@@ -23,8 +23,9 @@ namespace Auth.Network.Service
         [MessageHandler(typeof(CAuthInEUReqMessage))]
         public async Task LoginHandler(ISession session, CAuthInEUReqMessage message)
         {
+            var ip = ((IPEndPoint)((TcpProcessor)session.Processor).Socket.RemoteEndPoint).Address.ToString();
             _logger.Debug()
-                    .Message("Login from {0} - {1}{2}", message.Username, Environment.NewLine, JsonConvert.SerializeObject(message, Formatting.Indented))
+                    .Message("Login from {0} with username {1}", ip, message.Username)
                     .Write();
 
             var db = AuthDatabase.Instance;
@@ -33,27 +34,72 @@ namespace Auth.Network.Service
 
             if (account == null)
             {
-                _logger.Error()
-                    .Message("Wrong login for {0}", message.Username)
-                    .Write();
-                await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
-                    .ConfigureAwait(false);
-                return;
+                if (Config.Instance.NoobMode)
+                {
+                    // NoobMode: Create a new account if non exists
+                    using (var scope = new DataAccessScope())
+                    {
+                        account = db.Accounts.Create();
+                        account.Username = message.Username;
+
+                        var bytes = new byte[16];
+                        using (var rng = new RNGCryptoServiceProvider())
+                            rng.GetBytes(bytes);
+
+                        account.Salt = Hash.GetString<SHA1CryptoServiceProvider>(bytes);
+                        account.Password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
+
+                        await scope.CompleteAsync()
+                            .ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    _logger.Error()
+                        .Message("Wrong login for {0}", message.Username)
+                        .Write();
+                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
+                        .ConfigureAwait(false);
+                    return;
+                }
             }
 
             var password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
             if (!account.Password.Equals(password, StringComparison.InvariantCultureIgnoreCase))
             {
-                _logger.Error()
-                    .Message("Wrong login for {0}", message.Username)
-                    .Write();
-                await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
-                    .ConfigureAwait(false);
-                return;
+                if (Config.Instance.NoobMode)
+                {
+                    // Noob Mode: Save new password
+                    using (var scope = new DataAccessScope())
+                    {
+                        var acc = db.Accounts.GetReference(account.Id);
+                        var bytes = new byte[16];
+                        using (var rng = new RNGCryptoServiceProvider())
+                            rng.GetBytes(bytes);
+
+                        var salt = Hash.GetString<SHA1CryptoServiceProvider>(bytes);
+                        password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + salt);
+                        acc.Password = password;
+                        acc.Salt = salt;
+
+                        await scope.CompleteAsync()
+                            .ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    _logger.Error()
+                        .Message("Wrong login for {0}", message.Username)
+                        .Write();
+                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
+                        .ConfigureAwait(false);
+                    return;
+                }
             }
 
             var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var ban = account.Bans.FirstOrDefault(b => b.Date + b.Duration > now);
+            var ban = await account.Bans.FirstOrDefaultAsync(b => b.Date + b.Duration > now)
+                .ConfigureAwait(false);
             if (ban != null)
             {
                 var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + ban.Duration);
@@ -73,7 +119,7 @@ namespace Auth.Network.Service
             {
                 var entry = account.LoginHistory.Create();
                 entry.Date = DateTimeOffset.Now.ToUnixTimeSeconds();
-                entry.IP = ((IPEndPoint) ((TcpProcessor) session.Processor).Socket.RemoteEndPoint).Address.ToString();
+                entry.IP = ip;
 
                 await scope.CompleteAsync()
                     .ConfigureAwait(false);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Auth.Network;
 using NLog;
@@ -37,6 +36,13 @@ namespace Auth
             _logger.Info()
                 .Message("Ready for connections!")
                 .Write();
+
+            if (Config.Instance.NoobMode)
+            {
+                _logger.Warn()
+                    .Message("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!")
+                    .Write();
+            }
 
             while (true)
             {

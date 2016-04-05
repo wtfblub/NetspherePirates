@@ -25,6 +25,9 @@ namespace Auth
         [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan APITimeout { get; set; }
 
+        [JsonProperty("noob_mode")]
+        public bool NoobMode { get; set; }
+
         [JsonProperty("auth_database")]
         public DatabaseSettings AuthDatabase { get; set; }
 
@@ -46,6 +49,7 @@ namespace Auth
             MaxConnections = 1;
             APIListener = new IPEndPoint(IPAddress.Loopback, 27000);
             APITimeout = TimeSpan.FromSeconds(15);
+            NoobMode = true;
             AuthDatabase = new DatabaseSettings();
         }
     }
