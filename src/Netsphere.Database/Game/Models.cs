@@ -488,6 +488,11 @@ namespace Netsphere.Database.Game
     [DataAccessObject("shop_version")]
     public abstract class ShopVersionDto : DataAccessObject
     {
+        [PrimaryKey]
+        [AutoIncrement]
+        [PersistedMember]
+        public virtual byte Id { get; set; }
+
         [ValueRequired]
         [SizeConstraint(MaximumLength = 40, MinimumLength = 0, SizeFlexibility = SizeFlexibility.Variable)]
         [PersistedMember]
