@@ -1,4 +1,5 @@
-﻿using Shaolinq;
+﻿using Platform.Validation;
+using Shaolinq;
 
 namespace Netsphere.Database.Auth
 {
@@ -10,15 +11,22 @@ namespace Netsphere.Database.Auth
         [PersistedMember]
         public virtual int Id { get; set; }
 
+        [ValueRequired]
+        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
         [PersistedMember]
         public abstract string Username { get; set; }
 
+        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
         [PersistedMember]
         public abstract string Nickname { get; set; }
 
+        [ValueRequired]
+        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
         [PersistedMember]
         public abstract string Password { get; set; }
 
+        [ValueRequired]
+        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
         [PersistedMember]
         public abstract string Salt { get; set; }
 
@@ -43,6 +51,7 @@ namespace Netsphere.Database.Auth
         [PersistedMember]
         public virtual int Id { get; set; }
 
+        [ValueRequired]
         [BackReference]
         public abstract AccountDto Account { get; set; }
 
@@ -64,6 +73,7 @@ namespace Netsphere.Database.Auth
         [PersistedMember]
         public virtual int Id { get; set; }
 
+        [ValueRequired]
         [BackReference]
         public abstract AccountDto Account { get; set; }
 
@@ -82,9 +92,12 @@ namespace Netsphere.Database.Auth
         [PersistedMember]
         public virtual int Id { get; set; }
 
+        [ValueRequired]
         [BackReference]
         public abstract AccountDto Account { get; set; }
 
+        [ValueRequired]
+        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
         [PersistedMember]
         public abstract string Nickname { get; set; }
 
