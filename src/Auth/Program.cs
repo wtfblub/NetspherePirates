@@ -11,7 +11,7 @@ namespace Auth
 {
     internal class Program
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private static void Main()
         {
@@ -20,47 +20,61 @@ namespace Auth
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            _logger.Info()
+            Logger.Info()
                 .Message("Checking database...")
                 .Write();
 
             AuthDatabase.Instance.CreateIfNotExist();
 
-            _logger.Info()
+            Logger.Info()
                 .Message("Starting server...")
                 .Write();
 
             var server = new AuthServer();
             server.Start(Config.Instance.Listener);
 
-            _logger.Info()
+            Logger.Info()
                 .Message("Ready for connections!")
                 .Write();
 
             if (Config.Instance.NoobMode)
             {
-                _logger.Warn()
+                Logger.Warn()
                     .Message("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!")
                     .Write();
             }
 
+            Console.CancelKeyPress += OnCancelKeyPress;
             while (true)
             {
                 var input = Console.ReadLine();
-                if (input == "exit")
+                if (input.Equals("exit", StringComparison.InvariantCultureIgnoreCase) ||
+                    input.Equals("quit", StringComparison.InvariantCultureIgnoreCase) ||
+                    input.Equals("stop", StringComparison.InvariantCultureIgnoreCase))
                     break;
             }
 
-            _logger.Info()
+            server.Dispose(); // ToDo Make AuthServer a singleton
+            Exit();
+        }
+
+        private static void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            Exit();
+        }
+
+        private static void Exit()
+        {
+            Logger.Info()
                 .Message("Closing...")
                 .Write();
-            server.Dispose();
+
             LogManager.Shutdown();
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            _logger.Error()
+            Logger.Error()
                 .Exception(e.Exception)
                 .Message("UnobservedTaskException")
                 .Write();
@@ -68,7 +82,7 @@ namespace Auth
 
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
-            _logger.Error()
+            Logger.Error()
                 .Exception((Exception)e.ExceptionObject)
                 .Message("UnhandledException")
                 .Write();
