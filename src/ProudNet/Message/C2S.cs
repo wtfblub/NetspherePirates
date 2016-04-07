@@ -33,16 +33,16 @@ namespace ProudNet.Message
         [Serialize(1)]
         public uint B { get; set; }
 
-        [Serialize(2, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(2, typeof(IPEndPointSerializer))]
         public IPEndPoint ABSendAddr { get; set; }
 
-        [Serialize(3, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(3, typeof(IPEndPointSerializer))]
         public IPEndPoint ABRecvAddr { get; set; }
 
-        [Serialize(4, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(4, typeof(IPEndPointSerializer))]
         public IPEndPoint BASendAddr { get; set; }
 
-        [Serialize(5, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(5, typeof(IPEndPointSerializer))]
         public IPEndPoint BARecvAddr { get; set; }
 
         public NotifyP2PHolepunchSuccessMessage()
@@ -62,10 +62,10 @@ namespace ProudNet.Message
 
     internal class NotifyLogMessage : ProudMessage
     {
-        [Serialize(0, Compiler = typeof(EnumSerializer))]
+        [Serialize(0, typeof(EnumSerializer))]
         public TraceId TraceId { get; set; }
 
-        [Serialize(1, Compiler = typeof(StringSerializer))]
+        [Serialize(1, typeof(StringSerializer))]
         public string Message { get; set; }
     }
 
@@ -77,7 +77,7 @@ namespace ProudNet.Message
 
     internal class NotifyNatDeviceNameDetectedMessage : ProudMessage
     {
-        [Serialize(0, Compiler = typeof(StringSerializer))]
+        [Serialize(0, typeof(StringSerializer))]
         public string Name { get; set; }
     }
 

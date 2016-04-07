@@ -6,14 +6,30 @@ using Sigil;
 
 namespace Netsphere.Network.Serializers
 {
-    public class ArrayWithIntPrefixSerializer : ISerializerCompiler
+    internal class ArrayWithIntPrefixSerializer : ISerializerCompiler
     {
+        private readonly ISerializer _serializer;
+        private readonly ISerializerCompiler _compiler;
+
         public Type HandlesType
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
+        }
+
+        public ArrayWithIntPrefixSerializer()
+        { }
+
+        public ArrayWithIntPrefixSerializer(Type serializer, object[] parameters = null)
+        {
+            if (serializer == null)
+                throw new ArgumentNullException(nameof(serializer));
+
+            if (typeof(ISerializer).IsAssignableFrom(serializer))
+                _serializer = (ISerializer)Activator.CreateInstance(serializer, parameters);
+            else if (typeof(ISerializerCompiler).IsAssignableFrom(serializer))
+                _compiler = (ISerializerCompiler)Activator.CreateInstance(serializer, parameters);
+            else
+                throw new ArgumentException($"{serializer.FullName} must be a ISerializer or ISerializerCompiler", nameof(serializer));
         }
 
         public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
@@ -43,12 +59,12 @@ namespace Netsphere.Network.Serializers
                 var loopCheck = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "LoopCheck" + Guid.NewGuid());
 
                 // Little optimization for byte arrays
-                if (elementType == typeof (byte))
+                if (elementType == typeof(byte))
                 {
                     // value = reader.ReadBytes(length);
                     emiter.LoadArgument(1);
                     emiter.LoadLocal(length);
-                    emiter.CallVirtual(typeof (BinaryReader).GetMethod(nameof(BinaryReader.ReadBytes)));
+                    emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadBytes)));
                     emiter.StoreLocal(value);
                     emiter.Branch(end);
                 }
@@ -58,7 +74,13 @@ namespace Netsphere.Network.Serializers
                     using (var i = emiter.DeclareLocal<int>("i"))
                     {
                         emiter.MarkLabel(loop);
-                        emiter.CallDeserializerForType(elementType, element);
+
+                        if (_compiler != null)
+                            _compiler.EmitDeserialize(emiter, element);
+                        else if (_serializer != null)
+                            emiter.CallDeserializer(_serializer, element);
+                        else
+                            emiter.CallDeserializerForType(elementType, element);
 
                         // value[i] = element
                         emiter.LoadLocal(value);
@@ -119,7 +141,12 @@ namespace Netsphere.Network.Serializers
                     emiter.LoadElement(elementType);
                     emiter.StoreLocal(element);
 
-                    emiter.CallSerializerForType(elementType, element);
+                    if (_compiler != null)
+                        _compiler.EmitSerialize(emiter, element);
+                    else if (_serializer != null)
+                        emiter.CallSerializer(_serializer, element);
+                    else
+                        emiter.CallSerializerForType(elementType, element);
 
                     // ++i
                     emiter.LoadLocal(i);

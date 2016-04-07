@@ -5,16 +5,16 @@ namespace Netsphere.Network.Message.Auth
 {
     public class CAuthInEUReqMessage : AuthMessage
     {
-        [Serialize(0, Compiler = typeof(StringSerializer))]
+        [Serialize(0, typeof(StringSerializer))]
         public string Username { get; set; }
 
-        [Serialize(1, Compiler = typeof(StringSerializer))]
+        [Serialize(1, typeof(StringSerializer))]
         public string Password { get; set; }
 
-        [Serialize(2, Compiler = typeof(StringSerializer))]
+        [Serialize(2, typeof(StringSerializer))]
         public string Unk1 { get; set; }
 
-        [Serialize(3, Compiler = typeof(StringSerializer))]
+        [Serialize(3, typeof(StringSerializer))]
         public string Unk2 { get; set; }
 
         [Serialize(4)]
@@ -26,7 +26,7 @@ namespace Netsphere.Network.Message.Auth
         [Serialize(6)]
         public int Unk5 { get; set; }
 
-        [Serialize(7, Compiler = typeof(StringSerializer))]
+        [Serialize(7, typeof(StringSerializer))]
         public string Unk6 { get; set; }
     }
 

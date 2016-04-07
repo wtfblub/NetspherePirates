@@ -16,7 +16,7 @@ namespace ProudNet
         [Serialize(0)]
         public bool EnableServerLog { get; set; }
 
-        [Serialize(1, Compiler = typeof(EnumSerializer))]
+        [Serialize(1, typeof(EnumSerializer))]
         public FallbackMethod FallbackMethod { get; set; }
 
         [Serialize(2)]
@@ -25,7 +25,7 @@ namespace ProudNet
         [Serialize(3)]
         public double TimeoutTimeMs { get; set; }
 
-        [Serialize(4, Compiler = typeof(EnumSerializer))]
+        [Serialize(4, typeof(EnumSerializer))]
         public DirectP2PStartCondition DirectP2PStartCondition { get; set; }
 
         [Serialize(5)]

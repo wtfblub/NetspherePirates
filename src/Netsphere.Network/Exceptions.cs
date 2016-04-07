@@ -23,5 +23,17 @@ namespace Netsphere.Network
         public NetsphereBadOpCodeException(AuthOpCode opCode)
             : base($"Bad opCode: {opCode}")
         { }
+
+        public NetsphereBadOpCodeException(ChatOpCode opCode)
+            : base($"Bad opCode: {opCode}")
+        { }
+
+        public NetsphereBadOpCodeException(GameOpCode opCode)
+            : base($"Bad opCode: {opCode}")
+        { }
+
+        public NetsphereBadOpCodeException(GameRuleOpCode opCode)
+            : base($"Bad opCode: {opCode}")
+        { }
     }
 }

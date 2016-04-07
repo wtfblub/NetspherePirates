@@ -2,7 +2,6 @@
 using System.IO;
 using BlubLib.Serialization;
 using ProudNet.Message.Core;
-using BlubLib.IO;
 using Sigil;
 
 namespace ProudNet.Serializers
@@ -30,55 +29,28 @@ namespace ProudNet.Serializers
                 emiter.Call(typeof(ProudNetBinaryReaderExtensions).GetMethod(nameof(ProudNetBinaryReaderExtensions.ReadScalar)));
                 emiter.Call(typeof(CompressedMessage).GetProperty(nameof(CompressedMessage.DecompressedLength)).SetMethod);
 
-                using (var limitedStream = emiter.DeclareLocal<Stream>("limitedStream"))
-                {
-                    using (var baseStream = emiter.DeclareLocal<Stream>("baseStream"))
-                    {
-                        // baseStream = reader.BaseStream
-                        emiter.LoadArgument(1);
-                        emiter.CallVirtual(typeof(BinaryReader).GetProperty(nameof(BinaryReader.BaseStream)).GetMethod);
-                        emiter.StoreLocal(baseStream);
-
-                        // limitedStream = new LimitedStream(baseStream, baseStream.Position, compressedLength)
-                        emiter.LoadLocal(baseStream);
-                        emiter.LoadLocal(baseStream);
-                        emiter.CallVirtual(typeof(Stream).GetProperty(nameof(Stream.Position)).GetMethod);
-                        emiter.Convert<int>();
-                        emiter.LoadLocal(compressedLength);
-                        emiter.NewObject(typeof(LimitedStream), new Type[] { typeof(Stream), typeof(int), typeof(int) });
-                        emiter.StoreLocal(limitedStream);
-
-                        // baseStream.Seek(compressedLength, SeekOrigin.Current)
-                        emiter.LoadLocal(baseStream);
-                        emiter.LoadLocal(compressedLength);
-                        emiter.Convert<long>();
-                        emiter.LoadConstant((int)SeekOrigin.Current);
-                        emiter.CallVirtual(typeof(Stream).GetMethod(nameof(Stream.Seek)));
-                        emiter.Pop();
-                    }
-
-                    // value.Data = limitedStream
-                    emiter.LoadLocal(value);
-                    emiter.LoadLocal(limitedStream);
-                    emiter.Call(typeof(CompressedMessage).GetProperty(nameof(CompressedMessage.Data)).SetMethod);
-                }
+                // value.Data = reader.ReadBytes(compressedLength)
+                emiter.LoadLocal(value);
+                emiter.LoadArgument(1);
+                emiter.LoadLocal(compressedLength);
+                emiter.CallVirtual(typeof (BinaryReader).GetMethod(nameof(BinaryReader.ReadBytes)));
+                emiter.Call(typeof (CompressedMessage).GetProperty(nameof(CompressedMessage.Data)).SetMethod);
             }
         }
 
         public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
         {
-            using (var stream = emiter.DeclareLocal<Stream>("stream"))
+            using (var data = emiter.DeclareLocal<byte[]>("data"))
             {
-                // stream = value.Data
+                // data = value.Data
                 emiter.LoadLocal(value);
                 emiter.Call(typeof(CompressedMessage).GetProperty(nameof(CompressedMessage.Data)).GetMethod);
-                emiter.StoreLocal(stream);
+                emiter.StoreLocal(data);
 
-                // ProudNetBinaryWriterExtensions.WriteScalar(writer, stream.Length)
+                // ProudNetBinaryWriterExtensions.WriteScalar(writer, data.Length)
                 emiter.LoadArgument(1);
-                emiter.LoadLocal(stream);
-                emiter.CallVirtual(typeof(Stream).GetProperty(nameof(Stream.Length)).GetMethod);
-                emiter.Convert<int>();
+                emiter.LoadLocal(data);
+                emiter.CallVirtual(typeof(Array).GetProperty(nameof(Array.Length)).GetMethod);
                 emiter.Call(typeof(ProudNetBinaryWriterExtensions).GetMethod(nameof(ProudNetBinaryWriterExtensions.WriteScalar)));
 
                 // ProudNetBinaryWriterExtensions.WriteScalar(writer, value.DecompressedLength)
@@ -87,11 +59,10 @@ namespace ProudNet.Serializers
                 emiter.Call(typeof(CompressedMessage).GetProperty(nameof(CompressedMessage.DecompressedLength)).GetMethod);
                 emiter.Call(typeof(ProudNetBinaryWriterExtensions).GetMethod(nameof(ProudNetBinaryWriterExtensions.WriteScalar)));
 
-                // stream.CopyTo(writer.BaseStream)
-                emiter.LoadLocal(stream);
+                // writer.Write(data)
                 emiter.LoadArgument(1);
-                emiter.CallVirtual(typeof(BinaryWriter).GetProperty(nameof(BinaryWriter.BaseStream)).GetMethod);
-                emiter.CallVirtual(typeof(Stream).GetMethod(nameof(Stream.CopyTo), new Type[] { typeof(Stream) }));
+                emiter.LoadLocal(data);
+                emiter.CallVirtual(typeof (BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] {typeof (byte[])}));
             }
         }
     }

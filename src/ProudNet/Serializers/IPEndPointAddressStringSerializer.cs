@@ -10,10 +10,7 @@ namespace ProudNet.Serializers
     {
         public Type HandlesType
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { throw new NotImplementedException(); }
         }
 
         public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)

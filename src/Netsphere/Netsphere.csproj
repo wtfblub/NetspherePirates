@@ -36,8 +36,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CharacterStyle.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ItemNumber.cs" />
+    <Compile Include="LongPeerId.cs" />
     <Compile Include="MatchKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S4Color.cs" />

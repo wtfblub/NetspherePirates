@@ -1,11 +1,12 @@
-﻿using BlubLib.Serialization;
+﻿using System;
+using BlubLib.Serialization;
 using ProudNet.Serializers;
 
 namespace ProudNet.Message.Core
 {
     internal class RmiMessage : CoreMessage
     {
-        [Serialize(0, Compiler = typeof(ReadToEndSerializer))]
+        [Serialize(0, typeof(ReadToEndSerializer))]
         public byte[] Data { get; set; }
 
         public RmiMessage()
@@ -22,7 +23,7 @@ namespace ProudNet.Message.Core
         [Serialize(0)]
         public byte Unk { get; set; }
 
-        [Serialize(1, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public EncryptedReliableMessage()
@@ -40,7 +41,9 @@ namespace ProudNet.Message.Core
         public byte[] Data { get; set; }
 
         public CompressedMessage()
-        { }
+        {
+            Data = Array.Empty<byte>();
+        }
 
         public CompressedMessage(int decompressedLength, byte[] data)
         {
@@ -55,7 +58,7 @@ namespace ProudNet.Message.Core
         [Serialize(0)]
         public byte Unk { get; set; }
 
-        [Serialize(1, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
     }
 }

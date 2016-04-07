@@ -19,19 +19,19 @@ namespace ProudNet.Message
         [Serialize(1)]
         public uint MemberId { get; set; }
 
-        [Serialize(2, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(2, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
 
         [Serialize(3)]
         public uint EventId { get; set; }
 
-        [Serialize(4, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(4, typeof(ArrayWithScalarSerializer))]
         public byte[] SessionKey { get; set; }
 
         [Serialize(5)]
         public uint P2PFirstFrameNumber { get; set; }
 
-        [Serialize(6, Compiler = typeof(GuidSerializer))]
+        [Serialize(6, typeof(GuidSerializer))]
         public Guid ConnectionMagicNumber { get; set; }
 
         [Serialize(7)]
@@ -64,7 +64,7 @@ namespace ProudNet.Message
         [Serialize(1)]
         public uint MemberId { get; set; }
 
-        [Serialize(2, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(2, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
 
         [Serialize(3)]
@@ -73,7 +73,7 @@ namespace ProudNet.Message
         [Serialize(4)]
         public uint P2PFirstFrameNumber { get; set; }
 
-        [Serialize(5, Compiler = typeof(GuidSerializer))]
+        [Serialize(5, typeof(GuidSerializer))]
         public Guid ConnectionMagicNumber { get; set; }
 
         [Serialize(6)]
@@ -105,16 +105,16 @@ namespace ProudNet.Message
         [Serialize(1)]
         public bool Recycled { get; set; }
 
-        [Serialize(2, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(2, typeof(IPEndPointSerializer))]
         public IPEndPoint InternalAddress { get; set; }
 
-        [Serialize(3, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(3, typeof(IPEndPointSerializer))]
         public IPEndPoint ExternalAddress { get; set; }
 
-        [Serialize(4, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(4, typeof(IPEndPointSerializer))]
         public IPEndPoint SendAddress { get; set; }
 
-        [Serialize(5, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(5, typeof(IPEndPointSerializer))]
         public IPEndPoint RecvAddress { get; set; }
 
         public P2PRecycleCompleteMessage()
@@ -137,10 +137,10 @@ namespace ProudNet.Message
         [Serialize(0)]
         public uint HostId { get; set; }
 
-        [Serialize(1, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(1, typeof(IPEndPointSerializer))]
         public IPEndPoint LocalEndPoint { get; set; }
 
-        [Serialize(2, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(2, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public RequestP2PHolepunchMessage()
@@ -184,16 +184,16 @@ namespace ProudNet.Message
         [Serialize(1)]
         public uint B { get; set; }
 
-        [Serialize(2, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(2, typeof(IPEndPointSerializer))]
         public IPEndPoint ABSendAddr { get; set; }
 
-        [Serialize(3, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(3, typeof(IPEndPointSerializer))]
         public IPEndPoint ABRecvAddr { get; set; }
 
-        [Serialize(4, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(4, typeof(IPEndPointSerializer))]
         public IPEndPoint BASendAddr { get; set; }
 
-        [Serialize(5, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(5, typeof(IPEndPointSerializer))]
         public IPEndPoint BARecvAddr { get; set; }
 
         public NotifyDirectP2PEstablishMessage()
@@ -231,7 +231,7 @@ namespace ProudNet.Message
 
     internal class S2C_RequestCreateUdpSocketMessage : ProudMessage
     {
-        [Serialize(0, Compiler = typeof(IPEndPointAddressStringSerializer))]
+        [Serialize(0, typeof(IPEndPointAddressStringSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public S2C_RequestCreateUdpSocketMessage()
@@ -248,7 +248,7 @@ namespace ProudNet.Message
         [Serialize(0)]
         public bool Success { get; set; }
 
-        [Serialize(1, Compiler = typeof(IPEndPointAddressStringSerializer))]
+        [Serialize(1, typeof(IPEndPointAddressStringSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public S2C_CreateUdpSocketAckMessage()

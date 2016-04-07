@@ -5,10 +5,10 @@ using BlubLib.Serialization;
 
 namespace Netsphere.Network.Message.Auth
 {
-    public static class AuthMapper
+    internal static class AuthMapper
     {
-        private static readonly Dictionary<AuthOpCode, Type> _typeLookup = new Dictionary<AuthOpCode, Type>();
-        private static readonly Dictionary<Type, AuthOpCode> _opCodeLookup = new Dictionary<Type, AuthOpCode>();
+        private static readonly Dictionary<AuthOpCode, Type> TypeLookup = new Dictionary<AuthOpCode, Type>();
+        private static readonly Dictionary<Type, AuthOpCode> OpCodeLookup = new Dictionary<Type, AuthOpCode>();
 
         static AuthMapper()
         {
@@ -25,13 +25,13 @@ namespace Netsphere.Network.Message.Auth
             where T : AuthMessage, new()
         {
             var type = typeof(T);
-            _opCodeLookup.Add(type, opCode);
-            _typeLookup.Add(opCode, type);
+            OpCodeLookup.Add(type, opCode);
+            TypeLookup.Add(opCode, type);
         }
 
         public static AuthMessage GetMessage(AuthOpCode opCode, BinaryReader r)
         {
-            var type = _typeLookup.GetValueOrDefault(opCode);
+            var type = TypeLookup.GetValueOrDefault(opCode);
             if (type == null)
                 throw new NetsphereBadOpCodeException(opCode);
 
@@ -46,7 +46,7 @@ namespace Netsphere.Network.Message.Auth
 
         public static AuthOpCode GetOpCode(Type type)
         {
-            return _opCodeLookup[type];
+            return OpCodeLookup[type];
         }
     }
 }

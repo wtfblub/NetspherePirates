@@ -12,10 +12,10 @@ namespace Netsphere.Network.Data.Auth
         [Serialize(1)]
         public uint Id { get; set; }
 
-        [Serialize(2, Compiler = typeof(EnumSerializer))]
+        [Serialize(2, typeof(EnumSerializer))]
         public ServerType Type { get; set; }
 
-        [Serialize(3, Compiler = typeof(StringSerializer))]
+        [Serialize(3, typeof(StringSerializer))]
         public string Name { get; set; }
 
         [Serialize(4)]
@@ -24,7 +24,7 @@ namespace Netsphere.Network.Data.Auth
         [Serialize(5)]
         public ushort PlayerOnline { get; set; }
 
-        [Serialize(6, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(6, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         [Serialize(7)]

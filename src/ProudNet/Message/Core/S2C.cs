@@ -27,7 +27,7 @@ namespace ProudNet.Message.Core
 
     internal class NotifyCSSessionKeySuccessMessage : CoreMessage
     {
-        [Serialize(0, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(0, typeof(ArrayWithScalarSerializer))]
         public byte[] Key { get; set; }
 
         public NotifyCSSessionKeySuccessMessage()
@@ -53,13 +53,13 @@ namespace ProudNet.Message.Core
         [Serialize(0)]
         public uint HostId { get; set; }
 
-        [Serialize(1, Compiler = typeof(GuidSerializer))]
+        [Serialize(1, typeof(GuidSerializer))]
         public Guid Version { get; set; }
 
-        [Serialize(2, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(2, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
 
-        [Serialize(3, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(3, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public NotifyServerConnectSuccessMessage()
@@ -80,7 +80,7 @@ namespace ProudNet.Message.Core
 
     internal class RequestStartServerHolepunchMessage : CoreMessage
     {
-        [Serialize(0, Compiler = typeof(GuidSerializer))]
+        [Serialize(0, typeof(GuidSerializer))]
         public Guid MagicNumber { get; set; }
 
         public RequestStartServerHolepunchMessage()
@@ -96,10 +96,10 @@ namespace ProudNet.Message.Core
 
     internal class ServerHolepunchAckMessage : CoreMessage
     {
-        [Serialize(0, Compiler = typeof(GuidSerializer))]
+        [Serialize(0, typeof(GuidSerializer))]
         public Guid MagicNumber { get; set; }
 
-        [Serialize(1, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(1, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public ServerHolepunchAckMessage()
@@ -117,7 +117,7 @@ namespace ProudNet.Message.Core
 
     internal class NotifyClientServerUdpMatchedMessage : CoreMessage
     {
-        [Serialize(1, Compiler = typeof(GuidSerializer))]
+        [Serialize(1, typeof(GuidSerializer))]
         public Guid MagicNumber { get; set; }
 
         public NotifyClientServerUdpMatchedMessage()
@@ -133,10 +133,10 @@ namespace ProudNet.Message.Core
 
     internal class PeerUdp_ServerHolepunchAckMessage : CoreMessage
     {
-        [Serialize(0, Compiler = typeof(GuidSerializer))]
+        [Serialize(0, typeof(GuidSerializer))]
         public Guid MagicNumber { get; set; }
 
-        [Serialize(1, Compiler = typeof(IPEndPointSerializer))]
+        [Serialize(1, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         [Serialize(2)]
@@ -179,7 +179,7 @@ namespace ProudNet.Message.Core
         [Serialize(0)]
         public RelayDestinationDto Destination { get; set; }
 
-        [Serialize(1, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public ReliableRelay2Message()
@@ -199,7 +199,7 @@ namespace ProudNet.Message.Core
         [Serialize(0)]
         public uint HostId { get; set; }
 
-        [Serialize(1, Compiler = typeof(ArrayWithScalarSerializer))]
+        [Serialize(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public UnreliableRelay2Message()

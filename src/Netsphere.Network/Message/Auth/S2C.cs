@@ -14,19 +14,19 @@ namespace Netsphere.Network.Message.Auth
         [Serialize(1)]
         public uint SessionId { get; set; }
 
-        [Serialize(2, Compiler = typeof(StringSerializer))]
+        [Serialize(2, typeof(StringSerializer))]
         public string Unk1 { get; set; }
 
-        [Serialize(3, Compiler = typeof(StringSerializer))]
+        [Serialize(3, typeof(StringSerializer))]
         public string SessionId2 { get; set; }
 
-        [Serialize(4, Compiler = typeof(EnumSerializer))]
+        [Serialize(4, typeof(EnumSerializer))]
         public AuthLoginResult Result { get; set; }
 
-        [Serialize(5, Compiler = typeof(StringSerializer))]
+        [Serialize(5, typeof(StringSerializer))]
         public string Unk2 { get; set; }
 
-        [Serialize(6, Compiler = typeof(StringSerializer))]
+        [Serialize(6, typeof(StringSerializer))]
         public string BannedUntil { get; set; }
 
         public SAuthInEuAckMessage()
@@ -62,7 +62,7 @@ namespace Netsphere.Network.Message.Auth
 
     public class SServerListAckMessage : AuthMessage
     {
-        [Serialize(0, Compiler = typeof(ArrayWithIntPrefixSerializer))]
+        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
         public ServerInfoDto[] ServerList { get; set; }
 
         public SServerListAckMessage()
