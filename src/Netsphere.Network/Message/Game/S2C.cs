@@ -596,6 +596,14 @@ namespace Netsphere.Network.Message.Game
     {
         [Serialize(0)]
         public bool ShowConsole { get; set; }
+
+        public SAdminShowWindowAckMessage()
+        { }
+
+        public SAdminShowWindowAckMessage(bool showConsole)
+        {
+            ShowConsole = showConsole;
+        }
     }
 
     public class SNoticeMessageAckMessage : GameMessage

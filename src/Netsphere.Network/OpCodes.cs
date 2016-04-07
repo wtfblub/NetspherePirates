@@ -348,4 +348,23 @@
 
         #endregion
     }
+
+    public enum RelayOpCode : ushort
+    {
+        CRequestLogin = 10001,
+        CNotifyP2PLog = 10002,
+
+        SNotifyLoginResult = 11001,
+        SEnterLoginPlayer = 11002,
+    }
+
+    public enum EventOpCode : ushort
+    {
+        Chat = 20001,
+        EventMessage = 20002,
+        ChangeTarget = 20003,
+        ArcadeSync = 20004,
+        ArcadeSyncReq = 20005,
+        Packet = 20006,
+    }
 }

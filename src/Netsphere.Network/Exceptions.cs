@@ -35,5 +35,13 @@ namespace Netsphere.Network
         public NetsphereBadOpCodeException(GameRuleOpCode opCode)
             : base($"Bad opCode: {opCode}")
         { }
+
+        public NetsphereBadOpCodeException(RelayOpCode opCode)
+            : base($"Bad opCode: {opCode}")
+        { }
+
+        public NetsphereBadOpCodeException(EventOpCode opCode)
+            : base($"Bad opCode: {opCode}")
+        { }
     }
 }

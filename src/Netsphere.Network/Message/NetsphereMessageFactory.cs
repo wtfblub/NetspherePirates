@@ -4,8 +4,10 @@ using BlubLib.Network;
 using BlubLib.Serialization;
 using Netsphere.Network.Message.Auth;
 using Netsphere.Network.Message.Chat;
+using Netsphere.Network.Message.Event;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
+using Netsphere.Network.Message.Relay;
 using Netsphere.Network.Serializers;
 using ProudNet.Message;
 
@@ -56,6 +58,20 @@ namespace Netsphere.Network.Message
 
             if (Enum.IsDefined(typeof(GameRuleOpCode), opCode))
                 return GameRuleMapper.GetMessage((GameRuleOpCode)opCode, r);
+
+            throw new NetsphereBadOpCodeException(opCode);
+        }
+    }
+
+    public class RelayMessageFactory : INetsphereMessageFactory
+    {
+        public ProudMessage GetMessage(ISession session, ushort opCode, BinaryReader r)
+        {
+            if (Enum.IsDefined(typeof(RelayOpCode), opCode))
+                return RelayMapper.GetMessage((RelayOpCode)opCode, r);
+
+            if (Enum.IsDefined(typeof(EventOpCode), opCode))
+                return EventMapper.GetMessage((EventOpCode)opCode, r);
 
             throw new NetsphereBadOpCodeException(opCode);
         }
