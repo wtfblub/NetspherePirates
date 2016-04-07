@@ -30,6 +30,7 @@ namespace ProudNet.Serializers
             using (var tmp = emiter.DeclareLocal(typeToUse))
             {
                 emiter.CallDeserializerForType(typeToUse, tmp);
+                emiter.LoadLocal(tmp);
                 if (underlyingType != typeToUse)
                     emiter.Convert(underlyingType);
                 emiter.StoreLocal(value);
