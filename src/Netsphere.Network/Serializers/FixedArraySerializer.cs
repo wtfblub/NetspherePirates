@@ -17,8 +17,9 @@ namespace Netsphere.Network.Serializers
 
         public FixedArraySerializer(int length)
         {
+            _length = length;
             if (length < 0)
-                _length = length;
+                _length = 0;
         }
 
         public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)

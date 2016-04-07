@@ -19,7 +19,6 @@ namespace Netsphere.Network.Serializers
 
         public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
         {
-            emiter.LoadLocal(value);
             emiter.LoadArgument(1);
             emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt32)));
             emiter.Call(typeof(MatchKey).GetMethod("op_Implicit", new[] { typeof(uint) }));
