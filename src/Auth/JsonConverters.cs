@@ -28,7 +28,7 @@ namespace Auth
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, ((TimeSpan)value).TotalMilliseconds.ToString("F0"));
+            serializer.Serialize(writer, (uint)((TimeSpan)value).TotalMilliseconds);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
