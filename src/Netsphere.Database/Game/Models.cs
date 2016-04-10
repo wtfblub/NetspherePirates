@@ -82,10 +82,10 @@ namespace Netsphere.Database.Game
     public abstract class PlayerCharacterDto : DataAccessObject
     {
         [PrimaryKey]
-        [AutoIncrement]
         [PersistedMember]
         public virtual int Id { get; set; }
 
+        [ValueRequired]
         [BackReference]
         public abstract PlayerDto Player { get; set; }
 
@@ -145,7 +145,6 @@ namespace Netsphere.Database.Game
     public abstract class PlayerDenyDto : DataAccessObject
     {
         [PrimaryKey]
-        [AutoIncrement]
         [PersistedMember]
         public virtual int Id { get; set; }
 
@@ -162,7 +161,6 @@ namespace Netsphere.Database.Game
     public abstract class PlayerItemDto : DataAccessObject
     {
         [PrimaryKey]
-        [AutoIncrement]
         [PersistedMember]
         public virtual int Id { get; set; }
 
@@ -231,7 +229,6 @@ namespace Netsphere.Database.Game
     public abstract class PlayerLicenseDto : DataAccessObject
     {
         [PrimaryKey]
-        [AutoIncrement]
         [PersistedMember]
         public virtual int Id { get; set; }
 
