@@ -42,6 +42,8 @@ namespace ProudNet.Message
 
         public P2PGroup_MemberJoinMessage()
         {
+            UserData = Array.Empty<byte>();
+            SessionKey = Array.Empty<byte>();
             ConnectionMagicNumber = Guid.Empty;
         }
 
@@ -84,6 +86,7 @@ namespace ProudNet.Message
 
         public P2PGroup_MemberJoin_UnencryptedMessage()
         {
+            UserData = Array.Empty<byte>();
             ConnectionMagicNumber = Guid.Empty;
         }
 

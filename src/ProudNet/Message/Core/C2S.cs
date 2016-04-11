@@ -82,7 +82,7 @@ namespace ProudNet.Message.Core
         [Serialize(1, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
-        [Serialize(2, typeof(GuidSerializer))]
+        [Serialize(2)]
         public uint HostId { get; set; }
 
         public PeerUdp_NotifyHolepunchSuccessMessage()

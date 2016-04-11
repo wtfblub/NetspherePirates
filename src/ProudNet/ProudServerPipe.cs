@@ -308,6 +308,7 @@ namespace ProudNet
                 using (var data = new PooledMemoryStream(_pipe.Service.ArrayPool))
                 {
                     data.Write(_buffer, 0, bytesTransferred);
+                    data.Position = 0;
 
                     ushort flag;
                     ushort sessionId;
@@ -368,6 +369,7 @@ namespace ProudNet
                         }
 
                         session.UdpSessionId = sessionId;
+                        session.UdpEndPoint = remoteEndPoint;
                         Send(session, new ServerHolepunchAckMessage(holepunch.MagicNumber, remoteEndPoint));
                     }
                     else
