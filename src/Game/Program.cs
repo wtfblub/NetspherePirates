@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Netsphere.Database.Game;
 using Netsphere.Network;
+using Newtonsoft.Json;
 using NLog;
 using NLog.Fluent;
 using Shaolinq;
@@ -19,6 +20,11 @@ namespace Netsphere
 
         private static void Main()
         {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                Converters = new List<JsonConverter> { new IPEndPointConverter() }
+            };
+
             Shaolinq.Logging.LogProvider.IsDisabled = true;
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -61,6 +67,9 @@ namespace Netsphere
             while (true)
             {
                 var input = Console.ReadLine();
+                if (input == null)
+                    break;
+
                 if (input.Equals("exit", StringComparison.InvariantCultureIgnoreCase) ||
                     input.Equals("quit", StringComparison.InvariantCultureIgnoreCase) ||
                     input.Equals("stop", StringComparison.InvariantCultureIgnoreCase))

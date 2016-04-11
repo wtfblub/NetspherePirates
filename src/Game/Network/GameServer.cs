@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Linq;
 using System.Net;
+using Auth.ServiceModel;
 using BlubLib.Network;
 using BlubLib.Network.Pipes;
 using BlubLib.Network.Transport.Sockets;
@@ -32,7 +33,9 @@ namespace Netsphere.Network
 
         private readonly ChatServer _chatServer;
         private readonly ILoop _worker;
+        private readonly AuthWebAPIClient _authWebAPI;
 
+        private TimeSpan _serverListUpdateTimer;
         private TimeSpan _mailBoxCheckTimer;
         private TimeSpan _saveTimer;
 
@@ -143,6 +146,7 @@ namespace Netsphere.Network
             ChannelManager = new ChannelManager(ResourceCache.GetChannels());
 
             _worker = new ThreadLoop(TimeSpan.FromMilliseconds(100), (Action<TimeSpan>)Worker);
+            _authWebAPI = new AuthWebAPIClient();
         }
 
         #region Events
@@ -210,11 +214,23 @@ namespace Netsphere.Network
             _chatServer.Start(Config.Instance.ChatListener);
             RelayServer.Start(Config.Instance.RelayListener);
             _worker.Start();
+
+            RegisterServer();
         }
 
         public override void Stop()
         {
             _worker.Stop(new TimeSpan(0));
+
+            try
+            {
+                _authWebAPI.RemoveServer(Config.Instance.Id);
+            }
+            catch
+            {
+                // ignored
+            }
+
             _chatServer.Stop();
             RelayServer.Stop();
             base.Stop();
@@ -228,6 +244,24 @@ namespace Netsphere.Network
         private void Worker(TimeSpan delta)
         {
             ChannelManager.Update(delta);
+
+            _serverListUpdateTimer = _serverListUpdateTimer.Add(delta);
+            if (_serverListUpdateTimer >= Config.Instance.AuthWebAPI.UpdateInterval)
+            {
+                _serverListUpdateTimer = TimeSpan.Zero;
+                try
+                {
+                    if(!_authWebAPI.UpdateServer(this.Map<GameServer, ServerInfoDto>()))
+                        RegisterServer();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error()
+                        .Exception(ex)
+                        .Message("Failed to update serverlist")
+                        .Write();
+                }
+            }
 
             // ToDo Use another thread for this?
             _saveTimer = _saveTimer.Add(delta);
@@ -270,18 +304,38 @@ namespace Netsphere.Network
             }
         }
 
+        private void RegisterServer()
+        {
+            try
+            {
+                var result = _authWebAPI.RegisterServer(this.Map<GameServer, ServerInfoDto>());
+                if (result == RegisterResult.AlreadyExists)
+                {
+                    Logger.Error()
+                        .Message("Server id already exists. Please make sure you're using a unique id")
+                        .Write();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error()
+                    .Exception(ex)
+                    .Message("Failed to register to serverlist")
+                    .Write();
+            }
+        }
+
         private void RegisterMappings()
         {
-            //Mapper.Register<GameServer, ServerInfoDto>()
-            //    .Member(dest => dest.GroupId, src => Config.Instance.Group)
-            //    .Member(dest => dest.Name, src => Config.Instance.Name)
-            //    .Member(dest => dest.PlayerLimit, src => Config.Instance.PlayerLimit)
-            //    .Member(dest => dest.PlayerOnline, src => src.Sessions.Count)
-            //    .Member(dest => dest.EndPoint,
-            //        src => new IPEndPoint(IPAddress.Parse(Config.Instance.IP), Config.Instance.Listener.Port).ToString())
-            //    .Member(dest => dest.ChatEndPoint,
-            //        src =>
-            //            new IPEndPoint(IPAddress.Parse(Config.Instance.IP), Config.Instance.ChatListener.Port).ToString());
+            Mapper.Register<GameServer, ServerInfoDto>()
+                .Member(dest => dest.Id, src => Config.Instance.Id)
+                .Member(dest => dest.Name, src => Config.Instance.Name)
+                .Member(dest => dest.PlayerLimit, src => Config.Instance.PlayerLimit)
+                .Member(dest => dest.PlayerOnline, src => src.Sessions.Count)
+                .Member(dest => dest.EndPoint,
+                    src => new IPEndPoint(IPAddress.Parse(Config.Instance.IP), Config.Instance.Listener.Port))
+                .Member(dest => dest.ChatEndPoint,
+                    src => new IPEndPoint(IPAddress.Parse(Config.Instance.IP), Config.Instance.ChatListener.Port));
 
             Mapper.Register<Channel, ChannelInfoDto>()
                 .Member(dest => dest.ChannelId, src => src.Id)
@@ -401,7 +455,7 @@ namespace Netsphere.Network
 
             Mapper.Register<Player, UserDataDto>()
                 .Member(dest => dest.AccountId, src => src.Account.Id)
-                .Member(dest => dest.ServerId, src => Config.Instance.Group)
+                .Member(dest => dest.ServerId, src => Config.Instance.Id)
                 .Function(dest => dest.ChannelId, src => src.Channel != null ? (short)src.Channel.Id : (short)-1)
                 .Function(dest => dest.RoomId, src => src.Room?.Id ?? 0xFFFFFFFF) // ToDo: Tutorial, License
                 .Function(dest => dest.Team, src => src.RoomInfo?.Team?.Team ?? Team.Neutral)

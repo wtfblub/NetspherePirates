@@ -13,8 +13,8 @@ namespace Netsphere
         [JsonProperty("server_name")]
         public string Name { get; set; }
 
-        [JsonProperty("server_group")]
-        public int Group { get; set; }
+        [JsonProperty("server_id")]
+        public ushort Id { get; set; }
 
         [JsonProperty("server_ip")]
         public string IP { get; set; }
@@ -37,13 +37,8 @@ namespace Netsphere
         [JsonProperty("security_level")]
         public SecurityLevel SecurityLevel { get; set; }
 
-        [JsonProperty("api_endpoint")]
-        [JsonConverter(typeof(IPEndPointConverter))]
-        public IPEndPoint AuthAPIEndPoint { get; set; }
-
-        [JsonProperty("api_timeout")]
-        [JsonConverter(typeof(TimeSpanConverter))]
-        public TimeSpan AuthAPITimeout { get; set; }
+        [JsonProperty("auth_webapi")]
+        public AuthWebAPI AuthWebAPI { get; set; }
 
         [JsonProperty("save_interval")]
         [JsonConverter(typeof(TimeSpanConverter))]
@@ -76,20 +71,35 @@ namespace Netsphere
         public Config()
         {
             Name = "Netsphere";
-            Group = 1;
+            Id = 1;
             Listener = new IPEndPoint(IPAddress.Loopback, 28003);
             ChatListener = new IPEndPoint(IPAddress.Loopback, 28004);
             RelayListener = new IPEndPoint(IPAddress.Loopback, 28005);
             IP = "127.0.0.1";
             PlayerLimit = 100;
             SecurityLevel = SecurityLevel.User;
-            AuthAPIEndPoint = new IPEndPoint(IPAddress.Loopback, 27000);
-            AuthAPITimeout = TimeSpan.FromSeconds(15);
+            AuthWebAPI = new AuthWebAPI();
             SaveInterval = TimeSpan.FromMinutes(1);
             NoobMode = true;
             AuthDatabase = new DatabaseSettings { Filename = "db\\auth.db" };
             GameDatabase = new DatabaseSettings { Filename = "db\\game.db" };
             Game = new GameSettings();
+        }
+    }
+
+    public class AuthWebAPI
+    {
+        [JsonProperty("endpoint")]
+        public string EndPoint { get; set; }
+
+        [JsonProperty("serverlist_update_interval")]
+        [JsonConverter(typeof(TimeSpanConverter))]
+        public TimeSpan UpdateInterval { get; set; }
+
+        public AuthWebAPI()
+        {
+            EndPoint = "http://localhost:27000";
+            UpdateInterval = TimeSpan.FromSeconds(25);
         }
     }
 

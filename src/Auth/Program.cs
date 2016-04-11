@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Nancy.Hosting.Self;
 using Netsphere.Network;
+using Newtonsoft.Json;
 using NLog;
 using NLog.Fluent;
 using Shaolinq;
@@ -12,9 +15,15 @@ namespace Netsphere
     internal class Program
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static NancyHost _nancyHost;
 
         private static void Main()
         {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                Converters = new List<JsonConverter> { new IPEndPointConverter() }
+            };
+
             Shaolinq.Logging.LogProvider.IsDisabled = true;
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -30,8 +39,9 @@ namespace Netsphere
                 .Message("Starting server...")
                 .Write();
 
-            var server = new AuthServer();
-            server.Start(Config.Instance.Listener);
+            AuthServer.Instance.Start(Config.Instance.Listener);
+            _nancyHost = new NancyHost(new Uri(Config.Instance.WebAPI.Listener));
+            _nancyHost.Start();
 
             Logger.Info()
                 .Message("Ready for connections!")
@@ -48,13 +58,15 @@ namespace Netsphere
             while (true)
             {
                 var input = Console.ReadLine();
+                if (input == null)
+                    break;
+
                 if (input.Equals("exit", StringComparison.InvariantCultureIgnoreCase) ||
                     input.Equals("quit", StringComparison.InvariantCultureIgnoreCase) ||
                     input.Equals("stop", StringComparison.InvariantCultureIgnoreCase))
                     break;
             }
 
-            server.Dispose(); // ToDo Make AuthServer a singleton
             Exit();
         }
 
@@ -69,6 +81,8 @@ namespace Netsphere
                 .Message("Closing...")
                 .Write();
 
+            _nancyHost.Dispose();
+            AuthServer.Instance.Dispose();
             LogManager.Shutdown();
         }
 
@@ -118,7 +132,7 @@ namespace Netsphere
 
             }
 
-            Instance = DataAccessModel.BuildDataAccessModel<Netsphere.Database.Auth.AuthDatabase>(dbConfig);
+            Instance = DataAccessModel.BuildDataAccessModel<Database.Auth.AuthDatabase>(dbConfig);
         }
     }
 }

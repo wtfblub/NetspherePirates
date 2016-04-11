@@ -17,13 +17,8 @@ namespace Netsphere
         [JsonProperty("max_connections")]
         public int MaxConnections { get; set; }
 
-        [JsonProperty("listener_api")]
-        [JsonConverter(typeof(IPEndPointConverter))]
-        public IPEndPoint APIListener { get; set; }
-
-        [JsonProperty("api_timeout")]
-        [JsonConverter(typeof(TimeSpanConverter))]
-        public TimeSpan APITimeout { get; set; }
+        [JsonProperty("web_api")]
+        public WebAPIConfig WebAPI { get; set; }
 
         [JsonProperty("noob_mode")]
         public bool NoobMode { get; set; }
@@ -46,11 +41,26 @@ namespace Netsphere
         public Config()
         {
             Listener = new IPEndPoint(IPAddress.Loopback, 28002);
-            MaxConnections = 1;
-            APIListener = new IPEndPoint(IPAddress.Loopback, 27000);
-            APITimeout = TimeSpan.FromSeconds(15);
+            MaxConnections = 100;
+            WebAPI = new WebAPIConfig();
             NoobMode = true;
             AuthDatabase = new DatabaseSettings();
+        }
+    }
+
+    public class WebAPIConfig
+    {
+        [JsonProperty("listener")]
+        public string Listener { get; set; }
+
+        [JsonProperty("serverlist_timeout")]
+        [JsonConverter(typeof(TimeSpanConverter))]
+        public TimeSpan Timeout { get; set; }
+
+        public WebAPIConfig()
+        {
+            Listener = "http://localhost:27000";
+            Timeout = TimeSpan.FromSeconds(30);
         }
     }
 

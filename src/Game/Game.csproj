@@ -66,6 +66,10 @@
       <HintPath>..\..\packages\Platform.Xml.Serialization.1.2.1.276\lib\net452\Platform.Xml.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RestSharp.105.2.3\lib\net46\RestSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Shaolinq, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Shaolinq.1.0.1.812-rc\lib\net452\Shaolinq.dll</HintPath>
       <Private>True</Private>
@@ -97,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Account.cs" />
+    <Compile Include="AuthWebAPIClient.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="ChannelManager.cs" />
     <Compile Include="Character.cs" />
@@ -194,6 +199,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Auth.ServiceModel\Auth.ServiceModel.csproj">
+      <Project>{11ab9599-6a32-4411-9e14-1a04b47e9bcd}</Project>
+      <Name>Auth.ServiceModel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Netsphere.Database\Netsphere.Database.csproj">
       <Project>{f366589c-6b32-43b1-b8a1-45b4a8cabb28}</Project>
       <Name>Netsphere.Database</Name>

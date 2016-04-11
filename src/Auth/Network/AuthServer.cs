@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Buffers;
+using System.Net;
+using System.Threading.Tasks;
 using BlubLib.Network;
 using BlubLib.Network.Pipes;
 using BlubLib.Network.Transport.Sockets;
+using BlubLib.Threading;
+using BlubLib.Threading.Tasks;
 using Netsphere.Network.Message;
 using Netsphere.Network.Service;
 using NLog;
@@ -14,9 +18,14 @@ namespace Netsphere.Network
 {
     internal class AuthServer : TcpServer
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static AuthServer Instance { get; } = new AuthServer();
 
-        public AuthServer()
+        private readonly ILoop _worker;
+
+        public ServerManager ServerManager { get; }
+
+        private AuthServer()
             : base(new ProudSessionFactory(), ArrayPool<byte>.Create(1 * 1024 * 1024, Config.Instance.MaxConnections), Config.Instance.MaxConnections)
         {
             var config = new ProudConfig(new Guid("{9be73c0b-3b10-403e-be7d-9f222702a38c}"));
@@ -30,12 +39,15 @@ namespace Netsphere.Network
             Pipeline.AddLast("s4_service", new ServicePipe())
                 .Add(new AuthService())
                 .UnhandledMessage += OnUnhandledMessage;
+
+            _worker = new TaskLoop(TimeSpan.FromSeconds(10), Worker);
+            ServerManager = new ServerManager();
         }
 
 #if DEBUG
         private void OnUnhandledProudCoreMessage(object s, MessageReceivedEventArgs e)
         {
-            _logger.Warn()
+            Logger.Warn()
                 .Message("Unhandled ProudCoreMessage {0}", e.Message.GetType().Name)
                 .Write();
         }
@@ -45,13 +57,13 @@ namespace Netsphere.Network
             var message = e.Message as ProudUnknownMessage;
             if (message == null)
             {
-                _logger.Warn()
+                Logger.Warn()
                     .Message("Unhandled ProudMessage {0}", e.Message.GetType().Name)
                     .Write();
             }
             else
             {
-                _logger.Warn()
+                Logger.Warn()
                     .Message("Unknown ProudMessage {0}: {1}", message.OpCode, message.Data.ToHexString())
                     .Write();
             }
@@ -60,17 +72,35 @@ namespace Netsphere.Network
 
         private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
         {
-            _logger.Warn()
+            Logger.Warn()
                 .Message("Unhandled message {0}", e.Message.GetType().Name)
                 .Write();
         }
 
         protected override void OnError(ExceptionEventArgs ex)
         {
-            _logger.Error()
+            Logger.Error()
                 .Exception(ex.Exception)
                 .Write();
             base.OnError(ex);
+        }
+
+        public override void Start(IPEndPoint localEP)
+        {
+            _worker.Start();
+            base.Start(localEP);
+        }
+
+        public override void Dispose()
+        {
+            _worker.Stop();
+            base.Dispose();
+        }
+
+        private Task Worker(TimeSpan delta)
+        {
+            ServerManager.Flush();
+            return Task.CompletedTask;
         }
     }
 }
