@@ -199,7 +199,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Auth.ServiceModel\Auth.ServiceModel.csproj">
+    <ProjectReference Include="..\Auth.ServiceModel\Auth.ServiceModel.csproj">
       <Project>{11ab9599-6a32-4411-9e14-1a04b47e9bcd}</Project>
       <Name>Auth.ServiceModel</Name>
     </ProjectReference>
