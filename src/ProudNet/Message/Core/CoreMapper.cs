@@ -8,8 +8,8 @@ namespace ProudNet.Message.Core
 {
     internal static class CoreMapper
     {
-        private static readonly Dictionary<ProudCoreOpCode, Type> _typeLookup = new Dictionary<ProudCoreOpCode, Type>();
-        private static readonly Dictionary<Type, ProudCoreOpCode> _opCodeLookup = new Dictionary<Type, ProudCoreOpCode>();
+        private static readonly Dictionary<ProudCoreOpCode, Type> TypeLookup = new Dictionary<ProudCoreOpCode, Type>();
+        private static readonly Dictionary<Type, ProudCoreOpCode> OpCodeLookup = new Dictionary<Type, ProudCoreOpCode>();
 
         static CoreMapper()
         {
@@ -53,13 +53,13 @@ namespace ProudNet.Message.Core
             where T : CoreMessage, new()
         {
             var type = typeof(T);
-            _opCodeLookup.Add(type, opCode);
-            _typeLookup.Add(opCode, type);
+            OpCodeLookup.Add(type, opCode);
+            TypeLookup.Add(opCode, type);
         }
 
         public static CoreMessage GetMessage(ProudCoreOpCode opCode, BinaryReader r)
         {
-            var type = _typeLookup.GetValueOrDefault(opCode);
+            var type = TypeLookup.GetValueOrDefault(opCode);
             if(type == null)
 #if DEBUG
                 throw new ProudBadOpCodeException(opCode, r.ReadToEnd());
@@ -78,7 +78,7 @@ namespace ProudNet.Message.Core
 
         public static ProudCoreOpCode GetOpCode(Type type)
         {
-            return _opCodeLookup[type];
+            return OpCodeLookup[type];
         }
     }
 }

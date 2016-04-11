@@ -22,8 +22,8 @@ namespace ProudNet
 {
     public class ProudServerPipe : ProudPipe
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(15);
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
 
         // ToDo refactor hostId creation
         private readonly HashSet<uint> _hostIds = new HashSet<uint>();
@@ -48,14 +48,14 @@ namespace ProudNet
             var processor = (TcpProcessor)e.Session.Processor;
             var remoteEndPoint = (IPEndPoint)processor.Socket.RemoteEndPoint;
 
-            _logger.Debug()
+            Logger.Debug()
                 .Message("New incoming client on {0}", remoteEndPoint.ToString())
                 .Write();
 
             await e.Session.SendAsync(new NotifyServerConnectionHintMessage(Config))
                 .ConfigureAwait(false);
 
-            using (var cts = new CancellationTokenSource(_timeout))
+            using (var cts = new CancellationTokenSource(Timeout))
             {
                 try
                 {
@@ -67,7 +67,7 @@ namespace ProudNet
                     if (!e.Session.IsConnected)
                         return;
 
-                    _logger.Error()
+                    Logger.Error()
                         .Message("Handshake timeout for {0}", remoteEndPoint)
                         .Write();
 
@@ -123,13 +123,13 @@ namespace ProudNet
 
         public override void OnStart()
         {
-            _logger.Debug()
+            Logger.Debug()
                 .Message("Initializing...")
                 .Write();
 
             if (Config.UdpListener != null)
             {
-                _logger.Debug()
+                Logger.Debug()
                     .Message("Creating udp socket on {0}", Config.UdpListener.ToString())
                     .Write();
 
@@ -143,7 +143,7 @@ namespace ProudNet
 
         public override void OnClose()
         {
-            _logger.Debug()
+            Logger.Debug()
                 .Message("Closing...")
                 .Write();
 
@@ -207,7 +207,7 @@ namespace ProudNet
     internal class UdpServerSocket : IDisposable
     {
         private const int Mtu = 500;
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly ProudProtocol _protocol = new ProudProtocol();
         private readonly byte[] _buffer = new byte[Mtu];
@@ -326,7 +326,7 @@ namespace ProudNet
 
                     if (flag != 43981)
                     {
-                        _logger.Warn()
+                        Logger.Warn()
                             .Message("Received Fragment instead of FullFragment")
                             .Write();
                         DoUdpReceive();
@@ -337,7 +337,7 @@ namespace ProudNet
                     message.IsUdp = true;
                     message.RemoteEndPoint = remoteEndPoint;
 
-                    _logger.Trace()
+                    Logger.Trace()
                         .Message("Client:{0} Received:{1}", remoteEndPoint.ToString(), message.GetType().Name)
                         .Write();
 
@@ -347,20 +347,20 @@ namespace ProudNet
                         var session = (ProudSession)_pipe.Service[holepunch.MagicNumber];
                         if (session == null)
                         {
-                            _logger.Warn()
+                            Logger.Warn()
                                 .Message("Client:{0} Invalid MagicNumber", remoteEndPoint.ToString())
                                 .Write();
                             DoUdpReceive();
                             return;
                         }
 
-                        _logger.Debug()
+                        Logger.Debug()
                             .Message("Client:{0} Received ServerHolepunch", session.HostId)
                             .Write();
 
                         if (session.UdpEnabled)
                         {
-                            _logger.Warn()
+                            Logger.Warn()
                                 .Message("Client:{0} UDP relaying is already enabled", session.HostId)
                                 .Write();
 
@@ -378,7 +378,7 @@ namespace ProudNet
                         var session = _pipe.Service.Sessions.Cast<ProudSession>().FirstOrDefault(s => s.UdpSessionId == sessionId);
                         if (session == null)
                         {
-                            _logger.Warn()
+                            Logger.Warn()
                                 .Message("Client:{0} Invalid session id", remoteEndPoint.ToString())
                                 .Write();
                         }

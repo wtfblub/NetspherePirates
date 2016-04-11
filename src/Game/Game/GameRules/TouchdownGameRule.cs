@@ -8,7 +8,7 @@ namespace Netsphere.Game.GameRules
 {
     internal sealed class TouchdownGameRule : GameRuleBase
     {
-        private static readonly TimeSpan _touchdownWaitTime = TimeSpan.FromSeconds(12);
+        private static readonly TimeSpan TouchdownWaitTime = TimeSpan.FromSeconds(12);
 
         private readonly TouchdownAssistHelper _touchdownAssistHelper = new TouchdownAssistHelper();
         private TimeSpan _touchdownTime;
@@ -112,7 +112,7 @@ namespace Netsphere.Game.GameRules
                     if (!StateMachine.IsInState(GameRuleState.EnteringHalfTime) && !StateMachine.IsInState(GameRuleState.HalfTime) &&
                         !StateMachine.IsInState(GameRuleState.EnteringResult) && !StateMachine.IsInState(GameRuleState.Result))
                     {
-                        if (_touchdownTime >= _touchdownWaitTime)
+                        if (_touchdownTime >= TouchdownWaitTime)
                         {
                             IsInTouchdown = false;
                             _touchdownTime = TimeSpan.Zero;
@@ -200,7 +200,7 @@ namespace Netsphere.Game.GameRules
             if (diff <= TimeSpan.FromSeconds(10)) // ToDo use const
                 return;
 
-            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)_touchdownWaitTime.TotalMilliseconds, 0, 0, ""));
+            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)TouchdownWaitTime.TotalMilliseconds, 0, 0, ""));
             _touchdownTime = TimeSpan.Zero;
         }
 
@@ -375,7 +375,7 @@ namespace Netsphere.Game.GameRules
 
     internal class TouchdownAssistHelper
     {
-        private static readonly TimeSpan _touchdownAssistTimer = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan TouchdownAssistTimer = TimeSpan.FromSeconds(10);
 
         public DateTime LastTime { get; set; }
         public Player LastPlayer { get; set; }
@@ -394,7 +394,7 @@ namespace Netsphere.Game.GameRules
             if (plr.RoomInfo.Team != LastPlayer.RoomInfo.Team)
                 return false;
 
-            return DateTime.Now - LastTime < _touchdownAssistTimer;
+            return DateTime.Now - LastTime < TouchdownAssistTimer;
         }
     }
 }

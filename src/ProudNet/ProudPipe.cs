@@ -16,7 +16,7 @@ namespace ProudNet
 {
     public abstract class ProudPipe : Pipe
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly IList<IService> _coreServices = new List<IService>();
         private readonly IList<IService> _services = new List<IService>();
@@ -76,7 +76,7 @@ namespace ProudNet
         
         public override void OnDisconnected(SessionEventArgs e)
         {
-            _logger.Debug()
+            Logger.Debug()
                 .Message("Client {0} disconnected", ((ProudSession)e.Session).HostId)
                 .Write();
 

@@ -7,8 +7,8 @@ namespace ProudNet.Message
 {
     internal static class ProudMapper
     {
-        private static readonly Dictionary<ProudOpCode, Type> _typeLookup = new Dictionary<ProudOpCode, Type>();
-        private static readonly Dictionary<Type, ProudOpCode> _opCodeLookup = new Dictionary<Type, ProudOpCode>();
+        private static readonly Dictionary<ProudOpCode, Type> TypeLookup = new Dictionary<ProudOpCode, Type>();
+        private static readonly Dictionary<Type, ProudOpCode> OpCodeLookup = new Dictionary<Type, ProudOpCode>();
 
         static ProudMapper()
         {
@@ -44,13 +44,13 @@ namespace ProudNet.Message
             where T : ProudMessage, new()
         {
             var type = typeof(T);
-            _opCodeLookup.Add(type, opCode);
-            _typeLookup.Add(opCode, type);
+            OpCodeLookup.Add(type, opCode);
+            TypeLookup.Add(opCode, type);
         }
 
         public static ProudMessage GetMessage(ProudOpCode opCode, BinaryReader r)
         {
-            var type = _typeLookup.GetValueOrDefault(opCode);
+            var type = TypeLookup.GetValueOrDefault(opCode);
             if (type == null)
                 return new ProudUnknownMessage(opCode, r.ReadToEnd());
 
@@ -65,7 +65,7 @@ namespace ProudNet.Message
 
         public static ProudOpCode GetOpCode(Type type)
         {
-            return _opCodeLookup[type];
+            return OpCodeLookup[type];
         }
     }
 }

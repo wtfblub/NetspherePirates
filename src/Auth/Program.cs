@@ -91,8 +91,8 @@ namespace Netsphere
 
     internal static class AuthDatabase
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        public static Netsphere.Database.Auth.AuthDatabase Instance { get; }
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static Database.Auth.AuthDatabase Instance { get; }
 
         static AuthDatabase()
         {
@@ -110,7 +110,7 @@ namespace Netsphere
                     break;
 
                 default:
-                    _logger.Error()
+                    Logger.Error()
                         .Message("Invalid database engine {0}", Config.Instance.AuthDatabase.Engine)
                         .Write();
                     Environment.Exit(0);

@@ -12,7 +12,7 @@ namespace ProudNet.Services
 {
     internal class ProudServerService : Service
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ProudServerPipe _filter;
 
         public ProudServerService(ProudServerPipe filter)
@@ -90,7 +90,7 @@ namespace ProudNet.Services
         [MessageHandler(typeof(NotifyLogMessage))]
         public void NotifyLog(NotifyLogMessage message)
         {
-            _logger.Debug()
+            Logger.Debug()
                 .Message("{0} - {1}", message.TraceId, message.Message)
                 .Write();
         }
@@ -137,7 +137,7 @@ namespace ProudNet.Services
             if (session.P2PGroup == null || _filter.Config.UdpListener == null)
                 return;
 
-            _logger.Debug()
+            Logger.Debug()
                 .Message("Client:{0} - Requesting UdpSocket", session.HostId)
                 .Write();
 
@@ -151,7 +151,7 @@ namespace ProudNet.Services
             if (session.P2PGroup == null || _filter.Config.UdpListener == null)
                 return;
 
-            _logger.Debug()
+            Logger.Debug()
                 .Message("Client:{0} - Starting server holepunch", session.HostId)
                 .Write();
 

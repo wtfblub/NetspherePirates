@@ -10,10 +10,10 @@ namespace Netsphere.Game.GameRules
 {
     internal abstract class GameRuleBase
     {
-        private static readonly TimeSpan _preHalfTimeWaitTime = TimeSpan.FromSeconds(9);
-        private static readonly TimeSpan _preResultWaitTime = TimeSpan.FromSeconds(9);
-        private static readonly TimeSpan _halfTimeWaitTime = TimeSpan.FromSeconds(24);
-        private static readonly TimeSpan _resultWaitTime = TimeSpan.FromSeconds(14);
+        private static readonly TimeSpan PreHalfTimeWaitTime = TimeSpan.FromSeconds(9);
+        private static readonly TimeSpan PreResultWaitTime = TimeSpan.FromSeconds(9);
+        private static readonly TimeSpan HalfTimeWaitTime = TimeSpan.FromSeconds(24);
+        private static readonly TimeSpan ResultWaitTime = TimeSpan.FromSeconds(14);
 
         public abstract GameRule GameRule { get; }
         public Room Room { get; }
@@ -57,7 +57,7 @@ namespace Netsphere.Game.GameRules
 
             if (StateMachine.IsInState(GameRuleState.EnteringHalfTime))
             {
-                if (RoundTime >= _preHalfTimeWaitTime)
+                if (RoundTime >= PreHalfTimeWaitTime)
                 {
                     RoundTime = TimeSpan.Zero;
                     StateMachine.Fire(GameRuleStateTrigger.StartHalfTime);
@@ -65,13 +65,13 @@ namespace Netsphere.Game.GameRules
                 else
                 {
                     Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.HalfTimeIn, 2, 0, 0,
-                        ((int)(_preHalfTimeWaitTime - RoundTime).TotalSeconds + 1).ToString()));
+                        ((int)(PreHalfTimeWaitTime - RoundTime).TotalSeconds + 1).ToString()));
                 }
             }
 
             if (StateMachine.IsInState(GameRuleState.HalfTime))
             {
-                if (RoundTime >= _halfTimeWaitTime)
+                if (RoundTime >= HalfTimeWaitTime)
                     StateMachine.Fire(GameRuleStateTrigger.StartSecondHalf);
             }
 
@@ -81,7 +81,7 @@ namespace Netsphere.Game.GameRules
 
             if (StateMachine.IsInState(GameRuleState.EnteringResult))
             {
-                if (RoundTime >= _preResultWaitTime)
+                if (RoundTime >= PreResultWaitTime)
                 {
                     RoundTime = TimeSpan.Zero;
                     StateMachine.Fire(GameRuleStateTrigger.StartResult);
@@ -89,13 +89,13 @@ namespace Netsphere.Game.GameRules
                 else
                 {
                     Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.ResultIn, 3, 0, 0,
-                        (int)(_preResultWaitTime - RoundTime).TotalSeconds + 1 + " second(s)"));
+                        (int)(PreResultWaitTime - RoundTime).TotalSeconds + 1 + " second(s)"));
                 }
             }
 
             if (StateMachine.IsInState(GameRuleState.Result))
             {
-                if (RoundTime >= _resultWaitTime)
+                if (RoundTime >= ResultWaitTime)
                     StateMachine.Fire(GameRuleStateTrigger.EndGame);
             }
 

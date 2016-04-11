@@ -23,7 +23,7 @@ namespace Netsphere
 {
     internal class Room
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly AsyncLock _slotIdSync = new AsyncLock();
 
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
@@ -243,7 +243,7 @@ namespace Netsphere
             if (plr.Room != this || Host == plr)
                 return;
 
-            _logger.Debug()
+            Logger.Debug()
                 .Message("<Room {0}> Changing host to {1} - Ping:{2} ms", Id, plr.Account.Nickname, plr.Session.UnreliablePing)
                 .Write();
             Host = plr;
@@ -257,7 +257,7 @@ namespace Netsphere
 
             if (!RoomManager.GameRuleFactory.Contains(options.MatchKey.GameRule))
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(Master)
                     .Message($"Game rule {options.MatchKey.GameRule} does not exist")
                     .Write();
@@ -268,7 +268,7 @@ namespace Netsphere
             var map = GameServer.Instance.ResourceCache.GetMaps().GetValueOrDefault(options.MatchKey.Map);
             if (map == null)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(Master).Message($"Map {options.MatchKey.Map} does not exist")
                     .Write();
                 Master.Session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
@@ -277,7 +277,7 @@ namespace Netsphere
 
             if (!map.GameRules.Contains(options.MatchKey.GameRule))
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(Master)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {options.MatchKey.GameRule}")
                     .Write();
