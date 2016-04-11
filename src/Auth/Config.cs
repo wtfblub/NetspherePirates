@@ -4,7 +4,7 @@ using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Auth
+namespace Netsphere
 {
     public class Config
     {

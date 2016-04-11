@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Buffers;
-using Auth.Network.Service;
 using BlubLib.Network;
 using BlubLib.Network.Pipes;
 using BlubLib.Network.Transport.Sockets;
-using Netsphere.Network;
 using Netsphere.Network.Message;
+using Netsphere.Network.Service;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
 using ProudNet.Message;
 
-namespace Auth.Network
+namespace Netsphere.Network
 {
     internal class AuthServer : TcpServer
     {

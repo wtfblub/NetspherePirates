@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Auth.Network;
+using Netsphere.Network;
 using NLog;
 using NLog.Fluent;
 using Shaolinq;
 using Shaolinq.MySql;
 using Shaolinq.Sqlite;
 
-namespace Auth
+namespace Netsphere
 {
     internal class Program
     {

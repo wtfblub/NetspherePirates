@@ -6,15 +6,13 @@ using BlubLib.Network;
 using BlubLib.Network.Pipes;
 using BlubLib.Network.Transport.Sockets;
 using BlubLib.Security.Cryptography;
-using Netsphere;
-using Netsphere.Network;
 using Netsphere.Network.Data.Auth;
 using Netsphere.Network.Message.Auth;
 using NLog;
 using NLog.Fluent;
 using Shaolinq;
 
-namespace Auth.Network.Service
+namespace Netsphere.Network.Service
 {
     internal class AuthService : BlubLib.Network.Pipes.Service
     {

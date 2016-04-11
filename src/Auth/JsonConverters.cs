@@ -2,7 +2,7 @@
 using System.Net;
 using Newtonsoft.Json;
 
-namespace Auth
+namespace Netsphere
 {
     public class IPEndPointConverter : JsonConverter
     {
