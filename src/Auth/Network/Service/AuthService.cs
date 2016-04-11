@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -7,9 +6,10 @@ using BlubLib.Network;
 using BlubLib.Network.Pipes;
 using BlubLib.Network.Transport.Sockets;
 using BlubLib.Security.Cryptography;
+using Netsphere;
 using Netsphere.Network;
+using Netsphere.Network.Data.Auth;
 using Netsphere.Network.Message.Auth;
-using Newtonsoft.Json;
 using NLog;
 using NLog.Fluent;
 using Shaolinq;
@@ -134,7 +134,29 @@ namespace Auth.Network.Service
         [MessageHandler(typeof(CServerListReqMessage))]
         public Task ServerListHandler(AuthServer server, ISession session)
         {
-            return session.SendAsync(new SServerListAckMessage());
+            return session.SendAsync(new SServerListAckMessage(new []
+            {
+                new ServerInfoDto
+                {
+                    Id = 1,
+                    GroupId = 1,
+                    Type = ServerType.Game,
+                    Name = "Netsphere",
+                    PlayerLimit = 100,
+                    PlayerOnline = 0,
+                    EndPoint = new IPEndPoint(IPAddress.Loopback, 28003)
+                },
+                new ServerInfoDto
+                {
+                    Id = 1,
+                    GroupId = 1,
+                    Type = ServerType.Chat,
+                    Name = "Netsphere",
+                    PlayerLimit = 100,
+                    PlayerOnline = 0,
+                    EndPoint = new IPEndPoint(IPAddress.Loopback, 28004)
+                }
+            }));
         }
     }
 }

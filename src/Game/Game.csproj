@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{782EB49B-B4BB-4162-9FAF-BA2D39C22515}</ProjectGuid>
+    <ProjectGuid>{513F3C5C-8596-4B4E-BC8B-965F3175CAD2}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Auth</RootNamespace>
-    <AssemblyName>Auth</AssemblyName>
+    <RootNamespace>Netsphere</RootNamespace>
+    <AssemblyName>Game</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -24,7 +24,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -42,6 +41,10 @@
     </Reference>
     <Reference Include="BlubLib.Network">
       <HintPath>..\..\libs\BlubLib.Network.dll</HintPath>
+    </Reference>
+    <Reference Include="ExpressMapper, Version=1.8.0.0, Culture=neutral, PublicKeyToken=ac363faa09311ba0, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Expressmapper.1.8.0\lib\net46\ExpressMapper.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\..\packages\MySql.Data.6.9.8\lib\net45\MySql.Data.dll</HintPath>
@@ -75,22 +78,116 @@
       <HintPath>..\..\packages\Shaolinq.Sqlite.1.0.1.812-rc\lib\net452\Shaolinq.Sqlite.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Stateless, Version=2.5.62.0, Culture=neutral, PublicKeyToken=93038f0927583c9a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Stateless.2.5.62.0\lib\portable-net40+sl50+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10\Stateless.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.99.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Data.SQLite.Core.1.0.99.0\lib\net46\System.Data.SQLite.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Account.cs" />
+    <Compile Include="Channel.cs" />
+    <Compile Include="ChannelManager.cs" />
+    <Compile Include="Character.cs" />
+    <Compile Include="CharacterManager.cs" />
+    <Compile Include="Commands\CommandManager.cs" />
+    <Compile Include="Commands\GameCommands.cs" />
+    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\InventoryCommands.cs" />
+    <Compile Include="Commands\ReloadCommand.cs" />
+    <Compile Include="Commands\ServerCommand.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="CostumeManager.cs" />
+    <Compile Include="DenyManager.cs" />
+    <Compile Include="Events.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Game\Briefing.cs" />
+    <Compile Include="Game\Events.cs" />
+    <Compile Include="Game\GameRuleFactory.cs" />
+    <Compile Include="Game\GameRuleManager.cs" />
+    <Compile Include="Game\GameRules\BattleRoyalGameRule.cs" />
+    <Compile Include="Game\GameRules\ChaserGameRule.cs" />
+    <Compile Include="Game\GameRules\DeathmatchGameRule.cs" />
+    <Compile Include="Game\GameRules\GameRuleBase.cs" />
+    <Compile Include="Game\GameRules\TouchdownGameRule.cs" />
+    <Compile Include="Game\PlayerRecord.cs" />
+    <Compile Include="Game\TeamManager.cs" />
+    <Compile Include="Inventory.cs" />
+    <Compile Include="IdGenerators.cs" />
     <Compile Include="JsonConverters.cs" />
-    <Compile Include="Network\AuthServer.cs" />
-    <Compile Include="Network\Service\AuthService.cs" />
+    <Compile Include="License.cs" />
+    <Compile Include="LicenseManager.cs" />
+    <Compile Include="Mailbox.cs" />
+    <Compile Include="Network\ChatServer.cs" />
+    <Compile Include="Network\ChatSession.cs" />
+    <Compile Include="Network\GameServer.cs" />
+    <Compile Include="Network\GameSession.cs" />
+    <Compile Include="Network\PacketFirewallRule.cs" />
+    <Compile Include="Network\RelayServer.cs" />
+    <Compile Include="Network\RelaySession.cs" />
+    <Compile Include="Network\Services\AdminService.cs" />
+    <Compile Include="Network\Services\AuthService.cs" />
+    <Compile Include="Network\Services\ChannelService.cs" />
+    <Compile Include="Network\Services\CharacterService.cs" />
+    <Compile Include="Network\Services\ClubService.cs" />
+    <Compile Include="Network\Services\CommunityService.cs" />
+    <Compile Include="Network\Services\GeneralService.cs" />
+    <Compile Include="Network\Services\InventoryService.cs" />
+    <Compile Include="Network\Services\PeerService.cs" />
+    <Compile Include="Network\Services\PrivateMessageService.cs" />
+    <Compile Include="Network\Services\RelayService.cs" />
+    <Compile Include="Network\Services\RoomService.cs" />
+    <Compile Include="Network\Services\ShopService.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="PlayerItem.cs" />
+    <Compile Include="PlayerManager.cs" />
+    <Compile Include="PlayerRoomInfo.cs" />
+    <Compile Include="PlayerSettingManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="Resource\ChannelInfo.cs" />
+    <Compile Include="Resource\DefaultItem.cs" />
+    <Compile Include="Resource\Experience.cs" />
+    <Compile Include="Resource\Extensions.cs" />
+    <Compile Include="Resource\GameTempo.cs" />
+    <Compile Include="Resource\ItemEffect.cs" />
+    <Compile Include="Resource\ItemInfo.cs" />
+    <Compile Include="Resource\MapInfo.cs" />
+    <Compile Include="Resource\ResourceCache.cs" />
+    <Compile Include="Resource\ResourceCacheType.cs" />
+    <Compile Include="Resource\ResourceLoader.cs" />
+    <Compile Include="Resource\ShopResources.cs" />
+    <Compile Include="Resource\xml\ChannelSettingDto.cs" />
+    <Compile Include="Resource\xml\ConstantInfoDto.cs" />
+    <Compile Include="Resource\xml\DefaultItemDto.cs" />
+    <Compile Include="Resource\xml\ExperienceDto.cs" />
+    <Compile Include="Resource\xml\GameInfoDto.cs" />
+    <Compile Include="Resource\xml\ItemEffectDto.cs" />
+    <Compile Include="Resource\xml\ItemInfoDto.cs" />
+    <Compile Include="Resource\xml\StringTableDto.cs" />
+    <Compile Include="Room.cs" />
+    <Compile Include="RoomCreationOptions.cs" />
+    <Compile Include="RoomManager.cs" />
+    <Compile Include="Shop\BuyItemInfo.cs" />
+    <Compile Include="Shop\ShopEffect.cs" />
+    <Compile Include="Shop\ShopItem.cs" />
+    <Compile Include="Shop\LicenseReward.cs" />
+    <Compile Include="Shop\ShopPrice.cs" />
+    <Compile Include="SkillManager.cs" />
+    <Compile Include="WeaponManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
