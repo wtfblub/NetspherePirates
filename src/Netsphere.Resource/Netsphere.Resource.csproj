@@ -36,6 +36,9 @@
     <Reference Include="SharpLzo">
       <HintPath>..\..\libs\SharpLzo.dll</HintPath>
     </Reference>
+    <Reference Include="SlimMath">
+      <HintPath>..\..\libs\SlimMath.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,8 +49,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S4Zip.cs" />
+    <Compile Include="Scene\Chunks\Animations.cs" />
+    <Compile Include="Scene\Chunks\BoneChunk.cs" />
+    <Compile Include="Scene\Chunks\BoneSystemChunk.cs" />
+    <Compile Include="Scene\Chunks\BoxChunk.cs" />
+    <Compile Include="Scene\Chunks\ModelChunk.cs" />
+    <Compile Include="Scene\Chunks\SceneChunk.cs" />
+    <Compile Include="Scene\Chunks\ShapeChunk.cs" />
+    <Compile Include="Scene\Chunks\SkyDirect1Chunk.cs" />
+    <Compile Include="Scene\Constants.cs" />
+    <Compile Include="Scene\SceneContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="miniLzo_x64.dll">
