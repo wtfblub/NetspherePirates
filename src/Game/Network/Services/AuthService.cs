@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -56,11 +55,11 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            Account account;
-
             #region Validate Login
 
-            var accountDto = AuthDatabase.Instance.Accounts.GetByPrimaryKey((int)message.AccountId);
+            var accountDto = await AuthDatabase.Instance.Accounts
+                .FirstOrDefaultAsync(acc => acc.Id == (int)message.AccountId)
+                .ConfigureAwait(false);
             if (accountDto == null)
             {
                 Logger.Error()
@@ -115,7 +114,7 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            account = new Account(accountDto);
+            var account = new Account(accountDto);
 
             #endregion
 
