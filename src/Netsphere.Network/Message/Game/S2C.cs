@@ -101,12 +101,6 @@ namespace Netsphere.Network.Message.Game
         [Serialize(0)]
         public byte Slot { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixAndIndexSerializer))]
-        public ulong[] Unk1 { get; set; }
-
-        [Serialize(2, typeof(ArrayWithIntPrefixAndIndexSerializer))]
-        public ulong[] Unk2 { get; set; }
-
         [Serialize(3, typeof(ArrayWithIntPrefixAndIndexSerializer))]
         public ulong[] Weapons { get; set; }
 
@@ -118,9 +112,7 @@ namespace Netsphere.Network.Message.Game
 
         public SCharacterEquipInfoAckMessage()
         {
-            Unk1 = new ulong[3];
-            Unk2 = Unk1;
-            Weapons = Unk1;
+            Weapons = new ulong[9];
             Skills = new ulong[1];
             Clothes = new ulong[7];
         }
@@ -140,12 +132,28 @@ namespace Netsphere.Network.Message.Game
     {
         [Serialize(0)]
         public byte Slot { get; set; }
+
+        public SSuccessDeleteCharacterAckMessage()
+        { }
+
+        public SSuccessDeleteCharacterAckMessage(byte slot)
+        {
+            Slot = slot;
+        }
     }
 
     public class SSuccessSelectCharacterAckMessage : GameMessage
     {
         [Serialize(0)]
         public byte Slot { get; set; }
+
+        public SSuccessSelectCharacterAckMessage()
+        { }
+
+        public SSuccessSelectCharacterAckMessage(byte slot)
+        {
+            Slot = slot;
+        }
     }
 
     public class SSuccessCreateCharacterAckMessage : GameMessage
@@ -161,6 +169,15 @@ namespace Netsphere.Network.Message.Game
 
         [Serialize(3)]
         public byte Unk2 { get; set; }
+
+        public SSuccessCreateCharacterAckMessage()
+        { }
+
+        public SSuccessCreateCharacterAckMessage(byte slot, CharacterStyle style)
+        {
+            Slot = slot;
+            Style = style;
+        }
     }
 
     public class SServerResultInfoAckMessage : GameMessage
@@ -217,12 +234,18 @@ namespace Netsphere.Network.Message.Game
         [Serialize(0, typeof(EnumSerializer))]
         public InventoryAction Action { get; set; }
 
-        [Serialize(0)]
+        [Serialize(1)]
         public ItemDto Item { get; set; }
 
         public SInventoryActionAckMessage()
         {
             Item = new ItemDto();
+        }
+
+        public SInventoryActionAckMessage(InventoryAction action, ItemDto item)
+        {
+            Action = action;
+            Item = item;
         }
     }
 
@@ -703,6 +726,15 @@ namespace Netsphere.Network.Message.Game
 
         [Serialize(1)]
         public ItemNumber ItemNumber { get; set; }
+
+        public SLicensedAckMessage()
+        { }
+
+        public SLicensedAckMessage(ItemLicense itemLicense, ItemNumber itemNumber)
+        {
+            ItemLicense = itemLicense;
+            ItemNumber = itemNumber;
+        }
     }
 
     public class SCoinEventAckMessage : GameMessage
@@ -1080,6 +1112,14 @@ namespace Netsphere.Network.Message.Game
     {
         [Serialize(0)]
         public ulong ItemId { get; set; }
+
+        public SDeleteItemInventoryAckMessage()
+        { }
+
+        public SDeleteItemInventoryAckMessage(ulong itemId)
+        {
+            ItemId = itemId;
+        }
     }
 
     public class SClubAddressAckMessage : GameMessage

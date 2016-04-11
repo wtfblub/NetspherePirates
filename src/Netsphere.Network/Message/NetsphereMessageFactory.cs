@@ -65,6 +65,12 @@ namespace Netsphere.Network.Message
 
     public class RelayMessageFactory : INetsphereMessageFactory
     {
+        static RelayMessageFactory()
+        {
+            Serializer.AddCompiler(new PeerIdSerializer());
+            Serializer.AddSerializer(new DamageInfoMessageSerializer());
+        }
+
         public ProudMessage GetMessage(ISession session, ushort opCode, BinaryReader r)
         {
             if (Enum.IsDefined(typeof(RelayOpCode), opCode))

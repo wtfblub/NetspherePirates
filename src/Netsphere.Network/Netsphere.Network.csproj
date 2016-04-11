@@ -104,6 +104,9 @@
     <Compile Include="Data\Game\ShopItemDto.cs" />
     <Compile Include="Data\Game\TaskDto.cs" />
     <Compile Include="Data\Game\TDStatsDto.cs" />
+    <Compile Include="Data\P2P\CharacterDto.cs" />
+    <Compile Include="Data\P2P\ItemDto.cs" />
+    <Compile Include="Data\P2P\ValueDto.cs" />
     <Compile Include="Data\Relay\RoomLocation.cs" />
     <Compile Include="Message\Chat\C2S.cs" />
     <Compile Include="Message\Chat\ChatMapper.cs" />
@@ -116,6 +119,8 @@
     <Compile Include="Message\Game\C2S.cs" />
     <Compile Include="Message\Game\GameMapper.cs" />
     <Compile Include="Message\Game\S2C.cs" />
+    <Compile Include="Message\P2P\C2C.cs" />
+    <Compile Include="Message\P2P\P2PMapper.cs" />
     <Compile Include="Message\Relay\C2S.cs" />
     <Compile Include="Message\Relay\RelayMapper.cs" />
     <Compile Include="Message\Relay\S2C.cs" />
@@ -133,6 +138,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serializers\ArrayWithIntPrefixAndIndexSerializer.cs" />
     <Compile Include="Serializers\ArrayWithShortPrefixSerializer.cs" />
+    <Compile Include="Serializers\DamageInfoMessageSerializer.cs" />
+    <Compile Include="Serializers\RotationVectorSerializer.cs" />
+    <Compile Include="Serializers\CompressedVectorSerializer.cs" />
+    <Compile Include="Serializers\CompressedFloatSerializer.cs" />
+    <Compile Include="Serializers\PeerIdSerializer.cs" />
     <Compile Include="Serializers\RoomLocationSerializer.cs" />
     <Compile Include="Serializers\CharacterStyleSerializer.cs" />
     <Compile Include="Serializers\SGameRoomListAckMessageSerializer.cs" />

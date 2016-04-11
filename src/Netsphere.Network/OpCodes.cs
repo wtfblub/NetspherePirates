@@ -367,4 +367,49 @@
         ArcadeSyncReq = 20005,
         Packet = 20006,
     }
+
+    public enum P2POpCode : byte
+    {
+        PlayerSpawnReq = 1,
+        PlayerSpawnAck = 2,
+
+        AbilitySync = 3,
+        EquippingItemSync = 4,
+        DamageInfo = 5,
+        DamageRemoteInfo = 6,
+        SnapShot = 7,
+        StateSync = 8,
+
+        BGEffect = 10,
+        DefensivePower = 11,
+        BlastObjectDestroy = 12,
+        BlastObjectRespawn = 13,
+        MindEnergy = 15,
+        DamageShield = 16,
+        AimedPoint = 17,
+        OnOff = 18,
+        SentryGunSpawn = 19,
+        SentryGunState = 20,
+        SentryGunDestruction = 21,
+        SentryGunDestruction2 = 22,
+        GrenadeSpawn = 23,
+        GrenadeSnapShot = 24,
+        GrenadeSnapShot2 = 25,
+        ObstructionSpawn = 26,
+        ObstructionDestroy = 27,
+        ObstructionDamage = 28,
+        SyncObjectObstruction = 29,
+        BlastObjectSync = 30,
+        BallSync = 31,
+        BallSnapShot = 32,
+        ArcadeFin = 34,
+        AttachArcadeItem = 36,
+        HPSync = 37,
+        Unk38 = 38, // something with arcade
+        ExposeClubMark = 39,
+        ReflectRate = 40,
+        ConditionInfo = 41,
+        AbilityChangeSync = 42,
+        HealHP = 43,
+    }
 }

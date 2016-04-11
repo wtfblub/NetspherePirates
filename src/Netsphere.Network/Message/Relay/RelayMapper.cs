@@ -32,7 +32,8 @@ namespace Netsphere.Network.Message.Relay
         {
             var type = TypeLookup.GetValueOrDefault(opCode);
             if (type == null)
-                throw new NetsphereBadOpCodeException(opCode);
+                return new RelayUnknownMessage(opCode, r.ReadToEnd());
+                //throw new NetsphereBadOpCodeException(opCode);
 
             return (RelayMessage)Serializer.Deserialize(r, type);
         }
