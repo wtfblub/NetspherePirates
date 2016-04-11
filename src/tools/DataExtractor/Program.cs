@@ -30,7 +30,7 @@ namespace DataExtractor
                 "xml/item_effect.x7",
                 "xml/iteminfo.x7",
             };
-            var path = Path.Combine(@"C:\Users\wtfblub\Desktop\FumbiClient", "resource.s4hd");
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resource.s4hd");
             if (!File.Exists(path))
             {
                 Error("You have to place the extractor in the S4 League folder!");
@@ -48,7 +48,7 @@ namespace DataExtractor
                 Exit();
             }
 
-            var dataPath = Path.Combine(@"C:\Users\wtfblub\Desktop\FumbiClient", "data");
+            var dataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
             if (Directory.Exists(dataPath))
                 Directory.Delete(dataPath, true);
 
