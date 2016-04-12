@@ -64,7 +64,6 @@ namespace Netsphere
             if(Players.Count >= PlayerLimit)
                 throw new ChannelLimitReachedException();
 
-
             BroadcastChat(new SChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
 
             _players.Add(plr.Account.Id, plr);
@@ -80,7 +79,7 @@ namespace Netsphere
         public void Leave(Player plr)
         {
             if (plr.Channel != this)
-                return;
+                throw new ChannelException("Player is not in this channel");
 
             _players.Remove(plr.Account.Id);
             plr.Channel = null;
@@ -88,6 +87,7 @@ namespace Netsphere
             BroadcastChat(new SChannelLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(new ChannelPlayerLeftEventArgs(this, plr));
+            plr.Session?.Send(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
         }
 
         public void SendChatMessage(Player plr, string message)

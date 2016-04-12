@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BlubLib.Network.Pipes;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;
@@ -12,14 +13,15 @@ namespace Netsphere.Network.Services
         public void SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)
         {
             var plr = session.Player;
-
             if (message.UserData.ChannelId > 0 && !plr.SentPlayerList && plr.Channel != null)
             {
+                // We can't send the channel player list in Channel.Join because the client only accepts it here :/
                 plr.SentPlayerList = true;
                 var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
                 session.Send(new SChannelPlayerListAckMessage(data));
             }
 
+            // Save settings if any of them changed
             var settings = plr.Settings;
             var name = nameof(UserDataDto.AllowCombiInvite);
             if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowCombiInvite)
@@ -42,7 +44,6 @@ namespace Netsphere.Network.Services
         public void GetUserDataHandler(ChatSession session, CGetUserDataReqMessage message)
         {
             var plr = session.Player;
-
             if (plr.Account.Id == message.AccountId)
             {
                 session.Send(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()));
@@ -50,21 +51,21 @@ namespace Netsphere.Network.Services
             }
 
             Player target;
-            if (plr.Channel.Players.TryGetValue(message.AccountId, out target))
+            if (!plr.Channel.Players.TryGetValue(message.AccountId, out target))
+                return;
+
+            switch (target.Settings.Get<CommunitySetting>(nameof(UserDataDto.AllowInfoRequest)))
             {
-                switch (target.Settings.Get<CommunitySetting>(nameof(UserDataDto.AllowInfoRequest)))
-                {
-                    case CommunitySetting.Deny:
-                        // Not sure if there is an answer to this
-                        return;
+                case CommunitySetting.Deny:
+                    // Not sure if there is an answer to this
+                    return;
 
-                    case CommunitySetting.FriendOnly:
-                        // ToDo
-                        return;
-                }
-
-                session.Send(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
+                case CommunitySetting.FriendOnly:
+                    // ToDo
+                    return;
             }
+
+            session.Send(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
         }
 
         [MessageHandler(typeof(CDenyChatReqMessage))]
@@ -82,6 +83,7 @@ namespace Netsphere.Network.Services
                 case DenyAction.Add:
                     if (plr.DenyManager.Contains(message.Deny.AccountId))
                         return;
+
                     var target = server.PlayerManager[message.Deny.AccountId];
                     if (target == null)
                         return;
@@ -95,7 +97,7 @@ namespace Netsphere.Network.Services
                     if (deny == null)
                         return;
 
-                    plr.DenyManager.Remove(deny);
+                    plr.DenyManager.Remove(message.Deny.AccountId);
                     session.Send(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
                     break;
             }
