@@ -183,7 +183,8 @@ namespace Netsphere
 
             // Did we level up?
             // Using a loop for multiple level ups
-            while (TotalExperience >= expInfo.TotalExperience && expInfo.ExperienceToNextLevel != 0)
+            while (expInfo.ExperienceToNextLevel != 0 &&
+                expInfo.ExperienceToNextLevel <= (int)(TotalExperience - expInfo.TotalExperience))
             {
                 var newLevel = Level + 1;
                 expInfo = expTable.GetValueOrDefault(newLevel);
