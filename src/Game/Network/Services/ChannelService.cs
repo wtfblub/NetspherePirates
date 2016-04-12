@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BlubLib.Network.Pipes;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Game;
@@ -11,7 +12,7 @@ namespace Netsphere.Network.Services
 {
     internal class ChannelService : Service
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CGetChannelInfoReqMessage))]
         public void CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)
@@ -30,7 +31,7 @@ namespace Netsphere.Network.Services
                     break;
 
                 default:
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
                         .Message("Invalid request {0}", message.Request)
                         .Write();
@@ -56,36 +57,34 @@ namespace Netsphere.Network.Services
             {
                 session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelLimitReached));
             }
-            catch (ChannelException ex)
-            {
-                _logger.Error()
-                    .Account(session)
-                    .Exception(ex)
-                    .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.JoinChannelFailed));
-            }
         }
 
         [MessageHandler(typeof(CChannelLeaveReqMessage))]
         public void CChannelLeaveReq(GameSession session)
         {
-            if (session.Player.Channel == null)
-                return;
-
-            session.Player.Channel.Leave(session.Player);
-            session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
+            session.Player.Channel?.Leave(session.Player);
         }
 
         [MessageHandler(typeof(CChatMessageReqMessage))]
         public void CChatMessageReq(ChatSession session, CChatMessageReqMessage message)
         {
-            if (message.ChatType == ChatType.Channel)
+            switch (message.ChatType)
             {
-                session.Player.Channel.SendChatMessage(session.Player, message.Message);
-            }
-            else
-            {
-                session.Send(new SChatMessageAckMessage(ChatType.Club, session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
+                case ChatType.Channel:
+                    session.Player.Channel.SendChatMessage(session.Player, message.Message);
+                    break;
+
+                case ChatType.Club:
+                    // ToDo Change this when clans are implemented
+                    session.Send(new SChatMessageAckMessage(ChatType.Club, session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
+                    break;
+
+                default:
+                    Logger.Warn()
+                        .Account(session)
+                        .Message("Invalid chat type {0}", message.ChatType)
+                        .Write();
+                    break;
             }
         }
 
@@ -93,7 +92,23 @@ namespace Netsphere.Network.Services
         public void CWhisperChatMessageReq(ChatSession session, CWhisperChatMessageReqMessage message)
         {
             var toPlr = GameServer.Instance.PlayerManager.Get(message.ToNickname);
-            toPlr?.ChatSession.Send(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname, session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
+
+            // ToDo Is there an answer for this case?
+            if (toPlr == null)
+            {
+                session.Player.ChatSession.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is not online"));
+                return;
+            }
+
+            // ToDo Is there an answer for this case?
+            if (toPlr.DenyManager.Contains(session.Player.Account.Id))
+            {
+                session.Player.ChatSession.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is ignoring you"));
+                return;
+            }
+
+            toPlr.ChatSession.Send(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname,
+                session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
         }
     }
 }
