@@ -34,22 +34,26 @@ namespace Netsphere.Network
             Pipeline.AddFirst("proudnet", proudFilter);
             Pipeline.AddLast("s4_protocol", new NetspherePipe(new ChatMessageFactory()));
 
+            // ReSharper disable InconsistentNaming
+            Predicate<ChatSession> MustBeLoggedIn = session => session.IsLoggedIn();
+            Predicate<ChatSession> MustNotBeLoggedIn = session => !session.IsLoggedIn();
+            Predicate<ChatSession> MustBeInChannel = session => session.Player.Channel != null;
+            // ReSharper restore InconsistentNaming
+
             Pipeline.AddLast("firewall", new FirewallPipe())
                 .Add(new PacketFirewallRule<ChatSession>())
                 .Get<PacketFirewallRule<ChatSession>>()
 
-                .Register<CLoginReqMessage>(s => !s.IsLoggedIn())
-                .Register<CSetUserDataReqMessage>(s => s.IsLoggedIn())
-                .Register<CGetUserDataReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CDenyChatReqMessage>(s => s.IsLoggedIn())
-                .Register<CChatMessageReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CWhisperChatMessageReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CNoteListReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CReadNoteReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CDeleteNoteReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CSendNoteReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null);
-
-            //Pipeline.AddLast("spam_filter", new SpamFilter { RepeatLimit = 30, TimeFrame = TimeSpan.FromSeconds(3) });
+                .Register<CLoginReqMessage>(MustNotBeLoggedIn)
+                .Register<CSetUserDataReqMessage>(MustBeLoggedIn)
+                .Register<CGetUserDataReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CDenyChatReqMessage>(MustBeLoggedIn)
+                .Register<CChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CWhisperChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CNoteListReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CReadNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CDeleteNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CSendNoteReqMessage>(MustBeLoggedIn, MustBeInChannel);
 
             Pipeline.AddLast("s4_service", new ServicePipe())
                 .Add(new AuthService())

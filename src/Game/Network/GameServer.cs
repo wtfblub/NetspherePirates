@@ -61,59 +61,72 @@ namespace Netsphere.Network
             Pipeline.AddFirst("proudnet", proudFilter);
             Pipeline.AddLast("s4_protocol", new NetspherePipe(new GameMessageFactory()));
 
+            // ReSharper disable InconsistentNaming
+            Predicate<GameSession> MustBeLoggedIn = session => session.IsLoggedIn();
+            Predicate<GameSession> MustNotBeLoggedIn = session => !session.IsLoggedIn();
+            Predicate<GameSession> MustBeInChannel = session => session.Player.Channel != null;
+            Predicate<GameSession> MustNotBeInChannel = session => session.Player.Channel == null;
+            Predicate<GameSession> MustBeInRoom = session => session.Player.Room != null;
+            Predicate<GameSession> MustNotBeInRoom = session => session.Player.Room == null;
+            Predicate<GameSession> MustBeRoomHost = session => session.Player.Room.Host == session.Player;
+            Predicate<GameSession> MustBeRoomMaster = session => session.Player.Room.Master == session.Player;
+            // ReSharper restore InconsistentNaming
+
             Pipeline.AddLast("firewall", new FirewallPipe())
                 .Add(new PacketFirewallRule<GameSession>())
                 .Get<PacketFirewallRule<GameSession>>()
 
-                .Register<CLoginReqMessage>(s => !s.IsLoggedIn())
-                .Register<CCreateCharacterReqMessage>(s => s.IsLoggedIn())
-                .Register<CSelectCharacterReqMessage>(s => s.IsLoggedIn())
-                .Register<CDeleteCharacterReqMessage>(s => s.IsLoggedIn())
-                .Register<CAdminShowWindowReqMessage>(s => s.IsLoggedIn())
-                .Register<CAdminActionReqMessage>(s => s.IsLoggedIn())
-                .Register<CGetChannelInfoReqMessage>(s => s.IsLoggedIn())
-                .Register<CChannelEnterReqMessage>(s => s.IsLoggedIn() && s.Player.Channel == null)
-                .Register<CChannelLeaveReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CNewShopUpdateCheckReqMessage>(s => s.IsLoggedIn())
-                .Register<CLicensedReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CExerciseLicenceReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CBuyItemReqMessage>(s => s.IsLoggedIn())
-                .Register<CRandomShopRollingStartReqMessage>(s => s.IsLoggedIn())
-                .Register<CRandomShopItemSaleReqMessage>(s => s.IsLoggedIn())
-                .Register<CUseItemReqMessage>(s => s.IsLoggedIn())
-                .Register<CRepairItemReqMessage>(s => s.IsLoggedIn())
-                .Register<CRefundItemReqMessage>(s => s.IsLoggedIn())
-                .Register<CDiscardItemReqMessage>(s => s.IsLoggedIn())
-                .Register<CEnterPlayerReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.IsConnecting)
-                .Register<CMakeRoomReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room == null)
-                .Register<CGameRoomEnterReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room == null)
-                .Register<CJoinTunnelInfoReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null)
-                .Register<CChangeTeamReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null)
-                .Register<CPlayerGameModeChangeReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null)
-
-                .Register<CScoreKillReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreKillAssistReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreOffenseReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreOffenseAssistReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreDefenseReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreDefenseAssistReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreTeamKillReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreHealAssistReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreSuicideReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreReboundReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.Room.Host == s.Player && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreGoalReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.Room.Host == s.Player && s.Player.RoomInfo.State != PlayerState.Lobby && s.Player.RoomInfo.State != PlayerState.Spectating)
-
-                .Register<CBeginRoundReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.Room.Master == s.Player)
-                .Register<CReadyRoundReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State == PlayerState.Lobby)
-                .Register<CEventMessageReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null)
-                .Register<CItemsChangeReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player.RoomInfo.State == PlayerState.Lobby)
-                .Register<CAvatarChangeReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && (s.Player.RoomInfo.State == PlayerState.Lobby || s.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.HalfTime)))
-                .Register<CChangeRuleNotifyReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null && s.Player.Room != null && s.Player == s.Player.Room.Master && s.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
-
-                .Register<CClubAddressReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null)
-                .Register<CClubInfoReqMessage>(s => s.IsLoggedIn() && s.Player.Channel != null);
-
-            //FilterList.AddLast("spam_filter", new SpamFilter { RepeatLimit = 30, TimeFrame = TimeSpan.FromSeconds(3) });
+                .Register<CLoginReqMessage>(MustNotBeLoggedIn)
+                .Register<CCreateCharacterReqMessage>(MustBeLoggedIn)
+                .Register<CSelectCharacterReqMessage>(MustBeLoggedIn)
+                .Register<CDeleteCharacterReqMessage>(MustBeLoggedIn)
+                .Register<CAdminShowWindowReqMessage>(MustBeLoggedIn)
+                .Register<CAdminActionReqMessage>(MustBeLoggedIn)
+                .Register<CGetChannelInfoReqMessage>(MustBeLoggedIn)
+                .Register<CChannelEnterReqMessage>(MustBeLoggedIn, MustNotBeInChannel)
+                .Register<CChannelLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CNewShopUpdateCheckReqMessage>(MustBeLoggedIn)
+                .Register<CLicensedReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CExerciseLicenceReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CBuyItemReqMessage>(MustBeLoggedIn)
+                .Register<CRandomShopRollingStartReqMessage>(MustBeLoggedIn)
+                .Register<CRandomShopItemSaleReqMessage>(MustBeLoggedIn)
+                .Register<CUseItemReqMessage>(MustBeLoggedIn)
+                .Register<CRepairItemReqMessage>(MustBeLoggedIn)
+                .Register<CRefundItemReqMessage>(MustBeLoggedIn)
+                .Register<CDiscardItemReqMessage>(MustBeLoggedIn)
+                .Register<CEnterPlayerReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, session => session.Player.RoomInfo.IsConnecting)
+                .Register<CMakeRoomReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
+                .Register<CGameRoomEnterReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
+                .Register<CJoinTunnelInfoReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CChangeTeamReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CPlayerGameModeChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreKillAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreOffenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreOffenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreDefenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreDefenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreTeamKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreHealAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreSuicideReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CScoreReboundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
+                    session => session.Player.RoomInfo.State != PlayerState.Lobby &&
+                        session.Player.RoomInfo.State != PlayerState.Spectating)
+                .Register<CScoreGoalReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
+                    session => session.Player.RoomInfo.State != PlayerState.Lobby &&
+                        session.Player.RoomInfo.State != PlayerState.Spectating)
+                .Register<CBeginRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster)
+                .Register<CReadyRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, session => session.Player.RoomInfo.State == PlayerState.Lobby)
+                .Register<CEventMessageReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                .Register<CItemsChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, session => session.Player.RoomInfo.State == PlayerState.Lobby)
+                .Register<CAvatarChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                    session => session.Player.RoomInfo.State == PlayerState.Lobby ||
+                        session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.HalfTime))
+                .Register<CChangeRuleNotifyReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster,
+                    session => session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
+                .Register<CClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel);
 
             Pipeline.AddLast("s4_service", new ServicePipe())
                 .Add(new AuthService())
@@ -251,7 +264,7 @@ namespace Netsphere.Network
                 _serverListUpdateTimer = TimeSpan.Zero;
                 try
                 {
-                    if(!_authWebAPI.UpdateServer(this.Map<GameServer, ServerInfoDto>()))
+                    if (!_authWebAPI.UpdateServer(this.Map<GameServer, ServerInfoDto>()))
                         RegisterServer();
                 }
                 catch (Exception ex)
@@ -325,7 +338,7 @@ namespace Netsphere.Network
             }
         }
 
-        private void RegisterMappings()
+        private static void RegisterMappings()
         {
             Mapper.Register<GameServer, ServerInfoDto>()
                 .Member(dest => dest.Id, src => Config.Instance.Id)
@@ -437,8 +450,8 @@ namespace Netsphere.Network
                 .Member(dest => dest.Nickname, src => src.Account.Nickname)
                 .Value(dest => dest.Unk1, (byte)144);
 
-            //Mapper.Register<PlayerItem, Netsphere.Network.Data.P2P.ItemDto>()
-            //    .Function(dest => dest.ItemNumber, src => src?.ItemNumber ?? 0);
+            Mapper.Register<PlayerItem, Data.P2P.ItemDto>()
+                .Function(dest => dest.ItemNumber, src => src?.ItemNumber ?? 0);
 
             Mapper.Register<RoomCreationOptions, ChangeRuleDto>();
 
