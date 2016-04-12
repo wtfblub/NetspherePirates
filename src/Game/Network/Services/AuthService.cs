@@ -357,10 +357,10 @@ namespace Netsphere.Network.Services
             await session.SendAsync(new SBeginAccountInfoAckMessage
             {
                 Level = plr.Level,
-                TotalExp = server.ResourceCache.GetExperience()[plr.Level].TotalExperience + plr.TotalExperience,
+                TotalExp = plr.TotalExperience,
                 AP = plr.AP,
                 PEN = plr.PEN,
-                TutorialState = (uint)(Config.Instance.Game.EnableTutorial ? plr.TutorialState : 3),
+                TutorialState = (uint)(Config.Instance.Game.EnableTutorial ? plr.TutorialState : 2),
                 Nickname = plr.Account.Nickname
             }).ConfigureAwait(false);
 
