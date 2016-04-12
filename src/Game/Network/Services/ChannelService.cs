@@ -77,7 +77,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CChatMessageReqMessage))]
-        public void CChatMessageReq(GameSession session, CChatMessageReqMessage message)
+        public void CChatMessageReq(ChatSession session, CChatMessageReqMessage message)
         {
             if (message.ChatType == ChatType.Channel)
             {
@@ -90,7 +90,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CWhisperChatMessageReqMessage))]
-        public void CWhisperChatMessageReq(GameSession session, CWhisperChatMessageReqMessage message)
+        public void CWhisperChatMessageReq(ChatSession session, CWhisperChatMessageReqMessage message)
         {
             var toPlr = GameServer.Instance.PlayerManager.Get(message.ToNickname);
             toPlr?.ChatSession.Send(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname, session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
