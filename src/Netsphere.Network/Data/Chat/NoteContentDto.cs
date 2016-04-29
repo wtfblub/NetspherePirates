@@ -3,15 +3,16 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class NoteContentDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Id { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Message { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public NoteGiftDto Gift { get; set; }
 
         public NoteContentDto()

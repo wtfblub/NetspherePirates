@@ -128,7 +128,7 @@ namespace Netsphere.Network
                 .Register<CClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
                 .Register<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel);
 
-            Pipeline.AddLast("s4_service", new ServicePipe())
+            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
                 .Add(new AuthService())
                 .Add(new CharacterService())
                 .Add(new GeneralService())

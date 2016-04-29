@@ -19,7 +19,7 @@ namespace Netsphere.Network.Message
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(AuthMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }
@@ -31,7 +31,7 @@ namespace Netsphere.Network.Message
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(ChatMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }
@@ -43,7 +43,7 @@ namespace Netsphere.Network.Message
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(GameMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }
@@ -55,7 +55,7 @@ namespace Netsphere.Network.Message
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(GameRuleMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }
@@ -67,7 +67,7 @@ namespace Netsphere.Network.Message
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(RelayMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }
@@ -100,7 +100,7 @@ namespace Netsphere.Network.Message
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(EventMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }
@@ -112,7 +112,7 @@ namespace Netsphere.Network.Message
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(P2PMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using BlubLib.IO;
 using BlubLib.Serialization;
 using Netsphere.Network.Data.P2P;
@@ -10,9 +11,10 @@ using SlimMath;
 
 namespace Netsphere.Network.Message.P2P
 {
+    [BlubContract]
     public class PlayerSpawnReqMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public CharacterDto Character { get; set; }
 
         public PlayerSpawnReqMessage()
@@ -26,9 +28,10 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class PlayerSpawnAckMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public CharacterDto Character { get; set; }
 
         public PlayerSpawnAckMessage()
@@ -43,12 +46,13 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class AbilitySyncMessage : P2PMessage
     {
-        [Serialize(0, typeof(CompressedFloatSerializer))]
+        [BlubMember(0, typeof(CompressedFloatSerializer))]
         public float Unk { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ValueDto[] Values { get; set; }
 
         public AbilitySyncMessage()
@@ -57,18 +61,19 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class EquippingItemSyncMessage : P2PMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Costumes { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Skills { get; set; }
 
-        [Serialize(2, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(2, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Weapons { get; set; }
 
-        [Serialize(3, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(3, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Values { get; set; }
 
         public EquippingItemSyncMessage()
@@ -79,7 +84,8 @@ namespace Netsphere.Network.Message.P2P
             Values = Array.Empty<ItemDto>();
         }
     }
-
+    
+    [BlubContract(typeof(Serializer))]
     public class DamageInfoMessage : P2PMessage
     {
         public PeerId Target { get; set; }
@@ -117,32 +123,102 @@ namespace Netsphere.Network.Message.P2P
             Flag1 = 2;
             Flag2 = 2;
         }
+
+        internal class Serializer : ISerializer<DamageInfoMessage>
+        {
+            public bool CanHandle(Type type) => type == typeof(DamageInfoMessage);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Serialize(BinaryWriter writer, DamageInfoMessage value)
+            {
+                writer.Write(value.Target);
+                writer.WriteEnum(value.AttackAttribute);
+                writer.Write(value.GameTime);
+                writer.Write(value.Source);
+                writer.Write(value.Unk5);
+                writer.WriteRotation(value.Rotation);
+                writer.WriteCompressed(value.Position);
+                writer.WriteCompressed(value.Unk6);
+                writer.WriteCompressed(value.Damage);
+                writer.Write(value.Unk8);
+                writer.Write(value.Unk9);
+
+                var ls = new List<byte>();
+                var bw = new BitStreamWriter(ls);
+                bw.Write(value.Flag1, 3);
+                bw.Write(value.Flag2, 2);
+                bw.Write(value.Flag3, 1);
+                bw.Write(value.Flag4, 1);
+                bw.Write(value.Flag5, 1);
+
+                bw.Write(value.Flag6, 1);
+                bw.Write(value.Flag7, 7);
+
+                bw.Write(value.IsCritical, 4);
+                bw.Write(value.Flag9, 4);
+
+                writer.Write(ls);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public DamageInfoMessage Deserialize(BinaryReader reader)
+            {
+                var message = new DamageInfoMessage();
+                message.Target = reader.ReadUInt16();
+                message.AttackAttribute = reader.ReadEnum<AttackAttribute>();
+                message.GameTime = reader.ReadUInt32();
+                message.Source = reader.ReadUInt16();
+                message.Unk5 = reader.ReadByte();
+                message.Rotation = reader.ReadRotation();
+                message.Position = reader.ReadCompressedVector3();
+                message.Unk6 = reader.ReadCompressedFloat();
+                message.Damage = reader.ReadCompressedFloat();
+                message.Unk8 = reader.ReadInt16();
+                message.Unk9 = reader.ReadUInt16();
+
+                var br = new BitStreamReader(reader.ReadBytes(3));
+                message.Flag1 = br.ReadByte(3);
+                message.Flag2 = br.ReadByte(2);
+                message.Flag3 = br.ReadByte(1);
+                message.Flag4 = br.ReadByte(1);
+                message.Flag5 = br.ReadByte(1);
+
+                message.Flag6 = br.ReadByte(1);
+                message.Flag7 = br.ReadByte(7);
+
+                message.IsCritical = br.ReadByte(4);
+                message.Flag9 = br.ReadByte(4);
+
+                return message;
+            }
+        }
     }
 
+    [BlubContract]
     public class DamageRemoteInfoMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Target { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public AttackAttribute AttackAttribute { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint GameTime { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public PeerId Source { get; set; }
 
-        [Serialize(4, typeof(RotationVectorSerializer))]
+        [BlubMember(4, typeof(RotationVectorSerializer))]
         public Vector2 Rotation { get; set; }
 
-        [Serialize(5, typeof(CompressedVectorSerializer))]
+        [BlubMember(5, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(6, typeof(CompressedFloatSerializer))]
+        [BlubMember(6, typeof(CompressedFloatSerializer))]
         public float Unk { get; set; }
 
-        [Serialize(7, typeof(CompressedFloatSerializer))]
+        [BlubMember(7, typeof(CompressedFloatSerializer))]
         public float Damage { get; set; }
 
         public DamageRemoteInfoMessage()
@@ -154,18 +230,19 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class SnapShotMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Time { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk { get; set; }
 
-        [Serialize(2, typeof(CompressedVectorSerializer))]
+        [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(3, typeof(RotationVectorSerializer))]
+        [BlubMember(3, typeof(RotationVectorSerializer))]
         public Vector2 Rotation { get; set; }
 
         public SnapShotMessage()
@@ -183,18 +260,19 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class StateSyncMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint GameTime { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Value { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer))]
+        [BlubMember(2)]
         public ActorState State { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte CurrentWeapon { get; set; }
 
         public StateSyncMessage()
@@ -214,33 +292,34 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class BGEffectMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
 
-        [Serialize(2, typeof(CompressedVectorSerializer))]
+        [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Unk3 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public byte Unk4 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public byte Unk5 { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public short Unk6 { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public byte Unk7 { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public byte Unk8 { get; set; }
 
         public BGEffectMessage()
@@ -249,12 +328,13 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class DefensivePowerMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId PeerId { get; set; }
 
-        [Serialize(1, typeof(CompressedFloatSerializer))]
+        [BlubMember(1, typeof(CompressedFloatSerializer))]
         public float Value { get; set; }
 
         public DefensivePowerMessage()
@@ -263,12 +343,13 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class BlastObjectDestroyMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Player { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk { get; set; }
 
         public BlastObjectDestroyMessage()
@@ -278,9 +359,10 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class BlastObjectRespawnMessage : P2PMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk { get; set; }
 
         public BlastObjectRespawnMessage()
@@ -289,24 +371,25 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class MindEnergyMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public PeerId Target { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public short Unk3 { get; set; }
 
-        [Serialize(3, typeof(CompressedFloatSerializer))]
+        [BlubMember(3, typeof(CompressedFloatSerializer))]
         public float Unk4 { get; set; }
 
-        [Serialize(4, typeof(CompressedFloatSerializer))]
+        [BlubMember(4, typeof(CompressedFloatSerializer))]
         public float Unk5 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public byte Unk6 { get; set; }
 
         public MindEnergyMessage()
@@ -315,18 +398,20 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class DamageShieldMessage : P2PMessage
     {
-        [Serialize(0, typeof(CompressedFloatSerializer))]
+        [BlubMember(0, typeof(CompressedFloatSerializer))]
         public float Unk { get; set; }
     }
 
+    [BlubContract]
     public class AimedPointMessage : P2PMessage
     {
-        [Serialize(0, typeof(CompressedVectorSerializer))]
+        [BlubMember(0, typeof(CompressedVectorSerializer))]
         public Vector3 Unk1 { get; set; }
 
-        [Serialize(1, typeof(CompressedVectorSerializer))]
+        [BlubMember(1, typeof(CompressedVectorSerializer))]
         public Vector3 Unk2 { get; set; }
 
         public AimedPointMessage()
@@ -336,99 +421,105 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class OnOffMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Action { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public bool IsEnabled { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte Value { get; set; }
     }
 
+    [BlubContract]
     public class SentryGunSpawnMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public float Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public float Unk4 { get; set; }
 
-        [Serialize(4, typeof(CompressedVectorSerializer))]
+        [BlubMember(4, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public byte Unk5 { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public int Unk6 { get; set; }
 
-        [Serialize(7, typeof(CompressedFloatSerializer))]
+        [BlubMember(7, typeof(CompressedFloatSerializer))]
         public float Unk7 { get; set; }
 
-        [Serialize(8, typeof(CompressedFloatSerializer))]
+        [BlubMember(8, typeof(CompressedFloatSerializer))]
         public float Unk8 { get; set; }
 
-        [Serialize(9, typeof(CompressedFloatSerializer))]
+        [BlubMember(9, typeof(CompressedFloatSerializer))]
         public float Unk9 { get; set; }
     }
 
+    [BlubContract]
     public class SentryGunStateMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk1 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public PeerId Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SentryGunDestructionMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
     }
 
+    [BlubContract]
     public class SentryGunDestruction2Message : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class GrenadeSpawnMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public PeerId Owner { get; set; }
 
-        [Serialize(2, typeof(CompressedVectorSerializer))]
+        [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(3, typeof(CompressedVectorSerializer))]
+        [BlubMember(3, typeof(CompressedVectorSerializer))]
         public Vector3 Unk4 { get; set; }
 
-        [Serialize(4, typeof(CompressedFloatSerializer))]
+        [BlubMember(4, typeof(CompressedFloatSerializer))]
         public float Unk5 { get; set; }
 
-        [Serialize(5, typeof(CompressedFloatSerializer))]
+        [BlubMember(5, typeof(CompressedFloatSerializer))]
         public float Unk6 { get; set; }
 
-        [Serialize(6, typeof(StringSerializer))]
+        [BlubMember(6, typeof(StringSerializer))]
         public string Unk7 { get; set; }
 
         public GrenadeSpawnMessage()
@@ -441,18 +532,19 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class GrenadeSnapShotMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
 
-        [Serialize(1, typeof(CompressedVectorSerializer))]
+        [BlubMember(1, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(2, typeof(CompressedVectorSerializer))]
+        [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Unk2 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Unk3 { get; set; }
 
         public GrenadeSnapShotMessage()
@@ -463,12 +555,13 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class GrenadeSnapShot2Message : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
 
-        [Serialize(1, typeof(CompressedVectorSerializer))]
+        [BlubMember(1, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
         public GrenadeSnapShot2Message()
@@ -478,27 +571,28 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class ObstructionSpawnMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Owner { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public PeerId Id { get; set; }
 
-        [Serialize(2, typeof(CompressedVectorSerializer))]
+        [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(3, typeof(RotationVectorSerializer))]
+        [BlubMember(3, typeof(RotationVectorSerializer))]
         public Vector2 Rotation { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public int Unk2 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public int Unk3 { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public byte Unk4 { get; set; }
 
         public ObstructionSpawnMessage()
@@ -510,9 +604,10 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class ObstructionDestroyMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
 
         public ObstructionDestroyMessage()
@@ -524,39 +619,41 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class ObstructionDamageMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Damage { get; set; }
     }
 
+    [BlubContract]
     public class SyncObjectObstructionMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Owner { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public PeerId Id { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint GameTime { get; set; }
 
-        [Serialize(3, typeof(CompressedVectorSerializer))]
+        [BlubMember(3, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(4, typeof(RotationVectorSerializer))]
+        [BlubMember(4, typeof(RotationVectorSerializer))]
         public Vector2 Rotation { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint Count { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public uint HP { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public uint Time { get; set; }
 
         public SyncObjectObstructionMessage()
@@ -580,9 +677,10 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class BlastObjectSyncMessage : P2PMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk { get; set; }
 
         public BlastObjectSyncMessage()
@@ -591,15 +689,16 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class BallSyncMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Player { get; set; }
 
-        [Serialize(1, typeof(CompressedVectorSerializer))]
+        [BlubMember(1, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(2, typeof(CompressedVectorSerializer))]
+        [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Unk { get; set; }
 
         public BallSyncMessage()
@@ -616,12 +715,13 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class BallSnapShotMessage : P2PMessage
     {
-        [Serialize(0, typeof(CompressedVectorSerializer))]
+        [BlubMember(0, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(1, typeof(CompressedVectorSerializer))]
+        [BlubMember(1, typeof(CompressedVectorSerializer))]
         public Vector3 Unk { get; set; }
 
         public BallSnapShotMessage()
@@ -637,27 +737,30 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class ArcadeFinMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class AttachArcadeItemMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class HPSyncMessage : P2PMessage
     {
-        [Serialize(0, typeof(CompressedFloatSerializer))]
+        [BlubMember(0, typeof(CompressedFloatSerializer))]
         public float Value { get; set; }
 
-        [Serialize(1, typeof(CompressedFloatSerializer))]
+        [BlubMember(1, typeof(CompressedFloatSerializer))]
         public float Max { get; set; }
 
         public HPSyncMessage()
@@ -670,51 +773,55 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class Unk38Message : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public PeerId Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public int Unk3 { get; set; }
 
-        [Serialize(3, typeof(CompressedFloatSerializer))]
+        [BlubMember(3, typeof(CompressedFloatSerializer))]
         public float Unk4 { get; set; }
     }
 
+    [BlubContract]
     public class ExposeClubMarkMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class ReflectRateMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Unk1 { get; set; }
 
-        [Serialize(1, typeof(CompressedFloatSerializer))]
+        [BlubMember(1, typeof(CompressedFloatSerializer))]
         public float Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class ConditionInfoMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Unused { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public PeerId Target { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer))]
+        [BlubMember(2)]
         public Condition Condition { get; set; }
 
-        [Serialize(3, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(3, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public ConditionInfoMessage()
@@ -731,42 +838,44 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
+    [BlubContract]
     public class AbilityChangeSyncMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1, typeof(CompressedFloatSerializer))]
+        [BlubMember(1, typeof(CompressedFloatSerializer))]
         public float Unk2 { get; set; }
 
-        [Serialize(2, typeof(CompressedFloatSerializer))]
+        [BlubMember(2, typeof(CompressedFloatSerializer))]
         public float HP { get; set; }
 
-        [Serialize(3, typeof(CompressedFloatSerializer))]
+        [BlubMember(3, typeof(CompressedFloatSerializer))]
         public float Unk3 { get; set; }
 
-        [Serialize(4, typeof(CompressedFloatSerializer))]
+        [BlubMember(4, typeof(CompressedFloatSerializer))]
         public float MP { get; set; }
 
-        [Serialize(5, typeof(CompressedFloatSerializer))]
+        [BlubMember(5, typeof(CompressedFloatSerializer))]
         public float Unk4 { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public short Unk5 { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public short Unk6 { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public short Unk7 { get; set; }
     }
 
+    [BlubContract]
     public class HealHPMessage : P2PMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PeerId Unk1 { get; set; }
 
-        [Serialize(1, typeof(CompressedFloatSerializer))]
+        [BlubMember(1, typeof(CompressedFloatSerializer))]
         public float Unk2 { get; set; }
     }
 }

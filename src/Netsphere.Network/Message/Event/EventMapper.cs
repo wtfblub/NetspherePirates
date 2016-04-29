@@ -7,8 +7,8 @@ namespace Netsphere.Network.Message.Event
 {
     public static class EventMapper
     {
-        private static readonly Dictionary<EventOpCode, Type> TypeLookup = new Dictionary<EventOpCode, Type>();
-        private static readonly Dictionary<Type, EventOpCode> OpCodeLookup = new Dictionary<Type, EventOpCode>();
+        private static readonly Dictionary<EventOpCode, Type> s_typeLookup = new Dictionary<EventOpCode, Type>();
+        private static readonly Dictionary<Type, EventOpCode> s_opCodeLookup = new Dictionary<Type, EventOpCode>();
 
         static EventMapper()
         {
@@ -24,13 +24,13 @@ namespace Netsphere.Network.Message.Event
             where T : EventMessage, new()
         {
             var type = typeof(T);
-            OpCodeLookup.Add(type, opCode);
-            TypeLookup.Add(opCode, type);
+            s_opCodeLookup.Add(type, opCode);
+            s_typeLookup.Add(opCode, type);
         }
 
         public static EventMessage GetMessage(EventOpCode opCode, BinaryReader r)
         {
-            var type = TypeLookup.GetValueOrDefault(opCode);
+            var type = s_typeLookup.GetValueOrDefault(opCode);
             if (type == null)
                 throw new NetsphereBadOpCodeException(opCode);
 
@@ -45,7 +45,7 @@ namespace Netsphere.Network.Message.Event
 
         public static EventOpCode GetOpCode(Type type)
         {
-            return OpCodeLookup[type];
+            return s_opCodeLookup[type];
         }
     }
 }

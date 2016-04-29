@@ -2,18 +2,19 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class ChaserStatsDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint ChasedWon { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint ChasedRounds { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint ChaserWon { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint ChaserRounds { get; set; }
     }
 }

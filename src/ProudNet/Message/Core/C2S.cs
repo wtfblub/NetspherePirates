@@ -6,21 +6,23 @@ using ProudNet.Serializers;
 
 namespace ProudNet.Message.Core
 {
+    [BlubContract]
     internal class NotifyCSEncryptedSessionKeyMessage : CoreMessage
     {
-        [Serialize(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] Key { get; set; }
     }
 
+    [BlubContract]
     internal class NotifyServerConnectionRequestDataMessage : CoreMessage
     {
-        [Serialize(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
 
-        [Serialize(1, typeof(GuidSerializer))]
+        [BlubMember(1)]
         public Guid Version { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint InternalNetVersion { get; set; }
 
         public NotifyServerConnectionRequestDataMessage()
@@ -30,9 +32,10 @@ namespace ProudNet.Message.Core
         }
     }
 
+    [BlubContract]
     internal class ServerHolepunchMessage : CoreMessage
     {
-        [Serialize(0, typeof(GuidSerializer))]
+        [BlubMember(0)]
         public Guid MagicNumber { get; set; }
 
         public ServerHolepunchMessage()
@@ -41,15 +44,16 @@ namespace ProudNet.Message.Core
         }
     }
 
+    [BlubContract]
     internal class NotifyHolepunchSuccessMessage : CoreMessage
     {
-        [Serialize(0, typeof(GuidSerializer))]
+        [BlubMember(0)]
         public Guid MagicNumber { get; set; }
 
-        [Serialize(1, typeof(IPEndPointSerializer))]
+        [BlubMember(1, typeof(IPEndPointSerializer))]
         public IPEndPoint LocalEndPoint { get; set; }
 
-        [Serialize(2, typeof(IPEndPointSerializer))]
+        [BlubMember(2, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public NotifyHolepunchSuccessMessage()
@@ -60,12 +64,13 @@ namespace ProudNet.Message.Core
         }
     }
 
+    [BlubContract]
     internal class PeerUdp_ServerHolepunchMessage : CoreMessage
     {
-        [Serialize(0, typeof(GuidSerializer))]
+        [BlubMember(0)]
         public Guid MagicNumber { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint HostId { get; set; }
 
         public PeerUdp_ServerHolepunchMessage()
@@ -74,15 +79,16 @@ namespace ProudNet.Message.Core
         }
     }
 
+    [BlubContract]
     internal class PeerUdp_NotifyHolepunchSuccessMessage : CoreMessage
     {
-        [Serialize(0, typeof(IPEndPointSerializer))]
+        [BlubMember(0, typeof(IPEndPointSerializer))]
         public IPEndPoint LocalEndPoint { get; set; }
 
-        [Serialize(1, typeof(IPEndPointSerializer))]
+        [BlubMember(1, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint HostId { get; set; }
 
         public PeerUdp_NotifyHolepunchSuccessMessage()
@@ -92,24 +98,27 @@ namespace ProudNet.Message.Core
         }
     }
 
+    [BlubContract]
     internal class UnreliablePingMessage : CoreMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public double ClientTime { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public double Ping { get; set; }
     }
 
+    [BlubContract]
     internal class SpeedHackDetectorPingMessage : CoreMessage
     { }
 
+    [BlubContract]
     internal class ReliableRelay1Message : CoreMessage
     {
-        [Serialize(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public RelayDestinationDto[] Destination { get; set; }
 
-        [Serialize(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public ReliableRelay1Message()
@@ -118,18 +127,19 @@ namespace ProudNet.Message.Core
         }
     }
 
+    [BlubContract]
     internal class UnreliableRelay1Message : CoreMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public MessagePriority Priority { get; set; }
 
-        [Serialize(1, typeof(ScalarSerializer))]
+        [BlubMember(1, typeof(ScalarSerializer))]
         public int UniqueId { get; set; }
 
-        [Serialize(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public uint[] Destination { get; set; }
 
-        [Serialize(3, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(3, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public UnreliableRelay1Message()

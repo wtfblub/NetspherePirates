@@ -2,14 +2,15 @@
 using System.IO;
 using BlubLib.Serialization;
 using Sigil;
+using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
     internal class ItemNumberSerializer : ISerializerCompiler
     {
-        public Type HandlesType => typeof (ItemNumber);
+        public bool CanHandle(Type type) => type == typeof(ItemNumber);
 
-        public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
+        public void EmitSerialize(Emit emiter, Local value)
         {
             emiter.LoadArgument(1);
             emiter.LoadLocalAddress(value);
@@ -17,7 +18,7 @@ namespace Netsphere.Network.Serializers
             emiter.CallVirtual(typeof(BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] { typeof(uint) }));
         }
 
-        public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
+        public void EmitDeserialize(Emit emiter, Local value)
         {
             emiter.LoadLocalAddress(value);
             emiter.LoadArgument(1);

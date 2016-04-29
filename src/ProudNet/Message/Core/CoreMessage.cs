@@ -19,7 +19,7 @@ namespace ProudNet.Message.Core
             using (var w = stream.ToBinaryWriter(true))
             {
                 w.WriteEnum(CoreMapper.GetOpCode(GetType()));
-                Serializer.Serialize(w, this);
+                Serializer.Serialize(w, (object)this);
             }
         }
     }

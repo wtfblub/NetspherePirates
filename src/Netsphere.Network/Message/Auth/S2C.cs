@@ -6,27 +6,28 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.Auth
 {
+    [BlubContract]
     public class SAuthInEuAckMessage : AuthMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint SessionId { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Unk1 { get; set; }
 
-        [Serialize(3, typeof(StringSerializer))]
+        [BlubMember(3, typeof(StringSerializer))]
         public string SessionId2 { get; set; }
 
-        [Serialize(4, typeof(EnumSerializer))]
+        [BlubMember(4)]
         public AuthLoginResult Result { get; set; }
 
-        [Serialize(5, typeof(StringSerializer))]
+        [BlubMember(5, typeof(StringSerializer))]
         public string Unk2 { get; set; }
 
-        [Serialize(6, typeof(StringSerializer))]
+        [BlubMember(6, typeof(StringSerializer))]
         public string BannedUntil { get; set; }
 
         public SAuthInEuAckMessage()
@@ -60,9 +61,10 @@ namespace Netsphere.Network.Message.Auth
         }
     }
 
+    [BlubContract]
     public class SServerListAckMessage : AuthMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ServerInfoDto[] ServerList { get; set; }
 
         public SServerListAckMessage()

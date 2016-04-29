@@ -10,9 +10,9 @@ using ProudNet.Message.Core;
 
 namespace ProudNet.Services
 {
-    internal class ProudServerService : Service
+    internal class ProudServerService : MessageHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ProudServerPipe _filter;
 
         public ProudServerService(ProudServerPipe filter)

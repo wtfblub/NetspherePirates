@@ -7,8 +7,8 @@ namespace Netsphere.Network.Message.GameRule
 {
     internal static class GameRuleMapper
     {
-        private static readonly Dictionary<GameRuleOpCode, Type> TypeLookup = new Dictionary<GameRuleOpCode, Type>();
-        private static readonly Dictionary<Type, GameRuleOpCode> OpCodeLookup = new Dictionary<Type, GameRuleOpCode>();
+        private static readonly Dictionary<GameRuleOpCode, Type> s_typeLookup = new Dictionary<GameRuleOpCode, Type>();
+        private static readonly Dictionary<Type, GameRuleOpCode> s_opCodeLookup = new Dictionary<Type, GameRuleOpCode>();
 
         static GameRuleMapper()
         {
@@ -136,13 +136,13 @@ namespace Netsphere.Network.Message.GameRule
             where T : GameRuleMessage, new()
         {
             var type = typeof(T);
-            OpCodeLookup.Add(type, opCode);
-            TypeLookup.Add(opCode, type);
+            s_opCodeLookup.Add(type, opCode);
+            s_typeLookup.Add(opCode, type);
         }
 
         public static GameRuleMessage GetMessage(GameRuleOpCode opCode, BinaryReader r)
         {
-            var type = TypeLookup.GetValueOrDefault(opCode);
+            var type = s_typeLookup.GetValueOrDefault(opCode);
             if (type == null)
                 throw new NetsphereBadOpCodeException(opCode);
 
@@ -157,7 +157,7 @@ namespace Netsphere.Network.Message.GameRule
 
         public static GameRuleOpCode GetOpCode(Type type)
         {
-            return OpCodeLookup[type];
+            return s_opCodeLookup[type];
         }
     }
 }

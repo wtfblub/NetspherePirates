@@ -1,68 +1,73 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.CompilerServices;
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Serializers;
+using ProudNet;
 using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.Game
 {
+    [BlubContract]
     public class SLoginAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public GameLoginResult Result { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ulong Unk { get; set; }
     }
 
+    [BlubContract]
     public class SBeginAccountInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; } // IsGM?
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte Level { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Unk3 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint TotalExp { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint AP { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public uint PEN { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public uint TutorialState { get; set; }
 
-        [Serialize(8, typeof(StringSerializer))]
+        [BlubMember(8, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        [Serialize(9)]
+        [BlubMember(9)]
         public uint Unk4 { get; set; } // something with licenses needed to enter s4league
 
-        [Serialize(10)]
+        [BlubMember(10)]
         public DMStatsDto DMStats { get; set; }
 
-        [Serialize(11)]
+        [BlubMember(11)]
         public TDStatsDto TDStats { get; set; }
 
-        [Serialize(12)]
+        [BlubMember(12)]
         public ChaserStatsDto ChaserStats { get; set; }
 
-        [Serialize(13)]
+        [BlubMember(13)]
         public BRStatsDto BRStats { get; set; }
 
-        [Serialize(14)]
+        [BlubMember(14)]
         public CPTStatsDto CPTStats { get; set; }
 
         public SBeginAccountInfoAckMessage()
@@ -75,18 +80,19 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SOpenCharacterInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Slot { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk1 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte Unk2 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public CharacterStyle Style { get; set; }
 
         public SOpenCharacterInfoAckMessage()
@@ -96,18 +102,19 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SCharacterEquipInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Slot { get; set; }
 
-        [Serialize(3, typeof(ArrayWithIntPrefixAndIndexSerializer))]
+        [BlubMember(3, typeof(ArrayWithIntPrefixAndIndexSerializer))]
         public ulong[] Weapons { get; set; }
 
-        [Serialize(4, typeof(ArrayWithIntPrefixAndIndexSerializer))]
+        [BlubMember(4, typeof(ArrayWithIntPrefixAndIndexSerializer))]
         public ulong[] Skills { get; set; }
 
-        [Serialize(5, typeof(ArrayWithIntPrefixAndIndexSerializer))]
+        [BlubMember(5, typeof(ArrayWithIntPrefixAndIndexSerializer))]
         public ulong[] Clothes { get; set; }
 
         public SCharacterEquipInfoAckMessage()
@@ -118,6 +125,7 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract(typeof(Serializer))]
     public class SInventoryInfoAckMessage : GameMessage
     {
         public ItemDto[] Items { get; set; }
@@ -126,11 +134,53 @@ namespace Netsphere.Network.Message.Game
         {
             Items = Array.Empty<ItemDto>();
         }
+
+        internal class Serializer : ISerializer<SInventoryInfoAckMessage>
+        {
+            public bool CanHandle(Type type) => type == typeof(SInventoryInfoAckMessage);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Serialize(BinaryWriter writer, SInventoryInfoAckMessage value)
+            {
+                using (var w2 = new BinaryWriter(new MemoryStream()))
+                {
+                    w2.Write((ushort)value.Items.Length);
+
+                    var serializer = BlubLib.Serialization.Serializer.GetSerializer<ItemDto>();
+                    foreach (var item in value.Items)
+                        serializer.Serialize(w2, item);
+
+                    var data = w2.ToArray().CompressLZO();
+                    writer.WriteStruct(data);
+                    writer.Write(data.Length);
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public SInventoryInfoAckMessage Deserialize(BinaryReader reader)
+            {
+                var message = new SInventoryInfoAckMessage();
+                var compressed = reader.ReadStruct();
+                reader.ReadUInt32(); // length
+
+                var decompressed = compressed.DecompressLZO(compressed.Length * 4);
+
+                using (var r2 = decompressed.ToBinaryReader())
+                {
+                    message.Items = new ItemDto[r2.ReadInt16()];
+                    var serializer = BlubLib.Serialization.Serializer.GetSerializer<ItemDto>();
+                    for (var i = 0; i < message.Items.Length; i++)
+                        message.Items[i] = serializer.Deserialize(r2);
+                }
+                return message;
+            }
+        }
     }
 
+    [BlubContract]
     public class SSuccessDeleteCharacterAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Slot { get; set; }
 
         public SSuccessDeleteCharacterAckMessage()
@@ -142,9 +192,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SSuccessSelectCharacterAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Slot { get; set; }
 
         public SSuccessSelectCharacterAckMessage()
@@ -156,18 +207,19 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SSuccessCreateCharacterAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Slot { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public CharacterStyle Style { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte Unk1 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Unk2 { get; set; }
 
         public SSuccessCreateCharacterAckMessage()
@@ -180,9 +232,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SServerResultInfoAckMessage : GameMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public ServerResult Result { get; set; }
 
         public SServerResultInfoAckMessage()
@@ -194,15 +247,17 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SCreateNickAckMessage : GameMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Nickname { get; set; }
     }
 
+    [BlubContract]
     public class SCheckNickAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool IsAvailable { get; set; }
 
         public SCheckNickAckMessage()
@@ -214,27 +269,29 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SUseItemAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte CharacterSlot { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte EquipSlot { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ulong ItemId { get; set; }
 
-        [Serialize(3, typeof(EnumSerializer))]
+        [BlubMember(3)]
         public UseItemAction Action { get; set; }
     }
 
+    [BlubContract]
     public class SInventoryActionAckMessage : GameMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public InventoryAction Action { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ItemDto Item { get; set; }
 
         public SInventoryActionAckMessage()
@@ -249,12 +306,13 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SIdsInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Slot { get; set; }
 
         public SIdsInfoAckMessage()
@@ -267,9 +325,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SEnteredPlayerAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public RoomPlayerDto Player { get; set; }
 
         public SEnteredPlayerAckMessage()
@@ -283,9 +342,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SEnteredPlayerClubInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PlayerClubInfoDto Player { get; set; }
 
         public SEnteredPlayerClubInfoAckMessage()
@@ -294,9 +354,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SEnteredPlayerListAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public RoomPlayerDto[] Players { get; set; }
 
         public SEnteredPlayerListAckMessage()
@@ -310,9 +371,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SEnteredPlayerClubInfoListAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public PlayerClubInfoDto[] Players { get; set; }
 
         public SEnteredPlayerClubInfoListAckMessage()
@@ -321,9 +383,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SSuccessEnterRoomAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public EnterRoomInfoDto RoomInfo { get; set; }
 
         public SSuccessEnterRoomAckMessage()
@@ -337,9 +400,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SLeavePlayerAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
         public SLeavePlayerAckMessage()
@@ -351,55 +415,62 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     [Obsolete("This handler is empty inside the client")]
     public class SJoinTunnelPlayerAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class STimeSyncAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint ClientTime { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint ServerTime { get; set; }
     }
 
+    [BlubContract]
     public class SPlayTogetherSignAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class SPlayTogetherInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong AccountId { get; set; }
     }
 
+    [BlubContract]
     public class SPlayTogetherSignInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class SPlayTogetherCancelAckMessage : GameMessage
     { }
 
+    [BlubContract]
     public class SChangeGameRoomAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public RoomDto Room { get; set; }
 
         public SChangeGameRoomAckMessage()
@@ -413,21 +484,25 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SNewShopUpdateRequestAckMessage : GameMessage
     { }
 
+    [BlubContract]
     public class SLogoutAckMessage : GameMessage
     { }
 
+    [BlubContract]
     public class SPlayTogetherKickAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
+    [BlubContract]
     public class SChannelListInfoAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ChannelInfoDto[] Channels { get; set; }
 
         public SChannelListInfoAckMessage()
@@ -441,15 +516,16 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SChannelDeployPlayerAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk1 { get; set; } // room id?
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Unk2 { get; set; } // maybe nickname
 
         public SChannelDeployPlayerAckMessage()
@@ -458,12 +534,14 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SChannelDisposePlayerAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
+    [BlubContract(typeof(Serializer))]
     public class SGameRoomListAckMessage : GameMessage
     {
         public ChannelInfoRequest ListType { get; set; }
@@ -479,11 +557,53 @@ namespace Netsphere.Network.Message.Game
             ListType = ChannelInfoRequest.RoomList;
             Rooms = rooms;
         }
+
+        internal class Serializer : ISerializer<SGameRoomListAckMessage>
+        {
+            public bool CanHandle(Type type) => type == typeof(SGameRoomListAckMessage);
+
+            public void Serialize(BinaryWriter writer, SGameRoomListAckMessage value)
+            {
+                using (var w2 = new BinaryWriter(new MemoryStream()))
+                {
+                    w2.WriteEnum(value.ListType);
+                    w2.Write((ushort)value.Rooms.Length);
+
+                    var serializer = BlubLib.Serialization.Serializer.GetSerializer<RoomDto>();
+                    foreach (var room in value.Rooms)
+                        serializer.Serialize(w2, room);
+
+                    var data = w2.ToArray().CompressLZO();
+                    writer.WriteStruct(data);
+                    writer.Write(data.Length);
+                }
+            }
+
+            public SGameRoomListAckMessage Deserialize(BinaryReader reader)
+            {
+                var message = new SGameRoomListAckMessage();
+                var compressed = reader.ReadStruct();
+                reader.ReadUInt32(); // length
+
+                var decompressed = compressed.DecompressLZO(compressed.Length * 4);
+
+                using (var r2 = decompressed.ToBinaryReader())
+                {
+                    message.ListType = r2.ReadEnum<ChannelInfoRequest>();
+                    message.Rooms = new RoomDto[r2.ReadInt16()];
+                    var serializer = BlubLib.Serialization.Serializer.GetSerializer<RoomDto>();
+                    for (var i = 0; i < message.Rooms.Length; i++)
+                        message.Rooms[i] = serializer.Deserialize(r2);
+                }
+                return message;
+            }
+        }
     }
 
+    [BlubContract]
     public class SDeployGameRoomAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public RoomDto Room { get; set; }
 
         public SDeployGameRoomAckMessage()
@@ -497,9 +617,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SDisposeGameRoomAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint RoomId { get; set; }
 
         public SDisposeGameRoomAckMessage()
@@ -511,21 +632,23 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SGamePingAverageAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; } // ping?
     }
 
+    [BlubContract]
     public class SBuyItemAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Ids { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public ItemBuyResult Result { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ShopItemDto Item { get; set; }
 
         public SBuyItemAckMessage()
@@ -548,18 +671,20 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SRepairItemAckMessage : GameMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public ItemRepairResult Result { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong ItemId { get; set; }
     }
 
+    [BlubContract]
     public class SItemDurabilityInfoAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDurabilityInfoDto[] Items { get; set; }
 
         public SItemDurabilityInfoAckMessage()
@@ -574,21 +699,23 @@ namespace Netsphere.Network.Message.Game
 
     }
 
+    [BlubContract]
     public class SRefundItemAckMessage : GameMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public ItemRefundResult Result { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong ItemId { get; set; }
     }
 
+    [BlubContract]
     public class SRefreshCashInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint PEN { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint AP { get; set; }
 
         public SRefreshCashInfoAckMessage()
@@ -601,12 +728,13 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SAdminActionAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Result { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Message { get; set; }
 
         public SAdminActionAckMessage()
@@ -615,9 +743,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SAdminShowWindowAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool ShowConsole { get; set; }
 
         public SAdminShowWindowAckMessage()
@@ -629,9 +758,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SNoticeMessageAckMessage : GameMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Message { get; set; }
 
         public SNoticeMessageAckMessage()
@@ -644,21 +774,23 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SCharacterSlotInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte CharacterCount { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte MaxSlots { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte ActiveCharacter { get; set; }
     }
 
+    [BlubContract]
     public class SRefreshInvalidEquipItemAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Items { get; set; }
 
         public SRefreshInvalidEquipItemAckMessage()
@@ -667,9 +799,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SClearInvalidateItemAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public InvalidateItemInfoDto[] Items { get; set; }
 
         public SClearInvalidateItemAckMessage()
@@ -678,34 +811,38 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SRefreshItemTimeInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ulong Unk3 { get; set; }
     }
 
+    [BlubContract]
     [Obsolete("This handler is empty inside the client")]
     public class SEnableAccountStatusAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
+    [BlubContract]
     public class SActiveEquipPresetAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class SMyLicenseInfoAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public uint[] Licenses { get; set; }
 
         public SMyLicenseInfoAckMessage()
@@ -719,12 +856,13 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SLicensedAckMessage : GameMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public ItemLicense ItemLicense { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ItemNumber ItemNumber { get; set; }
 
         public SLicensedAckMessage()
@@ -737,33 +875,36 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SCoinEventAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class SCombiCompensationAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint Unk4 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint Unk5 { get; set; }
     }
 
+    [BlubContract]
     public class SClubInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public PlayerClubInfoDto ClubInfo { get; set; }
 
         public SClubInfoAckMessage()
@@ -777,9 +918,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SClubHistoryAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ClubHistoryDto History { get; set; }
 
         public SClubHistoryAckMessage()
@@ -788,9 +930,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SEquipedBoostItemAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Items { get; set; }
 
         public SEquipedBoostItemAckMessage()
@@ -799,9 +942,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SGetClubInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ClubInfoDto ClubInfo { get; set; }
 
         public SGetClubInfoAckMessage()
@@ -810,9 +954,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class STaskInfoAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public TaskDto[] Tasks { get; set; }
 
         public STaskInfoAckMessage()
@@ -821,63 +966,70 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class STaskUpdateAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint TaskId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ushort Progress { get; set; }
     }
 
+    [BlubContract]
     public class STaskRequestAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint TaskId { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public MissionRewardType RewardType { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Reward { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Slot { get; set; }
     }
 
+    [BlubContract]
     public class SExchangeItemAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class STaskIngameUpdateAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint TaskId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ushort Progress { get; set; }
     }
 
+    [BlubContract]
     public class STaskRemoveAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint TaskId { get; set; }
     }
 
+    [BlubContract]
     public class SRandomShopChanceInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Progress { get; set; }
     }
 
+    [BlubContract]
     public class SRandomShopItemInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public RandomShopItemDto Item { get; set; }
 
         public SRandomShopItemInfoAckMessage()
@@ -886,9 +1038,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SRandomShopInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public RandomShopDto Info { get; set; }
 
         public SRandomShopInfoAckMessage()
@@ -897,30 +1050,34 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SSetCoinAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint ArcadeCoins { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint BuffCoins { get; set; }
     }
 
+    [BlubContract]
     public class SApplyEsperChipItemAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public EsperChipItemInfoDto Chip { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeRewardInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ArcadeRewardDto Reward { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeMapScoreAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeMapScoreDto[] Scores { get; set; }
 
         public SArcadeMapScoreAckMessage()
@@ -929,9 +1086,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SArcadeStageScoreAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeStageScoreDto[] Scores { get; set; }
 
         public SArcadeStageScoreAckMessage()
@@ -940,12 +1098,13 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SMixedTeamBriefingInfoAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public MixedTeamBriefingDto[] Briefing { get; set; }
 
         public SMixedTeamBriefingInfoAckMessage()
@@ -954,18 +1113,20 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SSetGameMoneyAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
+    [BlubContract]
     public class SUseCapsuleAckMessage : GameMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public CapsuleRewardDto[] Rewards { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Result { get; set; }
 
         public SUseCapsuleAckMessage()
@@ -986,9 +1147,10 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SHGWKickAckMessage : GameMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Message { get; set; }
 
         public SHGWKickAckMessage()
@@ -997,12 +1159,13 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SClubJoinAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Message { get; set; }
 
         public SClubJoinAckMessage()
@@ -1011,27 +1174,29 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SClubUnJoinAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
+    [BlubContract]
     public class SNewShopUpdateCheckAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Date01 { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Date02 { get; set; }
 
-        [Serialize(3, typeof(StringSerializer))]
+        [BlubMember(3, typeof(StringSerializer))]
         public string Date03 { get; set; }
 
-        [Serialize(4, typeof(StringSerializer))]
+        [BlubMember(4, typeof(StringSerializer))]
         public string Date04 { get; set; }
 
         public SNewShopUpdateCheckAckMessage()
@@ -1043,21 +1208,22 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SNewShopUpdateInfoAckMessage : GameMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public ShopResourceType Type { get; set; }
 
-        [Serialize(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk1 { get; set; } // size of Data?
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint Unk2 { get; set; } // checksum?
 
-        [Serialize(4, typeof(StringSerializer))]
+        [BlubMember(4, typeof(StringSerializer))]
         public string Date { get; set; }
 
         public SNewShopUpdateInfoAckMessage()
@@ -1067,15 +1233,16 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SUseChangeNickItemAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Result { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Unk3 { get; set; }
 
         public SUseChangeNickItemAckMessage()
@@ -1084,33 +1251,37 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SUseResetRecordItemAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Result { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SUseCoinFillingItemAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Result { get; set; }
     }
 
+    [BlubContract]
     public class SDiscardItemAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Result { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong ItemId { get; set; }
     }
 
+    [BlubContract]
     public class SDeleteItemInventoryAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong ItemId { get; set; }
 
         public SDeleteItemInventoryAckMessage()
@@ -1122,12 +1293,13 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SClubAddressAckMessage : GameMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Fingerprint { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk2 { get; set; }
 
         public SClubAddressAckMessage()
@@ -1142,18 +1314,19 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SSmallLoudSpeakerAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk2 { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Unk3 { get; set; }
 
-        [Serialize(3, typeof(StringSerializer))]
+        [BlubMember(3, typeof(StringSerializer))]
         public string Unk4 { get; set; }
 
         public SSmallLoudSpeakerAckMessage()
@@ -1163,39 +1336,43 @@ namespace Netsphere.Network.Message.Game
         }
     }
 
+    [BlubContract]
     public class SIngameEquipCheckAckMessage : GameMessage
     { }
 
+    [BlubContract]
     public class SUseCoinRandomShopChanceAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
+    [BlubContract]
     public class SChangeNickCancelAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
+    [BlubContract]
     public class SEventRewardAckMessage : GameMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint Unk4 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint Unk5 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint Unk6 { get; set; }
     }
 }

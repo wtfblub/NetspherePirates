@@ -10,9 +10,9 @@ using NLog.Fluent;
 
 namespace Netsphere.Network.Services
 {
-    internal class PrivateMessageService : Service
+    internal class PrivateMessageService : MessageHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CNoteListReqMessage))]
         public void CNoteListReq(ChatSession session, CNoteListReqMessage message)

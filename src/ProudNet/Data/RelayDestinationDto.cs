@@ -2,12 +2,13 @@
 
 namespace ProudNet.Data
 {
+    [BlubContract]
     internal class RelayDestinationDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint HostId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint FrameNumber { get; set; }
 
         public RelayDestinationDto()

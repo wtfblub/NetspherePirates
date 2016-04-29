@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using BlubLib.Network.Pipes;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Game;
@@ -10,9 +9,9 @@ using NLog.Fluent;
 
 namespace Netsphere.Network.Services
 {
-    internal class ChannelService : Service
+    internal class ChannelService : MessageHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CGetChannelInfoReqMessage))]
         public void CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)

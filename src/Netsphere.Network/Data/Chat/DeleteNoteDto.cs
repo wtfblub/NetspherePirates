@@ -2,12 +2,13 @@
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class DeleteNoteDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
 
         public DeleteNoteDto()

@@ -2,15 +2,16 @@
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class BRUserDataDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public float Score { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint CountFirstPlaceKilled { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint CountFirstPlace { get; set; }
     }
 }

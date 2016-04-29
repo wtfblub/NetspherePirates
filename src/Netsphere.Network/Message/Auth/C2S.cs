@@ -3,33 +3,35 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.Auth
 {
+    [BlubContract]
     public class CAuthInEUReqMessage : AuthMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Username { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Password { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Unk1 { get; set; }
 
-        [Serialize(3, typeof(StringSerializer))]
+        [BlubMember(3, typeof(StringSerializer))]
         public string Unk2 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public int Unk3 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public int Unk4 { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public int Unk5 { get; set; }
 
-        [Serialize(7, typeof(StringSerializer))]
+        [BlubMember(7, typeof(StringSerializer))]
         public string Unk6 { get; set; }
     }
 
+    [BlubContract]
     public class CServerListReqMessage : AuthMessage
     { }
 }

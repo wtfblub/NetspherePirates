@@ -2,15 +2,16 @@
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class CPTUserDataDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public float Score { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint CaptainKill { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Domination { get; set; }
     }
 }

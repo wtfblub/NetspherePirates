@@ -1,30 +1,33 @@
 using System;
 using BlubLib.Serialization;
+using BlubLib.Serialization.Serializers;
 using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.Event
 {
+    [BlubContract]
     public class ChatMessage : EventMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Message { get; set; }
     }
 
+    [BlubContract]
     public class EventMessageMessage : EventMessage
     {
-        [Serialize(0, typeof(EnumSerializer), typeof(uint))]
+        [BlubMember(0, typeof(EnumSerializer), typeof(uint))]
         public GameEventMessage Event { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk { get; set; } // server/game time or something like that
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public ushort Value { get; set; }
 
-        [Serialize(4, typeof(StringSerializer))]
+        [BlubMember(4, typeof(StringSerializer))]
         public string String { get; set; }
 
         public EventMessageMessage()
@@ -42,24 +45,26 @@ namespace Netsphere.Network.Message.Event
         }
     }
 
+    [BlubContract]
     public class ChangeTargetMessage : EventMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public short Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class ArcadeSyncMessage : EventMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
 
-        [Serialize(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public byte[] Unk3 { get; set; }
 
         public ArcadeSyncMessage()
@@ -68,12 +73,13 @@ namespace Netsphere.Network.Message.Event
         }
     }
 
+    [BlubContract]
     public class ArcadeSyncReqMessage : EventMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Unk2 { get; set; }
 
         public ArcadeSyncReqMessage()
@@ -82,12 +88,13 @@ namespace Netsphere.Network.Message.Event
         }
     }
 
+    [BlubContract]
     public class PacketMessage : EventMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool IsCompressed { get; set; }
 
-        [Serialize(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public PacketMessage()

@@ -1,20 +1,20 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class CapsuleRewardDto
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public CapsuleRewardType RewardType { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint PEN { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ulong ItemUID { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint Quantity { get; set; }
 
         public CapsuleRewardDto()

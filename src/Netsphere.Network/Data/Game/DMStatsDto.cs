@@ -2,34 +2,35 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class DMStatsDto
     {
         // K/D = ((Kills * 2) + KillAssist) / (Deaths * 2)
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Won { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Lost { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Kills { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint KillAssists { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint Unk5 { get; set; } // suicide?
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint Deaths { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public uint Unk7 { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public uint Unk8 { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public uint Unk9 { get; set; }
     }
 }

@@ -2,17 +2,18 @@
 using System.IO;
 using BlubLib.Serialization;
 using Sigil;
+using Sigil.NonGeneric;
 
 namespace ProudNet.Serializers
 {
     public class ArrayWithScalarSerializer : ISerializerCompiler
     {
-        public Type HandlesType
+        public bool CanHandle(Type type)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotImplementedException();
         }
 
-        public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
+        public void EmitDeserialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
             var emptyArray = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "EmptyArray" + Guid.NewGuid());
@@ -90,7 +91,7 @@ namespace ProudNet.Serializers
             emiter.MarkLabel(end);
         }
 
-        public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
+        public void EmitSerialize(Emit emiter, Local value)
         {
             // ToDo check for null
 

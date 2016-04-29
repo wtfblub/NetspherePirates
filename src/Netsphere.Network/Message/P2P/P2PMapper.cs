@@ -7,8 +7,8 @@ namespace Netsphere.Network.Message.P2P
 {
     public static class P2PMapper
     {
-        private static readonly Dictionary<P2POpCode, Type> TypeLookup = new Dictionary<P2POpCode, Type>();
-        private static readonly Dictionary<Type, P2POpCode> OpCodeLookup = new Dictionary<Type, P2POpCode>();
+        private static readonly Dictionary<P2POpCode, Type> s_typeLookup = new Dictionary<P2POpCode, Type>();
+        private static readonly Dictionary<Type, P2POpCode> s_opCodeLookup = new Dictionary<Type, P2POpCode>();
 
         static P2PMapper()
         {
@@ -57,8 +57,8 @@ namespace Netsphere.Network.Message.P2P
             where T : P2PMessage, new()
         {
             var type = typeof (T);
-            OpCodeLookup.Add(type, opCode);
-            TypeLookup.Add(opCode, type);
+            s_opCodeLookup.Add(type, opCode);
+            s_typeLookup.Add(opCode, type);
         }
 
         public static IEnumerable<P2PMessage> GetMessage(byte[] data)
@@ -71,7 +71,7 @@ namespace Netsphere.Network.Message.P2P
                     var opCode = r.ReadEnum<P2POpCode>();
 
                     Type type;
-                    if (TypeLookup.TryGetValue(opCode, out type))
+                    if (s_typeLookup.TryGetValue(opCode, out type))
                     {
                         var msg = (P2PMessage)Serializer.Deserialize(r, type);
                         test.Add(msg);
@@ -94,7 +94,7 @@ namespace Netsphere.Network.Message.P2P
 
         public static P2POpCode GetOpCode(Type type)
         {
-            return OpCodeLookup[type];
+            return s_opCodeLookup[type];
         }
     }
 }

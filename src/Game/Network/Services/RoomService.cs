@@ -14,7 +14,7 @@ using ProudNet;
 
 namespace Netsphere.Network.Services
 {
-    internal class RoomService : Service
+    internal class RoomService : MessageHandler
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

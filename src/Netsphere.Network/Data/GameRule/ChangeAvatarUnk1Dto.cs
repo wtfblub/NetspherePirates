@@ -1,43 +1,43 @@
 ﻿using System;
 using BlubLib.Serialization;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.GameRule
 {
+    [BlubContract]
     public class ChangeAvatarUnk1Dto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] Costumes { get; set; }
 
-        [Serialize(2, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(2, typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] Skills { get; set; }
 
-        [Serialize(3, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(3, typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] Weapons { get; set; }
 
-        [Serialize(4, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(4, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk5 { get; set; }
 
-        [Serialize(5, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(5, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk6 { get; set; }
 
-        [Serialize(6, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(6, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk7 { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public int Unk8 { get; set; }
 
-        [Serialize(8, typeof(EnumSerializer))]
+        [BlubMember(8)]
         public CharacterGender Gender { get; set; }
 
-        [Serialize(9)]
+        [BlubMember(9)]
         public float HP { get; set; }
 
-        [Serialize(10)]
+        [BlubMember(10)]
         public byte Unk11 { get; set; }
 
         public ChangeAvatarUnk1Dto()

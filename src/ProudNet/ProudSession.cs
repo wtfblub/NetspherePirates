@@ -24,7 +24,7 @@ namespace ProudNet
         internal UdpServerSocket UdpSocket { get; set; }
         internal ushort UdpSessionId { get; set; }
 
-        public ProudSession(IIOService service, IIOProcessor processor)
+        public ProudSession(IService service, ITransport processor)
             : base(service, processor)
         {
             ReadyEvent = new AsyncManualResetEvent();

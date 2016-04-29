@@ -7,7 +7,7 @@ using ProudNet.Message.Core;
 
 namespace ProudNet.Services
 {
-    internal class ProudCoreService : Service
+    internal class ProudCoreService : MessageHandler
     {
         private readonly ProudPipe _filter;
 
@@ -58,7 +58,7 @@ namespace ProudNet.Services
         }
 
         [MessageHandler(typeof(CompressedMessage))]
-        public void CompressedMessage(IIOService service, CompressedMessage message, MessageReceivedEventArgs e)
+        public void CompressedMessage(IService service, CompressedMessage message, MessageReceivedEventArgs e)
         {
             var decompressed = message.Data.DecompressZLib();
 

@@ -7,9 +7,9 @@ using NLog.Fluent;
 
 namespace Netsphere.Network.Services
 {
-    internal class CharacterService : Service
+    internal class CharacterService : MessageHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CCreateCharacterReqMessage))]
         public void CreateCharacterHandler(GameSession session, CCreateCharacterReqMessage message)

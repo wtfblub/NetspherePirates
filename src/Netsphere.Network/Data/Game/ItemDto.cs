@@ -1,66 +1,66 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class ItemDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ItemNumber ItemNumber { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer))]
+        [BlubMember(2)]
         public ItemPriceType PriceType { get; set; }
 
-        [Serialize(3, typeof(EnumSerializer))]
+        [BlubMember(3)]
         public ItemPeriodType PeriodType { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public ushort Period { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint Color { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public uint Effect { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public uint Refund { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public long PurchaseTime { get; set; }
 
-        [Serialize(9)]
+        [BlubMember(9)]
         public long ExpireTime { get; set; }
 
-        [Serialize(10)]
+        [BlubMember(10)]
         public int Durability { get; set; }
 
-        [Serialize(11)]
+        [BlubMember(11)]
         public int TimeLeft { get; set; } // ToDo time in seconds or units?
 
-        [Serialize(12)]
+        [BlubMember(12)]
         public uint Quantity { get; set; }
 
         // ToDo: esper chip shit
-        [Serialize(13)]
+        [BlubMember(13)]
         public uint Unk1 { get; set; } // chip
 
-        [Serialize(14)]
+        [BlubMember(14)]
         public long Unk2 { get; set; }
 
-        [Serialize(15)]
+        [BlubMember(15)]
         public long Unk3 { get; set; }
 
-        [Serialize(16)]
+        [BlubMember(16)]
         public int Unk4 { get; set; } // TimeLeft?
 
-        [Serialize(17)]
+        [BlubMember(17)]
         public uint Unk5 { get; set; } // PeriodType?
 
-        [Serialize(18)]
+        [BlubMember(18)]
         public uint Unk6 { get; set; } // Effect?
     }
 }

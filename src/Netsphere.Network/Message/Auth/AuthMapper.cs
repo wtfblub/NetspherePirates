@@ -7,8 +7,8 @@ namespace Netsphere.Network.Message.Auth
 {
     internal static class AuthMapper
     {
-        private static readonly Dictionary<AuthOpCode, Type> TypeLookup = new Dictionary<AuthOpCode, Type>();
-        private static readonly Dictionary<Type, AuthOpCode> OpCodeLookup = new Dictionary<Type, AuthOpCode>();
+        private static readonly Dictionary<AuthOpCode, Type> s_typeLookup = new Dictionary<AuthOpCode, Type>();
+        private static readonly Dictionary<Type, AuthOpCode> s_opCodeLookup = new Dictionary<Type, AuthOpCode>();
 
         static AuthMapper()
         {
@@ -25,13 +25,13 @@ namespace Netsphere.Network.Message.Auth
             where T : AuthMessage, new()
         {
             var type = typeof(T);
-            OpCodeLookup.Add(type, opCode);
-            TypeLookup.Add(opCode, type);
+            s_opCodeLookup.Add(type, opCode);
+            s_typeLookup.Add(opCode, type);
         }
 
         public static AuthMessage GetMessage(AuthOpCode opCode, BinaryReader r)
         {
-            var type = TypeLookup.GetValueOrDefault(opCode);
+            var type = s_typeLookup.GetValueOrDefault(opCode);
             if (type == null)
                 throw new NetsphereBadOpCodeException(opCode);
 
@@ -46,7 +46,7 @@ namespace Netsphere.Network.Message.Auth
 
         public static AuthOpCode GetOpCode(Type type)
         {
-            return OpCodeLookup[type];
+            return s_opCodeLookup[type];
         }
     }
 }

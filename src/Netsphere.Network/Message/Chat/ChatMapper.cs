@@ -7,8 +7,8 @@ namespace Netsphere.Network.Message.Chat
 {
     internal static class ChatMapper
     {
-        private static readonly Dictionary<ChatOpCode, Type> TypeLookup = new Dictionary<ChatOpCode, Type>();
-        private static readonly Dictionary<Type, ChatOpCode> OpCodeLookup = new Dictionary<Type, ChatOpCode>();
+        private static readonly Dictionary<ChatOpCode, Type> s_typeLookup = new Dictionary<ChatOpCode, Type>();
+        private static readonly Dictionary<Type, ChatOpCode> s_opCodeLookup = new Dictionary<Type, ChatOpCode>();
 
         static ChatMapper()
         {
@@ -59,13 +59,13 @@ namespace Netsphere.Network.Message.Chat
             where T : ChatMessage, new()
         {
             var type = typeof(T);
-            OpCodeLookup.Add(type, opCode);
-            TypeLookup.Add(opCode, type);
+            s_opCodeLookup.Add(type, opCode);
+            s_typeLookup.Add(opCode, type);
         }
 
         public static ChatMessage GetMessage(ChatOpCode opCode, BinaryReader r)
         {
-            var type = TypeLookup.GetValueOrDefault(opCode);
+            var type = s_typeLookup.GetValueOrDefault(opCode);
             if (type == null)
                 throw new NetsphereBadOpCodeException(opCode);
 
@@ -80,7 +80,7 @@ namespace Netsphere.Network.Message.Chat
 
         public static ChatOpCode GetOpCode(Type type)
         {
-            return OpCodeLookup[type];
+            return s_opCodeLookup[type];
         }
     }
 }

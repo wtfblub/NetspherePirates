@@ -2,15 +2,16 @@
 
 namespace Netsphere.Network.Data.P2P
 {
+    [BlubContract]
     public class ValueDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float Value1 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public float Value2 { get; set; }
     }
 }

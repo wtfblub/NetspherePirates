@@ -2,17 +2,18 @@
 using System.IO;
 using BlubLib.Serialization;
 using Sigil;
+using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
     internal class ArrayWithIntPrefixAndIndexSerializer : ISerializerCompiler
     {
-        public Type HandlesType
+        public bool CanHandle(Type type)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotImplementedException();
         }
 
-        public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
+        public void EmitDeserialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
             var emptyArray = emiter.DefineLabel(nameof(ArrayWithIntPrefixAndIndexSerializer) + "EmptyArray" + Guid.NewGuid());
@@ -81,7 +82,7 @@ namespace Netsphere.Network.Serializers
             emiter.MarkLabel(end);
         }
 
-        public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
+        public void EmitSerialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
             using (var length = emiter.DeclareLocal<int>("length"))

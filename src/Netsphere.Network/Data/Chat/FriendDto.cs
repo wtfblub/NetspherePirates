@@ -3,18 +3,19 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class FriendDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint State { get; set; } // request pending, accepted etc.
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint Unk { get; set; }
 
         public FriendDto()

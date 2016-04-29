@@ -5,144 +5,159 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.Chat
 {
+    [BlubContract]
     public class CLoginReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string SessionId { get; set; }
     }
 
+    [BlubContract]
     public class CDenyChatReqMessage : ChatMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public DenyAction Action { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public DenyDto Deny { get; set; }
     }
 
+    [BlubContract]
     public class CFriendReqMessage : ChatMessage
     {
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Action { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Nickname { get; set; }
     }
 
+    [BlubContract]
     public class CCheckCombiNameReqMessage : ChatMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Name { get; set; }
     }
 
+    [BlubContract]
     public class CCombiReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Unk3 { get; set; }
 
-        [Serialize(3, typeof(StringSerializer))]
+        [BlubMember(3, typeof(StringSerializer))]
         public string Unk4 { get; set; }
     }
 
+    [BlubContract]
     public class CGetUserDataReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
+    [BlubContract]
     public class CSetUserDataReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public UserDataDto UserData { get; set; }
     }
 
+    [BlubContract]
     public class CChatMessageReqMessage : ChatMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public ChatType ChatType { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Message { get; set; }
     }
 
+    [BlubContract]
     public class CWhisperChatMessageReqMessage : ChatMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string ToNickname { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Message { get; set; }
     }
 
+    [BlubContract]
     public class CInvitationPlayerReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
+    [BlubContract]
     public class CNoteListReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Page { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int MessageType { get; set; }
     }
 
+    [BlubContract]
     public class CSendNoteReqMessage : ChatMessage
     {
-        [Serialize(0, typeof(StringSerializer))]
+        [BlubMember(0, typeof(StringSerializer))]
         public string Receiver { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Title { get; set; }
 
-        [Serialize(3, typeof(StringSerializer))]
+        [BlubMember(3, typeof(StringSerializer))]
         public string Message { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public int Unk2 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public NoteGiftDto Gift { get; set; }
     }
 
+    [BlubContract]
     public class CReadNoteReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Id { get; set; }
     }
 
+    [BlubContract]
     public class CDeleteNoteReqMessage : ChatMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Notes { get; set; }
     }
 
+    [BlubContract]
     public class CNoteReminderInfoReqMessage : ChatMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk { get; set; }
     }
 }

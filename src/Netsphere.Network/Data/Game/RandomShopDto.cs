@@ -1,28 +1,28 @@
 ﻿using System;
 using BlubLib.Serialization;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class RandomShopDto
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] ItemNumbers { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public uint[] Effects { get; set; }
 
-        [Serialize(2, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(2, typeof(ArrayWithIntPrefixSerializer))]
         public uint[] Colors { get; set; }
 
-        [Serialize(3, typeof(ArrayWithIntPrefixSerializer), typeof(EnumSerializer))]
+        [BlubMember(3, typeof(ArrayWithIntPrefixSerializer))]
         public ItemPeriodType[] PeriodTypes { get; set; }
 
-        [Serialize(4, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(4, typeof(ArrayWithIntPrefixSerializer))]
         public ushort[] Periods { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint Unk6 { get; set; }
 
         public RandomShopDto()

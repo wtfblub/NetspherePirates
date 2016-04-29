@@ -4,7 +4,7 @@ using Netsphere.Network.Message.Game;
 
 namespace Netsphere.Network.Services
 {
-    internal class AdminService : Service
+    internal class AdminService : MessageHandler
     {
         [MessageHandler(typeof(CAdminShowWindowReqMessage))]
         public void ShowWindowHandler(GameSession session)

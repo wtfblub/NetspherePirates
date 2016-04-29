@@ -55,7 +55,7 @@ namespace Netsphere.Network
                 .Register<CDeleteNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
                 .Register<CSendNoteReqMessage>(MustBeLoggedIn, MustBeInChannel);
 
-            Pipeline.AddLast("s4_service", new ServicePipe())
+            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
                 .Add(new AuthService())
                 .Add(new CommunityService())
                 .Add(new ChannelService())

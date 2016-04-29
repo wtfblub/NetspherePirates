@@ -7,8 +7,8 @@ namespace Netsphere.Network.Message.Relay
 {
     public static class RelayMapper
     {
-        private static readonly Dictionary<RelayOpCode, Type> TypeLookup = new Dictionary<RelayOpCode, Type>();
-        private static readonly Dictionary<Type, RelayOpCode> OpCodeLookup = new Dictionary<Type, RelayOpCode>();
+        private static readonly Dictionary<RelayOpCode, Type> s_typeLookup = new Dictionary<RelayOpCode, Type>();
+        private static readonly Dictionary<Type, RelayOpCode> s_opCodeLookup = new Dictionary<Type, RelayOpCode>();
 
         static RelayMapper()
         {
@@ -24,13 +24,13 @@ namespace Netsphere.Network.Message.Relay
             where T : RelayMessage, new()
         {
             var type = typeof(T);
-            OpCodeLookup.Add(type, opCode);
-            TypeLookup.Add(opCode, type);
+            s_opCodeLookup.Add(type, opCode);
+            s_typeLookup.Add(opCode, type);
         }
 
         public static RelayMessage GetMessage(RelayOpCode opCode, BinaryReader r)
         {
-            var type = TypeLookup.GetValueOrDefault(opCode);
+            var type = s_typeLookup.GetValueOrDefault(opCode);
             if (type == null)
                 return new RelayUnknownMessage(opCode, r.ReadToEnd());
                 //throw new NetsphereBadOpCodeException(opCode);
@@ -46,7 +46,7 @@ namespace Netsphere.Network.Message.Relay
 
         public static RelayOpCode GetOpCode(Type type)
         {
-            return OpCodeLookup[type];
+            return s_opCodeLookup[type];
         }
     }
 }

@@ -4,30 +4,31 @@ using Netsphere.Network.Serializers;
 
 namespace Netsphere.Network.Data.GameRule
 {
+    [BlubContract]
     public class ChangeItemsUnkDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] Skills { get; set; }
 
-        [Serialize(2, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(2, typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] Weapons { get; set; }
 
-        [Serialize(3, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(3, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk4 { get; set; }
 
-        [Serialize(4, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(4, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk5 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public int Unk6 { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public float HP { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public byte Unk8 { get; set; }
 
         public ChangeItemsUnkDto()

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using BlubLib.Network.Pipes;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;
@@ -7,7 +6,7 @@ using Netsphere.Network.Message.Chat;
 
 namespace Netsphere.Network.Services
 {
-    internal class CommunityService : Service
+    internal class CommunityService : MessageHandler
     {
         [MessageHandler(typeof(CSetUserDataReqMessage))]
         public void SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)

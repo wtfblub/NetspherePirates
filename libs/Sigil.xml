@@ -1232,6 +1232,13 @@
             To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
             </summary>
         </member>
+        <member name="M:Sigil.Emit`1.LoadFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pushes a pointer to the given function onto the stack, as a native int.
+            
+            To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
+            </summary>
+        </member>
         <member name="M:Sigil.Emit`1.LoadIndirect``1(System.Boolean,System.Nullable{System.Int32})">
             <summary>
             Pops a pointer from the stack and pushes the value (of the given type) at that address onto the stack.
@@ -3762,6 +3769,13 @@
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.LoadFunctionPointer(System.Reflection.MethodInfo)">
+            <summary>
+            Pushes a pointer to the given function onto the stack, as a native int.
+            
+            To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
+            </summary>
+        </member>
+        <member name="M:Sigil.NonGeneric.Emit.LoadFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
             <summary>
             Pushes a pointer to the given function onto the stack, as a native int.
             

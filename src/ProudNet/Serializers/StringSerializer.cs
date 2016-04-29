@@ -1,25 +1,25 @@
 ﻿using BlubLib.Serialization;
 using Sigil;
 using System;
-using System.IO;
+using Sigil.NonGeneric;
 
 namespace ProudNet.Serializers
 {
     public class StringSerializer : ISerializerCompiler
     {
-        public Type HandlesType
+        public bool CanHandle(Type type)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotImplementedException();
         }
 
-        public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
+        public void EmitDeserialize(Emit emiter, Local value)
         {
             emiter.LoadArgument(1);
             emiter.Call(typeof(ProudNetBinaryReaderExtensions).GetMethod(nameof(ProudNetBinaryReaderExtensions.ReadProudString)));
             emiter.StoreLocal(value);
         }
 
-        public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
+        public void EmitSerialize(Emit emiter, Local value)
         {
             var write = emiter.DefineLabel(nameof(StringSerializer) + "Write" + Guid.NewGuid());
 

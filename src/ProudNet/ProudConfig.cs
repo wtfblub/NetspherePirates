@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net;
 using BlubLib.Serialization;
-using ProudNet.Serializers;
 
 namespace ProudNet
 {
+    [BlubContract]
     public class ProudConfig
     {
         internal const uint InternalNetVersion = 196713;
@@ -13,46 +13,46 @@ namespace ProudNet
         public IPEndPoint UdpListener { get; set; }
         public IPAddress UdpAddress { get; set; }
 
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool EnableServerLog { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public FallbackMethod FallbackMethod { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint MessageMaxLength { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public double TimeoutTimeMs { get; set; }
 
-        [Serialize(4, typeof(EnumSerializer))]
+        [BlubMember(4)]
         public DirectP2PStartCondition DirectP2PStartCondition { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint OverSendSuspectingThresholdInBytes { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public bool EnableNagleAlgorithm { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public int EncryptedMessageKeyLength { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public bool AllowServerAsP2PGroupMember { get; set; }
 
-        [Serialize(9)]
+        [BlubMember(9)]
         public bool EnableP2PEncryptedMessaging { get; set; }
 
-        [Serialize(10)]
+        [BlubMember(10)]
         public bool UpnpDetectNatDevice { get; set; }
 
-        [Serialize(11)]
+        [BlubMember(11)]
         public bool UpnpTcpAddrPortMapping { get; set; }
 
-        [Serialize(12)]
+        [BlubMember(12)]
         public bool EnablePingTest { get; set; }
 
-        [Serialize(13)]
+        [BlubMember(13)]
         public uint EmergencyLogLineCount { get; set; }
 
         public ProudConfig()

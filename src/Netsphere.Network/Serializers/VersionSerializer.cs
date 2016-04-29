@@ -1,7 +1,7 @@
 ﻿using System;
-using System.IO;
 using BlubLib.Serialization;
 using Sigil;
+using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
@@ -9,12 +9,12 @@ namespace Netsphere.Network.Serializers
     {
         private readonly ArrayWithIntPrefixSerializer _arraySerializer = new ArrayWithIntPrefixSerializer();
 
-        public Type HandlesType
+        public bool CanHandle(Type type)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotImplementedException();
         }
 
-        public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
+        public void EmitSerialize(Emit emiter, Local value)
         {
             //w.Write(new[] { (ushort)Version.Major, (ushort)Version.Minor, (ushort)Version.Build, (ushort)Version.Revision });
 
@@ -56,7 +56,7 @@ namespace Netsphere.Network.Serializers
             }
         }
 
-        public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
+        public void EmitDeserialize(Emit emiter, Local value)
         {
             var ok = emiter.DefineLabel(nameof(VersionSerializer) + "OK" + Guid.NewGuid());
 

@@ -5,9 +5,9 @@ using NLog.Fluent;
 
 namespace Netsphere.Network.Services
 {
-    internal class ClubService : Service
+    internal class ClubService : MessageHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CClubAddressReqMessage))]
         public void CClubAddressReq(GameSession session, CClubAddressReqMessage message)

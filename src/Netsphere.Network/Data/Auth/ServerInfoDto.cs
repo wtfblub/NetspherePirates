@@ -4,30 +4,31 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Auth
 {
+    [BlubContract]
     public class ServerInfoDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool IsEnabled { get; set; } // ?
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Id { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer))]
+        [BlubMember(2)]
         public ServerType Type { get; set; }
 
-        [Serialize(3, typeof(StringSerializer))]
+        [BlubMember(3, typeof(StringSerializer))]
         public string Name { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public ushort PlayerLimit { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public ushort PlayerOnline { get; set; }
 
-        [Serialize(6, typeof(IPEndPointSerializer))]
+        [BlubMember(6, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public ushort GroupId { get; set; }
 
         public ServerInfoDto()

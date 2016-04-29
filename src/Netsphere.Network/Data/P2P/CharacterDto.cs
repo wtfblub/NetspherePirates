@@ -1,56 +1,58 @@
 ﻿using System;
 using BlubLib.Serialization;
+using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Serializers;
 using ProudNet.Serializers;
 using SlimMath;
 
 namespace Netsphere.Network.Data.P2P
 {
+    [BlubContract]
     public class CharacterDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public Team Team { get; set; }
 
-        [Serialize(2, typeof(CompressedVectorSerializer))]
+        [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Rotation1 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public byte Rotation2 { get; set; }
 
-        [Serialize(5, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(5, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Costumes { get; set; }
 
-        [Serialize(6, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(6, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Skills { get; set; }
 
-        [Serialize(7, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(7, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Weapons { get; set; }
 
-        [Serialize(8, typeof(EnumSerializer), typeof(uint))]
+        [BlubMember(8, typeof(EnumSerializer), typeof(uint))]
         public WeaponSlot CurrentWeapon { get; set; }
 
-        [Serialize(9, typeof(EnumSerializer))]
+        [BlubMember(9)]
         public CharacterGender Gender { get; set; }
 
-        [Serialize(10, typeof(StringSerializer))]
+        [BlubMember(10, typeof(StringSerializer))]
         public string Name { get; set; }
 
-        [Serialize(11)]
+        [BlubMember(11)]
         public byte Unk4 { get; set; }
 
-        [Serialize(12, typeof(CompressedFloatSerializer))]
+        [BlubMember(12, typeof(CompressedFloatSerializer))]
         public float CurrentHP { get; set; }
 
-        [Serialize(13, typeof(CompressedFloatSerializer))]
+        [BlubMember(13, typeof(CompressedFloatSerializer))]
         public float MaxHP { get; set; }
 
-        [Serialize(14, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(14, typeof(ArrayWithIntPrefixSerializer))]
         public ValueDto[] Values { get; set; }
 
         public CharacterDto()

@@ -2,15 +2,16 @@
 
 namespace Netsphere.Network.Data.GameRule
 {
+    [BlubContract]
     public class ChangeAvatarUnk2Dto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public float Unk3 { get; set; }
     }
 }

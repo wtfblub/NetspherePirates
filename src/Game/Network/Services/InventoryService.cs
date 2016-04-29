@@ -7,9 +7,9 @@ using Shaolinq;
 
 namespace Netsphere.Network.Services
 {
-    internal class InventoryService : Service
+    internal class InventoryService : MessageHandler
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CUseItemReqMessage))]
         public void UseItemHandler(GameSession session, CUseItemReqMessage message)
@@ -39,7 +39,7 @@ namespace Netsphere.Network.Services
             }
             catch (CharacterException ex)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Exception(ex)
                     .Write();
@@ -57,7 +57,7 @@ namespace Netsphere.Network.Services
                 var item = session.Player.Inventory[id];
                 if (item == null)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
                         .Message("Item {0} not found", id)
                         .Write();
@@ -67,7 +67,7 @@ namespace Netsphere.Network.Services
                 }
                 if (item.Durability == -1)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
                         .Message("Item {0} {1} {2} {3} can not be repaired", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                         .Write();
@@ -87,7 +87,7 @@ namespace Netsphere.Network.Services
                 var price = shop.GetPrice(item);
                 if (price == null)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
                         .Message("No shop entry found for {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                         .Write();
@@ -132,7 +132,7 @@ namespace Netsphere.Network.Services
             var item = session.Player.Inventory[message.ItemId];
             if (item == null)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Message("Item {0} not found", message.ItemId)
                     .Write();
@@ -144,7 +144,7 @@ namespace Netsphere.Network.Services
             var price = shop.GetPrice(item);
             if (price == null)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Message("No shop entry found for {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                     .Write();
@@ -154,7 +154,7 @@ namespace Netsphere.Network.Services
             }
             if (!price.CanRefund)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Message("Cannot refund {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                     .Write();
@@ -190,7 +190,7 @@ namespace Netsphere.Network.Services
             var item = session.Player.Inventory[message.ItemId];
             if (item == null)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Message("Item {0} not found", message.ItemId)
                     .Write();
@@ -201,7 +201,7 @@ namespace Netsphere.Network.Services
             var shopItem = shop.GetItem(item.ItemNumber);
             if (shopItem == null)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Message("No shop entry found for {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                     .Write();
@@ -210,7 +210,7 @@ namespace Netsphere.Network.Services
             }
             if (shopItem.IsDestroyable)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Message("Cannot discard {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                     .Write();

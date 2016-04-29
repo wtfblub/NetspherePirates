@@ -2,12 +2,13 @@
 
 namespace Netsphere.Network.Data.P2P
 {
+    [BlubContract]
     public class ItemDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ItemNumber ItemNumber { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
 
         public ItemDto()

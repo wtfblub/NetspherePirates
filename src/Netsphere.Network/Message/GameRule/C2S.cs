@@ -2,94 +2,104 @@
 using BlubLib.Serialization;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.GameRule
 {
+    [BlubContract]
     public class CEnterPlayerReqMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class CLeavePlayerRequestReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public RoomLeaveReason Reason { get; set; }
     }
 
+    [BlubContract]
     public class CChangeTeamReqMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public Team Team { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public PlayerGameMode Mode { get; set; }
     }
 
+    [BlubContract]
     public class CAutoAssingTeamReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class CAutoMixingTeamReqMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class CMixChangeTeamReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Unk4 { get; set; }
     }
 
+    [BlubContract]
     public class CEventMessageReqMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public GameEventMessage Event { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk1 { get; set; } // server/game time or something like that
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public ushort Value { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class CReadyRoundReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool IsReady { get; set; }
     }
 
+    [BlubContract]
     public class CBeginRoundReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool IsReady { get; set; }
     }
 
+    [BlubContract]
     public class CAvatarDurabilityDecreaseReqMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class CAvatarChangeReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ChangeAvatarUnk1Dto Unk1 { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
         public CAvatarChangeReqMessage()
@@ -99,9 +109,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class CChangeRuleNotifyReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ChangeRuleDto Settings { get; set; }
 
         public CChangeRuleNotifyReqMessage()
@@ -110,90 +121,103 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class CMissionScoreReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class CScoreKillReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreDto Score { get; set; }
     }
 
+    [BlubContract]
     public class CScoreKillAssistReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreAssist2Dto Score { get; set; }
     }
 
+    [BlubContract]
     public class CScoreOffenseReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public Score2Dto Score { get; set; }
     }
 
+    [BlubContract]
     public class CScoreOffenseAssistReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreAssist2Dto Score { get; set; }
     }
 
+    [BlubContract]
     public class CScoreDefenseReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public Score2Dto Score { get; set; }
     }
 
+    [BlubContract]
     public class CScoreDefenseAssistReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreAssist2Dto Score { get; set; }
     }
 
+    [BlubContract]
     public class CScoreHealAssistReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
     }
 
+    [BlubContract]
     public class CScoreGoalReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId PeerId { get; set; }
     }
 
+    [BlubContract]
     public class CScoreReboundReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId NewId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public LongPeerId OldId { get; set; }
     }
 
+    [BlubContract]
     public class CScoreSuicideReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Icon { get; set; }
     }
 
+    [BlubContract]
     public class CScoreTeamKillReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public Score2Dto Score { get; set; }
     }
 
+    [BlubContract]
     public class CItemsChangeReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ChangeItemsUnkDto Unk1 { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
         public CItemsChangeReqMessage()
@@ -203,21 +227,24 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class CPlayerGameModeChangeReqMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public PlayerGameMode Mode { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeAttackPointReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeScoreSyncReqMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
 
         public CArcadeScoreSyncReqMessage()
@@ -226,18 +253,20 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class CArcadeBeginRoundReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeStageClearReqMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
 
         public CArcadeStageClearReqMessage()
@@ -246,9 +275,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class CArcadeStageFailedReqMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
 
         public CArcadeStageFailedReqMessage()
@@ -257,111 +287,124 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class CArcadeStageInfoReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeEnablePlayTimeReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeRespawnReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeStageReadyReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeStageSelectReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class CSlaughterAttackPointReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float Unk1 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public float Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class CSlaughterHealPointReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public float Unk { get; set; }
     }
 
+    [BlubContract]
     public class CArcadeLoadingSucceesReqMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class CUseCoinReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class CBeginResponeReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk { get; set; }
     }
 
+    [BlubContract]
     public class CWeaponFireReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public int Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public ulong Unk4 { get; set; }
     }
 
+    [BlubContract]
     public class CCompulsionLeaveRequestReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public int Unk3 { get; set; }
     }
 
+    [BlubContract]
     public class CCompulsionLeaveVoteReqMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 }

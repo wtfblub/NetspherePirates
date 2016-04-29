@@ -2,12 +2,13 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class ChannelInfoDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ushort ChannelId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ushort PlayerCount { get; set; }
     }
 }

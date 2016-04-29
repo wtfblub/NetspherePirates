@@ -14,14 +14,14 @@ using Shaolinq;
 
 namespace Netsphere.Network.Service
 {
-    internal class AuthService : BlubLib.Network.Pipes.Service
+    internal class AuthService : MessageHandler
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CAuthInEUReqMessage))]
         public async Task LoginHandler(ISession session, CAuthInEUReqMessage message)
         {
-            var ip = ((IPEndPoint)((TcpProcessor)session.Processor).Socket.RemoteEndPoint).Address.ToString();
+            var ip = ((IPEndPoint)((TcpTransport)session.Transport).Socket.RemoteEndPoint).Address.ToString();
             _logger.Debug()
                     .Message("Login from {0} with username {1}", ip, message.Username)
                     .Write();

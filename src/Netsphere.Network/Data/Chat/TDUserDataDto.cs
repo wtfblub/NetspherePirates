@@ -2,27 +2,28 @@
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class TDUserDataDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public float TotalScore { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float TDScore { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public float OffenseScore { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public float DefenseScore { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public float KillScore { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public float RecoveryScore { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public float WinRate { get; set; }
     }
 }

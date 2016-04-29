@@ -1,23 +1,23 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class TaskDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ushort Progress { get; set; }
 
-        [Serialize(3, typeof(EnumSerializer))]
+        [BlubMember(3)]
         public MissionRewardType RewardType { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint Reward { get; set; }
     }
 }

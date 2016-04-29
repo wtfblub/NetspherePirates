@@ -4,7 +4,7 @@ namespace ProudNet
 {
     public class ProudSessionFactory : ISessionFactory
     {
-        public ISession GetSession(IIOService service, IIOProcessor processor)
+        public ISession GetSession(IService service, ITransport processor)
         {
             return new ProudSession(service, processor);
         }

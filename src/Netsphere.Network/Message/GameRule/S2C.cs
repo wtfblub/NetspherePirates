@@ -1,26 +1,28 @@
 ﻿using System;
 using BlubLib.Serialization;
+using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Serializers;
 using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.GameRule
 {
+    [BlubContract]
     public class SEnterPlayerAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk1 { get; set; } // 0 = char does not spawn
 
-        [Serialize(2, typeof(EnumSerializer))]
+        [BlubMember(2)]
         public PlayerGameMode PlayerGameMode { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public int Unk3 { get; set; }
 
-        [Serialize(4, typeof(StringSerializer))]
+        [BlubMember(4, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
         public SEnterPlayerAckMessage()
@@ -38,15 +40,16 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SLeavePlayerAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer))]
+        [BlubMember(2)]
         public RoomLeaveReason Reason { get; set; }
 
         public SLeavePlayerAckMessage()
@@ -62,21 +65,23 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SLeavePlayerRequestAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; } // result?
     }
 
+    [BlubContract]
     public class SChangeTeamAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public Team Team { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer))]
+        [BlubMember(2)]
         public PlayerGameMode Mode { get; set; }
 
         public SChangeTeamAckMessage()
@@ -90,9 +95,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeTeamFailAckMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public ChangeTeamResult Result { get; set; }
 
         public SChangeTeamFailAckMessage()
@@ -104,51 +110,55 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SMixChangeTeamAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Unk4 { get; set; }
     }
 
+    [BlubContract]
     public class SMixChangeTeamFailAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Result { get; set; }
     }
 
+    [BlubContract]
     public class SAutoAssignTeamAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SEventMessageAckMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public GameEventMessage Event { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk { get; set; } // server/game time or something like that
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public ushort Value { get; set; }
 
-        [Serialize(4, typeof(StringSerializer))]
+        [BlubMember(4, typeof(StringSerializer))]
         public string String { get; set; }
 
         public SEventMessageAckMessage()
@@ -166,15 +176,16 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SBriefingAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool IsResult { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public bool IsEvent { get; set; }
 
-        [Serialize(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
         public SBriefingAckMessage()
@@ -190,9 +201,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeStateAckMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public GameState State { get; set; }
 
         public SChangeStateAckMessage()
@@ -204,9 +216,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeSubStateAckMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(EnumSerializer))]
+        [BlubMember(0)]
         public GameTimeState State { get; set; }
 
         public SChangeSubStateAckMessage()
@@ -218,12 +231,14 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SDestroyGameRuleAckMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class SChangeMasterAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
         public SChangeMasterAckMessage()
@@ -235,9 +250,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeRefeReeAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
         public SChangeRefeReeAckMessage()
@@ -249,9 +265,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeTheFirstAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
         public SChangeTheFirstAckMessage()
@@ -263,12 +280,13 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeSlaughtererAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Unk { get; set; }
 
         public SChangeSlaughtererAckMessage()
@@ -289,15 +307,16 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SReadyRoundAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public bool IsReady { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public byte Result { get; set; }
 
         public SReadyRoundAckMessage()
@@ -310,15 +329,17 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SBeginRoundAckMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class SAvatarChangeAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ChangeAvatarUnk1Dto Unk1 { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
         public SAvatarChangeAckMessage()
@@ -334,9 +355,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeRuleNotifyAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ChangeRuleDto Settings { get; set; }
 
         public SChangeRuleNotifyAckMessage()
@@ -350,9 +372,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeRuleAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ChangeRuleDto Settings { get; set; }
 
         public SChangeRuleAckMessage()
@@ -366,30 +389,34 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SChangeRuleResultMsgAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Result { get; set; }
     }
 
+    [BlubContract]
     public class SMissionNotifyAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class SMissionScoreAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SScoreKillAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreDto Score { get; set; }
 
         public SScoreKillAckMessage()
@@ -403,9 +430,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreKillAssistAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreAssistDto Score { get; set; }
 
         public SScoreKillAssistAckMessage()
@@ -419,9 +447,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreOffenseAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreDto Score { get; set; }
 
         public SScoreOffenseAckMessage()
@@ -435,9 +464,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreOffenseAssistAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreAssistDto Score { get; set; }
 
         public SScoreOffenseAssistAckMessage()
@@ -451,9 +481,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreDefenseAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreDto Score { get; set; }
 
         public SScoreDefenseAckMessage()
@@ -467,9 +498,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreDefenseAssistAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ScoreAssistDto Score { get; set; }
 
         public SScoreDefenseAssistAckMessage()
@@ -483,9 +515,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreHealAssistAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
         public SScoreHealAssistAckMessage()
@@ -499,9 +532,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreGoalAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
         public SScoreGoalAckMessage()
@@ -515,12 +549,13 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreGoalAssistAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public LongPeerId Assist { get; set; }
 
         public SScoreGoalAssistAckMessage()
@@ -536,12 +571,13 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreReboundAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId NewId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public LongPeerId OldId { get; set; }
 
         public SScoreReboundAckMessage()
@@ -557,12 +593,13 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreSuicideAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer), typeof(uint))]
+        [BlubMember(1, typeof(EnumSerializer), typeof(uint))]
         public AttackAttribute Icon { get; set; }
 
         public SScoreSuicideAckMessage()
@@ -577,9 +614,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreTeamKillAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public Score2Dto Score { get; set; }
 
         public SScoreTeamKillAckMessage()
@@ -593,9 +631,10 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreRoundWinAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
 
         public SScoreRoundWinAckMessage()
@@ -607,15 +646,17 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SScoreSLRoundWinAckMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class SItemsChangeAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ChangeItemsUnkDto Unk1 { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
         public SItemsChangeAckMessage()
@@ -631,12 +672,13 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SPlayerGameModeChangeAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(EnumSerializer))]
+        [BlubMember(1)]
         public PlayerGameMode Mode { get; set; }
 
         public SPlayerGameModeChangeAckMessage()
@@ -649,21 +691,23 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SRefreshGameRuleInfoAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public int Unk3 { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeScoreSyncAckMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncDto[] Scores { get; set; }
 
         public SArcadeScoreSyncAckMessage()
@@ -672,24 +716,26 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SArcadeBeginRoundAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeStageBriefingAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
 
-        [Serialize(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; } // ToDo
 
         public SArcadeStageBriefingAckMessage()
@@ -698,33 +744,37 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SArcadeEnablePlayeTimeAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeStageInfoAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeRespawnAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeDeathPlayerInfoAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [Serialize(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Players { get; set; }
 
         public SArcadeDeathPlayerInfoAckMessage()
@@ -733,75 +783,85 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SArcadeStageReadyAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeRespawnFailAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Result { get; set; }
     }
 
+    [BlubContract]
     public class SChangeHPAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public float Value { get; set; }
     }
 
+    [BlubContract]
     public class SChangeMPAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public float Value { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeChangeStageAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Stage { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeStageSelectAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeSaveDataInfAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
+    [BlubContract]
     public class SSlaughterAttackPointAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float Unk1 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public float Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SSlaughterHealPointAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float Unk { get; set; }
     }
 
+    [BlubContract]
     public class SChangeBonusTargetAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
         public SChangeBonusTargetAckMessage()
@@ -813,45 +873,50 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SArcadeLoadingSucceedAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
+    [BlubContract]
     public class SArcadeAllLoadingSucceedAckMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class SUseCoinAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public int Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public int Unk4 { get; set; }
     }
 
+    [BlubContract]
     public class SLuckyShotAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public int Unk3 { get; set; }
     }
 
+    [BlubContract]
     public class SGameRuleChangeTheFirstAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
         public SGameRuleChangeTheFirstAckMessage()
@@ -863,45 +928,50 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SDevLogStartAckMessage : GameRuleMessage
     { }
 
+    [BlubContract]
     public class SCompulsionLeaveRequestAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class SCompulsionLeaveResultAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ulong Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public int Unk4 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public int Unk5 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public int Unk6 { get; set; }
     }
 
+    [BlubContract]
     public class SCompulsionLeaveActionAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk { get; set; }
     }
 
+    [BlubContract]
     public class SCaptainLifeRoundSetUpAckMessage : GameRuleMessage
     {
-        [Serialize(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public CaptainLifeDto[] Players { get; set; }
 
         public SCaptainLifeRoundSetUpAckMessage()
@@ -910,21 +980,23 @@ namespace Netsphere.Network.Message.GameRule
         }
     }
 
+    [BlubContract]
     public class SCaptainSubRoundEndReasonAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 
+    [BlubContract]
     public class SCurrentRoundInformationAckMessage : GameRuleMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Unk2 { get; set; }
     }
 }

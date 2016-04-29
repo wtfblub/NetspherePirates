@@ -3,15 +3,16 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.Relay
 {
+    [BlubContract]
     public class SEnterLoginPlayerMessage : RelayMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint HostId { get; set; } // Not sure, but proudnet thing for sure
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [Serialize(2, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
         public SEnterLoginPlayerMessage()
@@ -27,9 +28,10 @@ namespace Netsphere.Network.Message.Relay
         }
     }
 
+    [BlubContract]
     public class SNotifyLoginResultMessage : RelayMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public int Result { get; set; }
 
         public SNotifyLoginResultMessage()

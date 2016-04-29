@@ -20,9 +20,9 @@ using ProudNet.Message.Core;
 
 namespace ProudNet.Services
 {
-    internal class ProudCoreServerService : Service
+    internal class ProudCoreServerService : MessageHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ProudServerPipe _filter;
         private readonly Lazy<DateTime> _startTime = new Lazy<DateTime>(() => Process.GetCurrentProcess().StartTime);
 
@@ -100,7 +100,7 @@ namespace ProudNet.Services
         }
 
         [MessageHandler(typeof(NotifyCSEncryptedSessionKeyMessage))]
-        public void NotifyCSEncryptedSessionKeyMessage(IIOService service, ProudSession session, NotifyCSEncryptedSessionKeyMessage message)
+        public void NotifyCSEncryptedSessionKeyMessage(IService service, ProudSession session, NotifyCSEncryptedSessionKeyMessage message)
         {
             using (var rsa = new RSACryptoServiceProvider(1024))
             {
@@ -138,7 +138,7 @@ namespace ProudNet.Services
             }
 
             IPEndPoint ip;
-            var processor = session.Processor as TcpProcessor;
+            var processor = session.Transport as TcpTransport;
             if (processor != null)
                 ip = (IPEndPoint)processor.Socket.RemoteEndPoint;
             else

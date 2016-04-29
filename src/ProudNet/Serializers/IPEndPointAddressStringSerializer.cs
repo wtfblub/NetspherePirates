@@ -3,17 +3,18 @@ using Sigil;
 using System;
 using System.IO;
 using System.Net;
+using Sigil.NonGeneric;
 
 namespace ProudNet.Serializers
 {
     public class IPEndPointAddressStringSerializer : ISerializerCompiler
     {
-        public Type HandlesType
+        public bool CanHandle(Type type)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotImplementedException();
         }
 
-        public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
+        public void EmitDeserialize(Emit emiter, Local value)
         {
             // value = new IPEndPoint(IPAddress.Parse(ProudNetBinaryReaderExtensions.ReadProudString(reader)), reader.ReadUInt16())
             emiter.LoadArgument(1);
@@ -25,7 +26,7 @@ namespace ProudNet.Serializers
             emiter.StoreLocal(value);
         }
 
-        public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
+        public void EmitSerialize(Emit emiter, Local value)
         {
             using (var address = emiter.DeclareLocal<string>("str"))
             using (var port = emiter.DeclareLocal<ushort>("port"))

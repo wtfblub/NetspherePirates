@@ -2,12 +2,13 @@
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class ChaserUserDataDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public float SurvivalProbability { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public float AllKillProbability { get; set; }
     }
 }

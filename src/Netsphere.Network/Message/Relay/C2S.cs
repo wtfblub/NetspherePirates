@@ -5,18 +5,19 @@ using ProudNet.Serializers;
 
 namespace Netsphere.Network.Message.Relay
 {
+    [BlubContract]
     public class CRequestLoginMessage : RelayMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        [Serialize(2, typeof(RoomLocationSerializer))]
+        [BlubMember(2, typeof(RoomLocationSerializer))]
         public RoomLocation RoomLocation { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public bool CreatedRoom { get; set; }
     }
 }

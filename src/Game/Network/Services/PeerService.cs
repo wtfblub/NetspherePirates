@@ -3,7 +3,7 @@ using Netsphere.Network.Message.P2P;
 
 namespace Netsphere.Network.Services
 {
-    internal class PeerService : Service
+    internal class PeerService : MessageHandler
     {
         [MessageHandler(typeof(PlayerSpawnReqMessage))]
         public void PlayerSpawnReq(RelaySession session, PlayerSpawnReqMessage message)

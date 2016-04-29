@@ -2,18 +2,19 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class ItemDurabilityInfoDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong ItemId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public int Durability { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public int Unk2 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public int Unk3 { get; set; }
 
         public ItemDurabilityInfoDto()

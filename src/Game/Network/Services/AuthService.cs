@@ -18,20 +18,20 @@ using SLoginAckMessage = Netsphere.Network.Message.Game.SLoginAckMessage;
 
 namespace Netsphere.Network.Services
 {
-    internal class AuthService : Service
+    internal class AuthService : MessageHandler
     {
-        private static readonly Version Version = new Version(0, 8, 31, 18574);
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Version s_version = new Version(0, 8, 31, 18574);
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CLoginReqMessage))]
         public async Task LoginHandler(GameServer server, GameSession session, CLoginReqMessage message)
         {
             Logger.Info()
                 .Account(message.AccountId, message.Username)
-                .Message("Login from {0}", ((TcpProcessor)session.Processor).Socket.RemoteEndPoint)
+                .Message("Login from {0}", ((TcpTransport)session.Transport).Socket.RemoteEndPoint)
                 .Write();
 
-            if (message.Version != Version)
+            if (message.Version != s_version)
             {
                 Logger.Error()
                     .Account(message.AccountId, message.Username)
@@ -479,7 +479,7 @@ namespace Netsphere.Network.Services
         {
             Logger.Info()
                 .Account(message.AccountId, "")
-                .Message("Login from {0}", ((TcpProcessor)session.Processor).Socket.RemoteEndPoint)
+                .Message("Login from {0}", ((TcpTransport)session.Transport).Socket.RemoteEndPoint)
                 .Write();
 
             uint sessionId;
@@ -528,7 +528,7 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(Message.Relay.CRequestLoginMessage))]
         public void Relay_LoginHandler(RelayServer server, RelaySession session, Message.Relay.CRequestLoginMessage message)
         {
-            var ip = (IPEndPoint)((TcpProcessor)session.Processor).Socket.RemoteEndPoint;
+            var ip = (IPEndPoint)((TcpTransport)session.Transport).Socket.RemoteEndPoint;
             Logger.Info()
                 .Account(message.AccountId, "")
                 .Message("Login from {0}", ip)
@@ -555,7 +555,7 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            var gameIp = (IPEndPoint)((TcpProcessor)plr.Session.Processor).Socket.RemoteEndPoint;
+            var gameIp = (IPEndPoint)((TcpTransport)plr.Session.Transport).Socket.RemoteEndPoint;
             if (!gameIp.Address.Equals(ip.Address))
             {
                 Logger.Error()

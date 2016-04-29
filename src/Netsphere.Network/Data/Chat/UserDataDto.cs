@@ -1,24 +1,26 @@
 ﻿using BlubLib.Serialization;
+using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Serializers;
 using ProudNet.Serializers;
 
 namespace Netsphere.Network.Data.Chat
 {
+    [BlubContract]
     public class UserDataDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public ulong AccountId { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public short ServerId { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public short ChannelId { get; set; }
 
         /*
@@ -26,55 +28,55 @@ namespace Netsphere.Network.Data.Chat
         0xFFFFFFFD Tutorial
         0xFFFFFFFF No room
         */
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint RoomId { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public byte Unk3 { get; set; } // Gender?
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public uint TotalExp { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public TDUserDataDto TDStats { get; set; }
 
-        [Serialize(9)]
+        [BlubMember(9)]
         public DMUserDataDto DMStats { get; set; }
 
-        [Serialize(10)]
+        [BlubMember(10)]
         public ChaserUserDataDto ChaserStats { get; set; }
 
-        [Serialize(11)]
+        [BlubMember(11)]
         public BRUserDataDto BattleRoyalStats { get; set; }
 
-        [Serialize(12)]
+        [BlubMember(12)]
         public CPTUserDataDto CaptainStats { get; set; }
 
-        [Serialize(13, typeof(EnumSerializer))]
+        [BlubMember(13)]
         public CommunitySetting AllowCombiInvite { get; set; }
 
-        [Serialize(14, typeof(EnumSerializer))]
+        [BlubMember(14)]
         public CommunitySetting AllowFriendRequest { get; set; }
 
-        [Serialize(15, typeof(EnumSerializer))]
+        [BlubMember(15)]
         public CommunitySetting AllowRoomInvite { get; set; }
 
-        [Serialize(16, typeof(EnumSerializer))]
+        [BlubMember(16)]
         public CommunitySetting AllowInfoRequest { get; set; }
 
-        [Serialize(17, typeof(EnumSerializer))]
+        [BlubMember(17)]
         public Team Team { get; set; }
 
-        [Serialize(18)]
+        [BlubMember(18)]
         public int Unk4 { get; set; }
 
-        [Serialize(19)]
+        [BlubMember(19)]
         public byte Unk5 { get; set; }
 
-        [Serialize(20)]
+        [BlubMember(20)]
         public short Unk6 { get; set; }
 
-        [Serialize(21, typeof(FixedArraySerializer), 9)]
+        [BlubMember(21, typeof(FixedArraySerializer), 9)]
         public byte[] Unk7 { get; set; }
 
         public UserDataDto()
@@ -90,15 +92,16 @@ namespace Netsphere.Network.Data.Chat
         }
     }
 
+    [BlubContract]
     public class UserDataWithNickDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint AccountId { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public UserDataDto Data { get; set; }
 
         public UserDataWithNickDto()
@@ -108,15 +111,16 @@ namespace Netsphere.Network.Data.Chat
         }
     }
 
+    [BlubContract]
     public class UserDataWithNickLongDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [Serialize(1, typeof(StringSerializer))]
+        [BlubMember(1, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public UserDataDto Data { get; set; }
 
         public UserDataWithNickLongDto()

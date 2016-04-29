@@ -2,18 +2,19 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class InvalidateItemInfoDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong ItemId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk1 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk2 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public byte Unk3 { get; set; }
     }
 }

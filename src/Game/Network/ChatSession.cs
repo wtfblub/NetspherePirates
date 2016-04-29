@@ -8,16 +8,16 @@ namespace Netsphere.Network
         public GameSession GameSession { get; set; }
         public Player Player => GameSession.Player;
 
-        public ChatSession(IIOService service, IIOProcessor processor)
-            : base(service, processor)
+        public ChatSession(IService service, ITransport transport)
+            : base(service, transport)
         { }
     }
 
     internal class ChatSessionFactory : ISessionFactory
     {
-        public ISession GetSession(IIOService service, IIOProcessor processor)
+        public ISession GetSession(IService service, ITransport transport)
         {
-            return new ChatSession(service, processor);
+            return new ChatSession(service, transport);
         }
     }
 }

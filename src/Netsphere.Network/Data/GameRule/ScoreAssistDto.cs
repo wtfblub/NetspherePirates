@@ -1,23 +1,24 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serializers;
+using BlubLib.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.GameRule
 {
+    [BlubContract]
     public class ScoreAssistDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Killer { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public LongPeerId Assist { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer), typeof(int))]
+        [BlubMember(2, typeof(EnumSerializer), typeof(int))]
         public AttackAttribute Weapon { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public LongPeerId Target { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public byte Unk { get; set; }
 
         public ScoreAssistDto()
@@ -36,18 +37,19 @@ namespace Netsphere.Network.Data.GameRule
         }
     }
 
+    [BlubContract]
     public class ScoreAssist2Dto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public LongPeerId Killer { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public LongPeerId Assist { get; set; }
 
-        [Serialize(2, typeof(EnumSerializer), typeof(int))]
+        [BlubMember(2, typeof(EnumSerializer), typeof(int))]
         public AttackAttribute Weapon { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public LongPeerId Target { get; set; }
 
         public ScoreAssist2Dto()

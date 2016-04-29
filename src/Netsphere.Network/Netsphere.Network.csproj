@@ -138,22 +138,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serializers\ArrayWithIntPrefixAndIndexSerializer.cs" />
     <Compile Include="Serializers\ArrayWithShortPrefixSerializer.cs" />
-    <Compile Include="Serializers\DamageInfoMessageSerializer.cs" />
     <Compile Include="Serializers\RotationVectorSerializer.cs" />
     <Compile Include="Serializers\CompressedVectorSerializer.cs" />
     <Compile Include="Serializers\CompressedFloatSerializer.cs" />
     <Compile Include="Serializers\PeerIdSerializer.cs" />
     <Compile Include="Serializers\RoomLocationSerializer.cs" />
     <Compile Include="Serializers\CharacterStyleSerializer.cs" />
-    <Compile Include="Serializers\SGameRoomListAckMessageSerializer.cs" />
-    <Compile Include="Serializers\SInventoryInfoAckMessageSerializer.cs" />
-    <Compile Include="Serializers\FixedArraySerializer.cs" />
     <Compile Include="Serializers\ArrayWithIntPrefixSerializer.cs" />
     <Compile Include="Serializers\IntBooleanSerializer.cs" />
     <Compile Include="Serializers\LongPeerIdSerializer.cs" />
     <Compile Include="Serializers\MatchKeySerializer.cs" />
     <Compile Include="Serializers\ItemNumberSerializer.cs" />
-    <Compile Include="Serializers\SChannelPlayerListAckMessageSerializer.cs" />
     <Compile Include="Serializers\TimeSpanSerializer.cs" />
     <Compile Include="Serializers\VersionSerializer.cs" />
   </ItemGroup>

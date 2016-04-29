@@ -2,19 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using BlubLib.Serialization;
-using ProudNet.Serializers;
 
 namespace ProudNet.Message.Core
 {
     internal static class CoreMapper
     {
-        private static readonly Dictionary<ProudCoreOpCode, Type> TypeLookup = new Dictionary<ProudCoreOpCode, Type>();
-        private static readonly Dictionary<Type, ProudCoreOpCode> OpCodeLookup = new Dictionary<Type, ProudCoreOpCode>();
+        private static readonly Dictionary<ProudCoreOpCode, Type> s_typeLookup = new Dictionary<ProudCoreOpCode, Type>();
+        private static readonly Dictionary<Type, ProudCoreOpCode> s_opCodeLookup = new Dictionary<Type, ProudCoreOpCode>();
 
         static CoreMapper()
         {
-            Serializer.AddCompiler(new CompressedMessageSerializer());
-
             // S2C
             Create<ConnectServerTimedoutMessage>(ProudCoreOpCode.ConnectServerTimedout);
             Create<NotifyServerConnectionHintMessage>(ProudCoreOpCode.NotifyServerConnectionHint);
@@ -53,13 +50,13 @@ namespace ProudNet.Message.Core
             where T : CoreMessage, new()
         {
             var type = typeof(T);
-            OpCodeLookup.Add(type, opCode);
-            TypeLookup.Add(opCode, type);
+            s_opCodeLookup.Add(type, opCode);
+            s_typeLookup.Add(opCode, type);
         }
 
         public static CoreMessage GetMessage(ProudCoreOpCode opCode, BinaryReader r)
         {
-            var type = TypeLookup.GetValueOrDefault(opCode);
+            var type = s_typeLookup.GetValueOrDefault(opCode);
             if(type == null)
 #if DEBUG
                 throw new ProudBadOpCodeException(opCode, r.ReadToEnd());
@@ -78,7 +75,7 @@ namespace ProudNet.Message.Core
 
         public static ProudCoreOpCode GetOpCode(Type type)
         {
-            return OpCodeLookup[type];
+            return s_opCodeLookup[type];
         }
     }
 }

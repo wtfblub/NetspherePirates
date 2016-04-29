@@ -22,8 +22,8 @@ namespace ProudNet
 {
     public class ProudServerPipe : ProudPipe
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly TimeSpan s_timeout = TimeSpan.FromSeconds(15);
 
         // ToDo refactor hostId creation
         private readonly HashSet<uint> _hostIds = new HashSet<uint>();
@@ -45,7 +45,7 @@ namespace ProudNet
 
         public override async void OnConnected(SessionEventArgs e)
         {
-            var processor = (TcpProcessor)e.Session.Processor;
+            var processor = (TcpTransport)e.Session.Transport;
             var remoteEndPoint = (IPEndPoint)processor.Socket.RemoteEndPoint;
 
             Logger.Debug()
@@ -55,7 +55,7 @@ namespace ProudNet
             await e.Session.SendAsync(new NotifyServerConnectionHintMessage(Config))
                 .ConfigureAwait(false);
 
-            using (var cts = new CancellationTokenSource(Timeout))
+            using (var cts = new CancellationTokenSource(s_timeout))
             {
                 try
                 {

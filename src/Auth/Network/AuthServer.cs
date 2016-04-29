@@ -18,7 +18,7 @@ namespace Netsphere.Network
 {
     internal class AuthServer : TcpServer
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public static AuthServer Instance { get; } = new AuthServer();
 
         private readonly ILoop _worker;
@@ -36,7 +36,7 @@ namespace Netsphere.Network
 #endif
             Pipeline.AddFirst("proudnet", proudFilter);
             Pipeline.AddLast("s4_protocol", new NetspherePipe(new AuthMessageFactory()));
-            Pipeline.AddLast("s4_service", new ServicePipe())
+            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
                 .Add(new AuthService())
                 .UnhandledMessage += OnUnhandledMessage;
 

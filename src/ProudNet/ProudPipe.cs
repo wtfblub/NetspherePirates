@@ -16,10 +16,10 @@ namespace ProudNet
 {
     public abstract class ProudPipe : Pipe
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly IList<IService> _coreServices = new List<IService>();
-        private readonly IList<IService> _services = new List<IService>();
+        private readonly IList<IMessageHandler> _coreServices = new List<IMessageHandler>();
+        private readonly IList<IMessageHandler> _services = new List<IMessageHandler>();
 
         public ProudConfig Config { get; }
 
@@ -99,7 +99,7 @@ namespace ProudNet
                 OnUnhandledProudCoreMessage(e);
         }
         
-        public override void OnAttached(IIOService service, string name)
+        public override void OnAttached(IService service, string name)
         {
             base.OnAttached(service, name);
             service.Pipeline.AddBefore(name, "proudnet_protocol", new ProtocolPipe(new ProudProtocol()));
@@ -147,12 +147,12 @@ namespace ProudNet
             return base.OnSendMessage(e);
         }
 
-        protected void AddCoreService(IService service)
+        protected void AddCoreService(IMessageHandler service)
         {
             _coreServices.Add(service);
         }
 
-        protected void AddService(IService service)
+        protected void AddService(IMessageHandler service)
         {
             _services.Add(service);
         }

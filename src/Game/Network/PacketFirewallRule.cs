@@ -15,7 +15,7 @@ namespace Netsphere.Network
         where TSession : ProudSession
     {
         // ReSharper disable once StaticMemberInGenericType
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IDictionary<Type, List<Predicate<TSession>>> _filter = new Dictionary<Type, List<Predicate<TSession>>>();
 
         public PacketFirewallRule<TSession> Register<T>(params Predicate<TSession>[] predicates)
@@ -66,7 +66,7 @@ namespace Netsphere.Network
             if (predicates.Any(predicate => !predicate((TSession)e.Session)))
             {
                 Logger.Debug()
-                    .Message("Dropping message {0} from client {1}", e.Message.GetType().Name, ((TcpProcessor)e.Session.Processor).Socket.RemoteEndPoint.ToString())
+                    .Message("Dropping message {0} from client {1}", e.Message.GetType().Name, ((TcpTransport)e.Session.Transport).Socket.RemoteEndPoint.ToString())
                     .Write();
                 return false;
             }

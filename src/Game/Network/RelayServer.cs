@@ -66,7 +66,7 @@ namespace Netsphere.Network
 
             //FilterList.AddLast("spam_filter", new SpamFilter { RepeatLimit = 15, TimeFrame = TimeSpan.FromSeconds(3) });
 
-            Pipeline.AddLast("s4_service", new ServicePipe())
+            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
                 .Add(new AuthService())
                 .Add(new RelayService())
                 .UnhandledMessage += OnUnhandledMessage;

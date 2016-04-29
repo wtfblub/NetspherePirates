@@ -5,39 +5,42 @@ using System.Net;
 
 namespace ProudNet.Message
 {
+    [BlubContract]
     internal class ReliablePongMessage : ProudMessage
     { }
 
+    [BlubContract]
     internal class ShutdownTcpAckMessage : ProudMessage
     { }
 
+    [BlubContract]
     internal class P2PGroup_MemberJoinMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint GroupId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint MemberId { get; set; }
 
-        [Serialize(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint EventId { get; set; }
 
-        [Serialize(4, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(4, typeof(ArrayWithScalarSerializer))]
         public byte[] SessionKey { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint P2PFirstFrameNumber { get; set; }
 
-        [Serialize(6, typeof(GuidSerializer))]
+        [BlubMember(6)]
         public Guid ConnectionMagicNumber { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public bool EnableDirectP2P { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public ushort BindPort { get; set; }
 
         public P2PGroup_MemberJoinMessage()
@@ -58,30 +61,31 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class P2PGroup_MemberJoin_UnencryptedMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint GroupId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint MemberId { get; set; }
 
-        [Serialize(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint EventId { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint P2PFirstFrameNumber { get; set; }
 
-        [Serialize(5, typeof(GuidSerializer))]
+        [BlubMember(5)]
         public Guid ConnectionMagicNumber { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public bool EnableDirectP2P { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public ushort BindPort { get; set; }
 
         public P2PGroup_MemberJoin_UnencryptedMessage()
@@ -100,24 +104,25 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class P2PRecycleCompleteMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint HostId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public bool Recycled { get; set; }
 
-        [Serialize(2, typeof(IPEndPointSerializer))]
+        [BlubMember(2, typeof(IPEndPointSerializer))]
         public IPEndPoint InternalAddress { get; set; }
 
-        [Serialize(3, typeof(IPEndPointSerializer))]
+        [BlubMember(3, typeof(IPEndPointSerializer))]
         public IPEndPoint ExternalAddress { get; set; }
 
-        [Serialize(4, typeof(IPEndPointSerializer))]
+        [BlubMember(4, typeof(IPEndPointSerializer))]
         public IPEndPoint SendAddress { get; set; }
 
-        [Serialize(5, typeof(IPEndPointSerializer))]
+        [BlubMember(5, typeof(IPEndPointSerializer))]
         public IPEndPoint RecvAddress { get; set; }
 
         public P2PRecycleCompleteMessage()
@@ -135,15 +140,16 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class RequestP2PHolepunchMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint HostId { get; set; }
 
-        [Serialize(1, typeof(IPEndPointSerializer))]
+        [BlubMember(1, typeof(IPEndPointSerializer))]
         public IPEndPoint LocalEndPoint { get; set; }
 
-        [Serialize(2, typeof(IPEndPointSerializer))]
+        [BlubMember(2, typeof(IPEndPointSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public RequestP2PHolepunchMessage()
@@ -160,17 +166,17 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class P2PGroup_MemberLeaveMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint MemberId { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint GroupId { get; set; }
 
         public P2PGroup_MemberLeaveMessage()
-        {
-        }
+        { }
 
         public P2PGroup_MemberLeaveMessage(uint memberId, uint groupId)
         {
@@ -179,24 +185,25 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class NotifyDirectP2PEstablishMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint A { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint B { get; set; }
 
-        [Serialize(2, typeof(IPEndPointSerializer))]
+        [BlubMember(2, typeof(IPEndPointSerializer))]
         public IPEndPoint ABSendAddr { get; set; }
 
-        [Serialize(3, typeof(IPEndPointSerializer))]
+        [BlubMember(3, typeof(IPEndPointSerializer))]
         public IPEndPoint ABRecvAddr { get; set; }
 
-        [Serialize(4, typeof(IPEndPointSerializer))]
+        [BlubMember(4, typeof(IPEndPointSerializer))]
         public IPEndPoint BASendAddr { get; set; }
 
-        [Serialize(5, typeof(IPEndPointSerializer))]
+        [BlubMember(5, typeof(IPEndPointSerializer))]
         public IPEndPoint BARecvAddr { get; set; }
 
         public NotifyDirectP2PEstablishMessage()
@@ -218,9 +225,10 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class NewDirectP2PConnectionMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint HostId { get; set; }
 
         public NewDirectP2PConnectionMessage()
@@ -232,9 +240,10 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class S2C_RequestCreateUdpSocketMessage : ProudMessage
     {
-        [Serialize(0, typeof(IPEndPointAddressStringSerializer))]
+        [BlubMember(0, typeof(IPEndPointAddressStringSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public S2C_RequestCreateUdpSocketMessage()
@@ -246,12 +255,13 @@ namespace ProudNet.Message
         }
     }
 
+    [BlubContract]
     internal class S2C_CreateUdpSocketAckMessage : ProudMessage
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public bool Success { get; set; }
 
-        [Serialize(1, typeof(IPEndPointAddressStringSerializer))]
+        [BlubMember(1, typeof(IPEndPointAddressStringSerializer))]
         public IPEndPoint EndPoint { get; set; }
 
         public S2C_CreateUdpSocketAckMessage()

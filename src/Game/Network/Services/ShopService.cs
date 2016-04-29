@@ -8,16 +8,15 @@ using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
-using Shaolinq;
 
 namespace Netsphere.Network.Services
 {
-    internal class ShopService : Service
+    internal class ShopService : MessageHandler
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CNewShopUpdateCheckReqMessage))]
-        public void ShopUpdateCheckHandler(IIOService service, GameSession session, CNewShopUpdateCheckReqMessage message)
+        public void ShopUpdateCheckHandler(IService service, GameSession session, CNewShopUpdateCheckReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
             var version = shop.Version;

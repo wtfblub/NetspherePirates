@@ -6,13 +6,13 @@ using NLog;
 
 namespace Netsphere.Network.Services
 {
-    internal class RelayService : Service
+    internal class RelayService : MessageHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IService _peerService = new PeerService();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly IMessageHandler _peerService = new PeerService();
 
         [MessageHandler(typeof(PacketMessage))]
-        public void Packet(IIOService service, RelaySession session, PacketMessage message, MessageReceivedEventArgs e)
+        public void Packet(IService service, RelaySession session, PacketMessage message, MessageReceivedEventArgs e)
         {
             if (session.Player?.Room == null)
                 return;

@@ -2,12 +2,13 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class MixedTeamBriefingDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public ulong Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public byte Unk2 { get; set; }
     }
 }

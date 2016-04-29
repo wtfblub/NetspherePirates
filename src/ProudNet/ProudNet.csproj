@@ -78,9 +78,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProudConfig.cs" />
     <Compile Include="Serializers\ArrayWithScalarSerializer.cs" />
-    <Compile Include="Serializers\CompressedMessageSerializer.cs" />
-    <Compile Include="Serializers\EnumSerializer.cs" />
-    <Compile Include="Serializers\GuidSerializer.cs" />
     <Compile Include="Serializers\IPEndPointAddressStringSerializer.cs" />
     <Compile Include="Serializers\IPEndPointSerializer.cs" />
     <Compile Include="Serializers\ScalarSerializer.cs" />

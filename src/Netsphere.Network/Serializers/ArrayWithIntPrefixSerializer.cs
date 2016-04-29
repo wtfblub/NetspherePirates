@@ -3,6 +3,7 @@ using System.IO;
 using BlubLib.Serialization;
 using ProudNet.Serializers;
 using Sigil;
+using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
@@ -11,9 +12,9 @@ namespace Netsphere.Network.Serializers
         private readonly ISerializer _serializer;
         private readonly ISerializerCompiler _compiler;
 
-        public Type HandlesType
+        public bool CanHandle(Type type)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotImplementedException();
         }
 
         public ArrayWithIntPrefixSerializer()
@@ -32,7 +33,7 @@ namespace Netsphere.Network.Serializers
                 throw new ArgumentException($"{serializer.FullName} must be a ISerializer or ISerializerCompiler", nameof(serializer));
         }
 
-        public void EmitDeserialize(Emit<Func<BinaryReader, object>> emiter, Local value)
+        public void EmitDeserialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
             var emptyArray = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "EmptyArray" + Guid.NewGuid());
@@ -114,7 +115,7 @@ namespace Netsphere.Network.Serializers
             emiter.MarkLabel(end);
         }
 
-        public void EmitSerialize(Emit<Action<BinaryWriter, object>> emiter, Local value)
+        public void EmitSerialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
             using (var length = emiter.DeclareLocal<int>("length"))

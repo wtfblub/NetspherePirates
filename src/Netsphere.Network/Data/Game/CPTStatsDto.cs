@@ -2,21 +2,22 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class CPTStatsDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Won { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Lost { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint CaptainKilled { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint Captain { get; set; }
     }
 }

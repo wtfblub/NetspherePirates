@@ -3,7 +3,7 @@ using Netsphere.Network.Message.Game;
 
 namespace Netsphere.Network.Services
 {
-    internal class GeneralService : Service
+    internal class GeneralService : MessageHandler
     {
         [MessageHandler(typeof(CTimeSyncReqMessage))]
         public void TimeSyncHandler(GameSession session, CTimeSyncReqMessage message)

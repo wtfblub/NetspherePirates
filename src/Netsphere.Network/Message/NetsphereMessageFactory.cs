@@ -30,7 +30,6 @@ namespace Netsphere.Network.Message
     {
         static ChatMessageFactory()
         {
-            Serializer.AddSerializer(new SChannelPlayerListAckMessageSerializer());
             Serializer.AddCompiler(new ItemNumberSerializer());
         }
 
@@ -47,8 +46,6 @@ namespace Netsphere.Network.Message
             Serializer.AddCompiler(new MatchKeySerializer());
             Serializer.AddCompiler(new LongPeerIdSerializer());
             Serializer.AddCompiler(new CharacterStyleSerializer());
-            Serializer.AddSerializer(new SInventoryInfoAckMessageSerializer());
-            Serializer.AddSerializer(new SGameRoomListAckMessageSerializer());
         }
 
         public ProudMessage GetMessage(ISession session, ushort opCode, BinaryReader r)
@@ -68,7 +65,6 @@ namespace Netsphere.Network.Message
         static RelayMessageFactory()
         {
             Serializer.AddCompiler(new PeerIdSerializer());
-            Serializer.AddSerializer(new DamageInfoMessageSerializer());
         }
 
         public ProudMessage GetMessage(ISession session, ushort opCode, BinaryReader r)

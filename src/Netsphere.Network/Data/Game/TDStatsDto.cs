@@ -2,60 +2,61 @@
 
 namespace Netsphere.Network.Data.Game
 {
+    [BlubContract]
     public class TDStatsDto
     {
-        [Serialize(0)]
+        [BlubMember(0)]
         public uint Unk1 { get; set; }
 
-        [Serialize(1)]
+        [BlubMember(1)]
         public uint Unk2 { get; set; }
 
-        [Serialize(2)]
+        [BlubMember(2)]
         public uint Unk3 { get; set; }
 
-        [Serialize(3)]
+        [BlubMember(3)]
         public uint Unk4 { get; set; }
 
-        [Serialize(4)]
+        [BlubMember(4)]
         public uint Unk5 { get; set; }
 
-        [Serialize(5)]
+        [BlubMember(5)]
         public uint Unk6 { get; set; }
 
-        [Serialize(6)]
+        [BlubMember(6)]
         public uint Unk7 { get; set; }
 
-        [Serialize(7)]
+        [BlubMember(7)]
         public uint Unk8 { get; set; }
 
-        [Serialize(8)]
+        [BlubMember(8)]
         public uint Unk9 { get; set; }
 
-        [Serialize(9)]
+        [BlubMember(9)]
         public uint Unk10 { get; set; }
 
-        [Serialize(10)]
+        [BlubMember(10)]
         public uint Unk11 { get; set; }
 
-        [Serialize(11)]
+        [BlubMember(11)]
         public uint Unk12 { get; set; }
 
-        [Serialize(12)]
+        [BlubMember(12)]
         public uint Unk13 { get; set; }
 
-        [Serialize(13)]
+        [BlubMember(13)]
         public uint Unk14 { get; set; }
 
-        [Serialize(14)]
+        [BlubMember(14)]
         public uint Unk15 { get; set; }
 
-        [Serialize(15)]
+        [BlubMember(15)]
         public uint Unk16 { get; set; }
 
-        [Serialize(16)]
+        [BlubMember(16)]
         public uint Unk17 { get; set; }
 
-        [Serialize(17)]
+        [BlubMember(17)]
         public uint Unk18 { get; set; }
     }
 }
