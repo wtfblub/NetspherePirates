@@ -16,7 +16,7 @@ namespace ProudNet
 {
     public abstract class ProudPipe : Pipe
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly IList<IMessageHandler> _coreServices = new List<IMessageHandler>();
         private readonly IList<IMessageHandler> _services = new List<IMessageHandler>();

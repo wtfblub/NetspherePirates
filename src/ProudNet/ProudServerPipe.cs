@@ -22,7 +22,7 @@ namespace ProudNet
 {
     public class ProudServerPipe : ProudPipe
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly TimeSpan s_timeout = TimeSpan.FromSeconds(15);
 
         // ToDo refactor hostId creation
