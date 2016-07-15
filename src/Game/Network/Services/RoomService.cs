@@ -364,7 +364,6 @@ namespace Netsphere.Network.Services
             }
         }
 
-
         [MessageHandler(typeof(CMixChangeTeamReqMessage))]
         public void CMixChangeTeamReq(GameSession session, CMixChangeTeamReqMessage message)
         {

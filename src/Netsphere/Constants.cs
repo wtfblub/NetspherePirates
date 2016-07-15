@@ -95,7 +95,7 @@
         PEN = 1,
         AP = 2,
         Premium = 3,
-        None = 4 // CP?
+        None = 4 // ToDo - CP?
     }
 
     public enum ItemPeriodType : uint
