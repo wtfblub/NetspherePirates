@@ -54,10 +54,10 @@ namespace Netsphere
                     .Write();
             }
 
-            if (Config.Instance.QuickAccount)
+            if (Config.Instance.AutoRegister)
             {
                 Logger.Warn()
-                    .Message("Quick Account is enabled. Accounts will be created for each new username received!")
+                    .Message("AutoRegister is enabled. Accounts will be created for each new username received!")
                     .Write();
             }
 
