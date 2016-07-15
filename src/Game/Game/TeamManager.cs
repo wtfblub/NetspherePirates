@@ -129,8 +129,6 @@ namespace Netsphere.Game.Systems
                     break;
 
                 case PlayerGameMode.Spectate:
-                    Console.WriteLine($"{team.Spectators.Count()},{team.SpectatorLimit}");
-                    Console.WriteLine($"{team.Spectators.Count() >= team.SpectatorLimit}");
                     if (team.Spectators.Count() >= team.SpectatorLimit)
                     {
                         plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
