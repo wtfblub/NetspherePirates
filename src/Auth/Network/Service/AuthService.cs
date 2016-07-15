@@ -32,9 +32,9 @@ namespace Netsphere.Network.Service
 
             if (account == null)
             {
-                if (Config.Instance.NoobMode)
+                if (Config.Instance.NoobMode || Config.Instance.QuickAccount)
                 {
-                    // NoobMode: Create a new account if non exists
+                    // Create a new account if non exists
                     using (var scope = new DataAccessScope())
                     {
                         account = db.Accounts.Create();

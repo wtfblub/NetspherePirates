@@ -34,14 +34,13 @@ namespace Netsphere.Game.Systems
         public void Add(Team team, uint playerLimit, uint spectatorLimit)
         {
             var playerTeam = new PlayerTeam(this, team, playerLimit, spectatorLimit);
-            if(!_teams.TryAdd(team, playerTeam))
+            if (!_teams.TryAdd(team, playerTeam))
                 throw new Exception($"Team {team} already exists");
         }
 
         public void Remove(Team team)
         {
             _teams.Remove(team);
-
         }
 
         public void Join(Player plr)
@@ -60,7 +59,7 @@ namespace Netsphere.Game.Systems
             teams[0].Join(plr);
         }
 
-        public void ChangeTeam(Player plr, Team team)
+        public void ChangeTeam(Player plr, Team team, bool report = true)
         {
             //if (plr.Room != Room)
             //throw new RoomException("Player is not inside this room");
@@ -76,7 +75,8 @@ namespace Netsphere.Game.Systems
 
             if (plr.RoomInfo.IsReady)
             {
-                plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                if (report)
+                    plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                 throw new RoomException("Player is already ready");
             }
 
@@ -92,7 +92,8 @@ namespace Netsphere.Game.Systems
             }
             catch (TeamLimitReachedException)
             {
-                plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                if (report)
+                    plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
             }
         }
 

@@ -57,7 +57,9 @@ namespace Netsphere.Network
 
         public static float ReadCompressedFloat(this BinaryReader r)
         {
-            return r.ReadInt16().Decompress();
+            //Todo - This is a band-aid fix for stationary weapons
+            try { return r.ReadInt16().Decompress(); }
+            catch (EndOfStreamException) { return 0; }
         }
 
         public static Vector3 ReadCompressedVector3(this BinaryReader r)

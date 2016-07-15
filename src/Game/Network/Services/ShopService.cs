@@ -157,7 +157,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CBuyItemReqMessage))]
-        public async Task BuyItemHandler(GameSession session, CBuyItemReqMessage message)
+        public void BuyItemHandler(GameSession session, CBuyItemReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
             var plr = session.Player;
@@ -172,8 +172,7 @@ namespace Netsphere.Network.Services
                         .Message("No shop entry found for {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
                     return;
                 }
                 if (!shopItemInfo.IsEnabled)
@@ -183,8 +182,7 @@ namespace Netsphere.Network.Services
                         .Message("No shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
 
                     return;
                 }
@@ -198,8 +196,7 @@ namespace Netsphere.Network.Services
                         .Message("Invalid price group for shop entry {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
 
                     return;
                 }
@@ -210,8 +207,7 @@ namespace Netsphere.Network.Services
                         .Message("Shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
 
                     return;
                 }
@@ -223,8 +219,7 @@ namespace Netsphere.Network.Services
                         .Message("Shop entry {0} {1} {3}{2} has no color {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Color)
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
 
                     return;
                 }
@@ -238,8 +233,7 @@ namespace Netsphere.Network.Services
                             .Message("Shop entry {0} {1} {3}{2} has no effect {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Effect)
                             .Write();
 
-                        await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                                .ConfigureAwait(false);
+                        session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
 
                         return;
                     }
@@ -254,8 +248,7 @@ namespace Netsphere.Network.Services
                         .Message("Doesn't have license {0}", shopItemInfo.ShopItem.License)
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                            .ConfigureAwait(false);
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
 
                     return;
                 }
@@ -267,8 +260,7 @@ namespace Netsphere.Network.Services
                     case ItemPriceType.PEN:
                         if (plr.PEN < price.Price)
                         {
-                            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney))
-                                .ConfigureAwait(false);
+                            session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
 
                             return;
                         }
@@ -278,8 +270,17 @@ namespace Netsphere.Network.Services
                     case ItemPriceType.AP:
                         if (plr.AP < price.Price)
                         {
-                            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney))
-                                .ConfigureAwait(false);
+                            session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
+
+                            return;
+                        }
+                        plr.AP -= (uint)price.Price;
+                        break;
+
+                    case ItemPriceType.Premium:
+                        if (plr.AP < price.Price)
+                        {
+                            session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
 
                             return;
                         }
@@ -287,6 +288,7 @@ namespace Netsphere.Network.Services
                         break;
 
                     default:
+                        session.Send(new SBuyItemAckMessage(ItemBuyResult.DBError));
                         _logger.Error()
                             .Account(session)
                             .Message("Unknown PriceType {0}", shopItemInfo.PriceGroup.PriceType)
@@ -307,10 +309,10 @@ namespace Netsphere.Network.Services
 
                 var plrItem = session.Player.Inventory.Create(shopItemInfo, price, item.Color, item.Effect, (uint)(price.PeriodType == ItemPeriodType.Units ? price.Period : 0));
 
-                await session.SendAsync(new SBuyItemAckMessage(new[] { plrItem.Id }, item))
-                    .ConfigureAwait(false);
-                await session.SendAsync(new SRefreshCashInfoAckMessage(plr.PEN, plr.AP))
-                    .ConfigureAwait(false);
+
+                session.Send(new SBuyItemAckMessage(new[] { plrItem.Id }, item));
+
+                session.Send(new SRefreshCashInfoAckMessage(plr.PEN, plr.AP));
             }
         }
 

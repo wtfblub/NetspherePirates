@@ -27,6 +27,7 @@ namespace Netsphere
         private readonly AsyncLock _slotIdSync = new AsyncLock();
 
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
+        private List<Player> _kickedPlayers = new List<Player>();
         private readonly TimeSpan _hostUpdateTime = TimeSpan.FromSeconds(30);
         private readonly TimeSpan _changingRulesTime = TimeSpan.FromSeconds(5);
         private const uint PingDifferenceForChange = 20;
@@ -148,6 +149,12 @@ namespace Netsphere
             if (_players.Count >= Options.MatchKey.PlayerLimit)
                 throw new RoomLimitReachedException();
 
+            if (_kickedPlayers.Contains(plr))
+            {
+                plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
+                return;
+            }
+
             using (_slotIdSync.Lock())
             {
                 byte id = 3;
@@ -181,13 +188,16 @@ namespace Netsphere
             OnPlayerJoining(new RoomPlayerEventArgs(plr));
         }
 
-        public void Leave(Player plr)
+        public void Leave(Player plr, RoomLeaveReason roomLeaveReason = RoomLeaveReason.Left)
         {
             if (plr.Room != this)
                 return;
 
             Group.Leave(plr.RoomInfo.Slot);
-            Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, RoomLeaveReason.Left));
+            Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
+
+            if (roomLeaveReason == RoomLeaveReason.Kicked)
+                _kickedPlayers.Add(plr);
 
             plr.RoomInfo.PeerId = 0;
             plr.RoomInfo.Team.Leave(plr);
@@ -286,6 +296,17 @@ namespace Netsphere
             }
 
             // ToDo check if current player count is not above the new player limit
+            {
+                if (_players.Count() > options.MatchKey.PlayerLimit)
+                {
+                    Logger.Error()
+                        .Account(Master)
+                        .Message($"Players count ({_players.Count()}) is bigger than room limit ({options.MatchKey.PlayerLimit})")
+                        .Write();
+                    Master.Session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                    return;
+                }
+            }
 
             _changingRulesTimer = TimeSpan.Zero;
             IsChangingRules = true;
