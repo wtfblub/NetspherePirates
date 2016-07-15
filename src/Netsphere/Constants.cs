@@ -95,8 +95,7 @@
         PEN = 1,
         AP = 2,
         Premium = 3,
-        None = 4 // ?
-			// where is CP?
+        None = 4 // CP?
     }
 
     public enum ItemPeriodType : uint

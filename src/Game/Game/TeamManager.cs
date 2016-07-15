@@ -34,7 +34,7 @@ namespace Netsphere.Game.Systems
         public void Add(Team team, uint playerLimit, uint spectatorLimit)
         {
             var playerTeam = new PlayerTeam(this, team, playerLimit, spectatorLimit);
-            if(!_teams.TryAdd(team, playerTeam))
+            if (!_teams.TryAdd(team, playerTeam))
                 throw new Exception($"Team {team} already exists");
         }
 
@@ -75,8 +75,8 @@ namespace Netsphere.Game.Systems
 
             if (plr.RoomInfo.IsReady)
             {
-				if(report)
-					plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                if (report)
+                    plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                 throw new RoomException("Player is already ready");
             }
 
@@ -92,8 +92,8 @@ namespace Netsphere.Game.Systems
             }
             catch (TeamLimitReachedException)
             {
-				if(report)
-					plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                if (report)
+                    plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
             }
         }
 
@@ -121,7 +121,7 @@ namespace Netsphere.Game.Systems
             switch (mode)
             {
                 case PlayerGameMode.Normal:
-					if (team.Players.Count() >= team.PlayerLimit)
+                    if (team.Players.Count() >= team.PlayerLimit)
                     {
                         plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
@@ -129,11 +129,11 @@ namespace Netsphere.Game.Systems
                     break;
 
                 case PlayerGameMode.Spectate:
-					Console.WriteLine($"{team.Spectators.Count()},{team.SpectatorLimit}");
-					Console.WriteLine($"{team.Spectators.Count() >= team.SpectatorLimit}");
-					if (team.Spectators.Count() >= team.SpectatorLimit)
+                    Console.WriteLine($"{team.Spectators.Count()},{team.SpectatorLimit}");
+                    Console.WriteLine($"{team.Spectators.Count() >= team.SpectatorLimit}");
+                    if (team.Spectators.Count() >= team.SpectatorLimit)
                     {
-						plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                        plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
                     }
                     break;

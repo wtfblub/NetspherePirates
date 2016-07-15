@@ -156,371 +156,190 @@ namespace Netsphere.Network.Services
             }
         }
 
-		//[MessageHandler(typeof(CBuyItemReqMessage))]
-		//public async Task BuyItemHandler(GameSession session, CBuyItemReqMessage message)
-		//{
-		//    var shop = GameServer.Instance.ResourceCache.GetShop();
-		//    var plr = session.Player;
-
-		//    foreach (var item in message.Items)
-		//    {
-		//        var shopItemInfo = shop.GetItemInfo(item.ItemNumber, item.PriceType);
-		//        if (shopItemInfo == null)
-		//        {
-		//            _logger.Error()
-		//                .Account(session)
-		//                .Message("No shop entry found for {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-		//                .Write();
-
-		//            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-		//                .ConfigureAwait(false);
-		//            return;
-		//        }
-		//        if (!shopItemInfo.IsEnabled)
-		//        {
-		//            _logger.Error()
-		//                .Account(session)
-		//                .Message("No shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-		//                .Write();
-
-		//            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-		//                .ConfigureAwait(false);
-
-		//            return;
-		//        }
-
-		//        var priceGroup = shopItemInfo.PriceGroup;
-		//        var price = priceGroup.GetPrice(item.PeriodType, item.Period);
-		//        if (price == null)
-		//        {
-		//            _logger.Error()
-		//                .Account(session)
-		//                .Message("Invalid price group for shop entry {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-		//                .Write();
-
-		//            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-		//                .ConfigureAwait(false);
-
-		//            return;
-		//        }
-		//        if (!price.IsEnabled)
-		//        {
-		//            _logger.Error()
-		//                .Account(session)
-		//                .Message("Shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-		//                .Write();
-
-		//            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-		//                .ConfigureAwait(false);
-
-		//            return;
-		//        }
-
-		//        if (item.Color > shopItemInfo.ShopItem.ColorGroup)
-		//        {
-		//            _logger.Error()
-		//                .Account(session)
-		//                .Message("Shop entry {0} {1} {3}{2} has no color {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Color)
-		//                .Write();
-
-		//            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-		//                .ConfigureAwait(false);
-
-		//            return;
-		//        }
-
-		//        if (item.Effect != 0)
-		//        {
-		//            if (shopItemInfo.EffectGroup.Effects.All(effect => effect.Effect != item.Effect))
-		//            {
-		//                _logger.Error()
-		//                    .Account(session)
-		//                    .Message("Shop entry {0} {1} {3}{2} has no effect {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Effect)
-		//                    .Write();
-
-		//                await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-		//                        .ConfigureAwait(false);
-
-		//                return;
-		//            }
-		//        }
-
-		//        if (shopItemInfo.ShopItem.License != ItemLicense.None &&
-		//            !plr.LicenseManager.Contains(shopItemInfo.ShopItem.License) &&
-		//            Config.Instance.Game.EnableLicenseRequirement)
-		//        {
-		//            _logger.Error()
-		//                .Account(session)
-		//                .Message("Doesn't have license {0}", shopItemInfo.ShopItem.License)
-		//                .Write();
-
-		//            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-		//                    .ConfigureAwait(false);
-
-		//            return;
-		//        }
-
-		//        // ToDo missing price types
-
-		//        switch (shopItemInfo.PriceGroup.PriceType)
-		//        {
-		//            case ItemPriceType.PEN:
-		//                if (plr.PEN < price.Price)
-		//                {
-		//                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney))
-		//                        .ConfigureAwait(false);
-
-		//                    return;
-		//                }
-		//                plr.PEN -= (uint)price.Price;
-		//                break;
-
-		//            case ItemPriceType.AP:
-		//                if (plr.AP < price.Price)
-		//                {
-		//                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney))
-		//                        .ConfigureAwait(false);
-
-		//                    return;
-		//                }
-		//                plr.AP -= (uint)price.Price;
-		//                break;
-
-		//            default:
-		//                _logger.Error()
-		//                    .Account(session)
-		//                    .Message("Unknown PriceType {0}", shopItemInfo.PriceGroup.PriceType)
-		//                    .Write();
-		//                return;
-		//        }
-
-		//        // ToDo
-		//        //var purchaseDto = new PlayerPurchaseDto
-		//        //{
-		//        //    account_id = (int)plr.Account.Id,
-		//        //    shop_item_id = item.ItemNumber,
-		//        //    shop_item_info_id = shopItemInfo.Id,
-		//        //    shop_price_id = price.Id,
-		//        //    time = DateTimeOffset.Now.ToUnixTimeSeconds()
-		//        //};
-		//        //db.player_purchase.Add(purchaseDto);
-
-		//        var plrItem = session.Player.Inventory.Create(shopItemInfo, price, item.Color, item.Effect, (uint)(price.PeriodType == ItemPeriodType.Units ? price.Period : 0));
-
-		//        await session.SendAsync(new SBuyItemAckMessage(new[] { plrItem.Id }, item))
-		//            .ConfigureAwait(false);
-		//        await session.SendAsync(new SRefreshCashInfoAckMessage(plr.PEN, plr.AP))
-		//            .ConfigureAwait(false);
-		//    }
-		//}
-
-		//[MessageHandler(typeof(CRandomShopRollingStartReqMessage))]
-		//public void RandomShopRollHandler(GameSession session, CRandomShopRollingStartReqMessage message)
-		//{
-		//    var shop = GameServer.Instance.ResourceCache.GetShop();
-
-		//    session.Send(new SRandomShopItemInfoAckMessage
-		//    {
-		//        Item = new RandomShopItemDto()
-		//    });
-		//    //session.Send(new SRandomShopItemInfoAckMessage
-		//    //{
-		//    //    Item = new RandomShopItemDto
-		//    //    {
-		//    //        Unk1 = 2000001,
-		//    //        Value = 2000001,
-		//    //        CurrentWeapon = 2000001,
-		//    //        Unk4 = 2000001,
-		//    //        Unk5 = 2000001,
-		//    //        Unk6 = 0,
-		//    //    }
-		//    //});
-		//}
-
-		[MessageHandler(typeof(CBuyItemReqMessage))]
-		public void BuyItemHandler(GameSession session, CBuyItemReqMessage message)
-		{
-			var shop = GameServer.Instance.ResourceCache.GetShop();
-			var plr = session.Player;
-
-			foreach (var item in message.Items)
-			{
-				var shopItemInfo = shop.GetItemInfo(item.ItemNumber, item.PriceType);
-				if (shopItemInfo == null)
-				{
-					_logger.Error()
-						.Account(session)
-						.Message("No shop entry found for {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-						.Write();
-
-					session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
-					return;
-				}
-				if (!shopItemInfo.IsEnabled)
-				{
-					_logger.Error()
-						.Account(session)
-						.Message("No shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-						.Write();
-
-					session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
-
-					return;
-				}
-
-				var priceGroup = shopItemInfo.PriceGroup;
-				var price = priceGroup.GetPrice(item.PeriodType, item.Period);
-				if (price == null)
-				{
-					_logger.Error()
-						.Account(session)
-						.Message("Invalid price group for shop entry {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-						.Write();
-
-					session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
-
-					return;
-				}
-				if (!price.IsEnabled)
-				{
-					_logger.Error()
-						.Account(session)
-						.Message("Shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
-						.Write();
-
-					session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
-
-					return;
-				}
-
-				if (item.Color > shopItemInfo.ShopItem.ColorGroup)
-				{
-					_logger.Error()
-						.Account(session)
-						.Message("Shop entry {0} {1} {3}{2} has no color {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Color)
-						.Write();
-
-					session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
-
-					return;
-				}
-
-				if (item.Effect != 0)
-				{
-					if (shopItemInfo.EffectGroup.Effects.All(effect => effect.Effect != item.Effect))
-					{
-						_logger.Error()
-							.Account(session)
-							.Message("Shop entry {0} {1} {3}{2} has no effect {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Effect)
-							.Write();
-
-						session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
-
-						return;
-					}
-				}
-
-				if (shopItemInfo.ShopItem.License != ItemLicense.None &&
-					!plr.LicenseManager.Contains(shopItemInfo.ShopItem.License) &&
-					Config.Instance.Game.EnableLicenseRequirement)
-				{
-					_logger.Error()
-						.Account(session)
-						.Message("Doesn't have license {0}", shopItemInfo.ShopItem.License)
-						.Write();
-
-					session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
-
-					return;
-				}
-
-				// ToDo missing price types
-
-				switch (shopItemInfo.PriceGroup.PriceType)
-				{
-					case ItemPriceType.PEN:
-						if (plr.PEN < price.Price)
-						{
-							session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
-
-							return;
-						}
-						plr.PEN -= (uint)price.Price;
-						break;
-
-					case ItemPriceType.AP:
-						if (plr.AP < price.Price)
-						{
-							session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
-
-							return;
-						}
-						plr.AP -= (uint)price.Price;
-						break;
-
-					case ItemPriceType.Premium:
-						if (plr.AP < price.Price)
-						{
-							session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
-
-							return;
-						}
-						plr.AP -= (uint)price.Price;
-						break;
-
-					default:
-						session.Send(new SBuyItemAckMessage(ItemBuyResult.DBError));
-						_logger.Error()
-							.Account(session)
-							.Message("Unknown PriceType {0}", shopItemInfo.PriceGroup.PriceType)
-							.Write();
-						return;
-				}
-
-				// ToDo
-				//var purchaseDto = new PlayerPurchaseDto
-				//{
-				//    account_id = (int)plr.Account.Id,
-				//    shop_item_id = item.ItemNumber,
-				//    shop_item_info_id = shopItemInfo.Id,
-				//    shop_price_id = price.Id,
-				//    time = DateTimeOffset.Now.ToUnixTimeSeconds()
-				//};
-				//db.player_purchase.Add(purchaseDto);
-
-				var plrItem = session.Player.Inventory.Create(shopItemInfo, price, item.Color, item.Effect, (uint)(price.PeriodType == ItemPeriodType.Units ? price.Period : 0));
-
-
-				session.Send(new SBuyItemAckMessage(new[] { plrItem.Id }, item));
-
-				session.Send(new SRefreshCashInfoAckMessage(plr.PEN, plr.AP));
-			}
-		}
-
-		[MessageHandler(typeof(CRandomShopRollingStartReqMessage))]
-		public void RandomShopRollHandler(GameSession session, CRandomShopRollingStartReqMessage message)
-		{
-			var shop = GameServer.Instance.ResourceCache.GetShop();
-
-			session.Send(new SRandomShopItemInfoAckMessage
-			{
-				Item = new RandomShopItemDto()
-			});
-			//session.Send(new SRandomShopItemInfoAckMessage
-			//{
-			//    Item = new RandomShopItemDto
-			//    {
-			//        Unk1 = 2000001,
-			//        Value = 2000001,
-			//        CurrentWeapon = 2000001,
-			//        Unk4 = 2000001,
-			//        Unk5 = 2000001,
-			//        Unk6 = 0,
-			//    }
-			//});
-		}
-
-		[MessageHandler(typeof(CRandomShopItemSaleReqMessage))]
+        [MessageHandler(typeof(CBuyItemReqMessage))]
+        public void BuyItemHandler(GameSession session, CBuyItemReqMessage message)
+        {
+            var shop = GameServer.Instance.ResourceCache.GetShop();
+            var plr = session.Player;
+
+            foreach (var item in message.Items)
+            {
+                var shopItemInfo = shop.GetItemInfo(item.ItemNumber, item.PriceType);
+                if (shopItemInfo == null)
+                {
+                    _logger.Error()
+                        .Account(session)
+                        .Message("No shop entry found for {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Write();
+
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
+                    return;
+                }
+                if (!shopItemInfo.IsEnabled)
+                {
+                    _logger.Error()
+                        .Account(session)
+                        .Message("No shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Write();
+
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
+
+                    return;
+                }
+
+                var priceGroup = shopItemInfo.PriceGroup;
+                var price = priceGroup.GetPrice(item.PeriodType, item.Period);
+                if (price == null)
+                {
+                    _logger.Error()
+                        .Account(session)
+                        .Message("Invalid price group for shop entry {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Write();
+
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
+
+                    return;
+                }
+                if (!price.IsEnabled)
+                {
+                    _logger.Error()
+                        .Account(session)
+                        .Message("Shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Write();
+
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
+
+                    return;
+                }
+
+                if (item.Color > shopItemInfo.ShopItem.ColorGroup)
+                {
+                    _logger.Error()
+                        .Account(session)
+                        .Message("Shop entry {0} {1} {3}{2} has no color {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Color)
+                        .Write();
+
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
+
+                    return;
+                }
+
+                if (item.Effect != 0)
+                {
+                    if (shopItemInfo.EffectGroup.Effects.All(effect => effect.Effect != item.Effect))
+                    {
+                        _logger.Error()
+                            .Account(session)
+                            .Message("Shop entry {0} {1} {3}{2} has no effect {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Effect)
+                            .Write();
+
+                        session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
+
+                        return;
+                    }
+                }
+
+                if (shopItemInfo.ShopItem.License != ItemLicense.None &&
+                    !plr.LicenseManager.Contains(shopItemInfo.ShopItem.License) &&
+                    Config.Instance.Game.EnableLicenseRequirement)
+                {
+                    _logger.Error()
+                        .Account(session)
+                        .Message("Doesn't have license {0}", shopItemInfo.ShopItem.License)
+                        .Write();
+
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.DBError));
+
+                    return;
+                }
+
+                // ToDo missing price types
+
+                switch (shopItemInfo.PriceGroup.PriceType)
+                {
+                    case ItemPriceType.PEN:
+                        if (plr.PEN < price.Price)
+                        {
+                            session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
+
+                            return;
+                        }
+                        plr.PEN -= (uint)price.Price;
+                        break;
+
+                    case ItemPriceType.AP:
+                        if (plr.AP < price.Price)
+                        {
+                            session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
+
+                            return;
+                        }
+                        plr.AP -= (uint)price.Price;
+                        break;
+
+                    case ItemPriceType.Premium:
+                        if (plr.AP < price.Price)
+                        {
+                            session.Send(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
+
+                            return;
+                        }
+                        plr.AP -= (uint)price.Price;
+                        break;
+
+                    default:
+                        session.Send(new SBuyItemAckMessage(ItemBuyResult.DBError));
+                        _logger.Error()
+                            .Account(session)
+                            .Message("Unknown PriceType {0}", shopItemInfo.PriceGroup.PriceType)
+                            .Write();
+                        return;
+                }
+
+                // ToDo
+                //var purchaseDto = new PlayerPurchaseDto
+                //{
+                //    account_id = (int)plr.Account.Id,
+                //    shop_item_id = item.ItemNumber,
+                //    shop_item_info_id = shopItemInfo.Id,
+                //    shop_price_id = price.Id,
+                //    time = DateTimeOffset.Now.ToUnixTimeSeconds()
+                //};
+                //db.player_purchase.Add(purchaseDto);
+
+                var plrItem = session.Player.Inventory.Create(shopItemInfo, price, item.Color, item.Effect, (uint)(price.PeriodType == ItemPeriodType.Units ? price.Period : 0));
+
+
+                session.Send(new SBuyItemAckMessage(new[] { plrItem.Id }, item));
+
+                session.Send(new SRefreshCashInfoAckMessage(plr.PEN, plr.AP));
+            }
+        }
+
+        [MessageHandler(typeof(CRandomShopRollingStartReqMessage))]
+        public void RandomShopRollHandler(GameSession session, CRandomShopRollingStartReqMessage message)
+        {
+            var shop = GameServer.Instance.ResourceCache.GetShop();
+
+            session.Send(new SRandomShopItemInfoAckMessage
+            {
+                Item = new RandomShopItemDto()
+            });
+            //session.Send(new SRandomShopItemInfoAckMessage
+            //{
+            //    Item = new RandomShopItemDto
+            //    {
+            //        Unk1 = 2000001,
+            //        Value = 2000001,
+            //        CurrentWeapon = 2000001,
+            //        Unk4 = 2000001,
+            //        Unk5 = 2000001,
+            //        Unk6 = 0,
+            //    }
+            //});
+        }
+
+        [MessageHandler(typeof(CRandomShopItemSaleReqMessage))]
         public void RandomShopItemSaleHandler(GameSession session, CRandomShopItemSaleReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();

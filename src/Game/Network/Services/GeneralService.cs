@@ -15,32 +15,18 @@ namespace Netsphere.Network.Services
             });
         }
 
-		[MessageHandler(typeof(CQuickStartReqMessage))]
-		public void QuickStartHandler(GameSession session, CQuickStartReqMessage message)
-		{
-			//ToDo - get random room with desired gamerule
-			//var plr = session.Player;
-			//var gamerule = (GameRule) message.Unk;
-			//var roomcount = plr.Channel.RoomManager.Count;
+        [MessageHandler(typeof(CQuickStartReqMessage))]
+        public void QuickStartHandler(GameSession session, CQuickStartReqMessage message)
+        {
+            //ToDo - Logic
+            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+        }
 
-			//for(uint i = 0; i < roomcount; i++)
-			//{
-			//	var room = plr.Channel.RoomManager.Get(i);
-			//	if (room.GameRuleManager.GameRule.GameRule == gamerule)
-			//	{
-			//		room.Join(plr);
-			//		return;
-			//	}
-			//}
-
-			session.Send(new SServerResultInfoAckMessage(ServerResult.QuickJoinFailed));
-		}
-
-		[MessageHandler(typeof(CTaskRequestReqMessage))]
-		public void TaskRequestHandler(GameSession session, CTaskRequestReqMessage message)
-		{
-			//TODO
-			session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
-		}
-	}
+        [MessageHandler(typeof(CTaskRequestReqMessage))]
+        public void TaskRequestHandler(GameSession session, CTaskRequestReqMessage message)
+        {
+            //ToDo - Logic
+            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+        }
+    }
 }
