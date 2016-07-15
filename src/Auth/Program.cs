@@ -54,6 +54,13 @@ namespace Netsphere
                     .Write();
             }
 
+            if (Config.Instance.QuickAccount)
+            {
+                Logger.Warn()
+                    .Message("Quick Account is enabled. Accounts will be created for each new username received!")
+                    .Write();
+            }
+
             Console.CancelKeyPress += OnCancelKeyPress;
             while (true)
             {

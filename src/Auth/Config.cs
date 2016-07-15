@@ -23,6 +23,9 @@ namespace Netsphere
         [JsonProperty("noob_mode")]
         public bool NoobMode { get; set; }
 
+        [JsonProperty("quick_account")]
+        public bool QuickAccount { get; set; }
+
         [JsonProperty("auth_database")]
         public DatabaseSettings AuthDatabase { get; set; }
 
@@ -44,6 +47,7 @@ namespace Netsphere
             MaxConnections = 100;
             WebAPI = new WebAPIConfig();
             NoobMode = true;
+            QuickAccount = false;
             AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
         }
     }
