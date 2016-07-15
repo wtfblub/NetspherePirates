@@ -44,7 +44,7 @@ namespace Netsphere
             MaxConnections = 100;
             WebAPI = new WebAPIConfig();
             NoobMode = true;
-            AuthDatabase = new DatabaseSettings();
+            AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
         }
     }
 
@@ -88,7 +88,6 @@ namespace Netsphere
         public DatabaseSettings()
         {
             Engine = DatabaseEngine.SQLite;
-            Filename = "db\\auth.db";
         }
     }
 

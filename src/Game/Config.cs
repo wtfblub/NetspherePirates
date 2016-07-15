@@ -81,8 +81,8 @@ namespace Netsphere
             AuthWebAPI = new AuthWebAPI();
             SaveInterval = TimeSpan.FromMinutes(1);
             NoobMode = true;
-            AuthDatabase = new DatabaseSettings { Filename = "db\\auth.db" };
-            GameDatabase = new DatabaseSettings { Filename = "db\\game.db" };
+            AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
+            GameDatabase = new DatabaseSettings { Filename = "..\\db\\game.db" };
             Game = new GameSettings();
         }
     }
