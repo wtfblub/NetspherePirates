@@ -6,3 +6,5 @@ Experimental S4 League server emulator for patch 26(Season 1). Everyone is welco
 * MySQL/SQLite
 * Windows(or linux using a nightly mono build)
 * S4 League client patch 26: [Download(mega.nz - 450 MB)](https://mega.nz/#!TEVG1SQL!8w3prQrfvvGURaKBVsbroA0nqXazlyBc7JePWmLYfIY)
+
+A setup guide for pre-built packages can be found [here](https://github.com/wtfblub/NetspherePirates/wiki/Setup-from-a-pre-built-package)
