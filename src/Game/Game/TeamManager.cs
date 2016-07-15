@@ -41,7 +41,6 @@ namespace Netsphere.Game.Systems
         public void Remove(Team team)
         {
             _teams.Remove(team);
-
         }
 
         public void Join(Player plr)
@@ -60,7 +59,7 @@ namespace Netsphere.Game.Systems
             teams[0].Join(plr);
         }
 
-        public void ChangeTeam(Player plr, Team team)
+        public void ChangeTeam(Player plr, Team team, bool report = true)
         {
             //if (plr.Room != Room)
             //throw new RoomException("Player is not inside this room");
@@ -76,7 +75,8 @@ namespace Netsphere.Game.Systems
 
             if (plr.RoomInfo.IsReady)
             {
-                plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+				if(report)
+					plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                 throw new RoomException("Player is already ready");
             }
 
@@ -92,7 +92,8 @@ namespace Netsphere.Game.Systems
             }
             catch (TeamLimitReachedException)
             {
-                plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+				if(report)
+					plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
             }
         }
 
@@ -120,7 +121,7 @@ namespace Netsphere.Game.Systems
             switch (mode)
             {
                 case PlayerGameMode.Normal:
-                    if (team.Players.Count() >= team.PlayerLimit)
+					if (team.Players.Count() >= team.PlayerLimit)
                     {
                         plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
@@ -128,9 +129,11 @@ namespace Netsphere.Game.Systems
                     break;
 
                 case PlayerGameMode.Spectate:
-                    if (team.Spectators.Count() >= team.SpectatorLimit)
+					Console.WriteLine($"{team.Spectators.Count()},{team.SpectatorLimit}");
+					Console.WriteLine($"{team.Spectators.Count() >= team.SpectatorLimit}");
+					if (team.Spectators.Count() >= team.SpectatorLimit)
                     {
-                        plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+						plr.Session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
                     }
                     break;
