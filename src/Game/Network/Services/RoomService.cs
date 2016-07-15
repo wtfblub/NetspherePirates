@@ -269,6 +269,7 @@ namespace Netsphere.Network.Services
                 AccountId = plr.Account.Id,
                 Skills = @char.Skills.GetItems().Select(item => item?.ItemNumber ?? 0).ToArray(),
                 Weapons = @char.Weapons.GetItems().Select(item => item?.ItemNumber ?? 0).ToArray(),
+                Costumes = new ItemNumber[(int)CostumeSlot.Max],
                 Unk5 = message.Unk1.Unk5,
                 Unk6 = message.Unk1.Unk6,
                 Unk7 = message.Unk1.Unk7,
