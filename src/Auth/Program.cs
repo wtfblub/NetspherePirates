@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BlubLib;
 using Nancy.Hosting.Self;
 using Netsphere.Network;
 using Newtonsoft.Json;
@@ -120,7 +121,7 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    dbConfig = SqliteConfiguration.Create(config.Filename, null);
+                    dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
                     break;
 
                 default:

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using BlubLib;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
@@ -317,7 +318,7 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    dbConfig = SqliteConfiguration.Create(config.Filename, null);
+                    dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
                     break;
 
                 default:
