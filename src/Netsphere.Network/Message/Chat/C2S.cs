@@ -31,13 +31,13 @@ namespace Netsphere.Network.Message.Chat
     [BlubContract]
     public class CFriendReqMessage : ChatMessage
     {
-        [BlubMember(1)]
+        [BlubMember(0)]
         public uint Action { get; set; }
 
         [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(2, typeof(StringSerializer))]
         public string Nickname { get; set; }
     }
 
