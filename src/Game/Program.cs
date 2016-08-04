@@ -285,7 +285,7 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    dbConfig = SqliteConfiguration.Create(config.Filename, null);
+                    dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
                     break;
 
                 default:
