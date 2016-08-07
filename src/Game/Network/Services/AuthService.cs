@@ -389,7 +389,7 @@ namespace Netsphere.Network.Services
                         continue;
                     }
 
-                    var price = itemInfo.PriceGroup.GetPrice(startItem.ShopItemInfo.Id);
+                    var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPrice.Id);
                     if (price == null)
                     {
                         Logger.Warn()
