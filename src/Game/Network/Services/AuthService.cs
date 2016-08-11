@@ -163,6 +163,7 @@ namespace Netsphere.Network.Services
                     // first time connecting to this server
                     plrDto = GameDatabase.Instance.Players.Create((int)account.Id);
                     plrDto.Level = Config.Instance.Game.StartLevel;
+                    plrDto.TotalExperience = (int)GameServer.Instance.ResourceCache.GetExperience().ToList()[plrDto.Level].Value.TotalExperience;
                     plrDto.PEN = Config.Instance.Game.StartPEN;
                     plrDto.AP = Config.Instance.Game.StartAP;
                     plrDto.Coins1 = Config.Instance.Game.StartCoins1;

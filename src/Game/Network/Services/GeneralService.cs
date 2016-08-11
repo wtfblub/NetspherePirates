@@ -14,5 +14,19 @@ namespace Netsphere.Network.Services
                 ServerTime = (uint)Program.AppTime.ElapsedMilliseconds
             });
         }
+
+        [MessageHandler(typeof(CQuickStartReqMessage))]
+        public void QuickStartHandler(GameSession session, CQuickStartReqMessage message)
+        {
+            //ToDo - Logic
+            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+        }
+
+        [MessageHandler(typeof(CTaskRequestReqMessage))]
+        public void TaskRequestHandler(GameSession session, CTaskRequestReqMessage message)
+        {
+            //ToDo - Logic
+            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+        }
     }
 }

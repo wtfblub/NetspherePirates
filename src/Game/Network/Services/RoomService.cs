@@ -327,6 +327,83 @@ namespace Netsphere.Network.Services
             session.Player.Room.ChangeRules(message.Settings);
         }
 
+        [MessageHandler(typeof(CAutoMixingTeamReqMessage))]
+        public void CAutoMixingTeamReq(GameSession session, CAutoMixingTeamReqMessage message)
+        {
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr != room.Master)
+                return;
+
+            var playerlist = room.Players.Values.ToList();
+
+            if (playerlist.Count < 3)
+                return;
+
+            var rand = new Random();
+            var rndplrlist = playerlist.OrderBy(x => rand.Next()).ToList();
+
+            for (int num = 0; num < playerlist.Count; num++)
+            {
+                try
+                {
+                    if (num % 2 == 0)
+                        plr.Room.TeamManager.ChangeTeam(rndplrlist[num], Team.Alpha, false);
+                    else
+                        plr.Room.TeamManager.ChangeTeam(rndplrlist[num], Team.Beta, false);
+                }
+                catch (RoomException ex)
+                {
+                    _logger.Error()
+                        .Account(plr)
+                        .Exception(ex)
+                        .Message("RoomException - Failed to change shuffle teams - {0}", ex.Message)
+                        .Write();
+                }
+            }
+        }
+
+        [MessageHandler(typeof(CMixChangeTeamReqMessage))]
+        public void CMixChangeTeamReq(GameSession session, CMixChangeTeamReqMessage message)
+        {
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (room.Master != plr)
+                return;
+
+            var targetPlr = GameServer.Instance.PlayerManager.Get(message.Unk1);
+
+            var targetTeam = (Team)message.Unk4;
+
+            try
+            {
+                plr.Room.TeamManager.ChangeTeam(targetPlr, targetTeam, false);
+            }
+            catch (RoomException ex)
+            {
+                _logger.Error()
+                    .Account(plr)
+                    .Exception(ex).Message("Failed to change to {0} team", targetTeam)
+                    .Write();
+            }
+        }
+
+        [MessageHandler(typeof(CLeavePlayerRequestReqMessage))]
+        public void CLeavePlayerRequestReq(GameSession session, CLeavePlayerRequestReqMessage message)
+        {
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (room.Master != plr)
+                return;
+
+            var targetPlr = GameServer.Instance.PlayerManager.Get(message.AccountId);
+
+            room.Leave(targetPlr, message.Reason);
+        }
+
         #region Scores
 
         [MessageHandler(typeof(CScoreKillReqMessage))]

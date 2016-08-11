@@ -55,6 +55,13 @@ namespace Netsphere
                     .Write();
             }
 
+            if (Config.Instance.AutoRegister)
+            {
+                Logger.Warn()
+                    .Message("AutoRegister is enabled. Accounts will be created for each new username received!")
+                    .Write();
+            }
+
             Console.CancelKeyPress += OnCancelKeyPress;
             while (true)
             {
