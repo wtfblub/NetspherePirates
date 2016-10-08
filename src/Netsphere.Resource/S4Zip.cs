@@ -11,6 +11,7 @@ namespace Netsphere.Resource
 {
     public class S4Zip : IReadOnlyDictionary<string, S4ZipEntry>
     {
+        private static readonly S4Crypt s_s4FileCrypt = new S4Crypt(searchKey: false);
         private readonly Dictionary<string, S4ZipEntry> _entries;
 
         public string ZipPath { get; }
@@ -38,12 +39,16 @@ namespace Netsphere.Resource
 
         public void Open(byte[] data)
         {
-            var tmp = Decrypt(data);
-            using (var r = tmp.ToBinaryReader())
+            data = Decrypt(data);
+            using (var r = data.ToBinaryReader())
             {
-                r.ReadInt32();
+                if (r.ReadInt32() != 1)
+                    throw new Exception("Invalid s4 league file container");
 
                 var entryCount = r.ReadInt32();
+                if (entryCount < 0)
+                    throw new Exception("Invalid s4 league file container");
+
                 for (var i = 0; i < entryCount; i++)
                 {
                     var entrySize = r.ReadInt32();
@@ -92,14 +97,15 @@ namespace Netsphere.Resource
                     }
                 }
 
-                var outBuffer = w.ToArray();
-                outBuffer = Encrypt(outBuffer);
-                File.WriteAllBytes(fileName, outBuffer);
+                var data = w.ToArray();
+                data = Encrypt(data);
+                File.WriteAllBytes(fileName, data);
             }
         }
 
         public S4ZipEntry CreateEntry(string fullName, byte[] data)
         {
+            fullName = fullName.ToLower();
             if (_entries.ContainsKey(fullName))
                 throw new ArgumentException(fullName + " already exists", fullName);
 
@@ -116,6 +122,7 @@ namespace Netsphere.Resource
 
         public S4ZipEntry RemoveEntry(string fullName, bool deleteFromDisk)
         {
+            fullName = fullName.ToLower();
             S4ZipEntry entry;
             if (!_entries.TryGetValue(fullName, out entry))
                 throw new ArgumentException(fullName + " does not exist", fullName);
@@ -126,28 +133,28 @@ namespace Netsphere.Resource
             return entry;
         }
 
-        private byte[] Encrypt(byte[] data)
+        private static byte[] Encrypt(byte[] data)
         {
-            var cipher = S4Crypto.EncryptAES(data);
-            S4Crypto.Encrypt(cipher);
+            var cipher = data.EncryptAes();
+            S4Crypt.Default.Encrypt(cipher);
             return cipher;
         }
 
-        private byte[] Decrypt(byte[] data)
+        private static byte[] Decrypt(byte[] data)
         {
-            S4Crypto.Decrypt(data);
-            return S4Crypto.DecryptAES(data);
+            S4Crypt.Default.Decrypt(data);
+            return data.DecryptAes();
         }
 
-        private byte[] EncryptEntry(byte[] data)
+        private static byte[] EncryptEntry(byte[] data)
         {
-            S4Crypto.EncryptCapped(data);
+            S4Crypt.Capped32.Encrypt(data);
             return data;
         }
 
-        private byte[] DecryptEntry(byte[] data)
+        private static byte[] DecryptEntry(byte[] data)
         {
-            S4Crypto.DecryptCapped(data);
+            S4Crypt.Capped32.Decrypt(data);
             return data;
         }
 
@@ -155,7 +162,7 @@ namespace Netsphere.Resource
         {
             var realSize = data.Length;
             var buffer = miniLzo.Compress(data);
-            S4Crypto.Encrypt(buffer, 0, 0);
+            s_s4FileCrypt.Encrypt(buffer);
 
             using (var w = new BinaryWriter(new MemoryStream()))
             {
@@ -175,7 +182,7 @@ namespace Netsphere.Resource
                 buffer = r.ReadToEnd();
             }
 
-            S4Crypto.Decrypt(buffer, 0, 0);
+            s_s4FileCrypt.Decrypt(buffer);
             return miniLzo.Decompress(buffer, realSize);
         }
 
@@ -218,7 +225,6 @@ namespace Netsphere.Resource
         }
 
         #endregion
-
     }
 
     public class S4ZipEntry
@@ -238,6 +244,7 @@ namespace Netsphere.Resource
             FullName = fullName;
             Name = Path.GetFileName(fullName);
         }
+
         internal S4ZipEntry(S4Zip archive, string fullName, int length, long checksum, int unk)
         {
             Archive = archive;
@@ -252,10 +259,9 @@ namespace Netsphere.Resource
         {
             return Decrypt(File.ReadAllBytes(FileName));
         }
+
         public void SetData(byte[] data)
         {
-            Length = data.Length;
-            Checksum = GetChecksum(data);
             var encrypted = Encrypt(data);
             File.WriteAllBytes(FileName, encrypted);
         }
@@ -264,6 +270,7 @@ namespace Netsphere.Resource
         {
             Remove(true);
         }
+
         public void Remove(bool deleteFromDisk)
         {
             Archive.RemoveEntry(FullName, deleteFromDisk);
@@ -279,33 +286,37 @@ namespace Netsphere.Resource
             var isX7 = Name.EndsWith(".x7", StringComparison.InvariantCultureIgnoreCase);
             if (Name.EndsWith(".lua", StringComparison.InvariantCultureIgnoreCase) || isX7)
             {
-                if (isX7) data = S4Crypto.EncryptX7(data);
-                data = S4Crypto.EncryptAES(data);
-                S4Crypto.Encrypt(data);
+                if (isX7)
+                    data = data.EncryptX7();
+                data = data.EncryptAes();
+                S4Crypt.Default.Encrypt(data);
             }
 
+            Checksum = GetChecksum(data);
             Length = data.Length;
 
-            S4Crypto.EncryptCapped(data);
+            S4Crypt.Capped32.Encrypt(data);
             if (data.Length < 1048576)
                 data = miniLzo.Compress(data);
-            S4Crypto.SwapBytes(data);
+            data.SwapBytes();
 
             return data;
         }
+
         private byte[] Decrypt(byte[] data)
         {
-            S4Crypto.SwapBytes(data);
+            data.SwapBytes();
             if (data.Length < 1048576)
                 data = miniLzo.Decompress(data, Length);
-            S4Crypto.DecryptCapped(data);
+            S4Crypt.Capped32.Decrypt(data);
 
             var isX7 = Name.EndsWith(".x7", StringComparison.InvariantCultureIgnoreCase);
             if (Name.EndsWith(".lua", StringComparison.InvariantCultureIgnoreCase) || isX7)
             {
-                S4Crypto.Decrypt(data);
-                data = S4Crypto.DecryptAES(data);
-                if (isX7) data = S4Crypto.DecryptX7(data);
+                S4Crypt.Default.Decrypt(data);
+                data = data.DecryptAes();
+                if (isX7)
+                    data = data.DecryptX7();
             }
 
             return data;
@@ -313,14 +324,14 @@ namespace Netsphere.Resource
 
         private long GetChecksum(byte[] data)
         {
-            return S4CRC.ComputeHash(data, FullName);
+            return data.S4CRC(FullName);
         }
     }
 
-    internal static class S4Crypto
+    internal class S4Crypt
     {
         // ReSharper disable RedundantExplicitArraySize
-        private static readonly byte[][][] KeyTable = new byte[2][][]
+        private static readonly byte[][][] s_keyTable = new byte[2][][]
         {
             #region Table1
             new byte[10][]
@@ -556,217 +567,301 @@ namespace Netsphere.Resource
         };
         // ReSharper restore RedundantExplicitArraySize
 
-        private static readonly uint[] KeyTable2 = { 0xFE292513, 0xCD4802EF };
+        public static S4Crypt Default { get; } = new S4Crypt();
+        public static S4Crypt Capped32 { get; } = new S4Crypt(32, 256, false);
+        public static S4Crypt Capped40 { get; } = new S4Crypt(40, 256, false);
 
-        private static readonly byte[] AesIV = { 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF };
-        private static readonly byte[] AesKey =
+        private readonly int _keySize;
+        private readonly int _lengthLimit;
+        private readonly bool _searchKey;
+
+        public S4Crypt(int keySize = 40, int lengthLimit = 0, bool searchKey = true)
+        {
+            if (keySize < 1)
+                throw new ArgumentOutOfRangeException(nameof(keySize));
+
+            _keySize = keySize;
+            _searchKey = searchKey;
+
+            if (lengthLimit < 0)
+                lengthLimit = 0;
+            _lengthLimit = lengthLimit;
+        }
+
+        public void Encrypt(byte[] data, int lengthForKeySearch = 0, int blockIndex = -1)
+        {
+            byte[] key = null;
+            if (_searchKey)
+            {
+                key = blockIndex > -1
+                    ? GetKey(lengthForKeySearch > 0
+                        ? lengthForKeySearch
+                        : data.Length, blockIndex)
+                    : GetKey(lengthForKeySearch > 0 ? lengthForKeySearch : data.Length);
+            }
+            else
+            {
+                key = s_keyTable[0][0];
+            }
+            var length = data.Length;
+            if (_lengthLimit > 0 && length > _lengthLimit)
+                length = _lengthLimit;
+
+            for (var i = 0; i < length; ++i)
+            {
+                var x = (byte)(data[i] ^ key[i % _keySize]);
+                data[i] = (byte)(((x & 0x80) >> 7) & 1 | (x << 1) & 0xFE);
+            }
+        }
+
+        public void Decrypt(byte[] data, int lengthForKeySearch = 0, int blockIndex = -1)
+        {
+            //var key = _searchKey
+            //    ? GetKey(lengthForKeySearch > 0 ? lengthForKeySearch : data.Length)
+            //    : s_keyTable[0][0];
+            byte[] key = null;
+            if (_searchKey)
+            {
+                key = blockIndex > -1
+                    ? GetKey(lengthForKeySearch > 0
+                        ? lengthForKeySearch
+                        : data.Length, blockIndex)
+                    : GetKey(lengthForKeySearch > 0 ? lengthForKeySearch : data.Length);
+            }
+            else
+            {
+                key = s_keyTable[0][0];
+            }
+            File.WriteAllBytes("D:\\key.bin", key);
+            var length = data.Length;
+            if (_lengthLimit > 0 && length > _lengthLimit)
+                length = _lengthLimit;
+
+            for (var i = 0; i < length; ++i)
+            {
+                var x = data[i];
+                data[i] = (byte)((x >> 1) & 0x7F | ((x & 1) << 7) & 0x80);
+                data[i] ^= key[i % _keySize];
+            }
+        }
+
+        private static byte[] GetKey(int length)
+        {
+            const uint xorKey = 0xCD4802EF;
+
+            var num = (uint)((length - 8) >> 2);
+            var keyIndex = (num ^ xorKey) % 10;
+            var blockIndex = (num ^ xorKey) % 2;
+            return s_keyTable[blockIndex][keyIndex];
+        }
+
+        private static byte[] GetKey(int length, int blockIndex)
+        {
+            const uint xorKey = 0xCD4802EF;
+
+            //var num = (uint)((length - 8) >> 2);
+            var keyIndex = (length ^ xorKey) % 10;
+            return s_keyTable[blockIndex][keyIndex];
+        }
+    }
+
+    internal static class S4CryptoUtilities
+    {
+        private static readonly RandomNumberGenerator s_random = new RNGCryptoServiceProvider();
+        private static readonly byte[] s_aesIV = { 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF };
+        private static readonly byte[] s_aesKey =
         {
             0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
             0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
             0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF
         };
 
-        public static void EncryptCapped(byte[] data)
+        private static byte[] BuildX7(byte[] data, uint crc, int realSize)
         {
-            var length = data.Length > 256 ? 256 : data.Length;
-            for (var i = 0; i < length; i++)
+            var encrypted1 = data.FastClone();
+            var encrypted2 = data.FastClone();
+            S4Crypt.Default.Encrypt(encrypted1, blockIndex: 0);
+            S4Crypt.Default.Encrypt(encrypted2, blockIndex: 1);
+
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
-                data[i] ^= KeyTable[0][0][i % 32];
-                data[i] = (byte)(((data[i] & 0x80) >> 7) & 1 | (data[i] << 1) & 0xFE);
+                var encryptedSize = (int)(realSize ^ 0xFE292513);
+                w.Write(encryptedSize);
+                w.Write(crc);
+                for (var i = 0; i < data.Length; i++)
+                {
+                    w.Write(data[i]);
+                    w.Write(encrypted1[i]);
+                    w.Write((byte)0);
+                    w.Write(encrypted2[i]);
+                }
+
+                return w.ToArray();
             }
         }
 
-        public static void Encrypt(byte[] data)
+        private static byte[] RemoveX7Junk(byte[] data)
         {
-            uint blockIndex;
-            uint keyIndex;
-            GetKeyTableIndex(data.Length, out blockIndex, out keyIndex);
-            Encrypt(data, blockIndex, keyIndex);
-        }
+            var newSize = (data.Length - 8) >> 2;
+            var outBuffer = new byte[newSize];
 
-        public static void Encrypt(byte[] data, uint blockIndex, uint keyIndex)
-        {
-            for (var i = 0; i < data.Length; i++)
+            for (var i = 0; i < newSize; i++)
+                outBuffer[i] = data[i * 4 + 8];
+
+            using (var r = data.ToBinaryReader())
             {
-                data[i] ^= KeyTable[blockIndex][keyIndex][i % 40];
-                data[i] = (byte)(((data[i] & 0x80) >> 7) & 1 | (data[i] << 1) & 0xFE);
+                r.BaseStream.Position += 8;
+                var d1 = new byte[newSize];
+                var d2 = new byte[newSize];
+                var d3 = new byte[newSize];
+                var d4 = new byte[newSize];
+
+                for (var i = 0; i < newSize; i++)
+                {
+                    d1[i] = r.ReadByte();
+                    d2[i] = r.ReadByte();
+                    d3[i] = r.ReadByte();
+                    d4[i] = r.ReadByte();
+                }
+
+                S4Crypt.Default.Decrypt(d2, lengthForKeySearch: newSize, blockIndex: 0);
+                S4Crypt.Default.Decrypt(d4, lengthForKeySearch: newSize, blockIndex: 1);
+                File.WriteAllBytes("D:\\1.dat", d1);
+                File.WriteAllBytes("D:\\2.dat", d2);
+                File.WriteAllBytes("D:\\3.dat", d3);
+                File.WriteAllBytes("D:\\4.dat", d4);
+
             }
+
+            return outBuffer;
         }
 
-        public static void DecryptCapped(byte[] data)
+        private static uint X7CRC(byte[] data)
         {
-            var length = data.Length > 256 ? 256 : data.Length;
-            for (var i = 0; i < length; i++)
-            {
-                data[i] = (byte)((data[i] >> 1) & 0x7F | ((data[i] & 1) << 7) & 0x80);
-                data[i] ^= KeyTable[0][0][i % 32];
-            }
+            var crc = Hash.GetUInt32<CRC32>(data);
+            return crc ^ 0xBAD0A4B3;
         }
 
-        public static void Decrypt(byte[] data)
+        #region Extensions
+
+        public static long S4CRC(this byte[] @this, string fullName)
         {
-            uint blockIndex;
-            uint keyIndex;
-            GetKeyTableIndex(data.Length, out blockIndex, out keyIndex);
-            Decrypt(data, blockIndex, keyIndex);
+            long dataCRC = Hash.GetUInt32<CRC32>(@this);
+            long pathCRC = Hash.GetUInt32<CRC32>(Encoding.ASCII.GetBytes(fullName));
+            var finalCRC = dataCRC | (pathCRC << 32);
+
+            var tmp = BitConverter.GetBytes(finalCRC);
+            S4Crypt.Capped32.Encrypt(tmp);
+            return BitConverter.ToInt64(tmp, 0);
         }
 
-        public static void Decrypt(byte[] data, uint blockIndex, uint keyIndex)
+        public static void SwapBytes(this byte[] @this)
         {
-            for (var i = 0; i < data.Length; i++)
-            {
-                data[i] = (byte)((data[i] >> 1) & 0x7F | ((data[i] & 1) << 7) & 0x80);
-                data[i] ^= KeyTable[blockIndex][keyIndex][i % 40];
-            }
-        }
-
-        public static byte[] EncryptAES(byte[] data)
-        {
-            using (var aes = new RijndaelManaged())
-            {
-                aes.Mode = CipherMode.CFB;
-                aes.Padding = PaddingMode.Zeros;
-                aes.KeySize = 192;
-                aes.BlockSize = 128;
-
-                Array.Resize(ref data, data.Length + 16 - data.Length % 16);
-                aes.GenerateKeys(data.Length);
-                return aes.Encrypt(data);
-            }
-        }
-        public static byte[] DecryptAES(byte[] data)
-        {
-            using (var aes = new RijndaelManaged())
-            {
-                aes.Mode = CipherMode.CFB;
-                aes.Padding = PaddingMode.Zeros;
-                aes.KeySize = 192;
-                aes.BlockSize = 128;
-                aes.GenerateKeys(data.Length);
-
-                Array.Resize(ref data, data.Length + 16 - data.Length % 16);
-
-                return aes.Decrypt(data);
-            }
-        }
-
-        public static void SwapBytes(byte[] data)
-        {
-            var size = data.Length;
+            var size = @this.Length;
             var i = 0;
             var sizeCapped = size >= 128 ? 128 : size;
 
             while (i < sizeCapped / 2)
             {
                 var j = size - 1 - i;
-                var swap = data[j];
-                data[j] = data[i];
-                data[i++] = swap;
+                var swap = @this[j];
+                @this[j] = @this[i];
+                @this[i++] = swap;
             }
         }
 
-        public static byte[] EncryptX7(byte[] data)
+        public static byte[] EncryptAes(this byte[] @this)
         {
-            var crc = X7CRC.ComputeHash(data);
-            var realSize = data.Length;
+            var key = new byte[16];
+            var iv = new byte[16];
+            s_random.GetNonZeroBytes(key);
+            s_random.GetNonZeroBytes(iv);
 
-            data = miniLzo.Compress(data);
-            data = BuildX7(data, crc, realSize);
+            var data = @this.FastClone();
+            using (var aes = new RijndaelManaged())
+            {
+                aes.Mode = CipherMode.CFB;
+                aes.Padding = PaddingMode.None;
+                aes.KeySize = 192;
+                aes.BlockSize = 128;
+                aes.GenerateKeys(data.Length);
 
-            return data;
+                var blockSize = aes.BlockSize/8;
+                var needChange = data.Length % blockSize != 0;
+                var diff = blockSize - data.Length % blockSize;
+                if (needChange)
+                    Array.Resize(ref data, data.Length + diff);
+
+                data = aes.Encrypt(data);
+
+                if (needChange)
+                    Array.Resize(ref data, data.Length - diff);
+                return data;
+            }
         }
-        public static byte[] DecryptX7(byte[] data)
+
+        public static byte[] DecryptAes(this byte[] @this)
         {
-            var realSize = (int)(BitConverter.ToInt32(data, 0) ^ KeyTable2[0]);
-            data = RemoveX7Junk(data);
+            var data = @this.FastClone();
+            using (var aes = new RijndaelManaged())
+            {
+                aes.Mode = CipherMode.CFB;
+                aes.Padding = PaddingMode.None;
+                aes.KeySize = 192;
+                aes.BlockSize = 128;
+                aes.GenerateKeys(data.Length);
+
+                var blockSize = aes.BlockSize / 8;
+                var needChange = data.Length%blockSize != 0;
+                var diff = blockSize - data.Length % blockSize;
+                if (needChange)
+                    Array.Resize(ref data, data.Length + diff);
+
+                data = aes.Decrypt(data);
+
+                if (needChange)
+                    Array.Resize(ref data, data.Length - diff);
+                return data;
+            }
+        }
+
+        public static byte[] EncryptX7(this byte[] @this)
+        {
+            var crc = X7CRC(@this);
+            var realSize = @this.Length;
+
+            @this = miniLzo.Compress(@this);
+            @this = BuildX7(@this, crc, realSize);
+
+            return @this;
+        }
+
+        public static byte[] DecryptX7(this byte[] @this)
+        {
+            var realSize = (int)(BitConverter.ToInt32(@this, 0) ^ 0xFE292513);
+            @this = RemoveX7Junk(@this);
 
             LzoResult res;
-            data = miniLzo.Decompress(data, realSize, out res);
-            return data;
+            @this = miniLzo.Decompress(@this, realSize, out res);
+            return @this;
         }
 
-        public static byte[] BuildX7(byte[] data, uint crc, int realSize)
+        private static void GenerateKeys(this SymmetricAlgorithm @this, int length)
         {
-            var buffer1 = data.FastClone();
-            var buffer2 = data.FastClone();
-            Encrypt(buffer1);
-            Encrypt(buffer2);
+            var key = s_aesKey.FastClone();
+            var iv = s_aesIV.FastClone();
 
-            using (var w = new BinaryWriter(new MemoryStream()))
-            {
-                var encryptedSize = (int)(realSize ^ KeyTable2[0]);
-                w.Write(encryptedSize);
-                w.Write(crc);
-                for (var i = 0; i < data.Length; i++)
-                {
-                    w.Write(data[i]);
-                    w.Write(buffer1[i]);
-                    w.Write((byte)0);
-                    w.Write(buffer2[i]);
-                }
-
-                return w.ToArray();
-            }
-        }
-        private static byte[] RemoveX7Junk(byte[] data)
-        {
-            var newSize = (data.Length - 8) / 4;
-            var outBuffer = new byte[newSize];
-
-            for (var i = 0; i < newSize; i++)
-                outBuffer[i] = data[i * 4 + 8];
-
-            return outBuffer;
-        }
-
-        private static void GetKeyTableIndex(int length, out uint blockIndex, out uint keyIndex)
-        {
-            var num = (uint)((length - 8) / 4);
-            keyIndex = (num ^ KeyTable2[1]) % 10;
-            blockIndex = (num ^ KeyTable2[1]) % 2;
-        }
-
-        private static void GenerateKeys(this SymmetricAlgorithm aes, int length)
-        {
-            uint blockIndex;
-            uint keyIndex;
-
-            GetKeyTableIndex(length, out blockIndex, out keyIndex);
-
-            var key = AesKey.FastClone();
-            var iv = AesIV.FastClone();
-            Decrypt(key, blockIndex, keyIndex);
-            Decrypt(iv, blockIndex, keyIndex);
+            S4Crypt.Default.Decrypt(key, length);
+            S4Crypt.Default.Decrypt(iv, length);
 
             var tmp = new byte[iv.Length + 8];
             Array.Copy(iv, 0, tmp, 0, iv.Length);
             Array.Copy(key, 0, tmp, iv.Length, 8);
 
-            aes.Key = key;
-            aes.IV = tmp;
+            @this.Key = key;
+            @this.IV = tmp;
         }
-    }
 
-    internal static class S4CRC
-    {
-        public static long ComputeHash(byte[] data, string fullName)
-        {
-            long dataCRC = Hash.GetUInt32<CRC32>(data);
-            long pathCRC = Hash.GetUInt32<CRC32>(Encoding.ASCII.GetBytes(fullName));
-            var finalCRC = dataCRC | (pathCRC << 32);
-
-            var tmp = BitConverter.GetBytes(finalCRC);
-            S4Crypto.EncryptCapped(tmp);
-            return BitConverter.ToInt64(tmp, 0);
-        }
-    }
-
-    internal static class X7CRC
-    {
-        public static uint ComputeHash(byte[] data)
-        {
-            var crc = Hash.GetUInt32<CRC32>(data);
-            return crc ^ 0xBAD0A4B3;
-        }
+        #endregion
     }
 }
