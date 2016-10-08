@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProudNet", "src\ProudNet\ProudNet.csproj", "{7ED60C00-2BD9-4426-A9A5-295547B8C970}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataExtractor", "src\tools\DataExtractor\DataExtractor.csproj", "{7364B088-32B5-4033-B5A0-5147B8939F6E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.ServiceModel", "src\Auth.ServiceModel\Auth.ServiceModel.csproj", "{11AB9599-6A32-4411-9E14-1A04B47E9BCD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetsphereExplorer", "src\tools\NetsphereExplorer\NetsphereExplorer.csproj", "{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,11 +105,20 @@ Global
 		{11AB9599-6A32-4411-9E14-1A04B47E9BCD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{11AB9599-6A32-4411-9E14-1A04B47E9BCD}.Release|x86.ActiveCfg = Release|Any CPU
 		{11AB9599-6A32-4411-9E14-1A04B47E9BCD}.Release|x86.Build.0 = Release|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Debug|x86.Build.0 = Debug|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Release|x86.ActiveCfg = Release|Any CPU
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7364B088-32B5-4033-B5A0-5147B8939F6E} = {D196F056-F7FD-4F53-AD64-3D8677631492}
+		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3} = {D196F056-F7FD-4F53-AD64-3D8677631492}
 	EndGlobalSection
 EndGlobal
