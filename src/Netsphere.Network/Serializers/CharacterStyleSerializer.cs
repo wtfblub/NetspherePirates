@@ -20,10 +20,10 @@ namespace Netsphere.Network.Serializers
 
         public void EmitDeserialize(Emit emiter, Local value)
         {
-            emiter.LoadLocalAddress(value);
             emiter.LoadArgument(1);
             emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt32)));
-            emiter.Call(typeof(CharacterStyle).GetConstructor(new[] { typeof(uint) }));
+            emiter.NewObject<CharacterStyle, uint>();
+            emiter.StoreLocal(value);
         }
     }
 }
