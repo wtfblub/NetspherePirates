@@ -19,7 +19,7 @@ namespace Netsphere.Network.Serializers
             emiter.LoadLocalAddress(value);
             emiter.Call(typeof (TimeSpan).GetProperty(nameof(TimeSpan.TotalMinutes)).GetMethod);
             emiter.Convert<byte>();
-            emiter.CallVirtual(typeof (BinaryWriter).GetMethod(nameof(BinaryWriter), new[] {typeof (byte)}));
+            emiter.CallVirtual(typeof (BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] {typeof (byte)}));
         }
 
         public void EmitDeserialize(Emit emiter, Local value)
