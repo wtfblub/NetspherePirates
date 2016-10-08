@@ -632,7 +632,6 @@ namespace Netsphere.Resource
             {
                 key = s_keyTable[0][0];
             }
-            File.WriteAllBytes("D:\\key.bin", key);
             var length = data.Length;
             if (_lengthLimit > 0 && length > _lengthLimit)
                 length = _lengthLimit;
@@ -707,31 +706,6 @@ namespace Netsphere.Resource
 
             for (var i = 0; i < newSize; i++)
                 outBuffer[i] = data[i * 4 + 8];
-
-            using (var r = data.ToBinaryReader())
-            {
-                r.BaseStream.Position += 8;
-                var d1 = new byte[newSize];
-                var d2 = new byte[newSize];
-                var d3 = new byte[newSize];
-                var d4 = new byte[newSize];
-
-                for (var i = 0; i < newSize; i++)
-                {
-                    d1[i] = r.ReadByte();
-                    d2[i] = r.ReadByte();
-                    d3[i] = r.ReadByte();
-                    d4[i] = r.ReadByte();
-                }
-
-                S4Crypt.Default.Decrypt(d2, lengthForKeySearch: newSize, blockIndex: 0);
-                S4Crypt.Default.Decrypt(d4, lengthForKeySearch: newSize, blockIndex: 1);
-                File.WriteAllBytes("D:\\1.dat", d1);
-                File.WriteAllBytes("D:\\2.dat", d2);
-                File.WriteAllBytes("D:\\3.dat", d3);
-                File.WriteAllBytes("D:\\4.dat", d4);
-
-            }
 
             return outBuffer;
         }
