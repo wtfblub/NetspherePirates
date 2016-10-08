@@ -257,7 +257,7 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class SCheckNickAckMessage : GameMessage
     {
-        [BlubMember(0)]
+        [BlubMember(0, typeof(IntBooleanSerializer))]
         public bool IsAvailable { get; set; }
 
         public SCheckNickAckMessage()
