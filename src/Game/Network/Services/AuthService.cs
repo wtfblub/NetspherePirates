@@ -155,13 +155,14 @@ namespace Netsphere.Network.Services
 
             using (var scope = new DataAccessScope())
             {
+                var id = (int) account.Id;
                 var plrDto = await GameDatabase.Instance.Players
-                    .FirstOrDefaultAsync(p => p.Id == (int)account.Id)
+                    .FirstOrDefaultAsync(p => p.Id == id)
                     .ConfigureAwait(false);
                 if (plrDto == null)
                 {
                     // first time connecting to this server
-                    plrDto = GameDatabase.Instance.Players.Create((int)account.Id);
+                    plrDto = GameDatabase.Instance.Players.Create(id);
                     plrDto.Level = Config.Instance.Game.StartLevel;
                     plrDto.PEN = Config.Instance.Game.StartPEN;
                     plrDto.AP = Config.Instance.Game.StartAP;
