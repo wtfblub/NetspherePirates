@@ -71,16 +71,16 @@
       <HintPath>..\..\packages\Platform.Xml.Serialization.1.2.1.287\lib\net452\Platform.Xml.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shaolinq, Version=1.1.0.966, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shaolinq.1.1.0.966\lib\net452\Shaolinq.dll</HintPath>
+    <Reference Include="Shaolinq, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Shaolinq.1.0.1.812-rc\lib\net452\Shaolinq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shaolinq.MySql, Version=1.1.0.966, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shaolinq.MySql.1.1.0.966\lib\net452\Shaolinq.MySql.dll</HintPath>
+    <Reference Include="Shaolinq.MySql, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Shaolinq.MySql.1.0.1.812-rc\lib\net452\Shaolinq.MySql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shaolinq.Sqlite, Version=1.1.0.966, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shaolinq.Sqlite.1.1.0.966\lib\net452\Shaolinq.Sqlite.dll</HintPath>
+    <Reference Include="Shaolinq.Sqlite, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Shaolinq.Sqlite.1.0.1.812-rc\lib\net452\Shaolinq.Sqlite.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

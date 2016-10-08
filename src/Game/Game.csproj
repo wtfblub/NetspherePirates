@@ -70,16 +70,16 @@
       <HintPath>..\..\packages\RestSharp.105.2.3\lib\net46\RestSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shaolinq, Version=1.1.0.966, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shaolinq.1.1.0.966\lib\net452\Shaolinq.dll</HintPath>
+    <Reference Include="Shaolinq, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Shaolinq.1.0.1.812-rc\lib\net452\Shaolinq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shaolinq.MySql, Version=1.1.0.966, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shaolinq.MySql.1.1.0.966\lib\net452\Shaolinq.MySql.dll</HintPath>
+    <Reference Include="Shaolinq.MySql, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Shaolinq.MySql.1.0.1.812-rc\lib\net452\Shaolinq.MySql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shaolinq.Sqlite, Version=1.1.0.966, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shaolinq.Sqlite.1.1.0.966\lib\net452\Shaolinq.Sqlite.dll</HintPath>
+    <Reference Include="Shaolinq.Sqlite, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Shaolinq.Sqlite.1.0.1.812-rc\lib\net452\Shaolinq.Sqlite.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Stateless, Version=2.5.80.0, Culture=neutral, PublicKeyToken=93038f0927583c9a, processorArchitecture=MSIL">
