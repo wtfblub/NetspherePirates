@@ -107,6 +107,7 @@ namespace Netsphere
 
     internal static class AuthDatabase
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public static Database.Auth.AuthDatabase Instance { get; }
 
@@ -122,6 +123,8 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
+                    if (Utilities.IsMono)
+                        throw new NotSupportedException("SQLite is not supported on mono. Please switch to MySQL");
                     dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
                     break;
 

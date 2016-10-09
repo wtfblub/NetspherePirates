@@ -285,6 +285,8 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
+                    if (Utilities.IsMono)
+                        throw new NotSupportedException("SQLite is not supported on mono. Please switch to MySQL");
                     dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
                     break;
 
@@ -318,6 +320,8 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
+                    if (Utilities.IsMono)
+                        throw new NotSupportedException("SQLite is not supported on mono. Please switch to MySQL");
                     dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
                     break;
 
