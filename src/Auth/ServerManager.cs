@@ -72,7 +72,7 @@ namespace Netsphere
             foreach (var pair in _serverList)
             {
                 var diff = DateTimeOffset.Now - pair.Value.LastUpdate;
-                if (diff >= Config.Instance.WebAPI.Timeout)
+                if (diff >= Config.Instance.API.Timeout)
                     Remove(pair.Key);
             }
         }

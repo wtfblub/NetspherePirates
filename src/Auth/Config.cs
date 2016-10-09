@@ -17,8 +17,8 @@ namespace Netsphere
         [JsonProperty("max_connections")]
         public int MaxConnections { get; set; }
 
-        [JsonProperty("web_api")]
-        public WebAPIConfig WebAPI { get; set; }
+        [JsonProperty("api")]
+        public APIConfig API { get; set; }
 
         [JsonProperty("noob_mode")]
         public bool NoobMode { get; set; }
@@ -42,24 +42,25 @@ namespace Netsphere
         {
             Listener = new IPEndPoint(IPAddress.Loopback, 28002);
             MaxConnections = 100;
-            WebAPI = new WebAPIConfig();
+            API = new APIConfig();
             NoobMode = true;
             AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
         }
     }
 
-    public class WebAPIConfig
+    public class APIConfig
     {
         [JsonProperty("listener")]
-        public string Listener { get; set; }
+        [JsonConverter(typeof(IPEndPointConverter))]
+        public IPEndPoint Listener { get; set; }
 
         [JsonProperty("serverlist_timeout")]
         [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan Timeout { get; set; }
 
-        public WebAPIConfig()
+        public APIConfig()
         {
-            Listener = "http://localhost:27000";
+            Listener = new IPEndPoint(IPAddress.Loopback, 27000);
             Timeout = TimeSpan.FromSeconds(30);
         }
     }

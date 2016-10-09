@@ -30,6 +30,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BlubLib.Network.SimpleRmi">
+      <HintPath>..\..\libs\BlubLib.Network.SimpleRmi.dll</HintPath>
+    </Reference>
+    <Reference Include="BlubLib.Serialization">
+      <HintPath>..\..\libs\BlubLib.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,10 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IServerlistService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RegisterResultDto.cs" />
-    <Compile Include="RemoveServerDto.cs" />
+    <Compile Include="RegisterResult.cs" />
     <Compile Include="ServerInfoDto.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProudNet\ProudNet.csproj">
+      <Project>{7ed60c00-2bd9-4426-a9a5-295547b8c970}</Project>
+      <Name>ProudNet</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

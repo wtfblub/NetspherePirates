@@ -42,6 +42,9 @@
     <Reference Include="BlubLib.Network">
       <HintPath>..\..\libs\BlubLib.Network.dll</HintPath>
     </Reference>
+    <Reference Include="BlubLib.Network.SimpleRmi">
+      <HintPath>..\..\libs\BlubLib.Network.SimpleRmi.dll</HintPath>
+    </Reference>
     <Reference Include="ExpressMapper, Version=1.8.1.0, Culture=neutral, PublicKeyToken=ac363faa09311ba0, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Expressmapper.1.8.1\lib\net46\ExpressMapper.dll</HintPath>
       <Private>True</Private>
@@ -64,10 +67,6 @@
     </Reference>
     <Reference Include="Platform.Xml.Serialization, Version=1.2.1.287, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Platform.Xml.Serialization.1.2.1.287\lib\net452\Platform.Xml.Serialization.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\RestSharp.105.2.3\lib\net46\RestSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Shaolinq, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
@@ -101,7 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Account.cs" />
-    <Compile Include="AuthWebAPIClient.cs" />
+    <Compile Include="ServerlistManager.cs" />
     <Compile Include="Channel.cs" />
     <Compile Include="ChannelManager.cs" />
     <Compile Include="Character.cs" />

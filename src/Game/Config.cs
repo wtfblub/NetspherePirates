@@ -38,7 +38,7 @@ namespace Netsphere
         public SecurityLevel SecurityLevel { get; set; }
 
         [JsonProperty("auth_webapi")]
-        public AuthWebAPI AuthWebAPI { get; set; }
+        public AuthAPI AuthAPI { get; set; }
 
         [JsonProperty("save_interval")]
         [JsonConverter(typeof(TimeSpanConverter))]
@@ -78,7 +78,7 @@ namespace Netsphere
             IP = "127.0.0.1";
             PlayerLimit = 100;
             SecurityLevel = SecurityLevel.User;
-            AuthWebAPI = new AuthWebAPI();
+            AuthAPI = new AuthAPI();
             SaveInterval = TimeSpan.FromMinutes(1);
             NoobMode = true;
             AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
@@ -87,18 +87,19 @@ namespace Netsphere
         }
     }
 
-    public class AuthWebAPI
+    public class AuthAPI
     {
         [JsonProperty("endpoint")]
-        public string EndPoint { get; set; }
+        [JsonConverter(typeof(IPEndPointConverter))]
+        public IPEndPoint EndPoint { get; set; }
 
         [JsonProperty("serverlist_update_interval")]
         [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan UpdateInterval { get; set; }
 
-        public AuthWebAPI()
+        public AuthAPI()
         {
-            EndPoint = "http://localhost:27000";
+            EndPoint = new IPEndPoint(IPAddress.Loopback, 27000);
             UpdateInterval = TimeSpan.FromSeconds(25);
         }
     }

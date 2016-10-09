@@ -29,13 +29,13 @@ namespace Netsphere.Network
     {
         public static GameServer Instance { get; } = new GameServer();
 
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly ChatServer _chatServer;
         private readonly ILoop _worker;
-        private readonly AuthWebAPIClient _authWebAPI;
+        private readonly ServerlistManager _serverlistManager;
 
-        private TimeSpan _serverListUpdateTimer;
         private TimeSpan _mailBoxCheckTimer;
         private TimeSpan _saveTimer;
 
@@ -159,7 +159,7 @@ namespace Netsphere.Network
             ChannelManager = new ChannelManager(ResourceCache.GetChannels());
 
             _worker = new ThreadLoop(TimeSpan.FromMilliseconds(100), (Action<TimeSpan>)Worker);
-            _authWebAPI = new AuthWebAPIClient();
+            _serverlistManager = new ServerlistManager();
         }
 
         #region Events
@@ -227,26 +227,27 @@ namespace Netsphere.Network
             _chatServer.Start(Config.Instance.ChatListener);
             RelayServer.Start(Config.Instance.RelayListener);
             _worker.Start();
-
-            RegisterServer();
+            _serverlistManager.Start();
         }
 
         public override void Stop()
         {
             _worker.Stop(new TimeSpan(0));
 
-            try
-            {
-                _authWebAPI.RemoveServer(Config.Instance.Id);
-            }
-            catch
-            {
-                // ignored
-            }
-
+            _serverlistManager.Dispose();
             _chatServer.Stop();
             RelayServer.Stop();
             base.Stop();
+        }
+
+        public override void Dispose()
+        {
+            _worker.Stop(new TimeSpan(0));
+
+            _serverlistManager.Dispose();
+            _chatServer.Dispose();
+            RelayServer.Dispose();
+            base.Dispose();
         }
 
         public void BroadcastNotice(string message)
@@ -257,24 +258,6 @@ namespace Netsphere.Network
         private void Worker(TimeSpan delta)
         {
             ChannelManager.Update(delta);
-
-            _serverListUpdateTimer = _serverListUpdateTimer.Add(delta);
-            if (_serverListUpdateTimer >= Config.Instance.AuthWebAPI.UpdateInterval)
-            {
-                _serverListUpdateTimer = TimeSpan.Zero;
-                try
-                {
-                    if (!_authWebAPI.UpdateServer(this.Map<GameServer, ServerInfoDto>()))
-                        RegisterServer();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error()
-                        .Exception(ex)
-                        .Message("Failed to update serverlist")
-                        .Write();
-                }
-            }
 
             // ToDo Use another thread for this?
             _saveTimer = _saveTimer.Add(delta);
@@ -314,27 +297,6 @@ namespace Netsphere.Network
 
                 foreach (var plr in PlayerManager.Where(plr => plr.IsLoggedIn()))
                     plr.Mailbox.Remove(plr.Mailbox.Where(mail => mail.Expires >= DateTimeOffset.Now));
-            }
-        }
-
-        private void RegisterServer()
-        {
-            try
-            {
-                var result = _authWebAPI.RegisterServer(this.Map<GameServer, ServerInfoDto>());
-                if (result == RegisterResult.AlreadyExists)
-                {
-                    Logger.Error()
-                        .Message("Server id already exists. Please make sure you're using a unique id")
-                        .Write();
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error()
-                    .Exception(ex)
-                    .Message("Failed to register to serverlist")
-                    .Write();
             }
         }
 

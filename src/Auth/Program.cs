@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BlubLib;
-using Nancy.Hosting.Self;
+using Netsphere.API;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
@@ -15,8 +15,9 @@ namespace Netsphere
 {
     internal class Program
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static NancyHost _nancyHost;
+        private static APIServer s_apiHost;
 
         private static void Main()
         {
@@ -41,8 +42,8 @@ namespace Netsphere
                 .Write();
 
             AuthServer.Instance.Start(Config.Instance.Listener);
-            _nancyHost = new NancyHost(new Uri(Config.Instance.WebAPI.Listener));
-            _nancyHost.Start();
+            s_apiHost = new APIServer();
+            s_apiHost.Start(Config.Instance.API.Listener);
 
             Logger.Info()
                 .Message("Ready for connections!")
@@ -82,7 +83,7 @@ namespace Netsphere
                 .Message("Closing...")
                 .Write();
 
-            _nancyHost.Dispose();
+            s_apiHost.Dispose();
             AuthServer.Instance.Dispose();
             LogManager.Shutdown();
         }
