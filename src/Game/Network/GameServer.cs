@@ -54,9 +54,9 @@ namespace Netsphere.Network
             var config = new ProudConfig(new Guid("{beb92241-8333-4117-ab92-9b4af78c688f}"));
             var proudFilter = new ProudServerPipe(config);
 #if DEBUG
-            proudFilter.UnhandledProudCoreMessage += (s, e) => Logger.Warn().Message("Unhandled ProudCoreMessage {0}", e.Message.GetType().Name).Write();
+            proudFilter.UnhandledProudCoreMessage += (s, e) => Logger.Warn($"Unhandled ProudCoreMessage {e.Message.GetType().Name}");
             proudFilter.UnhandledProudMessage +=
-                (s, e) => Logger.Warn().Message("Unhandled UnhandledProudMessage {0}: {1}", e.Message.GetType().Name, e.Message.ToArray().ToHexString()).Write();
+                (s, e) => Logger.Warn($"Unhandled UnhandledProudMessage {e.Message.GetType().Name}: {e.Message.ToArray().ToHexString()}");
 #endif
             Pipeline.AddFirst("proudnet", proudFilter);
             Pipeline.AddLast("s4_protocol", new NetspherePipe(new GameMessageFactory()));
@@ -203,9 +203,7 @@ namespace Netsphere.Network
 
         protected override void OnError(ExceptionEventArgs e)
         {
-            Logger.Error()
-                .Exception(e.Exception)
-                .Write();
+            Logger.Error(e.Exception);
             base.OnError(e);
         }
 
@@ -214,7 +212,7 @@ namespace Netsphere.Network
             var session = (GameSession)e.Session;
             Logger.Warn()
                 .Account(session)
-                .Message("Unhandled message {0}", e.Message.GetType().Name)
+                .Message($"Unhandled message {e.Message.GetType().Name}")
                 .Write();
         }
 
@@ -265,9 +263,7 @@ namespace Netsphere.Network
             {
                 _saveTimer = TimeSpan.Zero;
 
-                Logger.Info()
-                    .Message("Saving players...")
-                    .Write();
+                Logger.Info("Saving players...");
 
                 foreach (var plr in PlayerManager.Where(plr => plr.IsLoggedIn()))
                 {
@@ -285,9 +281,7 @@ namespace Netsphere.Network
                     }
                 }
 
-                Logger.Info()
-                    .Message("Saving players completed")
-                    .Write();
+                Logger.Info("Saving players completed");
             }
 
             _mailBoxCheckTimer = _mailBoxCheckTimer.Add(delta);

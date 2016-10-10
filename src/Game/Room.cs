@@ -23,6 +23,7 @@ namespace Netsphere
 {
     internal class Room
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly AsyncLock _slotIdSync = new AsyncLock();
 
@@ -243,9 +244,8 @@ namespace Netsphere
             if (plr.Room != this || Host == plr)
                 return;
 
-            Logger.Debug()
-                .Message("<Room {0}> Changing host to {1} - Ping:{2} ms", Id, plr.Account.Nickname, plr.Session.UnreliablePing)
-                .Write();
+            // TODO Add Room extension?
+            Logger.Debug($"<Room {Id}> Changing host to {plr.Account.Nickname} - Ping:{plr.Session.UnreliablePing} ms");
             Host = plr;
             Broadcast(new SChangeRefeReeAckMessage(Host.Account.Id));
         }
@@ -269,7 +269,8 @@ namespace Netsphere
             if (map == null)
             {
                 Logger.Error()
-                    .Account(Master).Message($"Map {options.MatchKey.Map} does not exist")
+                    .Account(Master)
+                    .Message($"Map {options.MatchKey.Map} does not exist")
                     .Write();
                 Master.Session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;

@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using BlubLib.Caching;
 using NLog;
-using NLog.Fluent;
 
 namespace Netsphere.Resource
 {
     internal class ResourceCache
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ResourceLoader _loader;
         private readonly ICache _cache = new MemoryCache();
 
@@ -23,44 +23,28 @@ namespace Netsphere.Resource
 
         public void PreCache()
         {
-            _logger.Info()
-                .Message("Caching: Channels")
-                .Write();
+            Logger.Info("Caching: Channels");
             GetChannels();
 
-            _logger.Info()
-                .Message("Caching: Effects")
-                .Write();
+            Logger.Info("Caching: Effects");
             GetEffects();
 
-            _logger.Info()
-                .Message("Caching: Items")
-                .Write();
+            Logger.Info("Caching: Items");
             GetItems();
 
-            _logger.Info()
-                .Message("Caching: DefaultItems")
-                .Write();
+            Logger.Info("Caching: DefaultItems");
             GetDefaultItems();
 
-            _logger.Info()
-                .Message("Caching: Shop")
-                .Write();
+            Logger.Info("Caching: Shop");
             GetShop();
 
-            _logger.Info()
-                .Message("Caching: Experience")
-                .Write();
+            Logger.Info("Caching: Experience");
             GetExperience();
 
-            _logger.Info()
-                .Message("Caching: Maps")
-                .Write();
+            Logger.Info("Caching: Maps");
             GetMaps();
 
-            _logger.Info()
-                .Message("Caching: GameTempos")
-                .Write();
+            Logger.Info("Caching: GameTempos");
             GetGameTempos();
         }
 
@@ -69,10 +53,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<IReadOnlyList<ChannelInfo>>(ResourceCacheType.Channels);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
-
+                Logger.Debug("Caching...");
                 value = _loader.LoadChannels().ToList();
                 _cache.AddOrUpdate(ResourceCacheType.Channels, value);
             }
@@ -84,10 +65,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<IReadOnlyDictionary<uint, ItemEffect>>(ResourceCacheType.Effects);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
-
+                Logger.Debug("Caching...");
                 value = _loader.LoadEffects().ToDictionary(effect => effect.Id);
                 _cache.AddOrUpdate(ResourceCacheType.Effects, value);
             }
@@ -100,10 +78,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<IReadOnlyDictionary<ItemNumber, ItemInfo>>(ResourceCacheType.Items);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
-
+                Logger.Debug("Caching...");
                 value = _loader.LoadItems().ToDictionary(item => item.ItemNumber);
                 _cache.AddOrUpdate(ResourceCacheType.Items, value);
             }
@@ -116,10 +91,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<IReadOnlyList<DefaultItem>>(ResourceCacheType.DefaultItems);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
-
+                Logger.Debug("Caching...");
                 value = _loader.LoadDefaultItems().ToList();
                 _cache.AddOrUpdate(ResourceCacheType.DefaultItems, value);
             }
@@ -132,10 +104,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<ShopResources>(ResourceCacheType.Shop);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
-
+                Logger.Debug("Caching...");
                 value = new ShopResources();
                 _cache.AddOrUpdate(ResourceCacheType.Shop, value);
             }
@@ -150,10 +119,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<IReadOnlyDictionary<int, Experience>>(ResourceCacheType.Exp);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
-
+                Logger.Debug("Caching...");
                 value = _loader.LoadExperience().ToDictionary(e => e.Level);
                 _cache.AddOrUpdate(ResourceCacheType.Exp, value);
             }
@@ -166,10 +132,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<IReadOnlyDictionary<byte, MapInfo>>(ResourceCacheType.Maps);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
-
+                Logger.Debug("Caching...");
                 value = _loader.LoadMaps().ToDictionary(maps => maps.Id);
                 _cache.AddOrUpdate(ResourceCacheType.Maps, value);
             }
@@ -182,9 +145,7 @@ namespace Netsphere.Resource
             var value = _cache.Get<IReadOnlyDictionary<string, GameTempo>>(ResourceCacheType.GameTempo);
             if (value == null)
             {
-                _logger.Debug()
-                    .Message("Caching...")
-                    .Write();
+                Logger.Debug("Caching...");
 
                 value = _loader.LoadGameTempos().ToDictionary(t => t.Name);
                 _cache.AddOrUpdate(ResourceCacheType.GameTempo, value);
@@ -195,17 +156,13 @@ namespace Netsphere.Resource
 
         public void Clear()
         {
-            _logger.Debug()
-                .Message("Clearing cache")
-                .Write();
+            Logger.Debug("Clearing cache");
             _cache.Clear();
         }
 
         public void Clear(ResourceCacheType type)
         {
-            _logger.Debug()
-                .Message("Clearing cache for {0}", type)
-                .Write();
+            Logger.Debug($"Clearing cache for {type}");
 
             if (type == ResourceCacheType.Shop)
             {

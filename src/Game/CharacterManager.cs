@@ -14,7 +14,8 @@ namespace Netsphere
 {
     internal class CharacterManager : IReadOnlyCollection<Character>
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly Dictionary<byte, Character> _characters = new Dictionary<byte, Character>();
 
         private readonly ConcurrentStack<Character> _charactersToDelete = new ConcurrentStack<Character>();
@@ -38,7 +39,12 @@ namespace Netsphere
             foreach (var @char in dto.Characters.Select(@char => new Character(this, @char)))
             {
                 if (!_characters.TryAdd(@char.Slot, @char))
-                    _logger.Warn().Account(Player).Message("Multiple characters on slot {0}", @char.Slot);
+                {
+                    Logger.Warn()
+                        .Account(Player)
+                        .Message("Multiple characters on slot {0}", @char.Slot)
+                        .Write();
+                }
             }
         }
 

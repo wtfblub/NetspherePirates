@@ -13,7 +13,8 @@ namespace Netsphere.Network.Services
 {
     internal class ShopService : MessageHandler
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CNewShopUpdateCheckReqMessage))]
         public void ShopUpdateCheckHandler(IService service, GameSession session, CNewShopUpdateCheckReqMessage message)
@@ -133,7 +134,7 @@ namespace Netsphere.Network.Services
             }
             catch (LicenseNotFoundException ex)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Exception(ex)
                     .Write();
@@ -149,7 +150,7 @@ namespace Netsphere.Network.Services
             }
             catch (LicenseException ex)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(session)
                     .Exception(ex)
                     .Write();
@@ -167,9 +168,9 @@ namespace Netsphere.Network.Services
                 var shopItemInfo = shop.GetItemInfo(item.ItemNumber, item.PriceType);
                 if (shopItemInfo == null)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
-                        .Message("No shop entry found for {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType}")
                         .Write();
 
                     await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
@@ -178,9 +179,9 @@ namespace Netsphere.Network.Services
                 }
                 if (!shopItemInfo.IsEnabled)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
-                        .Message("No shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Message($"No shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} is not enabled")
                         .Write();
 
                     await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
@@ -193,9 +194,9 @@ namespace Netsphere.Network.Services
                 var price = priceGroup.GetPrice(item.PeriodType, item.Period);
                 if (price == null)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
-                        .Message("Invalid price group for shop entry {0} {1} {3}{2}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Message($"Invalid price group for shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType}")
                         .Write();
 
                     await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
@@ -205,9 +206,9 @@ namespace Netsphere.Network.Services
                 }
                 if (!price.IsEnabled)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
-                        .Message("Shop entry {0} {1} {3}{2} is not enabled", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} is not enabled")
                         .Write();
 
                     await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
@@ -218,9 +219,9 @@ namespace Netsphere.Network.Services
 
                 if (item.Color > shopItemInfo.ShopItem.ColorGroup)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
-                        .Message("Shop entry {0} {1} {3}{2} has no color {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Color)
+                        .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} has no color {item.Color}")
                         .Write();
 
                     await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
@@ -233,9 +234,9 @@ namespace Netsphere.Network.Services
                 {
                     if (shopItemInfo.EffectGroup.Effects.All(effect => effect.Effect != item.Effect))
                     {
-                        _logger.Error()
+                        Logger.Error()
                             .Account(session)
-                            .Message("Shop entry {0} {1} {3}{2} has no effect {4}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period, item.Effect)
+                            .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} has no effect {item.Effect}")
                             .Write();
 
                         await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
@@ -249,9 +250,9 @@ namespace Netsphere.Network.Services
                     !plr.LicenseManager.Contains(shopItemInfo.ShopItem.License) &&
                     Config.Instance.Game.EnableLicenseRequirement)
                 {
-                    _logger.Error()
+                    Logger.Error()
                         .Account(session)
-                        .Message("Doesn't have license {0}", shopItemInfo.ShopItem.License)
+                        .Message($"Doesn't have license {shopItemInfo.ShopItem.License}")
                         .Write();
 
                     await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
@@ -287,9 +288,9 @@ namespace Netsphere.Network.Services
                         break;
 
                     default:
-                        _logger.Error()
+                        Logger.Error()
                             .Account(session)
-                            .Message("Unknown PriceType {0}", shopItemInfo.PriceGroup.PriceType)
+                            .Message($"Unknown PriceType {shopItemInfo.PriceGroup.PriceType}")
                             .Write();
                         return;
                 }

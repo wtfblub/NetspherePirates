@@ -11,7 +11,8 @@ namespace Netsphere.Network.Services
 {
     internal class ChannelService : MessageHandler
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CGetChannelInfoReqMessage))]
         public void CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)
@@ -32,7 +33,7 @@ namespace Netsphere.Network.Services
                 default:
                     Logger.Error()
                         .Account(session)
-                        .Message("Invalid request {0}", message.Request)
+                        .Message($"Invalid request {message.Request}")
                         .Write();
                     break;
             }
@@ -81,7 +82,7 @@ namespace Netsphere.Network.Services
                 default:
                     Logger.Warn()
                         .Account(session)
-                        .Message("Invalid chat type {0}", message.ChatType)
+                        .Message($"Invalid chat type {message.ChatType}")
                         .Write();
                     break;
             }

@@ -10,7 +10,6 @@ using BlubLib.Threading.Tasks;
 using Netsphere.Network.Message;
 using Netsphere.Network.Service;
 using NLog;
-using NLog.Fluent;
 using ProudNet;
 using ProudNet.Message;
 
@@ -18,7 +17,8 @@ namespace Netsphere.Network
 {
     internal class AuthServer : TcpServer
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public static AuthServer Instance { get; } = new AuthServer();
 
         private readonly ILoop _worker;
@@ -47,9 +47,7 @@ namespace Netsphere.Network
 #if DEBUG
         private void OnUnhandledProudCoreMessage(object s, MessageReceivedEventArgs e)
         {
-            Logger.Warn()
-                .Message("Unhandled ProudCoreMessage {0}", e.Message.GetType().Name)
-                .Write();
+            Logger.Warn($"Unhandled ProudCoreMessage {e.Message.GetType().Name}");
         }
 
         private void OnUnhandledProudMessage(object s, MessageReceivedEventArgs e)
@@ -57,31 +55,23 @@ namespace Netsphere.Network
             var message = e.Message as ProudUnknownMessage;
             if (message == null)
             {
-                Logger.Warn()
-                    .Message("Unhandled ProudMessage {0}", e.Message.GetType().Name)
-                    .Write();
+                Logger.Warn($"Unhandled ProudMessage {e.Message.GetType().Name}");
             }
             else
             {
-                Logger.Warn()
-                    .Message("Unknown ProudMessage {0}: {1}", message.OpCode, message.Data.ToHexString())
-                    .Write();
+                Logger.Warn($"Unknown ProudMessage {message.OpCode}: {message.Data.ToHexString()}");
             }
         }
 #endif
 
         private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
         {
-            Logger.Warn()
-                .Message("Unhandled message {0}", e.Message.GetType().Name)
-                .Write();
+            Logger.Warn($"Unhandled message {e.Message.GetType().Name}");
         }
 
         protected override void OnError(ExceptionEventArgs ex)
         {
-            Logger.Error()
-                .Exception(ex.Exception)
-                .Write();
+            Logger.Error(ex.Exception);
             base.OnError(ex);
         }
 

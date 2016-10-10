@@ -6,7 +6,6 @@ using Netsphere.API;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
-using NLog.Fluent;
 using Shaolinq;
 using Shaolinq.MySql;
 using Shaolinq.Sqlite;
@@ -31,29 +30,21 @@ namespace Netsphere
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            Logger.Info()
-                .Message("Checking database...")
-                .Write();
+            Logger.Info("Checking database...");
 
             AuthDatabase.Instance.CreateIfNotExist();
 
-            Logger.Info()
-                .Message("Starting server...")
-                .Write();
+            Logger.Info("Starting server...");
 
             AuthServer.Instance.Start(Config.Instance.Listener);
             s_apiHost = new APIServer();
             s_apiHost.Start(Config.Instance.API.Listener);
 
-            Logger.Info()
-                .Message("Ready for connections!")
-                .Write();
+            Logger.Info("Ready for connections!");
 
             if (Config.Instance.NoobMode)
             {
-                Logger.Warn()
-                    .Message("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!")
-                    .Write();
+                Logger.Warn("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!");
             }
 
             Console.CancelKeyPress += OnCancelKeyPress;
@@ -79,9 +70,7 @@ namespace Netsphere
 
         private static void Exit()
         {
-            Logger.Info()
-                .Message("Closing...")
-                .Write();
+            Logger.Info("Closing...");
 
             s_apiHost.Dispose();
             AuthServer.Instance.Dispose();
@@ -90,18 +79,12 @@ namespace Netsphere
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Logger.Error()
-                .Exception(e.Exception)
-                .Message("UnobservedTaskException")
-                .Write();
+            Logger.Error(e.Exception, "UnobservedTaskException");
         }
 
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
-            Logger.Error()
-                .Exception((Exception)e.ExceptionObject)
-                .Message("UnhandledException")
-                .Write();
+            Logger.Error((Exception)e.ExceptionObject, "UnhandledException");
         }
     }
 
@@ -129,9 +112,7 @@ namespace Netsphere
                     break;
 
                 default:
-                    Logger.Error()
-                        .Message("Invalid database engine {0}", Config.Instance.AuthDatabase.Engine)
-                        .Write();
+                    Logger.Error("Invalid database engine {0}", Config.Instance.AuthDatabase.Engine);
                     Environment.Exit(0);
                     return;
 

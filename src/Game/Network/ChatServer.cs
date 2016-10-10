@@ -15,7 +15,8 @@ namespace Netsphere.Network
 {
     internal class ChatServer : TcpServer
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public GameServer GameServer { get; private set; }
 
@@ -27,9 +28,9 @@ namespace Netsphere.Network
             var config = new ProudConfig(new Guid("{97d36acf-8cc0-4dfb-bcc9-97cab255e2bc}"));
             var proudFilter = new ProudServerPipe(config);
 #if DEBUG
-            proudFilter.UnhandledProudCoreMessage += (s, e) => _logger.Warn().Message("Unhandled ProudCoreMessage {0}", e.Message.GetType().Name).Write();
+            proudFilter.UnhandledProudCoreMessage += (s, e) => Logger.Warn($"Unhandled ProudCoreMessage {e.Message.GetType().Name}");
             proudFilter.UnhandledProudMessage +=
-                (s, e) => _logger.Warn().Message("Unhandled UnhandledProudMessage {0}: {1}", e.Message.GetType().Name, e.Message.ToArray().ToHexString()).Write();
+                (s, e) => Logger.Warn($"Unhandled UnhandledProudMessage {e.Message.GetType().Name}: {e.Message.ToArray().ToHexString()}");
 #endif
             Pipeline.AddFirst("proudnet", proudFilter);
             Pipeline.AddLast("s4_protocol", new NetspherePipe(new ChatMessageFactory()));
@@ -78,18 +79,16 @@ namespace Netsphere.Network
 
         protected override void OnError(ExceptionEventArgs e)
         {
-            _logger.Error()
-                .Exception(e.Exception)
-                .Write();
+            Logger.Error(e.Exception);
             base.OnError(e);
         }
 
         private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
         {
             var session = (ChatSession)e.Session;
-            _logger.Warn()
+            Logger.Warn()
                 .Account(session)
-                .Message("Unhandled message {0}", e.Message.GetType().Name)
+                .Message($"Unhandled message {e.Message.GetType().Name}")
                 .Write();
         }
 

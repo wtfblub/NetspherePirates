@@ -16,6 +16,7 @@ namespace ProudNet
 {
     public abstract class ProudPipe : Pipe
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly IList<IMessageHandler> _coreServices = new List<IMessageHandler>();
@@ -76,10 +77,7 @@ namespace ProudNet
         
         public override void OnDisconnected(SessionEventArgs e)
         {
-            Logger.Debug()
-                .Message("Client {0} disconnected", ((ProudSession)e.Session).HostId)
-                .Write();
-
+            Logger.Debug($"Client {((ProudSession)e.Session).HostId} disconnected");
             base.OnDisconnected(e);
         }
 

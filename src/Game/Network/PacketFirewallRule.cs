@@ -65,9 +65,7 @@ namespace Netsphere.Network
 
             if (predicates.Any(predicate => !predicate((TSession)e.Session)))
             {
-                Logger.Debug()
-                    .Message("Dropping message {0} from client {1}", e.Message.GetType().Name, ((TcpTransport)e.Session.Transport).Socket.RemoteEndPoint.ToString())
-                    .Write();
+                Logger.Debug($"Dropping message {e.Message.GetType().Name} from client {((TcpTransport)e.Session.Transport).Socket.RemoteEndPoint}");
                 return false;
             }
             return true;

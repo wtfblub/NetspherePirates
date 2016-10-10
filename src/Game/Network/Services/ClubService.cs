@@ -7,14 +7,15 @@ namespace Netsphere.Network.Services
 {
     internal class ClubService : MessageHandler
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CClubAddressReqMessage))]
         public void CClubAddressReq(GameSession session, CClubAddressReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
-                .Message("RequestId:{0} LanguageId:{1} Command:{2}", message.RequestId, message.LanguageId, message.Command)
+                .Message($"RequestId:{message.RequestId} LanguageId:{message.LanguageId} Command:{message.Command}")
                 .Write();
 
             session.Send(new SClubAddressAckMessage("Kappa", 123));

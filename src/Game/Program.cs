@@ -16,6 +16,7 @@ namespace Netsphere
 {
     internal class Program
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public static Stopwatch AppTime { get; } = Stopwatch.StartNew();
 
@@ -31,9 +32,7 @@ namespace Netsphere
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            Logger.Info()
-                .Message("Checking database...")
-                .Write();
+            Logger.Info("Checking database...");
 
             AuthDatabase.Instance.CreateIfNotExist();
 
@@ -47,22 +46,14 @@ namespace Netsphere
             LicenseIdGenerator.Initialize();
             DenyIdGenerator.Initialize();
 
-            Logger.Info()
-                .Message("Starting server...")
-                .Write();
+            Logger.Info("Starting server...");
 
             GameServer.Instance.Start(Config.Instance.Listener);
 
-            Logger.Info()
-                .Message("Ready for connections!")
-                .Write();
+            Logger.Info("Ready for connections!");
 
             if (Config.Instance.NoobMode)
-            {
-                Logger.Warn()
-                    .Message("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!")
-                    .Write();
-            }
+                Logger.Warn("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!");
 
             Console.CancelKeyPress += OnCancelKeyPress;
             while (true)
@@ -94,9 +85,7 @@ namespace Netsphere
 
         private static void Exit()
         {
-            Logger.Info()
-                .Message("Closing...")
-                .Write();
+            Logger.Info("Closing...");
 
             GameServer.Instance.Dispose();
             LogManager.Shutdown();
@@ -104,18 +93,12 @@ namespace Netsphere
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Logger.Error()
-                .Exception(e.Exception)
-                .Message("UnobservedTaskException")
-                .Write();
+            Logger.Error(e.Exception, "UnobservedTaskException");
         }
 
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
-            Logger.Error()
-                .Exception((Exception)e.ExceptionObject)
-                .Message("UnhandledException")
-                .Write();
+            Logger.Error((Exception)e.ExceptionObject, "UnhandledException");
         }
 
         private static void FillShop()
@@ -137,9 +120,7 @@ namespace Netsphere
                 db.ShopItemInfos.Any() || db.ShopItems.Any())
                 return;
 
-            Logger.Info()
-                .Message("NoobMode: Filling the shop with items")
-                .Write();
+            Logger.Info("NoobMode: Filling the shop with items");
 
 
             using (var scope = new DataAccessScope())
@@ -256,9 +237,7 @@ namespace Netsphere
                     shopItemInfo.EffectGroup = effectToUse;
                     shopItemInfo.IsEnabled = true;
 
-                    Logger.Info()
-                        .Message("[{0}/{1}] {2}: {3}", i, items.Length, item.ItemNumber, item.Name)
-                        .Write();
+                    Logger.Info($"[{i}/{items.Length}] {item.ItemNumber}: {item.Name}");
                 }
 
                 #endregion

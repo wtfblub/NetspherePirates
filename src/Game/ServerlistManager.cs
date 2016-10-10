@@ -12,7 +12,6 @@ using BlubLib.Threading;
 using BlubLib.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Network;
-using Newtonsoft.Json;
 using NLog;
 using TcpClient = BlubLib.Network.Transport.Sockets.TcpClient;
 
@@ -133,8 +132,7 @@ namespace Netsphere
                     return true;
 
                 case RegisterResult.AlreadyExists:
-                    Logger.Warn(
-                        $"Unable to register server - Id:{Config.Instance.Id} is already registered(Invalid config?).");
+                    Logger.Warn($"Unable to register server - Id:{Config.Instance.Id} is already registered(Invalid config?).");
                     break;
             }
             return false;

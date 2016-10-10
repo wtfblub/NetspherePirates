@@ -14,6 +14,7 @@ namespace Netsphere
 {
     internal class Player
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private byte _tutorialState;
         private byte _level;
@@ -159,7 +160,7 @@ namespace Netsphere
         {
             Logger.Debug()
                 .Account(this)
-                .Message("Gained {0} exp", amount)
+                .Message($"Gained {amount} exp")
                 .Write();
 
             var expTable = GameServer.Instance.ResourceCache.GetExperience();
@@ -168,7 +169,7 @@ namespace Netsphere
             {
                 Logger.Warn()
                     .Account(this)
-                    .Message("Level {0} not found", Level)
+                    .Message($"Level {Level} not found")
                     .Write();
 
                 return false;
@@ -193,7 +194,7 @@ namespace Netsphere
                 {
                     Logger.Warn()
                         .Account(this)
-                        .Message("Can't level up because level {0} not found", newLevel)
+                        .Message($"Can't level up because level {newLevel} not found")
                         .Write();
 
                     break;
@@ -201,7 +202,7 @@ namespace Netsphere
 
                 Logger.Debug()
                     .Account(this)
-                    .Message("Leveled up to {0}", newLevel)
+                    .Message($"Leveled up to {newLevel}")
                     .Write();
 
                 // ToDo level rewards

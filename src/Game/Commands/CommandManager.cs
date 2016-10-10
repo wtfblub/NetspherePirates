@@ -9,7 +9,8 @@ namespace Netsphere.Commands
 {
     internal class CommandManager
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IList<ICommand> _commands = new List<ICommand>();
 
         public GameServer Server { get; }
@@ -50,7 +51,10 @@ namespace Netsphere.Commands
 
             if (!isConsole && plr.Account.SecurityLevel < cmd.Permission)
             {
-                _logger.Error().Account(plr).Message("Access denied for command {0} - args: {1}", cmd.Name, string.Join(",", args));
+                Logger.Error()
+                    .Account(plr)
+                    .Message($"Access denied for command {cmd.Name} - args: {string.Join(",", args)}")
+                    .Write();
                 plr.SendConsoleMessage(S4Color.Red + "Unknown command");
                 return true;
             }

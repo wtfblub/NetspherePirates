@@ -16,7 +16,8 @@ namespace Netsphere.Network.Services
 {
     internal class RoomService : MessageHandler
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CEnterPlayerReqMessage))]
         public void CEnterPlayerReq(GameSession session)
@@ -36,7 +37,7 @@ namespace Netsphere.Network.Services
             var plr = session.Player;
             if (!plr.Channel.RoomManager.GameRuleFactory.Contains(message.Room.MatchKey.GameRule))
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(plr)
                     .Message($"Game rule {message.Room.MatchKey.GameRule} does not exist")
                     .Write();
@@ -47,7 +48,7 @@ namespace Netsphere.Network.Services
             var map = GameServer.Instance.ResourceCache.GetMaps().GetValueOrDefault(message.Room.MatchKey.Map);
             if (map == null)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(plr).Message($"Map {message.Room.MatchKey.Map} does not exist")
                     .Write();
                 session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
@@ -55,7 +56,7 @@ namespace Netsphere.Network.Services
             }
             if (!map.GameRules.Contains(message.Room.MatchKey.GameRule))
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(plr)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {message.Room.MatchKey.GameRule}")
                     .Write();
@@ -86,15 +87,13 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CGameRoomEnterReqMessage))]
         public void CGameRoomEnterReq(GameSession session, CGameRoomEnterReqMessage message)
         {
-            _logger.Debug()
-                .Message(JsonConvert.SerializeObject(message, Formatting.Indented))
-                .Write();
+            Logger.Debug(JsonConvert.SerializeObject(message, Formatting.Indented));
 
             var plr = session.Player;
             var room = plr.Channel.RoomManager[message.RoomId];
             if (room == null)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(plr)
                     .Message($"Room {message.RoomId} in channel {plr.Channel.Id} not found")
                     .Write();
@@ -139,7 +138,7 @@ namespace Netsphere.Network.Services
             }
             catch (RoomException ex)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(plr)
                     .Exception(ex).Message("Failed to change team to {0}", message.Team)
                     .Write();
@@ -157,10 +156,10 @@ namespace Netsphere.Network.Services
             }
             catch (RoomException ex)
             {
-                _logger.Error()
+                Logger.Error()
                     .Account(plr)
                     .Exception(ex)
-                    .Message("Failed to change mode to {0}", message.Mode)
+                    .Message($"Failed to change mode to {message.Mode}")
                     .Write();
             }
         }
@@ -216,16 +215,16 @@ namespace Netsphere.Network.Services
         {
             var plr = session.Player;
 
-            _logger.Debug()
+            Logger.Debug()
                 .Account(session)
-                .Message("Item sync - {0}", JsonConvert.SerializeObject(message.Unk1, Formatting.Indented))
+                .Message($"Item sync - {JsonConvert.SerializeObject(message.Unk1, Formatting.Indented)}")
                 .Write();
 
             if (message.Unk2.Length > 0)
             {
-                _logger.Warn()
+                Logger.Warn()
                     .Account(session)
-                    .Message("Unk2: {0}", JsonConvert.SerializeObject(message.Unk2, Formatting.Indented))
+                    .Message($"Unk2: {JsonConvert.SerializeObject(message.Unk2, Formatting.Indented)}")
                     .Write();
             }
 
@@ -250,16 +249,16 @@ namespace Netsphere.Network.Services
         {
             var plr = session.Player;
 
-            _logger.Debug()
+            Logger.Debug()
                 .Account(session)
-                .Message("Avatar sync - {0}", JsonConvert.SerializeObject(message.Unk1, Formatting.Indented))
+                .Message($"Avatar sync - {JsonConvert.SerializeObject(message.Unk1, Formatting.Indented)}")
                 .Write();
 
             if (message.Unk2.Length > 0)
             {
-                _logger.Warn()
+                Logger.Warn()
                     .Account(session)
-                    .Message("Unk2: {0}", JsonConvert.SerializeObject(message.Unk2, Formatting.Indented))
+                    .Message($"Unk2: {JsonConvert.SerializeObject(message.Unk2, Formatting.Indented)}")
                     .Write();
             }
 

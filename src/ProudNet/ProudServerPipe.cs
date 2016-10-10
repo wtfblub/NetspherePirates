@@ -22,6 +22,7 @@ namespace ProudNet
 {
     public class ProudServerPipe : ProudPipe
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly TimeSpan s_timeout = TimeSpan.FromSeconds(15);
 
@@ -48,9 +49,7 @@ namespace ProudNet
             var processor = (TcpTransport)e.Session.Transport;
             var remoteEndPoint = (IPEndPoint)processor.Socket.RemoteEndPoint;
 
-            Logger.Debug()
-                .Message("New incoming client on {0}", remoteEndPoint.ToString())
-                .Write();
+            Logger.Debug($"New incoming client on {remoteEndPoint}");
 
             await e.Session.SendAsync(new NotifyServerConnectionHintMessage(Config))
                 .ConfigureAwait(false);
@@ -67,9 +66,7 @@ namespace ProudNet
                     if (!e.Session.IsConnected)
                         return;
 
-                    Logger.Error()
-                        .Message("Handshake timeout for {0}", remoteEndPoint)
-                        .Write();
+                    Logger.Error($"Handshake timeout for {remoteEndPoint}");
 
                     await e.Session.SendAsync(new ConnectServerTimedoutMessage())
                         .ConfigureAwait(false);
@@ -123,15 +120,11 @@ namespace ProudNet
 
         public override void OnStart()
         {
-            Logger.Debug()
-                .Message("Initializing...")
-                .Write();
+            Logger.Debug("Initializing...");
 
             if (Config.UdpListener != null)
             {
-                Logger.Debug()
-                    .Message("Creating udp socket on {0}", Config.UdpListener.ToString())
-                    .Write();
+                Logger.Debug($"Creating udp socket on {Config.UdpListener}");
 
                 // ToDo Add the possibility to listen on multiple ports
                 UdpSocket = new UdpServerSocket(this);
@@ -143,9 +136,7 @@ namespace ProudNet
 
         public override void OnClose()
         {
-            Logger.Debug()
-                .Message("Closing...")
-                .Write();
+            Logger.Debug("Closing...");
 
             if (UdpSocket != null)
             {

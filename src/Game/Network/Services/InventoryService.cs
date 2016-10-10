@@ -9,7 +9,8 @@ namespace Netsphere.Network.Services
 {
     internal class InventoryService : MessageHandler
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CUseItemReqMessage))]
         public void UseItemHandler(GameSession session, CUseItemReqMessage message)
@@ -59,7 +60,7 @@ namespace Netsphere.Network.Services
                 {
                     Logger.Error()
                         .Account(session)
-                        .Message("Item {0} not found", id)
+                        .Message($"Item {id} not found")
                         .Write();
                     await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error0 })
                         .ConfigureAwait(false);
@@ -69,7 +70,7 @@ namespace Netsphere.Network.Services
                 {
                     Logger.Error()
                         .Account(session)
-                        .Message("Item {0} {1} {2} {3} can not be repaired", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Message($"Item {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period} can not be repaired")
                         .Write();
                     await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error1 })
                         .ConfigureAwait(false);
@@ -89,7 +90,7 @@ namespace Netsphere.Network.Services
                 {
                     Logger.Error()
                         .Account(session)
-                        .Message("No shop entry found for {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                        .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                         .Write();
                     await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error4 })
                         .ConfigureAwait(false);
@@ -134,7 +135,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Item {0} not found", message.ItemId)
+                    .Message($"Item {message.ItemId} not found")
                     .Write();
                 await session.SendAsync(new SRefundItemAckMessage {Result = ItemRefundResult.Failed})
                     .ConfigureAwait(false);
@@ -146,7 +147,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("No shop entry found for {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                    .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
                 await session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed })
                     .ConfigureAwait(false);
@@ -156,7 +157,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Cannot refund {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                    .Message($"Cannot refund {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
                 await session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed })
                     .ConfigureAwait(false);
@@ -192,7 +193,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Item {0} not found", message.ItemId)
+                    .Message($"Item {message.ItemId} not found")
                     .Write();
                 session.Send(new SDiscardItemAckMessage { Result = 2 });
                 return;
@@ -203,7 +204,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("No shop entry found for {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                    .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
                 session.Send(new SDiscardItemAckMessage { Result = 2 });
                 return;
@@ -212,7 +213,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Cannot discard {0} {1} {2} {3}", item.ItemNumber, item.PriceType, item.PeriodType, item.Period)
+                    .Message($"Cannot discard {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
                 session.Send(new SDiscardItemAckMessage { Result = 2 });
                 return;

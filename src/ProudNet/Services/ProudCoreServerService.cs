@@ -22,7 +22,8 @@ namespace ProudNet.Services
 {
     internal class ProudCoreServerService : MessageHandler
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ProudServerPipe _filter;
         private readonly Lazy<DateTime> _startTime = new Lazy<DateTime>(() => Process.GetCurrentProcess().StartTime);
 
@@ -177,17 +178,13 @@ namespace ProudNet.Services
             {
                 if (session.P2PGroup == null)
                 {
-                    Logger.Debug()
-                        .Message("Client {0} is not in a P2PGroup", session.HostId)
-                        .Write();
+                    Logger.Debug($"Client {session.HostId} is not in a P2PGroup");
                     return;
                 }
 
                 if (!session.P2PGroup.Members.ContainsKey(destination.HostId))
                 {
-                    Logger.Debug()
-                        .Message("Client {0} trying to relay to non existant {1}", session.HostId, destination.HostId)
-                        .Write();
+                    Logger.Debug($"Client {session.HostId} trying to relay to non existant {destination.HostId}");
                     return;
                 }
 
@@ -272,17 +269,13 @@ namespace ProudNet.Services
             {
                 if (session.P2PGroup == null)
                 {
-                    Logger.Debug()
-                        .Message("Client {0} in not a p2pgroup", session.HostId)
-                        .Write();
+                    Logger.Debug($"Client {session.HostId} in not a p2pgroup");
                     return;
                 }
 
                 if (!session.P2PGroup.Members.ContainsKey(destination))
                 {
-                    Logger.Debug()
-                        .Message("Client {0} trying to relay to non existant {1}", session.HostId, destination)
-                        .Write();
+                    Logger.Debug($"Client {session.HostId} trying to relay to non existant {destination}");
                     return;
                 }
 
@@ -330,10 +323,7 @@ namespace ProudNet.Services
             if (session.P2PGroup == null || _filter.Config.UdpListener == null || session.Guid != message.MagicNumber)
                 return;
 
-            Logger.Debug()
-                .Message("Client:{0} - Server holepunch success(EndPoint:{1} LocalEndPoint:{2})",
-                    session.HostId, message.EndPoint, message.LocalEndPoint)
-                .Write();
+            Logger.Debug($"Client:{session.HostId} - Server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
 
             session.UdpEnabled = true;
             session.UdpEndPoint = message.EndPoint;
@@ -361,10 +351,7 @@ namespace ProudNet.Services
             if (!session.UdpEnabled || _filter.Config.UdpListener == null)
                 return;
 
-            Logger.Debug()
-                .Message("Client:{0} - Peer server holepunch success(EndPoint:{1} LocalEndPoint:{2})",
-                    session.HostId, message.EndPoint, message.LocalEndPoint)
-                .Write();
+            Logger.Debug($"Client:{session.HostId} - Peer server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
 
             // ToDo Refactor this shit...
             Task.Delay(2000).ContinueWith(_ =>

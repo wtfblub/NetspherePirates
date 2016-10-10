@@ -8,7 +8,8 @@ namespace Netsphere.Network.Services
 {
     internal class RelayService : MessageHandler
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IMessageHandler _peerService = new PeerService();
 
         [MessageHandler(typeof(PacketMessage))]

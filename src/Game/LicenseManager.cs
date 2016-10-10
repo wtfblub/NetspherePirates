@@ -13,7 +13,8 @@ namespace Netsphere
 {
     internal class LicenseManager : IReadOnlyCollection<License>
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly Player _player;
         private readonly ConcurrentDictionary<ItemLicense, License> _licenses = new ConcurrentDictionary<ItemLicense, License>();
         private readonly ConcurrentStack<License> _licensesToRemove = new ConcurrentStack<License>();
@@ -42,9 +43,9 @@ namespace Netsphere
 
         public License Acquire(ItemLicense itemLicense)
         {
-            _logger.Debug()
+            Logger.Debug()
                 .Account(_player)
-                .Message("Acquiring license {0}", itemLicense)
+                .Message($"Acquiring license {itemLicense}")
                 .Write();
 
             var shop = GameServer.Instance.ResourceCache.GetShop();
@@ -72,9 +73,9 @@ namespace Netsphere
                 _licenses.TryAdd(itemLicense, license);
                 _player.Session.Send(new SLicensedAckMessage(itemLicense, licenseReward?.ItemNumber ?? 0));
 
-                _logger.Info()
+                Logger.Info()
                     .Account(_player)
-                    .Message("Acquired license {0}", itemLicense)
+                    .Message($"Acquired license {itemLicense}")
                     .Write();
             }
 

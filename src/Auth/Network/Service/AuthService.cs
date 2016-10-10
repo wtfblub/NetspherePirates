@@ -9,22 +9,20 @@ using BlubLib.Network.Transport.Sockets;
 using BlubLib.Security.Cryptography;
 using Netsphere.Network.Message.Auth;
 using NLog;
-using NLog.Fluent;
 using Shaolinq;
 
 namespace Netsphere.Network.Service
 {
     internal class AuthService : MessageHandler
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CAuthInEUReqMessage))]
         public async Task LoginHandler(ISession session, CAuthInEUReqMessage message)
         {
             var ip = ((IPEndPoint)((TcpTransport)session.Transport).Socket.RemoteEndPoint).Address.ToString();
-            _logger.Debug()
-                    .Message("Login from {0} with username {1}", ip, message.Username)
-                    .Write();
+            Logger.Debug($"Login from {ip} with username {message.Username}");
 
             var db = AuthDatabase.Instance;
             var account = await db.Accounts.FirstOrDefaultAsync(acc => acc.Username == message.Username)
@@ -53,9 +51,7 @@ namespace Netsphere.Network.Service
                 }
                 else
                 {
-                    _logger.Error()
-                        .Message("Wrong login for {0}", message.Username)
-                        .Write();
+                    Logger.Error($"Wrong login for {message.Username}");
                     await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
                         .ConfigureAwait(false);
                     return;
@@ -86,9 +82,7 @@ namespace Netsphere.Network.Service
                 }
                 else
                 {
-                    _logger.Error()
-                        .Message("Wrong login for {0}", message.Username)
-                        .Write();
+                    Logger.Error($"Wrong login for {message.Username}");
                     await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
                         .ConfigureAwait(false);
                     return;
@@ -101,17 +95,13 @@ namespace Netsphere.Network.Service
             if (ban != null)
             {
                 var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + ban.Duration);
-                _logger.Error()
-                    .Message("{0} is banned until {1}", message.Username, unbanDate)
-                    .Write();
+                Logger.Error($"{message.Username} is banned until {unbanDate}");
                 await session.SendAsync(new SAuthInEuAckMessage(unbanDate))
                     .ConfigureAwait(false);
                 return;
             }
 
-            _logger.Info()
-                .Message("Login success for {0}", message.Username)
-                .Write();
+            Logger.Info($"Login success for {message.Username}");
 
             using (var scope = new DataAccessScope())
             {

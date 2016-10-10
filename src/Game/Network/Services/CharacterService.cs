@@ -9,14 +9,15 @@ namespace Netsphere.Network.Services
 {
     internal class CharacterService : MessageHandler
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CCreateCharacterReqMessage))]
         public void CreateCharacterHandler(GameSession session, CCreateCharacterReqMessage message)
         {
             Logger.Info()
                 .Account(session)
-                .Message("Creating character: {0}", JsonConvert.SerializeObject(message, new StringEnumConverter()))
+                .Message($"Creating character: {JsonConvert.SerializeObject(message, new StringEnumConverter())}")
                 .Write();
 
             try
@@ -48,7 +49,7 @@ namespace Netsphere.Network.Services
 
             Logger.Info()
                 .Account(session)
-                .Message("Selecting character {0}", message.Slot)
+                .Message($"Selecting character {message.Slot}")
                 .Write();
 
             try
@@ -70,7 +71,7 @@ namespace Netsphere.Network.Services
         {
             Logger.Info()
                 .Account(session)
-                .Message("Removing character {0}", message.Slot)
+                .Message($"Removing character {message.Slot}")
                 .Write();
 
             try

@@ -16,7 +16,8 @@ namespace Netsphere.Network
 {
     internal class RelayServer : TcpServer
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public GameServer GameServer { get; }
 
@@ -44,15 +45,15 @@ namespace Netsphere.Network
                 //if (unk != null)
                     //_logger.Warn().Message("Unknown CoreMessage {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
                 //else
-                    _logger.Warn().Message("Unhandled UnhandledProudCoreMessage {0}", e.Message.GetType().Name).Write();
+                    Logger.Warn($"Unhandled UnhandledProudCoreMessage {e.Message.GetType().Name}");
             };
             proudFilter.UnhandledProudMessage += (s, e) =>
             {
                 var unk = e.Message as ProudUnknownMessage;
                 if (unk != null)
-                    _logger.Warn().Message("Unknown ProudMessage {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
+                    Logger.Warn($"Unknown ProudMessage {unk.OpCode}: {unk.Data.ToHexString()}");
                 else
-                    _logger.Warn().Message("Unhandled UnhandledProudMessage {0}", e.Message.GetType().Name).Write();
+                    Logger.Warn($"Unhandled UnhandledProudMessage {e.Message.GetType().Name}");
             };
 #endif
             Pipeline.AddFirst("proudnet", proudFilter);
@@ -91,9 +92,7 @@ namespace Netsphere.Network
 
         protected override void OnError(ExceptionEventArgs e)
         {
-            _logger.Error()
-                .Exception(e.Exception)
-                .Write();
+            Logger.Error(e.Exception);
             base.OnError(e);
         }
 
@@ -107,9 +106,12 @@ namespace Netsphere.Network
                 return;
 
             //if (unk != null)
-                //_logger.Warn().Account(session).Message("Unk message {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
+            //_logger.Warn().Account(session).Message("Unk message {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
             //else
-                _logger.Warn().Account(session).Message("Unhandled message {0}", e.Message.GetType().Name).Write();
+            Logger.Warn()
+                .Account(session)
+                .Message($"Unhandled message {e.Message.GetType().Name}")
+                .Write();
 
             //if (message.IsRelayed)
             //{

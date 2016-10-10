@@ -12,14 +12,15 @@ namespace Netsphere.Network.Services
 {
     internal class PrivateMessageService : MessageHandler
     {
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CNoteListReqMessage))]
         public void CNoteListReq(ChatSession session, CNoteListReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
-                .Message("Page:{0} MessageType:{1}", message.Page, message.MessageType)
+                .Message($"Page:{message.Page} MessageType:{message.MessageType}")
                 .Write();
 
             var mailbox = session.Player.Mailbox;
@@ -29,7 +30,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Page {0} does not exist", message.Page)
+                    .Message($"Page {message.Page} does not exist")
                     .Write();
                 return;
             }
@@ -43,7 +44,7 @@ namespace Netsphere.Network.Services
         {
             Logger.Debug()
                 .Account(session)
-                .Message("Id:{0}", message.Id)
+                .Message($"Id:{message.Id}")
                 .Write();
 
             var mail = session.Player.Mailbox[message.Id];
@@ -51,7 +52,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Mail {0} not found", message.Id)
+                    .Message($"Mail {message.Id} not found")
                     .Write();
 
                 await session.SendAsync(new SReadNoteAckMessage(0, new NoteContentDto(), 1))
@@ -72,7 +73,7 @@ namespace Netsphere.Network.Services
         {
             Logger.Debug()
                 .Account(session)
-                .Message("Ids:{0}", string.Join(",", message.Notes))
+                .Message($"Ids:{string.Join(",", message.Notes)}")
                 .Write();
 
             session.Player.Mailbox.Remove(message.Notes);
@@ -85,7 +86,7 @@ namespace Netsphere.Network.Services
         {
             Logger.Debug()
                 .Account(session)
-                .Message("{0}", JsonConvert.SerializeObject(message, Formatting.Indented))
+                .Message($"{JsonConvert.SerializeObject(message, Formatting.Indented)}")
                 .Write();
 
             // ToDo use config file
@@ -93,7 +94,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Title is too big({0})", message.Title.Length)
+                    .Message($"Title is too big({message.Title.Length})")
                     .Write();
                 return;
             }
@@ -102,7 +103,7 @@ namespace Netsphere.Network.Services
             {
                 Logger.Error()
                     .Account(session)
-                    .Message("Message is too big({0})", message.Message.Length)
+                    .Message($"Message is too big({message.Message.Length})")
                     .Write();
                 return;
             }

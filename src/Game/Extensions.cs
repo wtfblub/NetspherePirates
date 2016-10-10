@@ -42,13 +42,6 @@ namespace Netsphere
             return session.IsLoggedIn() ? builder.Account(session.GameSession.Player) : builder;
         }
 
-        public static LogBuilder Account(this LogBuilder builder, Room room)
-        {
-            builder.LogEventInfo.Properties["room_id"] = room.Id;
-            builder.LogEventInfo.Properties["channel_id"] = room.RoomManager.Channel.Id;
-            return builder;
-        }
-
         public static bool IsLoggedIn(this GameSession session)
         {
             return !string.IsNullOrWhiteSpace(session?.Player?.Account.Nickname);
