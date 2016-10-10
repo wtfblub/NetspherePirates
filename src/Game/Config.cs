@@ -8,6 +8,8 @@ namespace Netsphere
 {
     public class Config
     {
+        private static readonly string s_path = Path.Combine(Environment.CurrentDirectory, "game.hjson");
+
         public static Config Instance { get; private set; }
 
         [JsonProperty("server_name")]
@@ -58,14 +60,15 @@ namespace Netsphere
 
         static Config()
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.json");
-            if (!File.Exists(path))
+            if (!File.Exists(s_path))
             {
-                var json = JsonConvert.SerializeObject(new Config(), Formatting.Indented);
-                File.WriteAllText(path, json);
+                Instance = new Config();
+                Instance.Save();
+                return;
             }
 
-            Instance = JsonConvert.DeserializeObject<Config>(File.ReadAllText(path));
+            using (var fs = new FileStream(s_path, FileMode.Open, FileAccess.Read))
+                Instance = JsonConvert.DeserializeObject<Config>(Hjson.HjsonValue.Load(fs).ToString(Hjson.Stringify.Plain));
         }
 
         public Config()
@@ -84,6 +87,12 @@ namespace Netsphere
             AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
             GameDatabase = new DatabaseSettings { Filename = "..\\db\\game.db" };
             Game = new GameSettings();
+        }
+
+        public void Save()
+        {
+            var json = JsonConvert.SerializeObject(this, Formatting.None);
+            File.WriteAllText(s_path, Hjson.JsonValue.Parse(json).ToString(Hjson.Stringify.Hjson));
         }
     }
 
