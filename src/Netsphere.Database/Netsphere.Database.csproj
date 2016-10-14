@@ -30,25 +30,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Platform, Version=1.2.1.287, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Platform.NET.1.2.1.287\lib\net452\Platform.dll</HintPath>
+    <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Dapper.1.50.2\lib\net451\Dapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Platform.Xml.Serialization, Version=1.2.1.287, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Platform.Xml.Serialization.1.2.1.287\lib\net452\Platform.Xml.Serialization.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Shaolinq, Version=1.0.1.812, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shaolinq.1.0.1.812-rc\lib\net452\Shaolinq.dll</HintPath>
+    <Reference Include="Dapper.FastCrud, Version=2.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Dapper.FastCrud.2.4.0\lib\net46\Dapper.FastCrud.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Auth\AuthDatabase.cs" />
     <Compile Include="Auth\Models.cs" />
-    <Compile Include="Game\GameDatabase.cs" />
     <Compile Include="Game\Models.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

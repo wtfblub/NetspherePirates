@@ -1,107 +1,69 @@
-﻿using Platform.Validation;
-using Shaolinq;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Auth
 {
-    [DataAccessObject("accounts")]
-    public abstract class AccountDto : DataAccessObject
+    [Table("accounts")]
+    public class AccountDto
     {
-        [PrimaryKey]
-        [AutoIncrement]
-        [PersistedMember]
-        public virtual int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Nickname { get; set; }
+        public string Password { get; set; }
+        public string Salt { get; set; }
+        public byte SecurityLevel { get; set; }
 
-        [ValueRequired]
-        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
-        [PersistedMember]
-        public abstract string Username { get; set; }
-
-        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
-        [PersistedMember]
-        public abstract string Nickname { get; set; }
-
-        [ValueRequired]
-        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
-        [PersistedMember]
-        public abstract string Password { get; set; }
-
-        [ValueRequired]
-        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
-        [PersistedMember]
-        public abstract string Salt { get; set; }
-
-        [PersistedMember]
-        public abstract byte SecurityLevel { get; set; }
-
-        [RelatedDataAccessObjects]
-        public abstract RelatedDataAccessObjects<BanDto> Bans { get; }
-
-        [RelatedDataAccessObjects]
-        public abstract RelatedDataAccessObjects<LoginHistoryDto> LoginHistory { get; }
-
-        [RelatedDataAccessObjects]
-        public abstract RelatedDataAccessObjects<NicknameHistoryDto> NicknameHistory { get; }
+        public IEnumerable<BanDto> Bans { get; }
+        public IEnumerable<LoginHistoryDto> LoginHistory { get; }
+        public IEnumerable<NicknameHistoryDto> NicknameHistory { get; }
     }
 
-    [DataAccessObject("bans")]
-    public abstract class BanDto : DataAccessObject
+    [Table("bans")]
+    public class BanDto
     {
-        [PrimaryKey]
-        [AutoIncrement]
-        [PersistedMember]
-        public virtual int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
-        [ValueRequired]
-        [BackReference]
-        public abstract AccountDto Account { get; set; }
+        [ForeignKey(nameof(Account))]
+        public int AccountId { get; set; }
+        public AccountDto Account { get; set; }
 
-        [PersistedMember]
-        public abstract long Date { get; set; }
-
-        [PersistedMember]
-        public abstract long Duration { get; set; }
-
-        [PersistedMember]
-        public abstract string Reason { get; set; }
+        public long Date { get; set; }
+        public long Duration { get; set; }
+        public string Reason { get; set; }
     }
 
-    [DataAccessObject("login_history")]
-    public abstract class LoginHistoryDto : DataAccessObject
+    [Table("login_history")]
+    public class LoginHistoryDto
     {
-        [PrimaryKey]
-        [AutoIncrement]
-        [PersistedMember]
-        public virtual int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
-        [ValueRequired]
-        [BackReference]
-        public abstract AccountDto Account { get; set; }
+        [ForeignKey(nameof(Account))]
+        public int AccountId { get; set; }
+        public AccountDto Account { get; set; }
 
-        [PersistedMember]
-        public abstract long Date { get; set; }
-
-        [PersistedMember]
-        public abstract string IP { get; set; }
+        public long Date { get; set; }
+        public string IP { get; set; }
     }
 
-    [DataAccessObject("nickname_history")]
-    public abstract class NicknameHistoryDto : DataAccessObject
+    [Table("nickname_history")]
+    public class NicknameHistoryDto
     {
-        [PrimaryKey]
-        [AutoIncrement]
-        [PersistedMember]
-        public virtual int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
-        [ValueRequired]
-        [BackReference]
-        public abstract AccountDto Account { get; set; }
+        [ForeignKey(nameof(Account))]
+        public int AccountId { get; set; }
+        public AccountDto Account { get; set; }
 
-        [ValueRequired]
-        [SizeConstraint(MaximumLength = 40, SizeFlexibility = SizeFlexibility.Variable)]
-        [PersistedMember]
-        public abstract string Nickname { get; set; }
-
-        [PersistedMember]
-        public abstract long ExpireDate { get; set; }
+        public string Nickname { get; set; }
+        public long ExpireDate { get; set; }
     }
 }
