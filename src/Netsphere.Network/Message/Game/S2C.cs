@@ -747,14 +747,14 @@ namespace Netsphere.Network.Message.Game
     public class SAdminShowWindowAckMessage : GameMessage
     {
         [BlubMember(0)]
-        public bool ShowConsole { get; set; }
+        public bool DisableConsole { get; set; }
 
         public SAdminShowWindowAckMessage()
         { }
 
-        public SAdminShowWindowAckMessage(bool showConsole)
+        public SAdminShowWindowAckMessage(bool disableConsole)
         {
-            ShowConsole = showConsole;
+            DisableConsole = disableConsole;
         }
     }
 

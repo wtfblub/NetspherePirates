@@ -9,7 +9,7 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CAdminShowWindowReqMessage))]
         public void ShowWindowHandler(GameSession session)
         {
-            session.Send(new SAdminShowWindowAckMessage(session.Player.Account.SecurityLevel > SecurityLevel.User));
+            session.Send(new SAdminShowWindowAckMessage(session.Player.Account.SecurityLevel <= SecurityLevel.User));
         }
 
         [MessageHandler(typeof(CAdminActionReqMessage))]
