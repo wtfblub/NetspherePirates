@@ -7,9 +7,10 @@ using BlubLib.Network;
 using BlubLib.Network.Pipes;
 using BlubLib.Network.Transport.Sockets;
 using BlubLib.Security.Cryptography;
+using Dapper.FastCrud;
+using Netsphere.Database.Auth;
 using Netsphere.Network.Message.Auth;
 using NLog;
-using Shaolinq;
 
 namespace Netsphere.Network.Service
 {
@@ -24,19 +25,23 @@ namespace Netsphere.Network.Service
             var ip = ((IPEndPoint)((TcpTransport)session.Transport).Socket.RemoteEndPoint).Address.ToString();
             Logger.Debug($"Login from {ip} with username {message.Username}");
 
-            var db = AuthDatabase.Instance;
-            var account = await db.Accounts.FirstOrDefaultAsync(acc => acc.Username == message.Username)
-                .ConfigureAwait(false);
-
-            if (account == null)
+            AccountDto account;
+            string password;
+            using (var db = AuthDatabase.Open())
             {
-                if (Config.Instance.NoobMode)
+                var result = await db.FindAsync<AccountDto>(statement => statement
+                        .Where($"{nameof(AccountDto.Username):C}=@Username")
+                        .Include<BanDto>()
+                        .WithParameters(new { message.Username }))
+                    .ConfigureAwait(false);
+                account = result.FirstOrDefault();
+
+                if (account == null)
                 {
-                    // NoobMode: Create a new account if non exists
-                    using (var scope = new DataAccessScope())
+                    if (Config.Instance.NoobMode)
                     {
-                        account = db.Accounts.Create();
-                        account.Username = message.Username;
+                        // NoobMode: Create a new account if non exists
+                        account = new AccountDto { Username = message.Username };
 
                         var bytes = new byte[16];
                         using (var rng = new RNGCryptoServiceProvider())
@@ -45,71 +50,65 @@ namespace Netsphere.Network.Service
                         account.Salt = Hash.GetString<SHA1CryptoServiceProvider>(bytes);
                         account.Password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
 
-                        await scope.CompleteAsync()
+                        await db.InsertAsync(account)
                             .ConfigureAwait(false);
                     }
-                }
-                else
-                {
-                    Logger.Error($"Wrong login for {message.Username}");
-                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
-                        .ConfigureAwait(false);
-                    return;
-                }
-            }
-
-            var password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
-            if (!account.Password.Equals(password, StringComparison.InvariantCultureIgnoreCase))
-            {
-                if (Config.Instance.NoobMode)
-                {
-                    // Noob Mode: Save new password
-                    using (var scope = new DataAccessScope())
+                    else
                     {
-                        var acc = db.Accounts.GetReference(account.Id);
+                        Logger.Error($"Wrong login for {message.Username}");
+                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
+                            .ConfigureAwait(false);
+                        return;
+                    }
+                }
+
+                password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
+                if (!account.Password.Equals(password, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (Config.Instance.NoobMode)
+                    {
+                        // Noob Mode: Save new password
                         var bytes = new byte[16];
                         using (var rng = new RNGCryptoServiceProvider())
                             rng.GetBytes(bytes);
 
                         var salt = Hash.GetString<SHA1CryptoServiceProvider>(bytes);
                         password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + salt);
-                        acc.Password = password;
-                        acc.Salt = salt;
+                        account.Password = password;
+                        account.Salt = salt;
 
-                        await scope.CompleteAsync()
+                        await db.UpdateAsync(account)
                             .ConfigureAwait(false);
                     }
+                    else
+                    {
+                        Logger.Error($"Wrong login for {message.Username}");
+                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
+                            .ConfigureAwait(false);
+                        return;
+                    }
                 }
-                else
+
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var ban = account.Bans.FirstOrDefault(b => b.Date + b.Duration > now);
+                if (ban != null)
                 {
-                    Logger.Error($"Wrong login for {message.Username}");
-                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
+                    var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + ban.Duration);
+                    Logger.Error($"{message.Username} is banned until {unbanDate}");
+                    await session.SendAsync(new SAuthInEuAckMessage(unbanDate))
                         .ConfigureAwait(false);
                     return;
                 }
-            }
 
-            var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var ban = await account.Bans.FirstOrDefaultAsync(b => b.Date + b.Duration > now)
-                .ConfigureAwait(false);
-            if (ban != null)
-            {
-                var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + ban.Duration);
-                Logger.Error($"{message.Username} is banned until {unbanDate}");
-                await session.SendAsync(new SAuthInEuAckMessage(unbanDate))
-                    .ConfigureAwait(false);
-                return;
-            }
+                Logger.Info($"Login success for {message.Username}");
 
-            Logger.Info($"Login success for {message.Username}");
-
-            using (var scope = new DataAccessScope())
-            {
-                var entry = account.LoginHistory.Create();
-                entry.Date = DateTimeOffset.Now.ToUnixTimeSeconds();
-                entry.IP = ip;
-
-                await scope.CompleteAsync()
+                var entry = new LoginHistoryDto
+                {
+                    AccountId = account.Id,
+                    Date = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    IP = ip
+                };
+                await db.InsertAsync(entry)
                     .ConfigureAwait(false);
             }
 

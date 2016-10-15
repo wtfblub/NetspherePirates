@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using BlubLib;
+using Dapper.FastCrud;
 using Netsphere.API;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
-using Shaolinq;
-using Shaolinq.MySql;
-using Shaolinq.Sqlite;
 
 namespace Netsphere
 {
@@ -24,8 +23,6 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
-
-            Shaolinq.Logging.LogProvider.IsDisabled = true;
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
@@ -92,33 +89,45 @@ namespace Netsphere
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        public static Database.Auth.AuthDatabase Instance { get; }
+        private static readonly string s_connectionString;
 
         static AuthDatabase()
         {
             var config = Config.Instance.AuthDatabase;
 
-            DataAccessModelConfiguration dbConfig;
-            switch (Config.Instance.AuthDatabase.Engine)
+            switch (config.Engine)
             {
-                case DatabaseEngine.MySQL:
-                    dbConfig = MySqlConfiguration.Create(config.Database, config.Host, config.Username, config.Password, true);
-                    break;
+                //case DatabaseEngine.MySQL:
+                //    break;
 
                 case DatabaseEngine.SQLite:
                     if (Utilities.IsMono)
                         throw new NotSupportedException("SQLite is not supported on mono. Please switch to MySQL");
-                    dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
+                    s_connectionString = $"Data Source={config.Filename};Pooling=true;";
+                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
                     break;
 
                 default:
-                    Logger.Error("Invalid database engine {0}", Config.Instance.AuthDatabase.Engine);
+                    Logger.Error($"Invalid database engine {config.Engine}");
                     Environment.Exit(0);
                     return;
 
             }
+        }
 
-            Instance = DataAccessModel.BuildDataAccessModel<Database.Auth.AuthDatabase>(dbConfig);
+        public static IDbConnection Open()
+        {
+            var engine = Config.Instance.AuthDatabase.Engine;
+            switch (engine)
+            {
+                case DatabaseEngine.SQLite:
+                    return new System.Data.SQLite.SQLiteConnection(s_connectionString);
+
+                default:
+                    Logger.Error($"Invalid database engine {engine}");
+                    Environment.Exit(0);
+                    return null;
+            }
         }
     }
 }
