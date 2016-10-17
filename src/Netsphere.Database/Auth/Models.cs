@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace Netsphere.Database.Auth
 {
@@ -16,9 +17,9 @@ namespace Netsphere.Database.Auth
         public string Salt { get; set; }
         public byte SecurityLevel { get; set; }
 
-        public IEnumerable<BanDto> Bans { get; set; }
-        public IEnumerable<LoginHistoryDto> LoginHistory { get; set; }
-        public IEnumerable<NicknameHistoryDto> NicknameHistory { get; set; }
+        public IEnumerable<BanDto> Bans { get; set; } = Enumerable.Empty<BanDto>();
+        public IEnumerable<LoginHistoryDto> LoginHistory { get; set; } = Enumerable.Empty<LoginHistoryDto>();
+        public IEnumerable<NicknameHistoryDto> NicknameHistory { get; set; } = Enumerable.Empty<NicknameHistoryDto>();
     }
 
     [Table("bans")]

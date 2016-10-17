@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace Netsphere.Database.Game
 {
@@ -35,14 +36,14 @@ namespace Netsphere.Database.Game
         public int Coins2 { get; set; }
         public byte CurrentCharacterSlot { get; set; }
 
-        public IEnumerable<PlayerCharacterDto> Characters { get; }
-        public IEnumerable<PlayerDenyDto> Ignores { get; }
-        public IEnumerable<PlayerDenyDto> IgnoredBy { get; }
-        public IEnumerable<PlayerItemDto> Items { get; }
-        public IEnumerable<PlayerLicenseDto> Licenses { get; }
-        public IEnumerable<PlayerMailDto> Inbox { get; }
-        public IEnumerable<PlayerMailDto> Outbox { get; }
-        public IEnumerable<PlayerSettingDto> Settings { get; }
+        public IEnumerable<PlayerCharacterDto> Characters { get; set; } = Enumerable.Empty<PlayerCharacterDto>();
+        public IEnumerable<PlayerDenyDto> Ignores { get; set; } = Enumerable.Empty<PlayerDenyDto>();
+        public IEnumerable<PlayerDenyDto> IgnoredBy { get; set; } = Enumerable.Empty<PlayerDenyDto>();
+        public IEnumerable<PlayerItemDto> Items { get; set; } = Enumerable.Empty<PlayerItemDto>();
+        public IEnumerable<PlayerLicenseDto> Licenses { get; set; } = Enumerable.Empty<PlayerLicenseDto>();
+        public IEnumerable<PlayerMailDto> Inbox { get; set; } = Enumerable.Empty<PlayerMailDto>();
+        public IEnumerable<PlayerMailDto> Outbox { get; set; } = Enumerable.Empty<PlayerMailDto>();
+        public IEnumerable<PlayerSettingDto> Settings { get; set; } = Enumerable.Empty<PlayerSettingDto>();
     }
 
     [Table("player_characters")]
@@ -145,19 +146,6 @@ namespace Netsphere.Database.Game
         public long PurchaseDate { get; set; }
         public int Durability { get; set; }
         public int Count { get; set; }
-
-
-        public IEnumerable<PlayerCharacterDto> Weapon1 { get; }
-        public IEnumerable<PlayerCharacterDto> Weapon2 { get; }
-        public IEnumerable<PlayerCharacterDto> Weapon3 { get; }
-        public IEnumerable<PlayerCharacterDto> Skill { get; }
-        public IEnumerable<PlayerCharacterDto> Hair { get; }
-        public IEnumerable<PlayerCharacterDto> Face { get; }
-        public IEnumerable<PlayerCharacterDto> Shirt { get; }
-        public IEnumerable<PlayerCharacterDto> Pants { get; }
-        public IEnumerable<PlayerCharacterDto> Gloves { get; }
-        public IEnumerable<PlayerCharacterDto> Shoes { get; }
-        public IEnumerable<PlayerCharacterDto> Accessory { get; }
     }
 
     [Table("player_licenses")]
@@ -220,8 +208,7 @@ namespace Netsphere.Database.Game
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public IEnumerable<ShopEffectDto> ShopEffects { get; }
-        public IEnumerable<ShopItemInfoDto> ShopItemInfos { get; }
+        public IEnumerable<ShopEffectDto> ShopEffects { get; set; } = Enumerable.Empty<ShopEffectDto>();
     }
 
     [Table("shop_effects")]
@@ -236,8 +223,6 @@ namespace Netsphere.Database.Game
         public ShopEffectGroupDto EffectGroup { get; set; }
 
         public uint Effect { get; set; }
-
-        public IEnumerable<StartItemDto> StartItems { get; }
     }
 
     [Table("shop_price_groups")]
@@ -250,8 +235,7 @@ namespace Netsphere.Database.Game
         public string Name { get; set; }
         public byte PriceType { get; set; }
 
-        public IEnumerable<ShopPriceDto> ShopPrices { get; }
-        public IEnumerable<ShopItemInfoDto> ShopItemInfos { get; }
+        public IEnumerable<ShopPriceDto> ShopPrices { get; set; } = Enumerable.Empty<ShopPriceDto>();
     }
 
     [Table("shop_prices")]
@@ -271,10 +255,6 @@ namespace Netsphere.Database.Game
         public bool IsRefundable { get; set; }
         public int Durability { get; set; }
         public bool IsEnabled { get; set; }
-
-        public IEnumerable<LicenseRewardDto> LicenseRewards { get; }
-        public IEnumerable<PlayerItemDto> PlayerItems { get; }
-        public IEnumerable<StartItemDto> StartItems { get; }
     }
 
     [Table("shop_items")]
@@ -292,7 +272,7 @@ namespace Netsphere.Database.Game
         public bool IsOneTimeUse { get; set; }
         public bool IsDestroyable { get; set; }
 
-        public IEnumerable<ShopItemInfoDto> ItemInfos { get; }
+        public IEnumerable<ShopItemInfoDto> ItemInfos { get; set; } = Enumerable.Empty<ShopItemInfoDto>();
     }
 
     [Table("shop_iteminfos")]
@@ -316,10 +296,6 @@ namespace Netsphere.Database.Game
 
         public byte DiscountPercentage { get; set; }
         public bool IsEnabled { get; set; }
-
-        public IEnumerable<LicenseRewardDto> LicenseRewards { get; }
-        public IEnumerable<PlayerItemDto> PlayerItems { get; }
-        public IEnumerable<StartItemDto> StartItems { get; }
     }
 
     [Table("shop_version")]

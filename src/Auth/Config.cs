@@ -101,6 +101,8 @@ namespace Netsphere
         public DatabaseSettings()
         {
             Engine = DatabaseEngine.SQLite;
+            Host = "localhost";
+            Port = 3306;
         }
     }
 

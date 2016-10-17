@@ -30,8 +30,8 @@ namespace Netsphere.Network.Service
             using (var db = AuthDatabase.Open())
             {
                 var result = await db.FindAsync<AccountDto>(statement => statement
-                        .Where($"{nameof(AccountDto.Username):C} LIKE @Username")
-                        .Include<BanDto>()
+                        .Where($"{nameof(AccountDto.Username):C} = @Username")
+                        .Include<BanDto>(join => join.LeftOuterJoin())
                         .WithParameters(new { message.Username }))
                     .ConfigureAwait(false);
                 account = result.FirstOrDefault();
@@ -63,7 +63,7 @@ namespace Netsphere.Network.Service
                 }
 
                 password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
-                if (!account.Password.Equals(password, StringComparison.InvariantCultureIgnoreCase))
+                if (string.IsNullOrWhiteSpace(account.Password) || !account.Password.Equals(password, StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (Config.Instance.NoobMode)
                     {
