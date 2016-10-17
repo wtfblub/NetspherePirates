@@ -30,7 +30,7 @@ namespace Netsphere.Network.Service
             using (var db = AuthDatabase.Open())
             {
                 var result = await db.FindAsync<AccountDto>(statement => statement
-                        .Where($"{nameof(AccountDto.Username):C}=@Username")
+                        .Where($"{nameof(AccountDto.Username):C} LIKE @Username")
                         .Include<BanDto>()
                         .WithParameters(new { message.Username }))
                     .ConfigureAwait(false);
@@ -90,10 +90,10 @@ namespace Netsphere.Network.Service
                 }
 
                 var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-                var ban = account.Bans.FirstOrDefault(b => b.Date + b.Duration > now);
+                var ban = account.Bans.FirstOrDefault(b => b.Date + (b.Duration ?? 0) > now);
                 if (ban != null)
                 {
-                    var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + ban.Duration);
+                    var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
                     Logger.Error($"{message.Username} is banned until {unbanDate}");
                     await session.SendAsync(new SAuthInEuAckMessage(unbanDate))
                         .ConfigureAwait(false);

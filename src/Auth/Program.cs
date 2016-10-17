@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Threading.Tasks;
 using BlubLib;
+using Dapper;
 using Dapper.FastCrud;
 using Netsphere.API;
 using Netsphere.Network;
@@ -27,9 +29,7 @@ namespace Netsphere
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            Logger.Info("Checking database...");
-
-            AuthDatabase.Instance.CreateIfNotExist();
+            AuthDatabase.Initialize();
 
             Logger.Info("Starting server...");
 
@@ -89,29 +89,50 @@ namespace Netsphere
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static readonly string s_connectionString;
+        private static string s_connectionString;
 
-        static AuthDatabase()
+        public static void Initialize()
         {
-            var config = Config.Instance.AuthDatabase;
+            Logger.Info("Initializing...");
 
+            var config = Config.Instance.AuthDatabase;
+            
             switch (config.Engine)
             {
-                //case DatabaseEngine.MySQL:
-                //    break;
+                case DatabaseEngine.MySQL:
+                    s_connectionString = $"Server={config.Host};Port={config.Port};Database={config.Database};Uid={config.Username};Pwd={config.Password};Pooling=true;";
+                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
+
+                    using (var con = Open())
+                    {
+                        if(con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Database}\"") == null)
+                        {
+                            Logger.Error($"Database '{config.Database}' not found");
+                            Environment.Exit(0);
+                        }
+                    }
+                    break;
 
                 case DatabaseEngine.SQLite:
                     if (Utilities.IsMono)
-                        throw new NotSupportedException("SQLite is not supported on mono. Please switch to MySQL");
+                    {
+                        Logger.Error("SQLite is not supported on mono");
+                        Environment.Exit(0);
+                    }
                     s_connectionString = $"Data Source={config.Filename};Pooling=true;";
                     OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
+
+                    if(!File.Exists(config.Filename))
+                    {
+                        Logger.Error($"Database '{config.Filename}' not found");
+                        Environment.Exit(0);
+                    }
                     break;
 
                 default:
                     Logger.Error($"Invalid database engine {config.Engine}");
                     Environment.Exit(0);
                     return;
-
             }
         }
 
@@ -120,6 +141,9 @@ namespace Netsphere
             var engine = Config.Instance.AuthDatabase.Engine;
             switch (engine)
             {
+                case DatabaseEngine.MySQL:
+                    return new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
+
                 case DatabaseEngine.SQLite:
                     return new System.Data.SQLite.SQLiteConnection(s_connectionString);
 

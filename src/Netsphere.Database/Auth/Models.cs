@@ -10,10 +10,10 @@ namespace Netsphere.Database.Auth
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public string Username { get; set; } = "";
-        public string Nickname { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string Salt { get; set; } = "";
+        public string Username { get; set; }
+        public string Nickname { get; set; }
+        public string Password { get; set; }
+        public string Salt { get; set; }
         public byte SecurityLevel { get; set; }
 
         public IEnumerable<BanDto> Bans { get; set; }
@@ -33,8 +33,8 @@ namespace Netsphere.Database.Auth
         public AccountDto Account { get; set; }
 
         public long Date { get; set; }
-        public long Duration { get; set; }
-        public string Reason { get; set; } = "";
+        public long? Duration { get; set; }
+        public string Reason { get; set; }
     }
 
     [Table("login_history")]
@@ -49,7 +49,7 @@ namespace Netsphere.Database.Auth
         public AccountDto Account { get; set; }
 
         public long Date { get; set; }
-        public string IP { get; set; } = "";
+        public string IP { get; set; }
     }
 
     [Table("nickname_history")]
@@ -63,7 +63,7 @@ namespace Netsphere.Database.Auth
         public int AccountId { get; set; }
         public AccountDto Account { get; set; }
 
-        public string Nickname { get; set; } = "";
-        public long ExpireDate { get; set; }
+        public string Nickname { get; set; }
+        public long? ExpireDate { get; set; }
     }
 }
