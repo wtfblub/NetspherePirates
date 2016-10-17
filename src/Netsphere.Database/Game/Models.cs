@@ -64,47 +64,47 @@ namespace Netsphere.Database.Game
         public byte BasicPants { get; set; }
 
         [ForeignKey(nameof(Weapon1))]
-        public int Weapon1Id { get; set; }
+        public int? Weapon1Id { get; set; }
         public PlayerItemDto Weapon1 { get; set; }
 
         [ForeignKey(nameof(Weapon2))]
-        public int Weapon2Id { get; set; }
+        public int? Weapon2Id { get; set; }
         public PlayerItemDto Weapon2 { get; set; }
 
         [ForeignKey(nameof(Weapon3))]
-        public int Weapon3Id { get; set; }
+        public int? Weapon3Id { get; set; }
         public PlayerItemDto Weapon3 { get; set; }
 
         [ForeignKey(nameof(Skill))]
-        public int SkillId { get; set; }
+        public int? SkillId { get; set; }
         public PlayerItemDto Skill { get; set; }
 
         [ForeignKey(nameof(Hair))]
-        public int HairId { get; set; }
+        public int? HairId { get; set; }
         public PlayerItemDto Hair { get; set; }
 
         [ForeignKey(nameof(Face))]
-        public int FaceId { get; set; }
+        public int? FaceId { get; set; }
         public PlayerItemDto Face { get; set; }
 
         [ForeignKey(nameof(Shirt))]
-        public int ShirtId { get; set; }
+        public int? ShirtId { get; set; }
         public PlayerItemDto Shirt { get; set; }
 
         [ForeignKey(nameof(Pants))]
-        public int PantsId { get; set; }
+        public int? PantsId { get; set; }
         public PlayerItemDto Pants { get; set; }
 
         [ForeignKey(nameof(Gloves))]
-        public int GlovesId { get; set; }
+        public int? GlovesId { get; set; }
         public PlayerItemDto Gloves { get; set; }
 
         [ForeignKey(nameof(Shoes))]
-        public int ShoesId { get; set; }
+        public int? ShoesId { get; set; }
         public PlayerItemDto Shoes { get; set; }
 
         [ForeignKey(nameof(Accessory))]
-        public int AccessoryId { get; set; }
+        public int? AccessoryId { get; set; }
         public PlayerItemDto Accessory { get; set; }
     }
 
