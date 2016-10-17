@@ -6,19 +6,12 @@ PRAGMA foreign_keys = OFF;
 DROP TABLE IF EXISTS "main"."accounts";
 CREATE TABLE "accounts" (
 "Id"  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-"Username"  TEXT(40) NOT NULL,
-"Nickname"  TEXT(40),
-"Password"  TEXT(40),
-"Salt"  TEXT(40),
+"Username"  TEXT(40) NOT NULL COLLATE NOCASE ,
+"Nickname"  TEXT(40) COLLATE NOCASE ,
+"Password"  TEXT(40) COLLATE NOCASE ,
+"Salt"  TEXT(40) COLLATE NOCASE ,
 "SecurityLevel"  INTEGER NOT NULL DEFAULT 0
 );
-
--- ----------------------------
--- Indexes structure for table accounts
--- ----------------------------
-CREATE UNIQUE INDEX "main".""
-ON "accounts" ("Username" ASC);
-PRAGMA foreign_keys = ON;
 
 -- ----------------------------
 -- Table structure for bans
@@ -29,7 +22,7 @@ CREATE TABLE "bans" (
 "AccountId"  INTEGER NOT NULL,
 "Date"  INTEGER NOT NULL DEFAULT 0,
 "Duration"  INTEGER,
-"Reason"  TEXT(255),
+"Reason"  TEXT(255) COLLATE NOCASE ,
 CONSTRAINT "fkey0" FOREIGN KEY ("AccountId") REFERENCES "accounts" ("Id") ON DELETE CASCADE
 );
 
@@ -52,8 +45,22 @@ DROP TABLE IF EXISTS "main"."nickname_history";
 CREATE TABLE "nickname_history" (
 "Id"  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 "AccountId"  INTEGER NOT NULL,
-"Nickname"  TEXT(40) NOT NULL,
+"Nickname"  TEXT(40) NOT NULL COLLATE NOCASE ,
 "ExpireDate"  INTEGER,
 CONSTRAINT "fkey0" FOREIGN KEY ("AccountId") REFERENCES "accounts" ("Id") ON DELETE CASCADE
 );
+
+-- ----------------------------
+-- Table structure for sqlite_sequence
+-- ----------------------------
+DROP TABLE IF EXISTS "main"."sqlite_sequence";
+CREATE TABLE sqlite_sequence(name,seq);
+
+-- ----------------------------
+-- Indexes structure for table accounts
+-- ----------------------------
+CREATE UNIQUE INDEX "main"."Nickname"
+ON "accounts" ("Nickname" ASC);
+CREATE UNIQUE INDEX "main"."Username"
+ON "accounts" ("Username" ASC);
 PRAGMA foreign_keys = ON;
