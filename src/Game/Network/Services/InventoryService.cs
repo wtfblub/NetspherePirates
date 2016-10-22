@@ -3,7 +3,6 @@ using BlubLib.Network.Pipes;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
-using Shaolinq;
 
 namespace Netsphere.Network.Services
 {
@@ -106,18 +105,6 @@ namespace Netsphere.Network.Services
                 item.Durability = price.Durability;
                 session.Player.PEN -= cost;
 
-                using (var scope = new DataAccessScope())
-                {
-                    var playerDto = GameDatabase.Instance.Players.GetReference((int)session.Player.Account.Id);
-                    playerDto.PEN = (int)session.Player.PEN;
-
-                    var itemDto = GameDatabase.Instance.PlayerItems.GetReference((int)item.Id);
-                    itemDto.Durability = item.Durability;
-
-                    await scope.CompleteAsync()
-                        .ConfigureAwait(false);
-                }
-
                 await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.OK, ItemId = item.Id })
                         .ConfigureAwait(false);
                 await session.SendAsync(new SRefreshCashInfoAckMessage { PEN = session.Player.PEN, AP = session.Player.AP })
@@ -166,16 +153,6 @@ namespace Netsphere.Network.Services
 
             session.Player.PEN += item.CalculateRefund();
             session.Player.Inventory.Remove(item);
-
-
-            using (var scope = new DataAccessScope())
-            {
-                var playerDto = GameDatabase.Instance.Players.GetReference((int)session.Player.Account.Id);
-                playerDto.PEN = (int)session.Player.PEN;
-
-                await scope.CompleteAsync()
-                    .ConfigureAwait(false);
-            }
 
             await session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.OK, ItemId = item.Id })
                     .ConfigureAwait(false);

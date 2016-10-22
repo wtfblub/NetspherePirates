@@ -2,7 +2,10 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Text;
+using Dapper.FastCrud;
 using ExpressMapper.Extensions;
 using Netsphere.Shop;
 using Netsphere.Database.Game;
@@ -99,41 +102,63 @@ namespace Netsphere
             Player.Session.Send(new SDeleteItemInventoryAckMessage(item.Id));
         }
 
-        internal void Save()
+        internal void Save(IDbConnection db)
         {
-            PlayerItem itemToDelete;
-            while (_itemsToDelete.TryPop(out itemToDelete))
-                GameDatabase.Instance.PlayerCharacters.GetReference(itemToDelete.Id).Delete();
+            if (!_itemsToDelete.IsEmpty)
+            {
+                var idsToRemove = new StringBuilder();
+                var firstRun = true;
+                PlayerItem itemToDelete;
+                while (_itemsToDelete.TryPop(out itemToDelete))
+                {
+                    if (firstRun)
+                        firstRun = false;
+                    else
+                        idsToRemove.Append(',');
+                    idsToRemove.Append(itemToDelete.Id);
+                }
+
+                db.BulkDelete<PlayerItemDto>(statement => statement
+                    .Where($"{nameof(PlayerItemDto.Id):C} IN ({idsToRemove})"));
+            }
 
             foreach (var item in _items.Values)
             {
-                PlayerItemDto itemDto;
                 if (!item.ExistsInDatabase)
                 {
-                    var plrRef = GameDatabase.Instance.Players.GetReference((int) Player.Account.Id);
-                    itemDto = plrRef.Items.Create((int)item.Id);
+                    db.Insert(new PlayerItemDto
+                    {
+                        Id = (int)item.Id,
+                        PlayerId = (int)Player.Account.Id,
+                        ShopItemInfoId = item.GetShopItemInfo().Id,
+                        ShopPriceId = item.GetShopItemInfo().PriceGroup.GetPrice(item.PeriodType, item.Period).Id,
+                        Effect = item.Effect,
+                        Color = item.Color,
+                        PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
+                        Durability = item.Durability,
+                        Count = (int)item.Count
+                    });
                     item.ExistsInDatabase = true;
-
-                    itemDto.Player = plrRef;
-                    itemDto.ShopItemInfo = GameDatabase.Instance.ShopItemInfos.GetReference(item.GetShopItemInfo().Id);
-                    itemDto.ShopPrice = GameDatabase.Instance.ShopPrices
-                        .GetReference(item.GetShopItemInfo().PriceGroup.GetPrice(item.PeriodType, item.Period).Id);
-                    itemDto.Effect = item.Effect;
-                    itemDto.Color = item.Color;
-                    itemDto.PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds();
                 }
                 else
                 {
                     if (!item.NeedsToSave)
                         continue;
 
+                    db.Update(new PlayerItemDto
+                    {
+                        Id = (int)item.Id,
+                        PlayerId = (int)Player.Account.Id,
+                        ShopItemInfoId = item.GetShopItemInfo().Id,
+                        ShopPriceId = item.GetShopPrice().Id,
+                        Effect = item.Effect,
+                        Color = item.Color,
+                        PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
+                        Durability = item.Durability,
+                        Count = (int)item.Count
+                    });
                     item.NeedsToSave = false;
-                    itemDto = GameDatabase.Instance.PlayerItems
-                        .GetReference((int)item.Id);
                 }
-
-                itemDto.Durability = item.Durability;
-                itemDto.Count = (int)item.Count;
             }
         }
 

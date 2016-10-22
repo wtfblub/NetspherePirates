@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BlubLib;
+using Dapper;
+using Dapper.FastCrud;
+using Netsphere.Database.Auth;
+using Netsphere.Database.Game;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
-using NLog.Fluent;
-using Shaolinq;
-using Shaolinq.MySql;
-using Shaolinq.Sqlite;
 
 namespace Netsphere
 {
@@ -27,17 +29,11 @@ namespace Netsphere
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
 
-            Shaolinq.Logging.LogProvider.IsDisabled = true;
-
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            Logger.Info("Checking database...");
-
-            AuthDatabase.Instance.CreateIfNotExist();
-
-            using (var scope = new DataAccessScope(DataAccessIsolationLevel.Unspecified, TimeSpan.FromMinutes(5)))
-                GameDatabase.Instance.CreateIfNotExist();
+            AuthDatabase.Initialize();
+            GameDatabase.Initialize();
 
             FillShop();
 
@@ -103,217 +99,317 @@ namespace Netsphere
 
         private static void FillShop()
         {
-            var db = GameDatabase.Instance;
-            if (!db.ShopVersion.Any())
-            {
-                using (var scope = new DataAccessScope())
-                {
-                    var version = db.ShopVersion.Create(1);
-                    version.Version = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
-                    scope.Complete();
-                }
-            }
-
-            if (!Config.Instance.NoobMode ||
-                db.ShopEffectGroups.Any() || db.ShopEffects.Any() ||
-                db.ShopPriceGroups.Any() || db.ShopPrices.Any() ||
-                db.ShopItemInfos.Any() || db.ShopItems.Any())
+            if (!Config.Instance.NoobMode)
                 return;
 
-            Logger.Info("NoobMode: Filling the shop with items");
-
-
-            using (var scope = new DataAccessScope())
+            using (var db = GameDatabase.Open())
             {
-                #region Effects
-
-                var noneEffectGroup = db.ShopEffectGroups.Create();
-                noneEffectGroup.Name = "None";
-
-                var hp30EffectGroup = db.ShopEffectGroups.Create();
-                hp30EffectGroup.Name = "HP+30";
-                hp30EffectGroup.ShopEffects.Create().Effect = 1030;
-
-                var hp15EffectGroup = db.ShopEffectGroups.Create();
-                hp15EffectGroup.Name = "HP+15";
-                hp15EffectGroup.ShopEffects.Create().Effect = 1015;
-
-                var sp40EffectGroup = db.ShopEffectGroups.Create();
-                sp40EffectGroup.Name = "SP+40";
-                sp40EffectGroup.ShopEffects.Create().Effect = 2040;
-
-                var dualMasteryEffectGroup = db.ShopEffectGroups.Create();
-                dualMasteryEffectGroup.Name = "HP+20 & SP+20";
-                dualMasteryEffectGroup.ShopEffects.Create().Effect = 4001;
-
-                var sp3EffectGroup = db.ShopEffectGroups.Create();
-                sp3EffectGroup.Name = "SP+3";
-                sp3EffectGroup.ShopEffects.Create().Effect = 2003;
-
-                var defense7EffectGroup = db.ShopEffectGroups.Create();
-                defense7EffectGroup.Name = "Defense+7";
-                defense7EffectGroup.ShopEffects.Create().Effect = 19907;
-
-                var hp3EffectGroup = db.ShopEffectGroups.Create();
-                hp3EffectGroup.Name = "HP+3";
-                hp3EffectGroup.ShopEffects.Create().Effect = 1003;
-
-                #endregion
-
-                #region Price
-
-                var priceGroup = db.ShopPriceGroups.Create();
-                priceGroup.Name = "PEN";
-                priceGroup.PriceType = (byte)ItemPriceType.PEN;
-
-                var price = priceGroup.ShopPrices.Create();
-                price.PeriodType = (byte)ItemPeriodType.None;
-                price.IsRefundable = false;
-                price.Durability = 1000000;
-                price.IsEnabled = true;
-                price.Price = 1;
-
-                #endregion
-
-                #region Items
-
-                var items = GameServer.Instance.ResourceCache.GetItems().Values.ToArray();
-                for (var i = 0; i < items.Length; ++i)
+                if (!db.Find<ShopVersionDto>().Any())
                 {
-                    var item = items[i];
-                    var effectToUse = noneEffectGroup;
-
-                    switch (item.ItemNumber.Category)
+                    var version = new ShopVersionDto
                     {
-                        case ItemCategory.Weapon:
-                            break;
-
-                        case ItemCategory.Skill:
-                            if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 0) // half hp mastery
-                                effectToUse = hp15EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 1) // hp mastery
-                                effectToUse = hp30EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 2) // sp mastery
-                                effectToUse = sp40EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 3) // dual mastery
-                                effectToUse = dualMasteryEffectGroup;
-
-                            break;
-
-                        case ItemCategory.Costume:
-                            if (item.ItemNumber.SubCategory == (int)CostumeSlot.Hair)
-                                effectToUse = defense7EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == (int)CostumeSlot.Face)
-                                effectToUse = sp3EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == (int)CostumeSlot.Pants)
-                                effectToUse = defense7EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == (int)CostumeSlot.Gloves)
-                                effectToUse = hp3EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == (int)CostumeSlot.Shoes)
-                                effectToUse = hp3EffectGroup;
-
-                            if (item.ItemNumber.SubCategory == (int)CostumeSlot.Accessory)
-                                effectToUse = sp3EffectGroup;
-                            break;
-
-                        default:
-                            continue;
-                    }
-
-                    var shopItem = db.ShopItems.Create((uint)item.ItemNumber);
-                    shopItem.RequiredGender = (byte)item.Gender;
-                    shopItem.RequiredLicense = (byte)item.License;
-                    shopItem.IsDestroyable = true;
-
-                    var shopItemInfo = shopItem.ItemInfos.Create();
-                    shopItemInfo.PriceGroup = priceGroup;
-                    shopItemInfo.EffectGroup = effectToUse;
-                    shopItemInfo.IsEnabled = true;
-
-                    Logger.Info($"[{i}/{items.Length}] {item.ItemNumber}: {item.Name}");
+                        Version = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss")
+                    };
+                    db.Insert(version);
                 }
 
-                #endregion
+                if (db.Find<ShopEffectGroupDto>().Any() || db.Find<ShopEffectDto>().Any() ||
+                    db.Find<ShopPriceGroupDto>().Any() || db.Find<ShopPriceDto>().Any() ||
+                    db.Find<ShopItemDto>().Any() || db.Find<ShopItemInfoDto>().Any())
+                    return;
 
-                scope.Complete();
+                Logger.Info("NoobMode: Filling the shop with items");
+
+                using (var transaction = db.BeginTransaction())
+                {
+                    var effects = new Dictionary<string, Tuple<uint[], int>>
+                    {
+                        {"None", Tuple.Create(Array.Empty<uint>(), 0)},
+                        {"HP+30", Tuple.Create(new uint[] {1030}, 0)},
+                        {"HP+15", Tuple.Create(new uint[] {1015}, 0)},
+                        {"SP+40", Tuple.Create(new uint[] {2040}, 0)},
+                        {"HP+20 & SP+20", Tuple.Create(new uint[] {4001}, 0)},
+                        {"SP+3", Tuple.Create(new uint[] {2003}, 0)},
+                        {"Defense+7", Tuple.Create(new uint[] {19907}, 0)},
+                        {"HP+3", Tuple.Create(new uint[] {1003}, 0)}
+                    };
+
+                    #region Effects
+
+                    foreach (var pair in effects.ToArray())
+                    {
+                        var effectGroup = new ShopEffectGroupDto { Name = pair.Key };
+                        db.Insert(effectGroup, statement => statement.AttachToTransaction(transaction));
+                        effects[pair.Key] = Tuple.Create(pair.Value.Item1, effectGroup.Id);
+
+                        foreach (var effect in pair.Value.Item1)
+                            db.Insert(new ShopEffectDto { EffectGroupId = effectGroup.Id, Effect = effect },
+                                statement => statement.AttachToTransaction(transaction));
+                    }
+
+                    #endregion
+
+                    #region Price
+
+                    var priceGroup = new ShopPriceGroupDto
+                    {
+                        Name = "PEN",
+                        PriceType = (byte)ItemPriceType.PEN
+                    };
+                    db.Insert(priceGroup, statement => statement.AttachToTransaction(transaction));
+
+                    var price = new ShopPriceDto
+                    {
+                        PriceGroupId = priceGroup.Id,
+                        PeriodType = (byte)ItemPeriodType.None,
+                        IsRefundable = false,
+                        Durability = 1000000,
+                        IsEnabled = true,
+                        Price = 1
+                    };
+                    db.Insert(price, statement => statement.AttachToTransaction(transaction));
+
+                    #endregion
+
+                    #region Items
+
+                    var items = GameServer.Instance.ResourceCache.GetItems().Values.ToArray();
+                    for (var i = 0; i < items.Length; ++i)
+                    {
+                        var item = items[i];
+                        var effectToUse = effects["None"];
+
+                        switch (item.ItemNumber.Category)
+                        {
+                            case ItemCategory.Weapon:
+                                break;
+
+                            case ItemCategory.Skill:
+                                if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 0) // half hp mastery
+                                    effectToUse = effects["HP+15"];
+
+                                if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 1) // hp mastery
+                                    effectToUse = effects["HP+30"];
+
+                                if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 2) // sp mastery
+                                    effectToUse = effects["SP+40"];
+
+                                if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 3) // dual mastery
+                                    effectToUse = effects["HP+20 & SP+20"];
+
+                                break;
+
+                            case ItemCategory.Costume:
+                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Hair)
+                                    effectToUse = effects["Defense+7"];
+
+                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Face)
+                                    effectToUse = effects["SP+3"];
+
+                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Pants)
+                                    effectToUse = effects["Defense+7"];
+
+                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Gloves)
+                                    effectToUse = effects["HP+3"];
+
+                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Shoes)
+                                    effectToUse = effects["HP+3"];
+
+                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Accessory)
+                                    effectToUse = effects["SP+3"];
+                                break;
+
+                            default:
+                                continue;
+                        }
+
+                        var shopItem = new ShopItemDto
+                        {
+                            Id = item.ItemNumber,
+                            RequiredGender = (byte)item.Gender,
+                            RequiredLicense = (byte)item.License,
+                            IsDestroyable = true
+                        };
+                        db.Insert(shopItem, statement => statement.AttachToTransaction(transaction));
+
+                        var shopItemInfo = new ShopItemInfoDto
+                        {
+                            ShopItemId = shopItem.Id,
+                            PriceGroupId = priceGroup.Id,
+                            EffectGroupId = effectToUse.Item2,
+                            IsEnabled = true
+                        };
+                        db.Insert(shopItemInfo, statement => statement.AttachToTransaction(transaction));
+
+                        Logger.Info($"[{i}/{items.Length}] {item.ItemNumber}: {item.Name}");
+                    }
+
+                    #endregion
+
+                    try
+                    {
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
             }
         }
+
     }
 
     internal static class AuthDatabase
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        public static Database.Auth.AuthDatabase Instance { get; }
+        private static string s_connectionString;
 
-        static AuthDatabase()
+        public static void Initialize()
         {
-            var config = Config.Instance.AuthDatabase;
+            Logger.Info("Initializing...");
 
-            DataAccessModelConfiguration dbConfig;
-            switch (Config.Instance.AuthDatabase.Engine)
+            var config = Config.Instance.Database;
+
+            switch (config.Engine)
             {
                 case DatabaseEngine.MySQL:
-                    dbConfig = MySqlConfiguration.Create(config.Database, config.Host, config.Username, config.Password, true);
+                    s_connectionString =
+                        $"Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
+                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
+
+                    using (var con = Open())
+                    {
+                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
+                        {
+                            Logger.Error($"Database '{config.Auth.Database}' not found");
+                            Environment.Exit(0);
+                        }
+                    }
                     break;
 
                 case DatabaseEngine.SQLite:
                     if (Utilities.IsMono)
-                        throw new NotSupportedException("SQLite is not supported on mono. Please switch to MySQL");
-                    dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
+                    {
+                        Logger.Error("SQLite is not supported on mono");
+                        Environment.Exit(0);
+                    }
+                    s_connectionString = $"Data Source={config.Auth.Filename};Pooling=true;";
+                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
+
+                    if (!File.Exists(config.Auth.Filename))
+                    {
+                        Logger.Error($"Database '{config.Auth.Filename}' not found");
+                        Environment.Exit(0);
+                    }
                     break;
 
                 default:
-                    Logger.Error()
-                        .Message("Invalid database engine {0}", Config.Instance.AuthDatabase.Engine)
-                        .Write();
+                    Logger.Error($"Invalid database engine {config.Engine}");
                     Environment.Exit(0);
                     return;
-
             }
+        }
 
-            Instance = DataAccessModel.BuildDataAccessModel<Database.Auth.AuthDatabase>(dbConfig);
+        public static IDbConnection Open()
+        {
+            var engine = Config.Instance.Database.Engine;
+            IDbConnection connection;
+            switch (engine)
+            {
+                case DatabaseEngine.MySQL:
+                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
+                    break;
+
+                case DatabaseEngine.SQLite:
+                    connection = new System.Data.SQLite.SQLiteConnection(s_connectionString);
+                    break;
+
+                default:
+                    Logger.Error($"Invalid database engine {engine}");
+                    Environment.Exit(0);
+                    return null;
+            }
+            connection.Open();
+            return connection;
         }
     }
 
     internal static class GameDatabase
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        public static Database.Game.GameDatabase Instance { get; }
+        private static string s_connectionString;
 
-        static GameDatabase()
+        public static void Initialize()
         {
-            var config = Config.Instance.GameDatabase;
+            Logger.Info("Initializing...");
 
-            DataAccessModelConfiguration dbConfig;
-            switch (Config.Instance.GameDatabase.Engine)
+            var config = Config.Instance.Database;
+
+            switch (config.Engine)
             {
                 case DatabaseEngine.MySQL:
-                    dbConfig = MySqlConfiguration.Create(config.Database, config.Host, config.Username, config.Password, true);
+                    s_connectionString =
+                        $"Server={config.Game.Host};Port={config.Game.Port};Database={config.Game.Database};Uid={config.Game.Username};Pwd={config.Game.Password};Pooling=true;";
+                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
+
+                    using (var con = Open())
+                    {
+                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Game.Database}\"") == null)
+                        {
+                            Logger.Error($"Database '{config.Game.Database}' not found");
+                            Environment.Exit(0);
+                        }
+                    }
                     break;
 
                 case DatabaseEngine.SQLite:
                     if (Utilities.IsMono)
-                        throw new NotSupportedException("SQLite is not supported on mono. Please switch to MySQL");
-                    dbConfig = SqliteConfiguration.Create(config.Filename, null, Utilities.IsMono);
+                    {
+                        Logger.Error("SQLite is not supported on mono");
+                        Environment.Exit(0);
+                    }
+                    s_connectionString = $"Data Source={config.Game.Filename};Pooling=true;";
+                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
+
+                    if (!File.Exists(config.Game.Filename))
+                    {
+                        Logger.Error($"Database '{config.Game.Filename}' not found");
+                        Environment.Exit(0);
+                    }
                     break;
 
                 default:
-                    Logger.Error()
-                        .Message("Invalid database engine {0}", Config.Instance.AuthDatabase.Engine)
-                        .Write();
+                    Logger.Error($"Invalid database engine {config.Engine}");
                     Environment.Exit(0);
                     return;
-
             }
+        }
 
-            Instance = DataAccessModel.BuildDataAccessModel<Database.Game.GameDatabase>(dbConfig);
+        public static IDbConnection Open()
+        {
+            var engine = Config.Instance.Database.Engine;
+            IDbConnection connection;
+            switch (engine)
+            {
+                case DatabaseEngine.MySQL:
+                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
+                    break;
+
+                case DatabaseEngine.SQLite:
+                    connection = new System.Data.SQLite.SQLiteConnection(s_connectionString);
+                    break;
+
+                default:
+                    Logger.Error($"Invalid database engine {engine}");
+                    Environment.Exit(0);
+                    return null;
+            }
+            connection.Open();
+            return connection;
         }
     }
 }

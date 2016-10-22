@@ -16,9 +16,9 @@ namespace Netsphere
             _character = @char;
             var plr = _character.CharacterManager.Player;
 
-            _items[0] = plr.Inventory[(ulong)(dto.Weapon1?.Id ?? 0)];
-            _items[1] = plr.Inventory[(ulong)(dto.Weapon2?.Id ?? 0)];
-            _items[2] = plr.Inventory[(ulong)(dto.Weapon3?.Id ?? 0)];
+            _items[0] = plr.Inventory[(ulong)(dto.Weapon1Id ?? 0)];
+            _items[1] = plr.Inventory[(ulong)(dto.Weapon2Id ?? 0)];
+            _items[2] = plr.Inventory[(ulong)(dto.Weapon3Id ?? 0)];
         }
 
         internal WeaponManager(Character @char)

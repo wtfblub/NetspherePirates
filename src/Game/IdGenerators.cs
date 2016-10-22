@@ -1,69 +1,87 @@
 ﻿using System.Linq;
 using System.Threading;
+using Dapper.FastCrud;
+using Netsphere.Database.Game;
 
 namespace Netsphere
 {
     internal static class ItemIdGenerator
     {
-        private static long _counter;
+        private static long s_counter;
 
         public static void Initialize()
         {
-            if (GameDatabase.Instance.PlayerItems.Any())
-                _counter = GameDatabase.Instance.PlayerItems.Max(item => item.Id);
+            using (var db = GameDatabase.Open())
+            {
+                var result = db.Find<PlayerItemDto>();
+                if (result.Any())
+                    s_counter = result.Max(item => item.Id);
+            }
         }
 
         public static ulong GetNextId()
         {
-            return (ulong)Interlocked.Add(ref _counter, 1);
+            return (ulong)Interlocked.Add(ref s_counter, 1);
         }
     }
 
     internal static class CharacterIdGenerator
     {
-        private static int _counter;
+        private static int s_counter;
 
         public static void Initialize()
         {
-            if (GameDatabase.Instance.PlayerCharacters.Any())
-                _counter = GameDatabase.Instance.PlayerCharacters.Max(@char => @char.Id);
+            using (var db = GameDatabase.Open())
+            {
+                var result = db.Find<PlayerCharacterDto>();
+                if (result.Any())
+                    s_counter = result.Max(item => item.Id);
+            }
         }
 
         public static int GetNextId()
         {
-            return Interlocked.Add(ref _counter, 1);
+            return Interlocked.Add(ref s_counter, 1);
         }
     }
 
     internal static class LicenseIdGenerator
     {
-        private static int _counter;
+        private static int s_counter;
 
         public static void Initialize()
         {
-            if (GameDatabase.Instance.PlayerLicenses.Any())
-                _counter = GameDatabase.Instance.PlayerLicenses.Max(license => license.Id);
+            using (var db = GameDatabase.Open())
+            {
+                var result = db.Find<PlayerLicenseDto>();
+                if (result.Any())
+                    s_counter = result.Max(item => item.Id);
+            }
         }
 
         public static int GetNextId()
         {
-            return Interlocked.Add(ref _counter, 1);
+            return Interlocked.Add(ref s_counter, 1);
         }
     }
 
     internal static class DenyIdGenerator
     {
-        private static int _counter;
+        private static int s_counter;
 
         public static void Initialize()
         {
-            if (GameDatabase.Instance.PlayerDeny.Any())
-                _counter = GameDatabase.Instance.PlayerDeny.Max(deny => deny.Id);
+            using (var db = GameDatabase.Open())
+            {
+                var result = db.Find<PlayerDenyDto>();
+                if (result.Any())
+                    s_counter = result.Max(item => item.Id);
+            }
         }
 
         public static int GetNextId()
         {
-            return Interlocked.Add(ref _counter, 1);
+            return Interlocked.Add(ref s_counter, 1);
         }
     }
 }

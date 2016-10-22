@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -6,13 +7,15 @@ using System.Threading.Tasks;
 using BlubLib.Network.Pipes;
 using BlubLib.Network.Transport.Sockets;
 using BlubLib.Security.Cryptography;
+using Dapper.FastCrud;
 using ExpressMapper.Extensions;
+using Netsphere.Database.Auth;
+using Netsphere.Database.Game;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
-using Shaolinq;
 using CLoginReqMessage = Netsphere.Network.Message.Game.CLoginReqMessage;
 using SLoginAckMessage = Netsphere.Network.Message.Game.SLoginAckMessage;
 
@@ -39,7 +42,7 @@ namespace Netsphere.Network.Services
                     .Message($"Invalid client version {message.Version}")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.WrongVersion })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.WrongVersion))
                     .ConfigureAwait(false);
                 return;
             }
@@ -51,16 +54,24 @@ namespace Netsphere.Network.Services
                     .Message("Server is full")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.ServerFull })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.ServerFull))
                     .ConfigureAwait(false);
                 return;
             }
 
             #region Validate Login
 
-            var accountDto = await AuthDatabase.Instance.Accounts
-                .FirstOrDefaultAsync(acc => acc.Id == (int)message.AccountId)
-                .ConfigureAwait(false);
+            AccountDto accountDto;
+            using (var db = AuthDatabase.Open())
+            {
+                accountDto = (await db.FindAsync<AccountDto>(statement => statement
+                            .Include<BanDto>(join => join.LeftOuterJoin())
+                            .Where($"{nameof(AccountDto.Id):C} = @Id")
+                            .WithParameters(new { Id = message.AccountId }))
+                        .ConfigureAwait(false))
+                    .FirstOrDefault();
+            }
+
             if (accountDto == null)
             {
                 Logger.Error()
@@ -68,7 +79,7 @@ namespace Netsphere.Network.Services
                     .Message("Wrong login")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.SessionTimeout })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout))
                     .ConfigureAwait(false);
                 return;
             }
@@ -81,7 +92,7 @@ namespace Netsphere.Network.Services
                     .Message("Wrong login")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.SessionTimeout })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout))
                     .ConfigureAwait(false);
                 return;
             }
@@ -94,23 +105,22 @@ namespace Netsphere.Network.Services
                     .Message("Wrong login")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.SessionTimeout })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout))
                     .ConfigureAwait(false);
                 return;
             }
 
             var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var ban = await accountDto.Bans.FirstOrDefaultAsync(b => b.Date + b.Duration > now)
-                .ConfigureAwait(false);
+            var ban = accountDto.Bans.FirstOrDefault(b => b.Date + (b.Duration ?? 0) > now);
             if (ban != null)
             {
-                var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + ban.Duration);
+                var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
                 Logger.Error()
                     .Account(message.AccountId, message.Username)
                     .Message($"Banned until {unbanDate}")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.SessionTimeout })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout))
                     .ConfigureAwait(false);
                 return;
             }
@@ -126,7 +136,7 @@ namespace Netsphere.Network.Services
                     .Message($"No permission to enter this server({Config.Instance.SecurityLevel} or above required)")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = (GameLoginResult)9 })
+                await session.SendAsync(new SLoginAckMessage((GameLoginResult)9))
                     .ConfigureAwait(false);
                 return;
             }
@@ -149,28 +159,38 @@ namespace Netsphere.Network.Services
                     .Message("Already online")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.TerminateOtherConnection })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.TerminateOtherConnection))
                     .ConfigureAwait(false);
                 return;
             }
 
-            using (var scope = new DataAccessScope())
+            using (var db = GameDatabase.Open())
             {
-                var id = (int) account.Id;
-                var plrDto = await GameDatabase.Instance.Players
-                    .FirstOrDefaultAsync(p => p.Id == id)
-                    .ConfigureAwait(false);
+                    var plrDto = (await db.FindAsync<PlayerDto>(statement => statement
+                            .Include<PlayerCharacterDto>(join => join.LeftOuterJoin())
+                            .Include<PlayerDenyDto>(join => join.LeftOuterJoin())
+                            .Include<PlayerItemDto>(join => join.LeftOuterJoin())
+                            .Include<PlayerLicenseDto>(join => join.LeftOuterJoin())
+                            .Include<PlayerMailDto>(join => join.LeftOuterJoin())
+                            .Include<PlayerSettingDto>(join => join.LeftOuterJoin())
+                            .Where($"{nameof(PlayerDto.Id):C} = @Id")
+                            .WithParameters(new { Id = message.AccountId }))
+                        .ConfigureAwait(false))
+                    .FirstOrDefault();
                 if (plrDto == null)
                 {
                     // first time connecting to this server
-                    plrDto = GameDatabase.Instance.Players.Create(id);
-                    plrDto.Level = Config.Instance.Game.StartLevel;
-                    plrDto.PEN = Config.Instance.Game.StartPEN;
-                    plrDto.AP = Config.Instance.Game.StartAP;
-                    plrDto.Coins1 = Config.Instance.Game.StartCoins1;
-                    plrDto.Coins2 = Config.Instance.Game.StartCoins2;
+                    plrDto = new PlayerDto
+                    {
+                        Id = (int)account.Id,
+                        Level = Config.Instance.Game.StartLevel,
+                        PEN = Config.Instance.Game.StartPEN,
+                        AP = Config.Instance.Game.StartAP,
+                        Coins1 = Config.Instance.Game.StartCoins1,
+                        Coins2 = Config.Instance.Game.StartCoins2
+                    };
 
-                    await scope.CompleteAsync()
+                    await db.InsertAsync(plrDto)
                         .ConfigureAwait(false);
                 }
 
@@ -185,7 +205,7 @@ namespace Netsphere.Network.Services
                     .Message("Already online")
                     .Write();
 
-                await session.SendAsync(new SLoginAckMessage { Result = GameLoginResult.TerminateOtherConnection })
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.TerminateOtherConnection))
                     .ConfigureAwait(false);
                 return;
             }
@@ -197,11 +217,11 @@ namespace Netsphere.Network.Services
                 .Message("Login success")
                 .Write();
 
-            await session.SendAsync(new SLoginAckMessage
-            {
-                Result = string.IsNullOrWhiteSpace(account.Nickname) ? GameLoginResult.ChooseNickname : GameLoginResult.OK,
-                AccountId = session.Player.Account.Id
-            }).ConfigureAwait(false);
+            var result = string.IsNullOrWhiteSpace(account.Nickname)
+                ? GameLoginResult.ChooseNickname
+                : GameLoginResult.OK;
+            await session.SendAsync(new SLoginAckMessage(result, session.Player.Account.Id))
+                .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(account.Nickname))
                 await LoginAsync(server, session).ConfigureAwait(false);
@@ -227,7 +247,7 @@ namespace Netsphere.Network.Services
                 .Message($"Nickname not available: {message.Nickname}")
                 .WriteIf(!available);
 
-            await session.SendAsync(new SCheckNickAckMessage { IsAvailable = available })
+            await session.SendAsync(new SCheckNickAckMessage(!available))
                 .ConfigureAwait(false);
         }
 
@@ -258,24 +278,17 @@ namespace Netsphere.Network.Services
             }
 
             session.Player.Account.Nickname = message.Nickname;
-            using (var scope = new DataAccessScope())
+            using (var db = AuthDatabase.Open())
             {
-                var accountDto = AuthDatabase.Instance.Accounts.GetReference((int)session.Player.Account.Id);
-                //if (accountDto == null)
-                //{
-                //    Logger.Error()
-                //        .Account(session)
-                //        .Message("Account {0} not found", session.Player.Account.Id)
-                //        .Write();
+                var mapping = OrmConfiguration
+                    .GetDefaultEntityMapping<AccountDto>()
+                    .Clone()
+                    .UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(AccountDto.Nickname));
 
-                //    await session.SendAsync(new SCheckNickAckMessage(false))
-                //        .ConfigureAwait(false);
-                //    return;
-                //}
-                accountDto.Nickname = message.Nickname;
+                await db.UpdateAsync(new AccountDto { Id = (int)session.Player.Account.Id, Nickname = message.Nickname },
+                            statement => statement.WithEntityMappingOverride(mapping))
+                        .ConfigureAwait(false);
 
-                await scope.CompleteAsync()
-                    .ConfigureAwait(false);
             }
             //session.Send(new SCreateNickAckMessage { Nickname = msg.Nickname });
             await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateNicknameSuccess))
@@ -371,16 +384,21 @@ namespace Netsphere.Network.Services
 
             if (plr.Inventory.Count == 0)
             {
-                var startItems = await GameDatabase.Instance.StartItems
-                    .Where(item => item.RequiredSecurityLevel <= (byte)plr.Account.SecurityLevel)
-                    .ToReadOnlyCollectionAsync()
-                    .ConfigureAwait(false);
+                IEnumerable<StartItemDto> startItems;
+                using (var db = GameDatabase.Open())
+                {
+                    startItems = await db.FindAsync<StartItemDto>(statement => statement
+                            .Where($"{nameof(StartItemDto.RequiredSecurityLevel):C} <= @{nameof(plr.Account.SecurityLevel)}")
+                            .WithParameters(new { plr.Account.SecurityLevel }))
+                        .ConfigureAwait(false);
+                }
 
                 foreach (var startItem in startItems)
                 {
                     var shop = GameServer.Instance.ResourceCache.GetShop();
-                    var itemInfo = shop.GetItemInfo(startItem.ShopItemInfo.ShopItem.Id,
-                        (ItemPriceType)startItem.ShopItemInfo.PriceGroup.PriceType);
+                    var item = shop.Items.Values.First(group => group.GetItemInfo(startItem.ShopItemInfoId) != null);
+                    var itemInfo = item.GetItemInfo(startItem.ShopItemInfoId);
+                    var effect = itemInfo.EffectGroup.GetEffect(startItem.ShopEffectId);
 
                     if (itemInfo == null)
                     {
@@ -388,7 +406,7 @@ namespace Netsphere.Network.Services
                         continue;
                     }
 
-                    var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPrice.Id);
+                    var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPriceId);
                     if (price == null)
                     {
                         Logger.Warn($"Cant find ShopPrice for Start item {startItem.Id} - Forgot to reload the cache?");
@@ -396,14 +414,14 @@ namespace Netsphere.Network.Services
                     }
 
                     var color = startItem.Color;
-                    if (color > itemInfo.ShopItem.ColorGroup)
+                    if (color > item.ColorGroup)
                     {
                         Logger.Warn($"Start item {startItem.Id} has an invalid color {color}");
                         color = 0;
                     }
 
                     var count = startItem.Count;
-                    if (count > 0 && itemInfo.ShopItem.ItemNumber.Category <= ItemCategory.Skill)
+                    if (count > 0 && item.ItemNumber.Category <= ItemCategory.Skill)
                     {
                         Logger.Warn($"Start item {startItem.Id} cant have stacks(quantity={count})");
                         count = 0;
@@ -412,7 +430,7 @@ namespace Netsphere.Network.Services
                     if (count < 0)
                         count = 0;
 
-                    plr.Inventory.Create(itemInfo, price, color, startItem.ShopEffect.Effect, (uint)count);
+                    plr.Inventory.Create(itemInfo, price, color, effect.Effect, (uint)count);
                 }
             }
 
@@ -453,15 +471,21 @@ namespace Netsphere.Network.Services
             }
 
             var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var nickExists = await AuthDatabase.Instance.Accounts
-                .AnyAsync(e => e.Nickname == nickname)
-                .ConfigureAwait(false);
+            using (var db = AuthDatabase.Open())
+            {
+                var nickExists = (await db.FindAsync<AccountDto>(statement => statement
+                            .Where($"{nameof(AccountDto.Nickname):C} = @{nameof(nickname)}")
+                            .WithParameters(new { nickname }))
+                        .ConfigureAwait(false))
+                    .Any();
 
-            var nickReserved = await AuthDatabase.Instance.NicknameHistory
-                .AnyAsync(e => e.Nickname == nickname && (e.ExpireDate == -1 || e.ExpireDate > now))
-                .ConfigureAwait(false);
-
-            return !nickExists && !nickReserved;
+                var nickReserved = (await db.FindAsync<NicknameHistoryDto>(statement => statement
+                            .Where($"{nameof(NicknameHistoryDto.Nickname):C} = @{nameof(nickname)} AND ({nameof(NicknameHistoryDto.ExpireDate):C} = -1 OR {nameof(NicknameHistoryDto.ExpireDate):C} > @{nameof(now)})")
+                            .WithParameters(new { nickname, now }))
+                        .ConfigureAwait(false))
+                    .Any();
+                return !nickExists && !nickReserved;
+            }
         }
 
         [MessageHandler(typeof(Message.Chat.CLoginReqMessage))]

@@ -10,7 +10,7 @@ namespace Netsphere
     {
         private static readonly string s_path = Path.Combine(Environment.CurrentDirectory, "auth.hjson");
 
-        public static Config Instance { get; private set; }
+        public static Config Instance { get; }
 
         [JsonProperty("listener")]
         [JsonConverter(typeof(IPEndPointConverter))]
@@ -25,8 +25,8 @@ namespace Netsphere
         [JsonProperty("noob_mode")]
         public bool NoobMode { get; set; }
 
-        [JsonProperty("auth_database")]
-        public DatabaseSettings AuthDatabase { get; set; }
+        [JsonProperty("database")]
+        public DatabasesConfig Database { get; set; }
 
         static Config()
         {
@@ -47,7 +47,7 @@ namespace Netsphere
             MaxConnections = 100;
             API = new APIConfig();
             NoobMode = true;
-            AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
+            Database = new DatabasesConfig();
         }
 
         public void Save()
@@ -74,35 +74,46 @@ namespace Netsphere
         }
     }
 
-    public class DatabaseSettings
+    public class DatabasesConfig
     {
         [JsonProperty("engine")]
         [JsonConverter(typeof(StringEnumConverter))]
         public DatabaseEngine Engine { get; set; }
 
-        [JsonProperty("filename")]
-        public string Filename { get; set; }
+        [JsonProperty("auth")]
+        public DatabaseConfig Auth { get; set; }
 
-        [JsonProperty("host")]
-        public string Host { get; set; }
-
-        [JsonProperty("port")]
-        public int Port { get; set; }
-
-        [JsonProperty("username")]
-        public string Username { get; set; }
-
-        [JsonProperty("password")]
-        public string Password { get; set; }
-
-        [JsonProperty("database")]
-        public string Database { get; set; }
-
-        public DatabaseSettings()
+        public DatabasesConfig()
         {
             Engine = DatabaseEngine.SQLite;
-            Host = "localhost";
-            Port = 3306;
+            Auth = new DatabaseConfig { Filename = "..\\db\\auth.db" };
+        }
+
+        public class DatabaseConfig
+        {
+            [JsonProperty("filename")]
+            public string Filename { get; set; }
+
+            [JsonProperty("host")]
+            public string Host { get; set; }
+
+            [JsonProperty("port")]
+            public int Port { get; set; }
+
+            [JsonProperty("username")]
+            public string Username { get; set; }
+
+            [JsonProperty("password")]
+            public string Password { get; set; }
+
+            [JsonProperty("database")]
+            public string Database { get; set; }
+
+            public DatabaseConfig()
+            {
+                Host = "localhost";
+                Port = 3306;
+            }
         }
     }
 

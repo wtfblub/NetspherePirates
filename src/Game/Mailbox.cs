@@ -2,12 +2,15 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Dapper.FastCrud;
+using Netsphere.Database.Auth;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Netsphere.Network.Message.Chat;
-using Shaolinq;
 
 namespace Netsphere
 {
@@ -45,26 +48,31 @@ namespace Netsphere
             // ToDo consume pen
             // ToDo check for ignore
 
-            var accDto = await AuthDatabase.Instance.Accounts
-                .FirstOrDefaultAsync(acc => acc.Nickname == receiver)
-                .ConfigureAwait(false);
-            if (accDto == null)
+            AccountDto account;
+            using (var db = AuthDatabase.Open())
+            {
+                account = (await db.FindAsync<AccountDto>(statement => statement
+                           .Where($"{nameof(AccountDto.Nickname):C} = @{nameof(receiver)}")
+                           .WithParameters(new { receiver }))
+                        .ConfigureAwait(false))
+                    .FirstOrDefault();
+            }
+            if (account == null)
                 return false;
 
-            using (var scope = new DataAccessScope())
+            using (var db = GameDatabase.Open())
             {
-                var mailDto = GameDatabase.Instance.Players
-                    .GetReference(accDto.Id)
-                    .Inbox.Create();
-                mailDto.SenderPlayer = GameDatabase.Instance.Players.GetReference((int)Player.Account.Id);
-                mailDto.SentDate = DateTimeOffset.Now.ToUnixTimeSeconds();
-                mailDto.Title = title;
-                mailDto.Message = message;
-                mailDto.IsMailNew = true;
-                mailDto.IsMailDeleted = false;
-
-                await scope.CompleteAsync()
-                    .ConfigureAwait(false);
+                var mailDto = new PlayerMailDto
+                {
+                    PlayerId = account.Id,
+                    SenderPlayerId = (int)Player.Account.Id,
+                    SentDate = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    Title = title,
+                    Message = message,
+                    IsMailNew = true,
+                    IsMailDeleted = false
+                };
+                await db.InsertAsync(mailDto).ConfigureAwait(false);
 
                 var plr = GameServer.Instance.PlayerManager.Get(receiver);
                 plr?.Mailbox.Add(new Mail(mailDto));
@@ -103,17 +111,60 @@ namespace Netsphere
             return Player.ChatSession.SendAsync(new SNoteReminderInfoAckMessage((byte)this.Count(m => m.IsNew), 0, 0));
         }
 
-        internal void Save()
+        internal void Save(IDbConnection db)
         {
-            Mail mailToDelete;
-            while (_mailsToDelete.TryPop(out mailToDelete))
-                GameDatabase.Instance.PlayerMails.GetReference(mailToDelete.Id).IsMailDeleted = true;
+            var deleteMapping = OrmConfiguration
+                .GetDefaultEntityMapping<PlayerMailDto>()
+                .Clone()
+                .UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true,
+                    nameof(PlayerMailDto.IsMailDeleted));
 
-            foreach (var mail in _mails.Values.Where(mail => mail.NeedsToSave))
+            if (!_mailsToDelete.IsEmpty)
             {
-                GameDatabase.Instance.PlayerMails
-                    .GetReference(mail.Id)
-                    .IsMailNew = mail.IsNew;
+                var idsToRemove = new StringBuilder();
+                var firstRun = true;
+                Mail mailToDelete;
+                while (_mailsToDelete.TryPop(out mailToDelete))
+                {
+                    if (firstRun)
+                        firstRun = false;
+                    else
+                        idsToRemove.Append(',');
+                    idsToRemove.Append(mailToDelete.Id);
+                }
+                db.BulkUpdate(new PlayerMailDto { IsMailDeleted = true }, statement => statement
+                      .Where($"{nameof(PlayerMailDto.Id):C} IN ({idsToRemove})")
+                      .WithEntityMappingOverride(deleteMapping));
+            }
+
+            var isNewMapping = OrmConfiguration
+                .GetDefaultEntityMapping<PlayerMailDto>()
+                .Clone()
+                .UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true,
+                    nameof(PlayerMailDto.IsMailNew));
+
+            var needsSave = _mails.Values.Where(mail => mail.NeedsToSave).ToArray();
+            var isNew = needsSave.Where(mail => mail.IsNew);
+            var isNotNew = needsSave.Where(mail => !mail.IsNew);
+
+            if (isNew.Any())
+            {
+                db.BulkUpdate(new PlayerMailDto { IsMailNew = true }, statement => statement
+                    .Where($"{nameof(PlayerMailDto.Id):C} IN ({string.Join(",", isNew.Select(x => x.Id))})")
+                    .WithEntityMappingOverride(isNewMapping));
+
+                foreach (var mail in isNew)
+                    mail.NeedsToSave = false;
+            }
+
+            if (isNotNew.Any())
+            {
+                db.BulkUpdate(new PlayerMailDto {IsMailNew = false}, statement => statement
+                    .Where($"{nameof(PlayerMailDto.Id):C} IN ({string.Join(",", isNotNew.Select(x => x.Id))})")
+                    .WithEntityMappingOverride(isNewMapping));
+
+                foreach (var mail in isNotNew)
+                    mail.NeedsToSave = false;
             }
         }
 
@@ -143,7 +194,6 @@ namespace Netsphere
 
         public string Title { get; }
         public string Message { get; }
-
         public bool IsNew
         {
             get { return _isNew; }
@@ -159,12 +209,12 @@ namespace Netsphere
         internal Mail(PlayerMailDto mailDto)
         {
             Id = (ulong)mailDto.Id;
-            SenderId = (ulong)mailDto.SenderPlayer.Id;
+            SenderId = (ulong)mailDto.SenderPlayerId;
             Sender = GetNickname(SenderId);
             SendDate = DateTimeOffset.FromUnixTimeSeconds(mailDto.SentDate);
             Title = mailDto.Title;
             Message = mailDto.Message;
-            IsNew = mailDto.IsMailNew;
+            _isNew = mailDto.IsMailNew;
         }
 
         private static string GetNickname(ulong id)
@@ -175,7 +225,8 @@ namespace Netsphere
                 return plr.Account.Nickname;
 
             // if player is not online use a database lookup
-            return AuthDatabase.Instance.Accounts.FirstOrDefault(acc => acc.Id == (int)id)?.Nickname ?? "";
+            using (var db = AuthDatabase.Open())
+                return db.Get(new AccountDto { Id = (int)id })?.Nickname ?? "";
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 
 namespace Netsphere.Database.Game
 {
@@ -10,15 +9,8 @@ namespace Netsphere.Database.Game
     {
         [Key]
         public byte Id { get; set; }
-
-        [ForeignKey(nameof(ShopItemInfo))]
         public int ShopItemInfoId { get; set; }
-        public ShopItemInfoDto ShopItemInfo { get; set; }
-
-        [ForeignKey(nameof(ShopPrice))]
         public int ShopPriceId { get; set; }
-        public ShopPriceDto ShopPrice { get; set; }
-
         public byte Color { get; set; }
     }
 
@@ -36,14 +28,12 @@ namespace Netsphere.Database.Game
         public int Coins2 { get; set; }
         public byte CurrentCharacterSlot { get; set; }
 
-        public IEnumerable<PlayerCharacterDto> Characters { get; set; } = Enumerable.Empty<PlayerCharacterDto>();
-        public IEnumerable<PlayerDenyDto> Ignores { get; set; } = Enumerable.Empty<PlayerDenyDto>();
-        public IEnumerable<PlayerDenyDto> IgnoredBy { get; set; } = Enumerable.Empty<PlayerDenyDto>();
-        public IEnumerable<PlayerItemDto> Items { get; set; } = Enumerable.Empty<PlayerItemDto>();
-        public IEnumerable<PlayerLicenseDto> Licenses { get; set; } = Enumerable.Empty<PlayerLicenseDto>();
-        public IEnumerable<PlayerMailDto> Inbox { get; set; } = Enumerable.Empty<PlayerMailDto>();
-        public IEnumerable<PlayerMailDto> Outbox { get; set; } = Enumerable.Empty<PlayerMailDto>();
-        public IEnumerable<PlayerSettingDto> Settings { get; set; } = Enumerable.Empty<PlayerSettingDto>();
+        public IList<PlayerCharacterDto> Characters { get; set; } = new List<PlayerCharacterDto>();
+        public IList<PlayerDenyDto> Ignores { get; set; } = new List<PlayerDenyDto>();
+        public IList<PlayerItemDto> Items { get; set; } = new List<PlayerItemDto>();
+        public IList<PlayerLicenseDto> Licenses { get; set; } = new List<PlayerLicenseDto>();
+        public IList<PlayerMailDto> Inbox { get; set; } = new List<PlayerMailDto>();
+        public IList<PlayerSettingDto> Settings { get; set; } = new List<PlayerSettingDto>();
     }
 
     [Table("player_characters")]
@@ -62,50 +52,17 @@ namespace Netsphere.Database.Game
         public byte BasicFace { get; set; }
         public byte BasicShirt { get; set; }
         public byte BasicPants { get; set; }
-
-        [ForeignKey(nameof(Weapon1))]
         public int? Weapon1Id { get; set; }
-        public PlayerItemDto Weapon1 { get; set; }
-
-        [ForeignKey(nameof(Weapon2))]
         public int? Weapon2Id { get; set; }
-        public PlayerItemDto Weapon2 { get; set; }
-
-        [ForeignKey(nameof(Weapon3))]
         public int? Weapon3Id { get; set; }
-        public PlayerItemDto Weapon3 { get; set; }
-
-        [ForeignKey(nameof(Skill))]
         public int? SkillId { get; set; }
-        public PlayerItemDto Skill { get; set; }
-
-        [ForeignKey(nameof(Hair))]
         public int? HairId { get; set; }
-        public PlayerItemDto Hair { get; set; }
-
-        [ForeignKey(nameof(Face))]
         public int? FaceId { get; set; }
-        public PlayerItemDto Face { get; set; }
-
-        [ForeignKey(nameof(Shirt))]
         public int? ShirtId { get; set; }
-        public PlayerItemDto Shirt { get; set; }
-
-        [ForeignKey(nameof(Pants))]
         public int? PantsId { get; set; }
-        public PlayerItemDto Pants { get; set; }
-
-        [ForeignKey(nameof(Gloves))]
         public int? GlovesId { get; set; }
-        public PlayerItemDto Gloves { get; set; }
-
-        [ForeignKey(nameof(Shoes))]
         public int? ShoesId { get; set; }
-        public PlayerItemDto Shoes { get; set; }
-
-        [ForeignKey(nameof(Accessory))]
         public int? AccessoryId { get; set; }
-        public PlayerItemDto Accessory { get; set; }
     }
 
     [Table("player_deny")]
@@ -118,9 +75,7 @@ namespace Netsphere.Database.Game
         public int PlayerId { get; set; }
         public PlayerDto Player { get; set; }
 
-        [ForeignKey(nameof(DenyPlayer))]
         public int DenyPlayerId { get; set; }
-        public PlayerDto DenyPlayer { get; set; }
     }
 
     [Table("player_items")]
@@ -132,15 +87,9 @@ namespace Netsphere.Database.Game
         [ForeignKey(nameof(Player))]
         public int PlayerId { get; set; }
         public PlayerDto Player { get; set; }
-
-        [ForeignKey(nameof(ShopItemInfo))]
+        
         public int ShopItemInfoId { get; set; }
-        public ShopItemInfoDto ShopItemInfo { get; set; }
-
-        [ForeignKey(nameof(ShopPrice))]
         public int ShopPriceId { get; set; }
-        public ShopPriceDto ShopPrice { get; set; }
-
         public uint Effect { get; set; }
         public byte Color { get; set; }
         public long PurchaseDate { get; set; }
@@ -174,10 +123,7 @@ namespace Netsphere.Database.Game
         public int PlayerId { get; set; }
         public PlayerDto Player { get; set; }
 
-        [ForeignKey(nameof(SenderPlayer))]
         public int SenderPlayerId { get; set; }
-        public PlayerDto SenderPlayer { get; set; }
-
         public long SentDate { get; set; }
         public string Title { get; set; }
         public string Message { get; set; }
@@ -208,7 +154,7 @@ namespace Netsphere.Database.Game
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public IEnumerable<ShopEffectDto> ShopEffects { get; set; } = Enumerable.Empty<ShopEffectDto>();
+        public IList<ShopEffectDto> ShopEffects { get; set; } = new List<ShopEffectDto>();
     }
 
     [Table("shop_effects")]
@@ -231,11 +177,10 @@ namespace Netsphere.Database.Game
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
         public string Name { get; set; }
         public byte PriceType { get; set; }
 
-        public IEnumerable<ShopPriceDto> ShopPrices { get; set; } = Enumerable.Empty<ShopPriceDto>();
+        public IList<ShopPriceDto> ShopPrices { get; set; } = new List<ShopPriceDto>();
     }
 
     [Table("shop_prices")]
@@ -272,7 +217,7 @@ namespace Netsphere.Database.Game
         public bool IsOneTimeUse { get; set; }
         public bool IsDestroyable { get; set; }
 
-        public IEnumerable<ShopItemInfoDto> ItemInfos { get; set; } = Enumerable.Empty<ShopItemInfoDto>();
+        public IList<ShopItemInfoDto> ItemInfos { get; set; } = new List<ShopItemInfoDto>();
     }
 
     [Table("shop_iteminfos")]
@@ -283,17 +228,11 @@ namespace Netsphere.Database.Game
         public int Id { get; set; }
 
         [ForeignKey(nameof(ShopItem))]
-        public int ShopItemId { get; set; }
+        public uint ShopItemId { get; set; }
         public ShopItemDto ShopItem { get; set; }
 
-        [ForeignKey(nameof(PriceGroup))]
         public int PriceGroupId { get; set; }
-        public ShopPriceGroupDto PriceGroup { get; set; }
-
-        [ForeignKey(nameof(EffectGroup))]
         public int EffectGroupId { get; set; }
-        public ShopEffectGroupDto EffectGroup { get; set; }
-
         public byte DiscountPercentage { get; set; }
         public bool IsEnabled { get; set; }
     }
@@ -313,19 +252,9 @@ namespace Netsphere.Database.Game
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
-        [ForeignKey(nameof(ShopItemInfo))]
         public int ShopItemInfoId { get; set; }
-        public ShopItemInfoDto ShopItemInfo { get; set; }
-
-        [ForeignKey(nameof(ShopPrice))]
         public int ShopPriceId { get; set; }
-        public ShopPriceDto ShopPrice { get; set; }
-
-        [ForeignKey(nameof(ShopEffect))]
         public int ShopEffectId { get; set; }
-        public ShopEffectDto ShopEffect { get; set; }
-
         public byte Color { get; set; }
         public int Count { get; set; }
         public byte RequiredSecurityLevel { get; set; }

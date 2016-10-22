@@ -53,10 +53,10 @@ CREATE TABLE `player_characters` (
   KEY `GlovesId` (`GlovesId`),
   KEY `ShoesId` (`ShoesId`),
   KEY `AccessoryId` (`AccessoryId`),
-  CONSTRAINT `player_characters_ibfk_12` FOREIGN KEY (`AccessoryId`) REFERENCES `player_items` (`Id`) ON DELETE SET NULL,
   CONSTRAINT `player_characters_ibfk_1` FOREIGN KEY (`PlayerId`) REFERENCES `players` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `player_characters_ibfk_10` FOREIGN KEY (`GlovesId`) REFERENCES `player_items` (`Id`) ON DELETE SET NULL,
   CONSTRAINT `player_characters_ibfk_11` FOREIGN KEY (`ShoesId`) REFERENCES `player_items` (`Id`) ON DELETE SET NULL,
+  CONSTRAINT `player_characters_ibfk_12` FOREIGN KEY (`AccessoryId`) REFERENCES `player_items` (`Id`) ON DELETE SET NULL,
   CONSTRAINT `player_characters_ibfk_2` FOREIGN KEY (`Weapon1Id`) REFERENCES `player_items` (`Id`) ON DELETE SET NULL,
   CONSTRAINT `player_characters_ibfk_3` FOREIGN KEY (`Weapon2Id`) REFERENCES `player_items` (`Id`) ON DELETE SET NULL,
   CONSTRAINT `player_characters_ibfk_4` FOREIGN KEY (`Weapon3Id`) REFERENCES `player_items` (`Id`) ON DELETE SET NULL,
@@ -200,18 +200,18 @@ CREATE TABLE `shop_effects` (
 DROP TABLE IF EXISTS `shop_iteminfos`;
 CREATE TABLE `shop_iteminfos` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
-  `ShopItemId` int(11) NOT NULL,
+  `ShopItemId` int(11) unsigned NOT NULL,
   `PriceGroupId` int(11) NOT NULL,
   `EffectGroupId` int(11) NOT NULL,
   `DiscountPercentage` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `IsEnabled` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`Id`),
-  KEY `ShopItemId` (`ShopItemId`),
   KEY `PriceGroupId` (`PriceGroupId`),
   KEY `EffectGroupId` (`EffectGroupId`),
+  KEY `ShopItemId` (`ShopItemId`),
+  CONSTRAINT `shop_iteminfos_ibfk_2` FOREIGN KEY (`PriceGroupId`) REFERENCES `shop_price_groups` (`Id`) ON DELETE CASCADE,
   CONSTRAINT `shop_iteminfos_ibfk_3` FOREIGN KEY (`EffectGroupId`) REFERENCES `shop_effect_groups` (`Id`) ON DELETE CASCADE,
-  CONSTRAINT `shop_iteminfos_ibfk_1` FOREIGN KEY (`ShopItemId`) REFERENCES `shop_items` (`Id`) ON DELETE CASCADE,
-  CONSTRAINT `shop_iteminfos_ibfk_2` FOREIGN KEY (`PriceGroupId`) REFERENCES `shop_price_groups` (`Id`) ON DELETE CASCADE
+  CONSTRAINT `shop_iteminfos_ibfk_4` FOREIGN KEY (`ShopItemId`) REFERENCES `shop_items` (`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
@@ -219,7 +219,7 @@ CREATE TABLE `shop_iteminfos` (
 -- ----------------------------
 DROP TABLE IF EXISTS `shop_items`;
 CREATE TABLE `shop_items` (
-  `Id` int(11) NOT NULL,
+  `Id` int(10) unsigned NOT NULL,
   `RequiredGender` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `RequiredLicense` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `Colors` tinyint(3) unsigned NOT NULL DEFAULT '0',

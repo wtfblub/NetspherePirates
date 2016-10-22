@@ -1,4 +1,5 @@
-﻿using Netsphere.Database.Game;
+﻿using System.Linq;
+using Netsphere.Database.Game;
 using Netsphere.Resource;
 
 namespace Netsphere.Shop
@@ -14,9 +15,9 @@ namespace Netsphere.Shop
         public LicenseReward(LicenseRewardDto dto, ShopResources shopResources)
         {
             ItemLicense = (ItemLicense)dto.Id;
-            ItemNumber = dto.ShopItemInfo.ShopItem.Id;
-            ShopItemInfo = shopResources.Items[ItemNumber].GetItemInfo(dto.ShopItemInfo.Id);
-            ShopPrice = ShopItemInfo.PriceGroup.GetPrice(dto.ShopPrice.Id);
+            ItemNumber = shopResources.Items.Values.First(item => item.GetItemInfo(dto.ShopItemInfoId) != null).ItemNumber;
+            ShopItemInfo = shopResources.Items[ItemNumber].GetItemInfo(dto.ShopItemInfoId);
+            ShopPrice = ShopItemInfo.PriceGroup.GetPrice(dto.ShopPriceId);
             Color = dto.Color;
         }
     }

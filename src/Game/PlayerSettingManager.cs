@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using Dapper.FastCrud;
 using Netsphere.Database.Game;
-using Shaolinq;
 
 namespace Netsphere
 {
     internal class PlayerSettingManager
     {
-        private static readonly IDictionary<string, IPlayerSettingConverter> Converter = new ConcurrentDictionary<string, IPlayerSettingConverter>();
-        private readonly IDictionary<string, object> _settings = new ConcurrentDictionary<string, object>();
+        private static readonly IDictionary<string, IPlayerSettingConverter> s_converter = new ConcurrentDictionary<string, IPlayerSettingConverter>();
+        private readonly IDictionary<string, Setting> _settings = new ConcurrentDictionary<string, Setting>();
 
         public Player Player { get; }
 
@@ -28,7 +28,7 @@ namespace Netsphere
             Player = player;
 
             foreach (var settingDto in dto.Settings)
-                _settings[settingDto.Setting] = GetObject(settingDto.Setting, settingDto.Value);
+                _settings[settingDto.Setting] = new Setting(GetObject(settingDto.Setting, settingDto.Value)) { ExistsInDatabase = true };
         }
 
         public bool Contains(string name)
@@ -38,81 +38,72 @@ namespace Netsphere
 
         public T Get<T>(string name)
         {
-            object value;
-            if (!_settings.TryGetValue(name, out value))
+            Setting setting;
+            if (!_settings.TryGetValue(name, out setting))
                 throw new Exception($"Setting {name} not found");
 
-            return (T)value;
+            return (T)setting.Data;
         }
 
         public string Get(string name)
         {
-            object value;
-            if (!_settings.TryGetValue(name, out value))
+            Setting setting;
+            if (!_settings.TryGetValue(name, out setting))
                 throw new Exception($"Setting {name} not found");
 
-            return (string)value;
+            return (string)setting.Data;
         }
 
         public void AddOrUpdate(string name, string value)
         {
-            using (var scope = new DataAccessScope())
-            {
-                if (_settings.ContainsKey(name))
-                {
-                    var dto = GameDatabase.Instance.Players
-                        .First(plr => plr.Id == (int)Player.Account.Id)
-                        .Settings
-                        .First(s => s.Setting == name);
-                    dto.Value = value;
-                    _settings[name] = value;
-                }
-                else
-                {
-                    var dto = GameDatabase.Instance.Players
-                        .First(plr => plr.Id == (int) Player.Account.Id);
-
-                    var settingsDto = dto.Settings.Create();
-                    settingsDto.Setting = name;
-                    settingsDto.Value = value;
-                    _settings[name] = value;
-                }
-
-                scope.Complete();
-            }
+            Setting setting;
+            if (_settings.TryGetValue(name, out setting))
+                setting.Data = value;
+            else
+                _settings[name] = new Setting(value);
         }
 
         public void AddOrUpdate<T>(string name, T value)
         {
-            var converter = GetConverter(name);
-            if (converter == null && typeof(T) != typeof(string))
-                throw new Exception($"No PlayerSettingConverter for {name} found");
+            Setting setting;
+            if (_settings.TryGetValue(name, out setting))
+                setting.Data = value;
+            else
+                _settings[name] = new Setting(value);
+        }
 
-            var str = converter != null ? converter.GetString(value) : (string)(object)value;
-
-            using (var scope = new DataAccessScope())
+        internal void Save(IDbConnection db)
+        {
+            foreach (var pair in _settings)
             {
-                if (_settings.ContainsKey(name))
+                var name = pair.Key;
+                var setting = pair.Value;
+                if (!setting.ExistsInDatabase)
                 {
-                    var dto = GameDatabase.Instance.Players
-                        .First(plr => plr.Id == (int)Player.Account.Id)
-                        .Settings
-                        .First(s => s.Setting == name);
-                    dto.Value = str;
-                    _settings[name] = value;
+                    db.Insert(new PlayerSettingDto
+                    {
+                        PlayerId = (int)Player.Account.Id,
+                        Setting = name,
+                        Value = GetString(name, setting.Data)
+                    });
+                    setting.ExistsInDatabase = true;
                 }
                 else
                 {
-                    var dto = GameDatabase.Instance.Players
-                        .First(plr => plr.Id == (int)Player.Account.Id);
+                    if (!setting.NeedsToSave)
+                        continue;
 
-                    var settingsDto = dto.Settings.Create();
-                    settingsDto.Setting = name;
-                    settingsDto.Value = str;
-                    _settings[name] = value;
+                    db.BulkUpdate(new PlayerSettingDto
+                    {
+                        PlayerId = (int)Player.Account.Id,
+                        Setting = name,
+                        Value = GetString(name, setting.Data)
+                    },
+                    statement => statement
+                        .Where($"{nameof(PlayerSettingDto.PlayerId):C} = @PlayerId AND {nameof(PlayerSettingDto.Setting):C} = @Setting")
+                        .WithParameters(new { PlayerId = (int)Player.Account.Id, Setting = name }));
+                    setting.NeedsToSave = false;
                 }
-
-                scope.Complete();
             }
         }
 
@@ -120,7 +111,7 @@ namespace Netsphere
 
         public static void RegisterConverter(string name, IPlayerSettingConverter converter)
         {
-            if (!Converter.TryAdd(name, converter))
+            if (!s_converter.TryAdd(name, converter))
                 throw new Exception($"Converter for {name} already registered");
         }
 
@@ -132,7 +123,7 @@ namespace Netsphere
         private static IPlayerSettingConverter GetConverter(string name)
         {
             IPlayerSettingConverter converter;
-            Converter.TryGetValue(name, out converter);
+            s_converter.TryGetValue(name, out converter);
             return converter;
         }
 
@@ -142,7 +133,36 @@ namespace Netsphere
             return converter != null ? converter.GetObject(value) : value;
         }
 
+        private static string GetString(string name, object value)
+        {
+            var converter = GetConverter(name);
+            return converter != null ? converter.GetString(value) : (string)value;
+        }
+
         #endregion
+
+        private class Setting
+        {
+            private object _data;
+            public bool ExistsInDatabase { get; set; }
+            public bool NeedsToSave { get; set; }
+            public object Data
+            {
+                get { return _data; }
+                set
+                {
+                    if (_data == value)
+                        return;
+                    _data = value;
+                    NeedsToSave = true;
+                }
+            }
+
+            public Setting(object data)
+            {
+                _data = data;
+            }
+        }
     }
 
     internal interface IPlayerSettingConverter

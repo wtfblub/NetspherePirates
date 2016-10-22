@@ -16,7 +16,7 @@ namespace Netsphere
             _character = @char;
             var plr = _character.CharacterManager.Player;
 
-            _items[0] = plr.Inventory[(ulong)(dto.Skill?.Id ?? 0)];
+            _items[0] = plr.Inventory[(ulong)(dto.SkillId ?? 0)];
         }
 
         internal SkillManager(Character @char)

@@ -172,7 +172,7 @@ namespace Netsphere.Network
                 session.Player.Room?.Leave(session.Player);
                 session.Player.Channel?.Leave(session.Player);
 
-                session.Player.Save(true);
+                session.Player.Save();
 
                 PlayerManager.Remove(session.Player);
 
@@ -269,7 +269,7 @@ namespace Netsphere.Network
                 {
                     try
                     {
-                        plr.Save(true);
+                        plr.Save();
                     }
                     catch (Exception ex)
                     {

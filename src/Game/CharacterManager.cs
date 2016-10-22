@@ -2,7 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Text;
+using Dapper.FastCrud;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Netsphere.Network.Message.Game;
@@ -133,109 +136,66 @@ namespace Netsphere
             Player.Session.Send(new SSuccessDeleteCharacterAckMessage(slot));
         }
 
-        internal void Save()
+        internal void Save(IDbConnection db)
         {
-            Character charToDelete;
-            while (_charactersToDelete.TryPop(out charToDelete))
-                GameDatabase.Instance.PlayerCharacters.GetReference(charToDelete.Id).Delete();
+            if (!_charactersToDelete.IsEmpty)
+            {
+                var idsToRemove = new StringBuilder();
+                var firstRun = true;
+                Character charToDelete;
+                while (_charactersToDelete.TryPop(out charToDelete))
+                {
+                    if (firstRun)
+                        firstRun = false;
+                    else
+                        idsToRemove.Append(',');
+                    idsToRemove.Append(charToDelete.Id);
+                }
+
+                db.BulkDelete<PlayerCharacterDto>(statement => statement
+                    .Where($"{nameof(PlayerCharacterDto.Id):C} IN ({idsToRemove})"));
+            }
 
             foreach (var @char in _characters.Values)
             {
-                PlayerCharacterDto charDto;
                 if (!@char.ExistsInDatabase)
                 {
-                    var plrRef = GameDatabase.Instance.Players.GetReference((int) Player.Account.Id);
-                    charDto = plrRef.Characters.Create(@char.Id);
+                    var charDto = new PlayerCharacterDto
+                    {
+                        Id = @char.Id,
+                        PlayerId = (int)Player.Account.Id,
+                        Slot = @char.Slot,
+                        Gender = (byte)@char.Gender,
+                        BasicHair = @char.Hair.Variation,
+                        BasicFace = @char.Face.Variation,
+                        BasicShirt = @char.Shirt.Variation,
+                        BasicPants = @char.Pants.Variation
+                    };
+                    SetDtoItems(@char, charDto);
+                    db.Insert(charDto);
                     @char.ExistsInDatabase = true;
-
-                    charDto.Player = plrRef;
-                    charDto.Slot = @char.Slot;
-                    charDto.Gender = (byte)@char.Gender;
-                    charDto.BasicHair = @char.Hair.Variation;
-                    charDto.BasicFace = @char.Face.Variation;
-                    charDto.BasicShirt = @char.Shirt.Variation;
-                    charDto.BasicPants = @char.Pants.Variation;
                 }
                 else
                 {
                     if (!@char.NeedsToSave)
                         continue;
 
+                    var charDto = new PlayerCharacterDto
+                    {
+                        Id = @char.Id,
+                        PlayerId = (int) Player.Account.Id,
+                        Slot = @char.Slot,
+                        Gender = (byte)@char.Gender,
+                        BasicHair = @char.Hair.Variation,
+                        BasicFace = @char.Face.Variation,
+                        BasicShirt = @char.Shirt.Variation,
+                        BasicPants = @char.Pants.Variation
+                    };
+                    SetDtoItems(@char, charDto);
+                    db.Update(charDto);
                     @char.NeedsToSave = false;
-                    charDto = GameDatabase.Instance.PlayerCharacters
-                        .GetReference(@char.Id);
                 }
 
-                PlayerItem item;
-
-                // Weapons
-                for (var slot = WeaponSlot.Weapon1; slot <= WeaponSlot.Weapon3; slot++)
-                {
-                    item = @char.Weapons.GetItem(slot);
-                    var itemRef = item != null ?
-                        GameDatabase.Instance.PlayerItems.GetReference((int)item.Id)
-                        : null;
-
-                    switch (slot)
-                    {
-                        case WeaponSlot.Weapon1:
-                            charDto.Weapon1 = itemRef;
-                            break;
-
-                        case WeaponSlot.Weapon2:
-                            charDto.Weapon2 = itemRef;
-                            break;
-
-                        case WeaponSlot.Weapon3:
-                            charDto.Weapon3 = itemRef;
-                            break;
-                    }
-                }
-
-                // Skills
-                item = @char.Skills.GetItem(SkillSlot.Skill);
-                charDto.Skill = item != null ?
-                    GameDatabase.Instance.PlayerItems.GetReference((int)item.Id) : null;
-
-                // Costumes
-                for (var slot = CostumeSlot.Hair; slot <= CostumeSlot.Accessory; slot++)
-                {
-                    item = @char.Costumes.GetItem(slot);
-                    var itemRef = item != null ?
-                        GameDatabase.Instance.PlayerItems.GetReference((int)item.Id)
-                        : null;
-
-                    switch (slot)
-                    {
-                        case CostumeSlot.Hair:
-                            charDto.Hair = itemRef;
-                            break;
-
-                        case CostumeSlot.Face:
-                            charDto.Face = itemRef;
-                            break;
-
-                        case CostumeSlot.Shirt:
-                            charDto.Shirt = itemRef;
-                            break;
-
-                        case CostumeSlot.Pants:
-                            charDto.Pants = itemRef;
-                            break;
-
-                        case CostumeSlot.Gloves:
-                            charDto.Gloves = itemRef;
-                            break;
-
-                        case CostumeSlot.Shoes:
-                            charDto.Shoes = itemRef;
-                            break;
-
-                        case CostumeSlot.Accessory:
-                            charDto.Accessory = itemRef;
-                            break;
-                    }
-                }
             }
         }
 
@@ -252,6 +212,75 @@ namespace Netsphere
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        private void SetDtoItems(Character @char, PlayerCharacterDto charDto)
+        {
+            PlayerItem item;
+
+            // Weapons
+            for (var slot = WeaponSlot.Weapon1; slot <= WeaponSlot.Weapon3; slot++)
+            {
+                item = @char.Weapons.GetItem(slot);
+                var itemId = item != null ? (int?)item.Id : null;
+
+                switch (slot)
+                {
+                    case WeaponSlot.Weapon1:
+                        charDto.Weapon1Id = itemId;
+                        break;
+
+                    case WeaponSlot.Weapon2:
+                        charDto.Weapon2Id = itemId;
+                        break;
+
+                    case WeaponSlot.Weapon3:
+                        charDto.Weapon3Id = itemId;
+                        break;
+                }
+            }
+
+            // Skills
+            item = @char.Skills.GetItem(SkillSlot.Skill);
+            charDto.SkillId = item != null ? (int?)item.Id : null;
+
+            // Costumes
+            for (var slot = CostumeSlot.Hair; slot <= CostumeSlot.Accessory; slot++)
+            {
+                item = @char.Costumes.GetItem(slot);
+                var itemId = item != null ? (int?)item.Id : null;
+
+                switch (slot)
+                {
+                    case CostumeSlot.Hair:
+                        charDto.HairId = itemId;
+                        break;
+
+                    case CostumeSlot.Face:
+                        charDto.FaceId = itemId;
+                        break;
+
+                    case CostumeSlot.Shirt:
+                        charDto.ShirtId = itemId;
+                        break;
+
+                    case CostumeSlot.Pants:
+                        charDto.PantsId = itemId;
+                        break;
+
+                    case CostumeSlot.Gloves:
+                        charDto.GlovesId = itemId;
+                        break;
+
+                    case CostumeSlot.Shoes:
+                        charDto.ShoesId = itemId;
+                        break;
+
+                    case CostumeSlot.Accessory:
+                        charDto.AccessoryId = itemId;
+                        break;
+                }
+            }
         }
     }
 }

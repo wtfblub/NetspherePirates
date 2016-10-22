@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dapper.FastCrud;
 using ExpressMapper.Extensions;
 using Netsphere.Database.Game;
 using Netsphere.Network;
@@ -8,7 +9,6 @@ using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
-using Shaolinq;
 
 namespace Netsphere
 {
@@ -291,37 +291,33 @@ namespace Netsphere
         /// <summary>
         /// Saves all pending changes to the database
         /// </summary>
-        public void Save(bool createScope)
+        public void Save()
         {
-            var scope = createScope ? new DataAccessScope() : null;
-            try
+            using (var db = GameDatabase.Open())
             {
                 if (NeedsToSave)
                 {
-                    var plrRef = GameDatabase.Instance.Players.GetReference((int)Account.Id);
-                    plrRef.TutorialState = TutorialState;
-                    plrRef.Level = Level;
-                    plrRef.TotalExperience = (int)TotalExperience;
-                    plrRef.PEN = (int)PEN;
-                    plrRef.AP = (int)AP;
-                    plrRef.Coins1 = (int)Coins1;
-                    plrRef.Coins2 = (int)Coins2;
-                    plrRef.CurrentCharacterSlot = CharacterManager.CurrentSlot;
-
+                    db.Update(new PlayerDto
+                    {
+                        Id = (int)Account.Id,
+                        TutorialState = TutorialState,
+                        Level = Level,
+                        TotalExperience = (int)TotalExperience,
+                        PEN = (int)PEN,
+                        AP = (int)AP,
+                        Coins1 = (int)Coins1,
+                        Coins2 = (int)Coins2,
+                        CurrentCharacterSlot = CharacterManager.CurrentSlot
+                    });
                     NeedsToSave = false;
                 }
 
-                Inventory.Save();
-                CharacterManager.Save();
-                LicenseManager.Save();
-                DenyManager.Save();
-                Mailbox.Save();
-
-                scope?.Complete();
-            }
-            finally
-            {
-                scope?.Dispose();
+                Settings.Save(db);
+                Inventory.Save(db);
+                CharacterManager.Save(db);
+                LicenseManager.Save(db);
+                DenyManager.Save(db);
+                Mailbox.Save(db);
             }
         }
 

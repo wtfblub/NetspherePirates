@@ -10,7 +10,7 @@ namespace Netsphere
     {
         private static readonly string s_path = Path.Combine(Environment.CurrentDirectory, "game.hjson");
 
-        public static Config Instance { get; private set; }
+        public static Config Instance { get; }
 
         [JsonProperty("server_name")]
         public string Name { get; set; }
@@ -49,11 +49,8 @@ namespace Netsphere
         [JsonProperty("noob_mode")]
         public bool NoobMode { get; set; }
 
-        [JsonProperty("auth_database")]
-        public DatabaseSettings AuthDatabase { get; set; }
-
-        [JsonProperty("game_database")]
-        public DatabaseSettings GameDatabase { get; set; }
+        [JsonProperty("database")]
+        public DatabasesConfig Database { get; set; }
 
         [JsonProperty("game")]
         public GameSettings Game { get; set; }
@@ -84,8 +81,7 @@ namespace Netsphere
             AuthAPI = new AuthAPI();
             SaveInterval = TimeSpan.FromMinutes(1);
             NoobMode = true;
-            AuthDatabase = new DatabaseSettings { Filename = "..\\db\\auth.db" };
-            GameDatabase = new DatabaseSettings { Filename = "..\\db\\game.db" };
+            Database = new DatabasesConfig();
             Game = new GameSettings();
         }
 
@@ -113,31 +109,50 @@ namespace Netsphere
         }
     }
 
-    public class DatabaseSettings
+    public class DatabasesConfig
     {
         [JsonProperty("engine")]
         [JsonConverter(typeof(StringEnumConverter))]
         public DatabaseEngine Engine { get; set; }
 
-        [JsonProperty("filename")]
-        public string Filename { get; set; }
+        [JsonProperty("auth")]
+        public DatabaseConfig Auth { get; set; }
 
-        [JsonProperty("host")]
-        public string Host { get; set; }
+        [JsonProperty("game")]
+        public DatabaseConfig Game { get; set; }
 
-        [JsonProperty("username")]
-        public string Username { get; set; }
-
-        [JsonProperty("password")]
-        public string Password { get; set; }
-
-        [JsonProperty("database")]
-        public string Database { get; set; }
-
-        public DatabaseSettings()
+        public DatabasesConfig()
         {
             Engine = DatabaseEngine.SQLite;
-            Filename = "db\\db.db";
+            Auth = new DatabaseConfig { Filename = "..\\db\\auth.db" };
+            Game = new DatabaseConfig { Filename = "..\\db\\game.db" };
+        }
+
+        public class DatabaseConfig
+        {
+            [JsonProperty("filename")]
+            public string Filename { get; set; }
+
+            [JsonProperty("host")]
+            public string Host { get; set; }
+
+            [JsonProperty("port")]
+            public int Port { get; set; }
+
+            [JsonProperty("username")]
+            public string Username { get; set; }
+
+            [JsonProperty("password")]
+            public string Password { get; set; }
+
+            [JsonProperty("database")]
+            public string Database { get; set; }
+
+            public DatabaseConfig()
+            {
+                Host = "localhost";
+                Port = 3306;
+            }
         }
     }
 
@@ -204,8 +219,8 @@ namespace Netsphere
             EnableLicenseRequirement = true;
             MaxLevel = 100;
             StartLevel = 0;
-            StartPEN = 0;
-            StartAP = 0;
+            StartPEN = 10000;
+            StartAP = 10000;
             StartCoins1 = 0;
             StartCoins2 = 0;
             NickRestrictions = new NickRestrictions();

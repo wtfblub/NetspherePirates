@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Dapper.FastCrud;
+using Netsphere.Database.Game;
 using Netsphere.Shop;
 
 namespace Netsphere.Resource
@@ -23,12 +25,33 @@ namespace Netsphere.Resource
 
         public void Load()
         {
-            var db = GameDatabase.Instance;
-            _effects = db.ShopEffectGroups.ToArray().Select(dto => new ShopEffectGroup(dto)).ToDictionary(effect => effect.Id);
-            _prices = db.ShopPriceGroups.ToArray().Select(dto => new ShopPriceGroup(dto)).ToDictionary(price => price.Id);
-            _items = db.ShopItems.ToArray().Select(dto => new ShopItem(dto, this)).ToDictionary(item => item.ItemNumber);
-            _licenses = db.LicenseRewards.ToArray().Select(dto => new LicenseReward(dto, this)).ToDictionary(license => license.ItemLicense);
-            Version = db.ShopVersion.First().Version;
+            using (var db = GameDatabase.Open())
+            {
+                _effects = db.Find<ShopEffectGroupDto>(statement => statement
+                        .Include<ShopEffectDto>(join => join.LeftOuterJoin()))
+                    .ToArray()
+                    .Select(dto => new ShopEffectGroup(dto))
+                    .ToDictionary(x => x.Id);
+
+                _prices = db.Find<ShopPriceGroupDto>(statement => statement
+                        .Include<ShopPriceDto>(join => join.LeftOuterJoin()))
+                    .ToArray()
+                    .Select(dto => new ShopPriceGroup(dto))
+                    .ToDictionary(x => x.Id);
+
+                _items = db.Find<ShopItemDto>(statement => statement
+                        .Include<ShopItemInfoDto>(join => join.LeftOuterJoin()))
+                    .ToArray()
+                    .Select(dto => new ShopItem(dto, this))
+                    .ToDictionary(x => x.ItemNumber);
+
+                _licenses = db.Find<LicenseRewardDto>()
+                    .ToArray()
+                    .Select(dto => new LicenseReward(dto, this))
+                    .ToDictionary(x => x.ItemLicense);
+
+                Version = db.Find<ShopVersionDto>().First().Version;
+            }
         }
 
         public void Clear()

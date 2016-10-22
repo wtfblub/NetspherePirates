@@ -16,13 +16,13 @@ namespace Netsphere
             _character = @char;
             var plr = _character.CharacterManager.Player;
 
-            _items[0] = plr.Inventory[(ulong)(dto.Hair?.Id ?? 0)];
-            _items[1] = plr.Inventory[(ulong)(dto.Face?.Id ?? 0)];
-            _items[2] = plr.Inventory[(ulong)(dto.Shirt?.Id ?? 0)];
-            _items[3] = plr.Inventory[(ulong)(dto.Pants?.Id ?? 0)];
-            _items[4] = plr.Inventory[(ulong)(dto.Gloves?.Id ?? 0)];
-            _items[5] = plr.Inventory[(ulong)(dto.Shoes?.Id ?? 0)];
-            _items[6] = plr.Inventory[(ulong)(dto.Accessory?.Id ?? 0)];
+            _items[0] = plr.Inventory[(ulong)(dto.HairId ?? 0)];
+            _items[1] = plr.Inventory[(ulong)(dto.FaceId ?? 0)];
+            _items[2] = plr.Inventory[(ulong)(dto.ShirtId ?? 0)];
+            _items[3] = plr.Inventory[(ulong)(dto.PantsId ?? 0)];
+            _items[4] = plr.Inventory[(ulong)(dto.GlovesId ?? 0)];
+            _items[5] = plr.Inventory[(ulong)(dto.ShoesId ?? 0)];
+            _items[6] = plr.Inventory[(ulong)(dto.AccessoryId ?? 0)];
         }
 
         internal CostumeManager(Character @char)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Database.Game;
@@ -8,7 +9,6 @@ using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using Netsphere.Resource;
 using Netsphere.Shop;
-using Shaolinq;
 
 namespace Netsphere
 {
@@ -57,13 +57,20 @@ namespace Netsphere
 
         internal PlayerItem(Inventory inventory, PlayerItemDto dto)
         {
+            var shop = GameServer.Instance.ResourceCache.GetShop();
             ExistsInDatabase = true;
             Inventory = inventory;
             Id = (ulong)dto.Id;
-            ItemNumber = dto.ShopItemInfo.ShopItem.Id;
-            PriceType = (ItemPriceType)dto.ShopPrice.PriceGroup.PriceType;
-            PeriodType = (ItemPeriodType)dto.ShopPrice.PeriodType;
-            Period = (ushort)dto.ShopPrice.Period;
+
+            var itemInfo = shop.Items.Values.First(group => group.GetItemInfo(dto.ShopItemInfoId) != null);
+            ItemNumber = itemInfo.ItemNumber;
+
+            var priceGroup = shop.Prices.Values.First(group => group.GetPrice(dto.ShopPriceId) != null);
+            var price = priceGroup.GetPrice(dto.ShopPriceId);
+
+            PriceType = priceGroup.PriceType;
+            PeriodType = price.PeriodType;
+            Period = price.Period;
             Color = dto.Color;
             Effect = dto.Effect;
             PurchaseDate = DateTimeOffset.FromUnixTimeSeconds(dto.PurchaseDate);
@@ -107,6 +114,11 @@ namespace Netsphere
             return shop.GetItemInfo(ItemNumber, PriceType);
         }
 
+        public ShopPrice GetShopPrice()
+        {
+            return GetShopItemInfo().PriceGroup.GetPrice(PeriodType, Period);
+        }
+
         public async Task LoseDurabilityAsync(int loss)
         {
             if (loss < 0)
@@ -121,15 +133,6 @@ namespace Netsphere
             Durability -= loss;
             if (Durability < 0)
                 Durability = 0;
-
-            using (var scope = new DataAccessScope())
-            {
-                var dto = GameDatabase.Instance.PlayerItems.GetReference((int)Id);
-                dto.Durability = Durability;
-
-                await scope.CompleteAsync()
-                    .ConfigureAwait(false);
-            }
 
             await Inventory.Player.Session.SendAsync(new SItemDurabilityInfoAckMessage(new[] { this.Map<PlayerItem, ItemDurabilityInfoDto>() }))
                         .ConfigureAwait(false);

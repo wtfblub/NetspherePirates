@@ -20,6 +20,20 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(2)]
         public ulong Unk { get; set; }
+
+        public SLoginAckMessage()
+        { }
+
+        public SLoginAckMessage(GameLoginResult result, ulong accountId)
+        {
+            AccountId = accountId;
+            Result = result;
+        }
+
+        public SLoginAckMessage(GameLoginResult result)
+        {
+            Result = result;
+        }
     }
 
     [BlubContract]

@@ -60,8 +60,8 @@ namespace Netsphere.Shop
         public ShopItemInfo(ShopItem shopItem, ShopItemInfoDto dto, ShopResources shopResources)
         {
             Id = dto.Id;
-            PriceGroup = shopResources.Prices[dto.PriceGroup.Id];
-            EffectGroup = shopResources.Effects[dto.EffectGroup.Id];
+            PriceGroup = shopResources.Prices[dto.PriceGroupId];
+            EffectGroup = shopResources.Effects[dto.EffectGroupId];
             IsEnabled = dto.IsEnabled;
             Discount = dto.DiscountPercentage;
 

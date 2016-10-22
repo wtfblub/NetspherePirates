@@ -2,7 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Text;
+using Dapper.FastCrud;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Netsphere.Network.Message.Game;
@@ -65,7 +68,7 @@ namespace Netsphere
 
             if (license != null)
             {
-                license.TimesCompleted++;
+                ++license.TimesCompleted;
             }
             else
             {
@@ -107,36 +110,56 @@ namespace Netsphere
             return true;
         }
 
-        internal void Save()
+        internal void Save(IDbConnection db)
         {
-            License licenseToRemove;
-            while (_licensesToRemove.TryPop(out licenseToRemove))
-                GameDatabase.Instance.PlayerLicenses.GetReference(licenseToRemove.Id).Delete();
+            if (!_licensesToRemove.IsEmpty)
+            {
+                var idsToRemove = new StringBuilder();
+                var firstRun = true;
+                License licenseToRemove;
+                while (_licensesToRemove.TryPop(out licenseToRemove))
+                {
+                    if (firstRun)
+                        firstRun = false;
+                    else
+                        idsToRemove.Append(',');
+                    idsToRemove.Append(licenseToRemove.Id);
+                }
+
+                db.BulkDelete<PlayerLicenseDto>(statement => statement
+                    .Where($"{nameof(PlayerLicenseDto.Id):C} IN ({idsToRemove})"));
+            }
 
             foreach (var license in this)
             {
-                PlayerLicenseDto licenseDto;
                 if (!license.ExistsInDatabase)
                 {
-                    licenseDto = GameDatabase.Instance.Players
-                        .GetReference((int)_player.Account.Id)
-                        .Licenses.Create(license.Id);
+                    db.Insert(new PlayerLicenseDto
+                    {
+                        Id = license.Id,
+                        PlayerId = (int)_player.Account.Id,
+                        License = (byte)license.ItemLicense,
+                        FirstCompletedDate = license.FirstCompletedDate.ToUnixTimeSeconds(),
+                        CompletedCount = license.TimesCompleted
+                    });
                     license.ExistsInDatabase = true;
-
-                    licenseDto.License = (byte)license.ItemLicense;
-                    licenseDto.FirstCompletedDate = license.FirstCompletedDate.ToUnixTimeSeconds();
                 }
                 else
                 {
-                    if(!license.NeedsToSave)
+                    if (!license.NeedsToSave)
                         continue;
 
+                    var mapping = OrmConfiguration
+                        .GetDefaultEntityMapping<PlayerLicenseDto>()
+                        .Clone()
+                        .UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true,
+                            nameof(PlayerLicenseDto.CompletedCount));
+                    db.Update(new PlayerLicenseDto
+                    {
+                        CompletedCount = license.TimesCompleted
+                    }, statement => statement.WithEntityMappingOverride(mapping));
                     license.NeedsToSave = false;
-                    licenseDto = GameDatabase.Instance.PlayerLicenses
-                        .GetReference(license.Id);
                 }
-
-                licenseDto.CompletedCount = license.TimesCompleted;
             }
         }
 

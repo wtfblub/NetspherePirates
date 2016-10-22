@@ -16,6 +16,11 @@ namespace Netsphere.Shop
             Name = dto.Name;
             Effects = dto.ShopEffects.Select(e => new ShopEffect(e)).ToList();
         }
+
+        public ShopEffect GetEffect(int id)
+        {
+            return Effects.FirstOrDefault(effect => effect.Id == id);
+        }
     }
 
     internal class ShopEffect

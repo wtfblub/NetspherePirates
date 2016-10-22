@@ -95,19 +95,19 @@ namespace Netsphere
         {
             Logger.Info("Initializing...");
 
-            var config = Config.Instance.AuthDatabase;
-            
+            var config = Config.Instance.Database;
+
             switch (config.Engine)
             {
                 case DatabaseEngine.MySQL:
-                    s_connectionString = $"Server={config.Host};Port={config.Port};Database={config.Database};Uid={config.Username};Pwd={config.Password};Pooling=true;";
+                    s_connectionString = $"Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
                     OrmConfiguration.DefaultDialect = SqlDialect.MySql;
 
                     using (var con = Open())
                     {
-                        if(con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Database}\"") == null)
+                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
                         {
-                            Logger.Error($"Database '{config.Database}' not found");
+                            Logger.Error($"Database '{config.Auth.Database}' not found");
                             Environment.Exit(0);
                         }
                     }
@@ -119,12 +119,12 @@ namespace Netsphere
                         Logger.Error("SQLite is not supported on mono");
                         Environment.Exit(0);
                     }
-                    s_connectionString = $"Data Source={config.Filename};Pooling=true;";
+                    s_connectionString = $"Data Source={config.Auth.Filename};Pooling=true;";
                     OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
 
-                    if(!File.Exists(config.Filename))
+                    if (!File.Exists(config.Auth.Filename))
                     {
-                        Logger.Error($"Database '{config.Filename}' not found");
+                        Logger.Error($"Database '{config.Auth.Filename}' not found");
                         Environment.Exit(0);
                     }
                     break;
@@ -138,20 +138,25 @@ namespace Netsphere
 
         public static IDbConnection Open()
         {
-            var engine = Config.Instance.AuthDatabase.Engine;
+            var engine = Config.Instance.Database.Engine;
+            IDbConnection connection;
             switch (engine)
             {
                 case DatabaseEngine.MySQL:
-                    return new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
+                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
+                    break;
 
                 case DatabaseEngine.SQLite:
-                    return new System.Data.SQLite.SQLiteConnection(s_connectionString);
+                    connection = new System.Data.SQLite.SQLiteConnection(s_connectionString);
+                    break;
 
                 default:
                     Logger.Error($"Invalid database engine {engine}");
                     Environment.Exit(0);
                     return null;
             }
+            connection.Open();
+            return connection;
         }
     }
 }

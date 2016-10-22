@@ -30,7 +30,7 @@ namespace Netsphere.Network.Service
             using (var db = AuthDatabase.Open())
             {
                 var result = await db.FindAsync<AccountDto>(statement => statement
-                        .Where($"{nameof(AccountDto.Username):C} = @Username")
+                        .Where($"{nameof(AccountDto.Username):C} = @{nameof(message.Username)}")
                         .Include<BanDto>(join => join.LeftOuterJoin())
                         .WithParameters(new { message.Username }))
                     .ConfigureAwait(false);
