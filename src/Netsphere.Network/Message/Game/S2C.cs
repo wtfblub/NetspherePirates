@@ -258,14 +258,14 @@ namespace Netsphere.Network.Message.Game
     public class SCheckNickAckMessage : GameMessage
     {
         [BlubMember(0, typeof(IntBooleanSerializer))]
-        public bool IsAvailable { get; set; }
+        public bool IsTaken { get; set; }
 
         public SCheckNickAckMessage()
         { }
 
-        public SCheckNickAckMessage(bool isAvailable)
+        public SCheckNickAckMessage(bool isTaken)
         {
-            IsAvailable = isAvailable;
+            IsTaken = isTaken;
         }
     }
 

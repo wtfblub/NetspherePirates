@@ -17,7 +17,7 @@ namespace Netsphere.Network.Serializers
         {
             emiter.LoadArgument(1);
             emiter.LoadLocal(value);
-            emiter.LoadConstant(false);
+            emiter.LoadConstant(true);
             emiter.CompareEqual();
             emiter.CallVirtual(typeof(BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] { typeof(int) }));
         }
@@ -27,7 +27,6 @@ namespace Netsphere.Network.Serializers
             emiter.LoadArgument(1);
             emiter.CallVirtual(typeof (BinaryReader).GetMethod(nameof(BinaryReader.ReadInt32)));
             emiter.Convert<bool>();
-            emiter.Not();
             emiter.StoreLocal(value);
         }
     }
