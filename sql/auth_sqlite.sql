@@ -51,12 +51,6 @@ CONSTRAINT "fkey0" FOREIGN KEY ("AccountId") REFERENCES "accounts" ("Id") ON DEL
 );
 
 -- ----------------------------
--- Table structure for sqlite_sequence
--- ----------------------------
-DROP TABLE IF EXISTS "main"."sqlite_sequence";
-CREATE TABLE sqlite_sequence(name,seq);
-
--- ----------------------------
 -- Indexes structure for table accounts
 -- ----------------------------
 CREATE UNIQUE INDEX "main"."Nickname"
