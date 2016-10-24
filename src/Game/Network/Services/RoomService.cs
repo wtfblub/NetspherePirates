@@ -326,6 +326,20 @@ namespace Netsphere.Network.Services
             session.Player.Room.ChangeRules(message.Settings);
         }
 
+        [MessageHandler(typeof(CLeavePlayerRequestReqMessage))]
+        public void CLeavePlayerRequestReq(GameSession session, CLeavePlayerRequestReqMessage message)
+        {
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (room.Master != plr)
+                return;
+
+            var targetPlr = GameServer.Instance.PlayerManager.Get(message.AccountId);
+
+            room.Leave(targetPlr, message.Reason);
+        }
+
         #region Scores
 
         [MessageHandler(typeof(CScoreKillReqMessage))]
