@@ -94,8 +94,9 @@
     {
         PEN = 1,
         AP = 2,
-        CP = 3,
-        None = 4
+        Premium = 3,
+        None = 4, //?
+        CP = 5,
     }
 
     public enum ItemPeriodType : uint
