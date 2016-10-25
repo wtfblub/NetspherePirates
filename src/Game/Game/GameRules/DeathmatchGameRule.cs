@@ -112,6 +112,12 @@ namespace Netsphere.Game.GameRules
             base.OnScoreKill(killer, assist, target, attackAttribute);
         }
 
+        public override void OnScoreHeal(Player plr)
+        {
+            GetRecord(plr).HealAssists++;
+            base.OnScoreHeal(plr);
+        }
+
         private bool CanStartGame()
         {
             if (!StateMachine.IsInState(GameRuleState.Waiting))
