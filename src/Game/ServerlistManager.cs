@@ -75,9 +75,12 @@ namespace Netsphere
                 return;
             }
 
-            await _client.GetProxy<IServerlistService>("rmi")
+            var result = await _client.GetProxy<IServerlistService>("rmi")
                 .Update(GameServer.Instance.Map<GameServer, ServerInfoDto>())
                 .ConfigureAwait(false);
+
+            if (!result)
+                await Register().ConfigureAwait(false);
         }
 
         private void Client_Connected(object sender, SessionEventArgs e)
