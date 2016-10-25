@@ -277,6 +277,7 @@ namespace Netsphere.Network.Services
                         break;
 
                     case ItemPriceType.AP:
+                    case ItemPriceType.Premium:
                         if (plr.AP < price.Price)
                         {
                             await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney))

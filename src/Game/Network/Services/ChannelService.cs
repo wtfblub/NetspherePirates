@@ -110,5 +110,19 @@ namespace Netsphere.Network.Services
             toPlr.ChatSession.Send(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname,
                 session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
         }
+
+        [MessageHandler(typeof(CQuickStartReqMessage))]
+        public void CQuickStartReq(GameSession session, CQuickStartReqMessage message)
+        {
+            //ToDo - Logic
+            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+        }
+
+        [MessageHandler(typeof(CTaskRequestReqMessage))]
+        public void TaskRequestReq(GameSession session, CTaskRequestReqMessage message)
+        {
+            //ToDo - Logic
+            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+        }
     }
 }
