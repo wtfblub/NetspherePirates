@@ -28,7 +28,7 @@ namespace Netsphere
         private readonly AsyncLock _slotIdSync = new AsyncLock();
 
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
-        private readonly ConcurrentDictionary<ulong, Player> _kickedPlayers = new ConcurrentDictionary<ulong, Player>();
+        private readonly ConcurrentDictionary<ulong, object> _kickedPlayers = new ConcurrentDictionary<ulong, object>();
         private readonly TimeSpan _hostUpdateTime = TimeSpan.FromSeconds(30);
         private readonly TimeSpan _changingRulesTime = TimeSpan.FromSeconds(5);
         private const uint PingDifferenceForChange = 20;
@@ -197,8 +197,10 @@ namespace Netsphere
             Group.Leave(plr.RoomInfo.Slot);
             Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
 
-            if (roomLeaveReason == RoomLeaveReason.Kicked)
-                _kickedPlayers.TryAdd(plr.Account.Id, plr);
+            if (roomLeaveReason == RoomLeaveReason.Kicked ||
+                roomLeaveReason == RoomLeaveReason.ModeratorKick ||
+                roomLeaveReason == RoomLeaveReason.VoteKick)
+                _kickedPlayers.TryAdd(plr.Account.Id, null);
 
             plr.RoomInfo.PeerId = 0;
             plr.RoomInfo.Team.Leave(plr);

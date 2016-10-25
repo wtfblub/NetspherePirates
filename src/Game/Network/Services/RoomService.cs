@@ -332,10 +332,29 @@ namespace Netsphere.Network.Services
             var plr = session.Player;
             var room = plr.Room;
 
-            if (room.Master != plr)
-                return;
+            switch (message.Reason)
+            {
+                case RoomLeaveReason.Kicked:
+                    // Only the master can kick people and kick is only allowed in the lobby
+                    if (room.Master != plr &&
+                        !room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
+                        return;
+                    break;
 
-            var targetPlr = GameServer.Instance.PlayerManager.Get(message.AccountId);
+                case RoomLeaveReason.AFK:
+                    // The client kicks itself when afk is detected
+                    if (message.AccountId != plr.Account.Id)
+                        return;
+                    break;
+
+                default:
+                    // Dont allow any other reasons for now
+                    return;
+            }
+
+            var targetPlr = room.Players.GetValueOrDefault(message.AccountId);
+            if (targetPlr == null)
+                return;
 
             room.Leave(targetPlr, message.Reason);
         }

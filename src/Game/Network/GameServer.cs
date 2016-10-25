@@ -126,7 +126,8 @@ namespace Netsphere.Network
                 .Register<CChangeRuleNotifyReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster,
                     session => session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
                 .Register<CClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel);
+                .Register<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                .Register<CLeavePlayerRequestReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom);
 
             Pipeline.AddLast("s4_service", new MessageHandlerPipe())
                 .Add(new AuthService())
