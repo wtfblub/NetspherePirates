@@ -150,6 +150,9 @@ namespace Netsphere
             if (_players.Count >= Options.MatchKey.PlayerLimit)
                 throw new RoomLimitReachedException();
 
+            if (_kickedPlayers.ContainsKey(plr.Account.Id))
+                throw new RoomAccessDeniedException();
+
             using (_slotIdSync.Lock())
             {
                 byte id = 3;
@@ -157,12 +160,6 @@ namespace Netsphere
                     id++;
 
                 plr.RoomInfo.Slot = id;
-            }
-
-            if(_kickedPlayers.ContainsKey(plr.Account.Id))
-            {
-                plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
-                return;
             }
 
             plr.RoomInfo.State = PlayerState.Lobby;

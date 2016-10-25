@@ -55,6 +55,9 @@ namespace Netsphere
     public class RoomLimitReachedException : RoomException
     { }
 
+    public class RoomAccessDeniedException : RoomException
+    { }
+
     public class TeamLimitReachedException : RoomException
     { }
 }

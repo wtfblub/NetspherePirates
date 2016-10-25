@@ -110,6 +110,10 @@ namespace Netsphere.Network.Services
             {
                 room.Join(plr);
             }
+            catch (RoomAccessDeniedException)
+            {
+                session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
+            }
             catch (RoomLimitReachedException)
             {
                 session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
