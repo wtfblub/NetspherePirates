@@ -379,7 +379,7 @@ namespace ProudNet
                             {
                                 var deferral = new DeferralManager();
                                 _pipe.OnMessageReceived(new MessageReceivedEventArgs(session, message, deferral));
-                                await deferral.WaitAsync().ConfigureAwait(false);
+                                await deferral.SignalAndWaitAsync().ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {
