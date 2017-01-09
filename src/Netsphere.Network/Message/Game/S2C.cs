@@ -231,15 +231,19 @@ namespace Netsphere.Network.Message.Game
         public CharacterStyle Style { get; set; }
 
         [BlubMember(2)]
-        public byte Unk1 { get; set; }
+        public byte MaxSkills { get; set; }
 
         [BlubMember(3)]
-        public byte Unk2 { get; set; }
+        public byte MaxWeapons { get; set; }
 
         public SSuccessCreateCharacterAckMessage()
-        { }
+        {
+            MaxSkills = 1;
+            MaxWeapons = 3;
+        }
 
         public SSuccessCreateCharacterAckMessage(byte slot, CharacterStyle style)
+            : this()
         {
             Slot = slot;
             Style = style;
