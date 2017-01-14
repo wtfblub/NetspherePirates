@@ -1,11 +1,12 @@
-﻿using BlubLib.Serialization;
-using Sigil;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
+using BlubLib.Reflection;
+using BlubLib.Serialization;
+using Sigil;
 using Sigil.NonGeneric;
 
-namespace ProudNet.Serializers
+namespace ProudNet.Serialization.Serializers
 {
     public class IPEndPointAddressStringSerializer : ISerializerCompiler
     {
@@ -18,11 +19,11 @@ namespace ProudNet.Serializers
         {
             // value = new IPEndPoint(IPAddress.Parse(ProudNetBinaryReaderExtensions.ReadProudString(reader)), reader.ReadUInt16())
             emiter.LoadArgument(1);
-            emiter.Call(typeof(ProudNetBinaryReaderExtensions).GetMethod(nameof(ProudNetBinaryReaderExtensions.ReadProudString)));
-            emiter.Call(typeof(IPAddress).GetMethod(nameof(IPAddress.Parse)));
+            emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadProudString()));
+            emiter.Call(ReflectionHelper.GetMethod(() => IPAddress.Parse(default(string))));
             emiter.LoadArgument(1);
-            emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt16)));
-            emiter.NewObject(typeof(IPEndPoint).GetConstructor(new Type[] { typeof(IPAddress), typeof(int) }));
+            emiter.CallVirtual(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadUInt16()));
+            emiter.NewObject(typeof(IPEndPoint).GetConstructor(new[] { typeof(IPAddress), typeof(int) }));
             emiter.StoreLocal(value);
         }
 
@@ -31,8 +32,8 @@ namespace ProudNet.Serializers
             using (var address = emiter.DeclareLocal<string>("str"))
             using (var port = emiter.DeclareLocal<ushort>("port"))
             {
-                var isNull = emiter.DefineLabel(nameof(IPEndPointAddressStringSerializer) + "IsNull" + Guid.NewGuid());
-                var write = emiter.DefineLabel(nameof(IPEndPointAddressStringSerializer) + "Write" + Guid.NewGuid());
+                var isNull = emiter.DefineLabel();
+                var write = emiter.DefineLabel();
 
                 // if (value == null) goto isNull
                 emiter.LoadLocal(value);
@@ -64,7 +65,7 @@ namespace ProudNet.Serializers
                 emiter.LoadArgument(1);
                 emiter.LoadLocal(address);
                 emiter.LoadConstant(false);
-                emiter.Call(typeof(ProudNetBinaryWriterExtensions).GetMethod(nameof(ProudNetBinaryWriterExtensions.WriteProudString)));
+                emiter.Call(ReflectionHelper.GetMethod((BinaryWriter x) => x.WriteProudString(default(string), default(bool))));
 
                 // writer.Write(port)
                 emiter.CallSerializerForType(typeof(ushort), port);

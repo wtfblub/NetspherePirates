@@ -1,11 +1,13 @@
 ﻿using System;
+using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
 using Sigil.NonGeneric;
 
-namespace ProudNet.Serializers
+namespace ProudNet.Serialization.Serializers
 {
-    public class ScalarSerializer : ISerializerCompiler
+    public class ReadToEndSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {
@@ -14,18 +16,18 @@ namespace ProudNet.Serializers
 
         public void EmitDeserialize(Emit emiter, Local value)
         {
-            // value = ProudNetBinaryReaderExtensions.ReadScalar(reader)
+            // value = BinaryReaderExtensions.ReadToEnd(reader);
             emiter.LoadArgument(1);
-            emiter.Call(typeof(ProudNetBinaryReaderExtensions).GetMethod(nameof(ProudNetBinaryReaderExtensions.ReadScalar)));
+            emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadToEnd()));
             emiter.StoreLocal(value);
         }
 
         public void EmitSerialize(Emit emiter, Local value)
         {
-            // ProudNetBinaryWriterExtensions.WriteScalar(writer, value)
+            // writer.Write(value)
             emiter.LoadArgument(1);
             emiter.LoadLocal(value);
-            emiter.Call(typeof(ProudNetBinaryWriterExtensions).GetMethod(nameof(ProudNetBinaryWriterExtensions.WriteScalar)));
+            emiter.CallVirtual(ReflectionHelper.GetMethod((BinaryWriter x) => x.Write(default(byte[]))));
         }
     }
 }

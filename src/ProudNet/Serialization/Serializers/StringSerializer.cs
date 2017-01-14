@@ -1,9 +1,11 @@
-﻿using BlubLib.Serialization;
+﻿using System;
+using System.IO;
+using BlubLib.Reflection;
+using BlubLib.Serialization;
 using Sigil;
-using System;
 using Sigil.NonGeneric;
 
-namespace ProudNet.Serializers
+namespace ProudNet.Serialization.Serializers
 {
     public class StringSerializer : ISerializerCompiler
     {
@@ -15,7 +17,7 @@ namespace ProudNet.Serializers
         public void EmitDeserialize(Emit emiter, Local value)
         {
             emiter.LoadArgument(1);
-            emiter.Call(typeof(ProudNetBinaryReaderExtensions).GetMethod(nameof(ProudNetBinaryReaderExtensions.ReadProudString)));
+            emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadProudString()));
             emiter.StoreLocal(value);
         }
 
@@ -38,7 +40,7 @@ namespace ProudNet.Serializers
             emiter.LoadArgument(1);
             emiter.LoadLocal(value);
             emiter.LoadConstant(false);
-            emiter.Call(typeof(ProudNetBinaryWriterExtensions).GetMethod(nameof(ProudNetBinaryWriterExtensions.WriteProudString)));
+            emiter.Call(ReflectionHelper.GetMethod((BinaryWriter x) => x.WriteProudString(default(string), default(bool))));
         }
     }
 }

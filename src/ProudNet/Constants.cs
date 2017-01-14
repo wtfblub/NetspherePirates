@@ -105,6 +105,11 @@
         S2C_CreateUdpSocketAck = 64519,
     }
 
+    public enum HostId : uint
+    {
+        Server = 0
+    }
+
     public enum FallbackMethod : byte
     {
         None = 0,
@@ -136,5 +141,10 @@
         System,
         Holepunch,
         HolepunchFreqFail
+    }
+
+    internal static class Constants
+    {
+        public const uint NetVersion = 196713;
     }
 }

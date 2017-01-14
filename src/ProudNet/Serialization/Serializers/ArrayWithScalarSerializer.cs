@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
 using Sigil.NonGeneric;
 
-namespace ProudNet.Serializers
+namespace ProudNet.Serialization.Serializers
 {
     public class ArrayWithScalarSerializer : ISerializerCompiler
     {
@@ -16,14 +17,14 @@ namespace ProudNet.Serializers
         public void EmitDeserialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
-            var emptyArray = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "EmptyArray" + Guid.NewGuid());
-            var end = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "End" + Guid.NewGuid());
+            var emptyArray = emiter.DefineLabel();
+            var end = emiter.DefineLabel();
 
             using (var length = emiter.DeclareLocal<int>("length"))
             {
                 // length = ProudNetBinaryReaderExtensions.ReadScalar(reader)
                 emiter.LoadArgument(1);
-                emiter.Call(typeof(ProudNetBinaryReaderExtensions).GetMethod(nameof(ProudNetBinaryReaderExtensions.ReadScalar)));
+                emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadScalar()));
                 emiter.StoreLocal(length);
 
                 // if(length < 1) {
@@ -40,18 +41,18 @@ namespace ProudNet.Serializers
                 emiter.StoreLocal(value);
 
                 // Little optimization for byte arrays
-                if (elementType == typeof (byte))
+                if (elementType == typeof(byte))
                 {
                     // value = reader.ReadBytes(length);
                     emiter.LoadArgument(1);
                     emiter.LoadLocal(length);
-                    emiter.CallVirtual(typeof (BinaryReader).GetMethod(nameof(BinaryReader.ReadBytes)));
+                    emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadBytes(default(int))));
                     emiter.StoreLocal(value);
                 }
                 else
                 {
-                    var loop = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "Loop" + Guid.NewGuid());
-                    var loopCheck = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "LoopCheck" + Guid.NewGuid());
+                    var loop = emiter.DefineLabel();
+                    var loopCheck = emiter.DefineLabel();
 
                     using (var element = emiter.DeclareLocal(elementType, "element"))
                     using (var i = emiter.DeclareLocal<int>("i"))
@@ -106,10 +107,10 @@ namespace ProudNet.Serializers
                 // ProudNetBinaryWriterExtensions.WriteScalar(writer, length)
                 emiter.LoadArgument(1);
                 emiter.LoadLocal(length);
-                emiter.Call(typeof(ProudNetBinaryWriterExtensions).GetMethod(nameof(ProudNetBinaryWriterExtensions.WriteScalar)));
+                emiter.Call(ReflectionHelper.GetMethod((BinaryWriter x) => x.WriteScalar(default(int))));
 
-                var loop = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "Loop" + Guid.NewGuid());
-                var loopCheck = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "LoopCheck" + Guid.NewGuid());
+                var loop = emiter.DefineLabel();
+                var loopCheck = emiter.DefineLabel();
 
                 using (var element = emiter.DeclareLocal(elementType, "element"))
                 using (var i = emiter.DeclareLocal<int>("i"))

@@ -1,18 +1,18 @@
-﻿using BlubLib.Serialization;
-using ProudNet.Serializers;
-using System.Net;
+﻿using System.Net;
+using BlubLib.Serialization;
+using ProudNet.Serialization.Serializers;
 
-namespace ProudNet.Message
+namespace ProudNet.Serialization.Messages
 {
     [BlubContract]
-    internal class ReliablePingMessage : ProudMessage
+    internal class ReliablePingMessage
     {
         [BlubMember(0)]
         public int RecentFrameRate { get; set; }
     }
 
     [BlubContract]
-    internal class P2PGroup_MemberJoin_AckMessage : ProudMessage
+    internal class P2PGroup_MemberJoin_AckMessage
     {
         [BlubMember(0)]
         public uint GroupHostId { get; set; }
@@ -28,7 +28,7 @@ namespace ProudNet.Message
     }
 
     [BlubContract]
-    internal class NotifyP2PHolepunchSuccessMessage : ProudMessage
+    internal class NotifyP2PHolepunchSuccessMessage
     {
         [BlubMember(0)]
         public uint A { get; set; }
@@ -58,14 +58,14 @@ namespace ProudNet.Message
     }
 
     [BlubContract]
-    internal class ShutdownTcpMessage : ProudMessage
+    internal class ShutdownTcpMessage
     {
         [BlubMember(0)]
         public short Unk { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyLogMessage : ProudMessage
+    internal class NotifyLogMessage
     {
         [BlubMember(0)]
         public TraceId TraceId { get; set; }
@@ -75,32 +75,32 @@ namespace ProudNet.Message
     }
 
     [BlubContract]
-    internal class NotifyJitDirectP2PTriggeredMessage : ProudMessage
+    internal class NotifyJitDirectP2PTriggeredMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyNatDeviceNameDetectedMessage : ProudMessage
+    internal class NotifyNatDeviceNameDetectedMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Name { get; set; }
     }
 
     [BlubContract]
-    internal class C2S_RequestCreateUdpSocketMessage : ProudMessage
+    internal class C2S_RequestCreateUdpSocketMessage
     { }
 
     [BlubContract]
-    internal class C2S_CreateUdpSocketAckMessage : ProudMessage
+    internal class C2S_CreateUdpSocketAckMessage
     {
         [BlubMember(0)]
         public bool Success { get; set; }
     }
 
     [BlubContract]
-    internal class ReportC2SUdpMessageTrialCountMessage : ProudMessage
+    internal class ReportC2SUdpMessageTrialCountMessage
     {
         [BlubMember(0)]
         public int TrialCount { get; set; }

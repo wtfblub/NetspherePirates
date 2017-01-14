@@ -1,6 +1,6 @@
 ﻿using BlubLib.Serialization;
 
-namespace ProudNet.Data
+namespace ProudNet.Serialization
 {
     [BlubContract]
     internal class RelayDestinationDto

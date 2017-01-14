@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Net;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using System.Net;
 using Sigil.NonGeneric;
 
-namespace ProudNet.Serializers
+namespace ProudNet.Serialization.Serializers
 {
     public class IPEndPointSerializer : ISerializerCompiler
     {
@@ -18,7 +19,7 @@ namespace ProudNet.Serializers
         {
             // value = BinaryReaderExtensions.ReadIPEndPoint(reader)
             emiter.LoadArgument(1);
-            emiter.Call(typeof(BinaryReaderExtensions).GetMethod(nameof(BinaryReaderExtensions.ReadIPEndPoint)));
+            emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadIPEndPoint()));
             emiter.StoreLocal(value);
         }
 
@@ -27,7 +28,7 @@ namespace ProudNet.Serializers
             // BinaryWriterExtensions.Write(writer, value)
             emiter.LoadArgument(1);
             emiter.LoadLocal(value);
-            emiter.Call(typeof(BinaryWriterExtensions).GetMethod(nameof(BinaryWriterExtensions.Write), new Type[] { typeof(BinaryWriter), typeof(IPEndPoint) }));
+            emiter.Call(ReflectionHelper.GetMethod((BinaryWriter x) => x.Write(default(IPEndPoint))));
         }
     }
 }

@@ -1,20 +1,20 @@
-﻿using System;
+using System;
+using System.IO;
 using System.Net;
-using ProudNet.Data;
 using BlubLib.Serialization;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
-namespace ProudNet.Message.Core
+namespace ProudNet.Serialization.Messages.Core
 {
     [BlubContract]
-    internal class NotifyCSEncryptedSessionKeyMessage : CoreMessage
+    internal class NotifyCSEncryptedSessionKeyMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] Key { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyServerConnectionRequestDataMessage : CoreMessage
+    internal class NotifyServerConnectionRequestDataMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
@@ -28,12 +28,12 @@ namespace ProudNet.Message.Core
         public NotifyServerConnectionRequestDataMessage()
         {
             Version = Guid.Empty;
-            InternalNetVersion = ProudConfig.InternalNetVersion;
+            InternalNetVersion = Constants.NetVersion;
         }
     }
 
     [BlubContract]
-    internal class ServerHolepunchMessage : CoreMessage
+    internal class ServerHolepunchMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -45,7 +45,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class NotifyHolepunchSuccessMessage : CoreMessage
+    internal class NotifyHolepunchSuccessMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -65,7 +65,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class PeerUdp_ServerHolepunchMessage : CoreMessage
+    internal class PeerUdp_ServerHolepunchMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -80,7 +80,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class PeerUdp_NotifyHolepunchSuccessMessage : CoreMessage
+    internal class PeerUdp_NotifyHolepunchSuccessMessage
     {
         [BlubMember(0, typeof(IPEndPointSerializer))]
         public IPEndPoint LocalEndPoint { get; set; }
@@ -99,7 +99,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class UnreliablePingMessage : CoreMessage
+    internal class UnreliablePingMessage
     {
         [BlubMember(0)]
         public double ClientTime { get; set; }
@@ -109,17 +109,17 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class SpeedHackDetectorPingMessage : CoreMessage
+    internal class SpeedHackDetectorPingMessage
     { }
 
     [BlubContract]
-    internal class ReliableRelay1Message : CoreMessage
+    internal class ReliableRelay1Message
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public RelayDestinationDto[] Destination { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
-        public byte[] Data { get; set; }
+        [BlubMember(1, typeof(StreamWithScalarSerializer))]
+        public Stream Data { get; set; }
 
         public ReliableRelay1Message()
         {
@@ -128,7 +128,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class UnreliableRelay1Message : CoreMessage
+    internal class UnreliableRelay1Message
     {
         [BlubMember(0)]
         public MessagePriority Priority { get; set; }
@@ -139,8 +139,8 @@ namespace ProudNet.Message.Core
         [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public uint[] Destination { get; set; }
 
-        [BlubMember(3, typeof(ArrayWithScalarSerializer))]
-        public byte[] Data { get; set; }
+        [BlubMember(3, typeof(StreamWithScalarSerializer))]
+        public Stream Data { get; set; }
 
         public UnreliableRelay1Message()
         {

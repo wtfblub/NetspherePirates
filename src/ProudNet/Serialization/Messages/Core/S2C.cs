@@ -1,34 +1,34 @@
 ﻿using System;
+using System.IO;
 using System.Net;
-using ProudNet.Data;
 using BlubLib.Serialization;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
-namespace ProudNet.Message.Core
+namespace ProudNet.Serialization.Messages.Core
 {
     [BlubContract]
-    internal class ConnectServerTimedoutMessage : CoreMessage
+    internal class ConnectServerTimedoutMessage
     { }
 
     [BlubContract]
-    internal class NotifyServerConnectionHintMessage : CoreMessage
+    internal class NotifyServerConnectionHintMessage
     {
         [BlubMember(0)]
-        public ProudConfig Config { get; set; }
+        public NetConfigDto Config { get; set; }
 
         public NotifyServerConnectionHintMessage()
         {
-            Config = new ProudConfig();
+            Config = new NetConfigDto();
         }
 
-        public NotifyServerConnectionHintMessage(ProudConfig config)
+        public NotifyServerConnectionHintMessage(NetConfigDto config)
         {
             Config = config;
         }
     }
 
     [BlubContract]
-    internal class NotifyCSSessionKeySuccessMessage : CoreMessage
+    internal class NotifyCSSessionKeySuccessMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] Key { get; set; }
@@ -43,18 +43,18 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class NotifyProtocolVersionMismatchMessage : CoreMessage
+    internal class NotifyProtocolVersionMismatchMessage
     { }
 
     [BlubContract]
-    internal class NotifyServerDeniedConnectionMessage : CoreMessage
+    internal class NotifyServerDeniedConnectionMessage
     {
         [BlubMember(0)]
         public ushort Unk { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyServerConnectSuccessMessage : CoreMessage
+    internal class NotifyServerConnectSuccessMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
@@ -85,7 +85,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class RequestStartServerHolepunchMessage : CoreMessage
+    internal class RequestStartServerHolepunchMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -102,7 +102,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class ServerHolepunchAckMessage : CoreMessage
+    internal class ServerHolepunchAckMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -124,9 +124,9 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class NotifyClientServerUdpMatchedMessage : CoreMessage
+    internal class NotifyClientServerUdpMatchedMessage
     {
-        [BlubMember(1)]
+        [BlubMember(0)]
         public Guid MagicNumber { get; set; }
 
         public NotifyClientServerUdpMatchedMessage()
@@ -141,7 +141,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class PeerUdp_ServerHolepunchAckMessage : CoreMessage
+    internal class PeerUdp_ServerHolepunchAckMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -167,7 +167,7 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class UnreliablePongMessage : CoreMessage
+    internal class UnreliablePongMessage
     {
         [BlubMember(0)]
         public double ClientTime { get; set; }
@@ -186,20 +186,20 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class ReliableRelay2Message : CoreMessage
+    internal class ReliableRelay2Message
     {
         [BlubMember(0)]
         public RelayDestinationDto Destination { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
-        public byte[] Data { get; set; }
+        [BlubMember(1, typeof(StreamWithScalarSerializer))]
+        public Stream Data { get; set; }
 
         public ReliableRelay2Message()
         {
             Destination = new RelayDestinationDto();
         }
 
-        public ReliableRelay2Message(RelayDestinationDto destination, byte[] data)
+        public ReliableRelay2Message(RelayDestinationDto destination, Stream data)
         {
             Destination = destination;
             Data = data;
@@ -207,18 +207,18 @@ namespace ProudNet.Message.Core
     }
 
     [BlubContract]
-    internal class UnreliableRelay2Message : CoreMessage
+    internal class UnreliableRelay2Message
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
-        public byte[] Data { get; set; }
+        [BlubMember(1, typeof(StreamWithScalarSerializer))]
+        public Stream Data { get; set; }
 
         public UnreliableRelay2Message()
         { }
 
-        public UnreliableRelay2Message(uint hostId, byte[] data)
+        public UnreliableRelay2Message(uint hostId, Stream data)
         {
             HostId = hostId;
             Data = data;
