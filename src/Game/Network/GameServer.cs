@@ -131,6 +131,7 @@ namespace Netsphere.Network
 
             Pipeline.AddLast("s4_service", new MessageHandlerPipe())
                 .Add(new AuthService())
+                .Add(new AccountService())
                 .Add(new CharacterService())
                 .Add(new GeneralService())
                 .Add(new AdminService())
