@@ -6,15 +6,15 @@ using ProudNet.Serialization.Serializers;
 namespace ProudNet.Serialization.Messages
 {
     [BlubContract]
-    internal class ReliablePongMessage
+    internal class ReliablePongMessage : IMessage
     { }
 
     [BlubContract]
-    internal class ShutdownTcpAckMessage
+    internal class ShutdownTcpAckMessage : IMessage
     { }
 
     [BlubContract]
-    internal class P2PGroup_MemberJoinMessage
+    internal class P2PGroup_MemberJoinMessage : IMessage
     {
         [BlubMember(0)]
         public uint GroupId { get; set; }
@@ -62,7 +62,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class P2PGroup_MemberJoin_UnencryptedMessage
+    internal class P2PGroup_MemberJoin_UnencryptedMessage : IMessage
     {
         [BlubMember(0)]
         public uint GroupId { get; set; }
@@ -105,7 +105,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class P2PRecycleCompleteMessage
+    internal class P2PRecycleCompleteMessage : IMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
@@ -141,7 +141,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class RequestP2PHolepunchMessage
+    internal class RequestP2PHolepunchMessage : IMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
@@ -167,7 +167,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class P2PGroup_MemberLeaveMessage
+    internal class P2PGroup_MemberLeaveMessage : IMessage
     {
         [BlubMember(0)]
         public uint MemberId { get; set; }
@@ -186,7 +186,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class NotifyDirectP2PEstablishMessage
+    internal class NotifyDirectP2PEstablishMessage : IMessage
     {
         [BlubMember(0)]
         public uint A { get; set; }
@@ -226,7 +226,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class NewDirectP2PConnectionMessage
+    internal class NewDirectP2PConnectionMessage : IMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
@@ -241,7 +241,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class S2C_RequestCreateUdpSocketMessage
+    internal class S2C_RequestCreateUdpSocketMessage : IMessage
     {
         [BlubMember(0, typeof(IPEndPointAddressStringSerializer))]
         public IPEndPoint EndPoint { get; set; }
@@ -256,7 +256,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class S2C_CreateUdpSocketAckMessage
+    internal class S2C_CreateUdpSocketAckMessage : IMessage
     {
         [BlubMember(0)]
         public bool Success { get; set; }

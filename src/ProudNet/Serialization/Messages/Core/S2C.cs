@@ -7,11 +7,11 @@ using ProudNet.Serialization.Serializers;
 namespace ProudNet.Serialization.Messages.Core
 {
     [BlubContract]
-    internal class ConnectServerTimedoutMessage
+    internal class ConnectServerTimedoutMessage : ICoreMessage
     { }
 
     [BlubContract]
-    internal class NotifyServerConnectionHintMessage
+    internal class NotifyServerConnectionHintMessage : ICoreMessage
     {
         [BlubMember(0)]
         public NetConfigDto Config { get; set; }
@@ -28,7 +28,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class NotifyCSSessionKeySuccessMessage
+    internal class NotifyCSSessionKeySuccessMessage : ICoreMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] Key { get; set; }
@@ -43,18 +43,18 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class NotifyProtocolVersionMismatchMessage
+    internal class NotifyProtocolVersionMismatchMessage : ICoreMessage
     { }
 
     [BlubContract]
-    internal class NotifyServerDeniedConnectionMessage
+    internal class NotifyServerDeniedConnectionMessage : ICoreMessage
     {
         [BlubMember(0)]
         public ushort Unk { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyServerConnectSuccessMessage
+    internal class NotifyServerConnectSuccessMessage : ICoreMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
@@ -85,7 +85,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class RequestStartServerHolepunchMessage
+    internal class RequestStartServerHolepunchMessage : ICoreMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -102,7 +102,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class ServerHolepunchAckMessage
+    internal class ServerHolepunchAckMessage : ICoreMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -124,7 +124,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class NotifyClientServerUdpMatchedMessage
+    internal class NotifyClientServerUdpMatchedMessage : ICoreMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -141,7 +141,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class PeerUdp_ServerHolepunchAckMessage
+    internal class PeerUdp_ServerHolepunchAckMessage : ICoreMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -167,7 +167,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class UnreliablePongMessage
+    internal class UnreliablePongMessage : ICoreMessage
     {
         [BlubMember(0)]
         public double ClientTime { get; set; }
@@ -186,7 +186,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class ReliableRelay2Message
+    internal class ReliableRelay2Message : ICoreMessage
     {
         [BlubMember(0)]
         public RelayDestinationDto Destination { get; set; }
@@ -207,7 +207,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class UnreliableRelay2Message
+    internal class UnreliableRelay2Message : ICoreMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }

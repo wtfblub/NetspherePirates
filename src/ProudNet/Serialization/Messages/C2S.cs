@@ -5,14 +5,14 @@ using ProudNet.Serialization.Serializers;
 namespace ProudNet.Serialization.Messages
 {
     [BlubContract]
-    internal class ReliablePingMessage
+    internal class ReliablePingMessage : IMessage
     {
         [BlubMember(0)]
         public int RecentFrameRate { get; set; }
     }
 
     [BlubContract]
-    internal class P2PGroup_MemberJoin_AckMessage
+    internal class P2PGroup_MemberJoin_AckMessage : IMessage
     {
         [BlubMember(0)]
         public uint GroupHostId { get; set; }
@@ -28,7 +28,7 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class NotifyP2PHolepunchSuccessMessage
+    internal class NotifyP2PHolepunchSuccessMessage : IMessage
     {
         [BlubMember(0)]
         public uint A { get; set; }
@@ -58,14 +58,14 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class ShutdownTcpMessage
+    internal class ShutdownTcpMessage : IMessage
     {
         [BlubMember(0)]
         public short Unk { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyLogMessage
+    internal class NotifyLogMessage : IMessage
     {
         [BlubMember(0)]
         public TraceId TraceId { get; set; }
@@ -75,32 +75,32 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
-    internal class NotifyJitDirectP2PTriggeredMessage
+    internal class NotifyJitDirectP2PTriggeredMessage : IMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyNatDeviceNameDetectedMessage
+    internal class NotifyNatDeviceNameDetectedMessage : IMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Name { get; set; }
     }
 
     [BlubContract]
-    internal class C2S_RequestCreateUdpSocketMessage
+    internal class C2S_RequestCreateUdpSocketMessage : IMessage
     { }
 
     [BlubContract]
-    internal class C2S_CreateUdpSocketAckMessage
+    internal class C2S_CreateUdpSocketAckMessage : IMessage
     {
         [BlubMember(0)]
         public bool Success { get; set; }
     }
 
     [BlubContract]
-    internal class ReportC2SUdpMessageTrialCountMessage
+    internal class ReportC2SUdpMessageTrialCountMessage : IMessage
     {
         [BlubMember(0)]
         public int TrialCount { get; set; }

@@ -35,6 +35,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\libs\BlubLib.dll</HintPath>
     </Reference>
+    <Reference Include="BlubLib.DotNetty">
+      <HintPath>..\..\libs\BlubLib.DotNetty.dll</HintPath>
+    </Reference>
     <Reference Include="BlubLib.Serialization">
       <HintPath>..\..\libs\BlubLib.Serialization.dll</HintPath>
     </Reference>
@@ -70,21 +73,30 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EncryptContext.cs" />
-    <Compile Include="ProudProtocol.cs" />
+    <Compile Include="Codecs\CoreMessageDecoder.cs" />
+    <Compile Include="Codecs\CoreMessageEncoder.cs" />
+    <Compile Include="Codecs\MessageDecoder.cs" />
+    <Compile Include="Codecs\MessageEncoder.cs" />
+    <Compile Include="Codecs\ProudFrameEncoder.cs" />
+    <Compile Include="Crypt.cs" />
+    <Compile Include="HostIdFactory.cs" />
+    <Compile Include="Codecs\ProudFrameDecoder.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="ProudPipe.cs" />
-    <Compile Include="ProudServerPipe.cs" />
     <Compile Include="P2PGroup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProudConfig.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="ProudSession.cs" />
+    <Compile Include="Rmi\RmiContractAttribute.cs" />
+    <Compile Include="Rmi\RmiSerializerAttribute.cs" />
     <Compile Include="Serialization\MessageFactory.cs" />
     <Compile Include="Serialization\Messages\Core\C2S.cs" />
     <Compile Include="Serialization\Messages\Core\Factory.cs" />
     <Compile Include="Serialization\Messages\C2S.cs" />
+    <Compile Include="Serialization\Messages\Core\ICoreMessage.cs" />
     <Compile Include="Serialization\Messages\Factory.cs" />
+    <Compile Include="Serialization\Messages\IMessage.cs" />
     <Compile Include="Serialization\Messages\S2C.cs" />
     <Compile Include="Serialization\Messages\Core\S2C.cs" />
     <Compile Include="Serialization\Messages\Core\SC.cs" />
@@ -98,15 +110,20 @@
     <Compile Include="Serialization\Serializers\StreamSerializer.cs" />
     <Compile Include="Serialization\Serializers\StreamWithScalarSerializer.cs" />
     <Compile Include="Serialization\Serializers\StringSerializer.cs" />
-    <Compile Include="Services\ProudCoreServerService.cs" />
-    <Compile Include="Services\ProudServerService.cs" />
-    <Compile Include="Services\ProudCoreService.cs" />
-    <Compile Include="ProudSession.cs" />
-    <Compile Include="ProudSessionFactory.cs" />
+    <Compile Include="Server\P2PGroup.cs" />
+    <Compile Include="Server\P2PGroupManager.cs" />
+    <Compile Include="Server\ProudServer.cs" />
+    <Compile Include="Server\RemotePeer.cs" />
+    <Compile Include="Server\SessionHandler.cs" />
+    <Compile Include="Server\Handlers\CoreServerHandler.cs" />
+    <Compile Include="Handlers\ProudMessageHandler.cs" />
+    <Compile Include="Server\Handlers\ServerHandler.cs" />
+    <Compile Include="Handlers\CoreHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

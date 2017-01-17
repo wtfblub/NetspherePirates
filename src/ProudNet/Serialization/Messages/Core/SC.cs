@@ -1,55 +1,54 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using BlubLib.IO;
 using BlubLib.Serialization;
 using ProudNet.Serialization.Serializers;
 
 namespace ProudNet.Serialization.Messages.Core
 {
     [BlubContract]
-    internal class RmiMessage
+    internal class RmiMessage : ICoreMessage
     {
-        [BlubMember(0, typeof(StreamSerializer))]
-        public Stream Data { get; set; }
+        [BlubMember(0, typeof(ReadToEndSerializer))]
+        public byte[] Data { get; set; }
 
         public RmiMessage()
         { }
 
-        public RmiMessage(Stream data)
+        public RmiMessage(byte[] data)
         {
             Data = data;
         }
     }
 
     [BlubContract]
-    internal class EncryptedReliableMessage
+    internal class EncryptedReliableMessage : ICoreMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [BlubMember(1, typeof(StreamWithScalarSerializer))]
-        public Stream Data { get; set; }
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
 
         public EncryptedReliableMessage()
         { }
 
-        public EncryptedReliableMessage(Stream data)
+        public EncryptedReliableMessage(byte[] data)
         {
             Data = data;
         }
     }
 
     [BlubContract(typeof(Serializer))]
-    internal class CompressedMessage
+    internal class CompressedMessage : ICoreMessage
     {
         public int DecompressedLength { get; set; }
-        public Stream Data { get; set; }
+        public byte[] Data { get; set; }
 
         public CompressedMessage()
         { }
 
-        public CompressedMessage(int decompressedLength, Stream data)
+        public CompressedMessage(int decompressedLength, byte[] data)
         {
             DecompressedLength = decompressedLength;
             Data = data;
@@ -65,25 +64,25 @@ namespace ProudNet.Serialization.Messages.Core
             {
                 writer.WriteScalar((int)value.Data.Length);
                 writer.WriteScalar(value.DecompressedLength);
-                value.Data.CopyTo(writer.BaseStream);
+                writer.Write(value.Data);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public CompressedMessage Deserialize(BinaryReader reader)
             {
                 var length = reader.ReadScalar();
-                return new CompressedMessage(reader.ReadScalar(), new LimitedStream(reader.BaseStream, reader.BaseStream.Position, length));
+                return new CompressedMessage(reader.ReadScalar(), reader.ReadBytes(length));
             }
         }
     }
 
     [BlubContract]
-    internal class ReliableUdp_FrameMessage
+    internal class ReliableUdp_FrameMessage : ICoreMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [BlubMember(1, typeof(StreamWithScalarSerializer))]
-        public Stream Data { get; set; }
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
     }
 }

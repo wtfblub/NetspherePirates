@@ -1,10 +1,10 @@
 ﻿namespace ProudNet.Serialization.Messages.Core
 {
-    internal class MessageFactory : MessageFactory<ProudCoreOpCode>
+    internal class CoreMessageFactory : MessageFactory<ProudCoreOpCode, ICoreMessage>
     {
-        public static MessageFactory Default { get; } = new MessageFactory();
+        public static CoreMessageFactory Default { get; } = new CoreMessageFactory();
 
-        public MessageFactory()
+        public CoreMessageFactory()
         {
             // S2C
             Register<ConnectServerTimedoutMessage>(ProudCoreOpCode.ConnectServerTimedout);

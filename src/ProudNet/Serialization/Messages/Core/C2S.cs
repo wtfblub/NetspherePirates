@@ -7,14 +7,14 @@ using ProudNet.Serialization.Serializers;
 namespace ProudNet.Serialization.Messages.Core
 {
     [BlubContract]
-    internal class NotifyCSEncryptedSessionKeyMessage
+    internal class NotifyCSEncryptedSessionKeyMessage : ICoreMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] Key { get; set; }
     }
 
     [BlubContract]
-    internal class NotifyServerConnectionRequestDataMessage
+    internal class NotifyServerConnectionRequestDataMessage : ICoreMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] UserData { get; set; }
@@ -33,7 +33,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class ServerHolepunchMessage
+    internal class ServerHolepunchMessage : ICoreMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -45,7 +45,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class NotifyHolepunchSuccessMessage
+    internal class NotifyHolepunchSuccessMessage : ICoreMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -65,7 +65,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class PeerUdp_ServerHolepunchMessage
+    internal class PeerUdp_ServerHolepunchMessage : ICoreMessage
     {
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
@@ -80,7 +80,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class PeerUdp_NotifyHolepunchSuccessMessage
+    internal class PeerUdp_NotifyHolepunchSuccessMessage : ICoreMessage
     {
         [BlubMember(0, typeof(IPEndPointSerializer))]
         public IPEndPoint LocalEndPoint { get; set; }
@@ -99,7 +99,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class UnreliablePingMessage
+    internal class UnreliablePingMessage : ICoreMessage
     {
         [BlubMember(0)]
         public double ClientTime { get; set; }
@@ -109,11 +109,11 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class SpeedHackDetectorPingMessage
+    internal class SpeedHackDetectorPingMessage : ICoreMessage
     { }
 
     [BlubContract]
-    internal class ReliableRelay1Message
+    internal class ReliableRelay1Message : ICoreMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public RelayDestinationDto[] Destination { get; set; }
@@ -128,7 +128,7 @@ namespace ProudNet.Serialization.Messages.Core
     }
 
     [BlubContract]
-    internal class UnreliableRelay1Message
+    internal class UnreliableRelay1Message : ICoreMessage
     {
         [BlubMember(0)]
         public MessagePriority Priority { get; set; }

@@ -1,68 +1,41 @@
 ﻿using System;
-using System.Net;
-using BlubLib.Serialization;
+using BlubLib.DotNetty.Handlers.MessageHandling;
+using ProudNet.Serialization;
 
 namespace ProudNet
 {
-    [BlubContract]
-    public class ProudConfig
+    public class Configuration
     {
-        internal const uint InternalNetVersion = 196713;
+        public Guid Version { get; set; }
+        public IHostIdFactory HostIdFactory { get; set; }
+        public TimeSpan ConnectTimeout { get; set; }
+        public MessageFactory MessageFactory { get; set; }
+        public IMessageHandler[] MessageHandlers { get; set; }
 
-        public Guid Version { get; }
-        public IPEndPoint UdpListener { get; set; }
-        public IPAddress UdpAddress { get; set; }
-
-        [BlubMember(0)]
         public bool EnableServerLog { get; set; }
-
-        [BlubMember(1)]
         public FallbackMethod FallbackMethod { get; set; }
-
-        [BlubMember(2)]
         public uint MessageMaxLength { get; set; }
-
-        [BlubMember(3)]
-        public double TimeoutTimeMs { get; set; }
-
-        [BlubMember(4)]
+        public TimeSpan IdleTimeout { get; set; }
         public DirectP2PStartCondition DirectP2PStartCondition { get; set; }
-
-        [BlubMember(5)]
         public uint OverSendSuspectingThresholdInBytes { get; set; }
-
-        [BlubMember(6)]
         public bool EnableNagleAlgorithm { get; set; }
-
-        [BlubMember(7)]
         public int EncryptedMessageKeyLength { get; set; }
-
-        [BlubMember(8)]
         public bool AllowServerAsP2PGroupMember { get; set; }
-
-        [BlubMember(9)]
         public bool EnableP2PEncryptedMessaging { get; set; }
-
-        [BlubMember(10)]
         public bool UpnpDetectNatDevice { get; set; }
-
-        [BlubMember(11)]
         public bool UpnpTcpAddrPortMapping { get; set; }
-
-        [BlubMember(12)]
         public bool EnablePingTest { get; set; }
-
-        [BlubMember(13)]
         public uint EmergencyLogLineCount { get; set; }
 
-        public ProudConfig()
+        public Configuration()
         {
             Version = Guid.Empty;
+            ConnectTimeout = TimeSpan.FromSeconds(10);
 
             EnableServerLog = false;
             FallbackMethod = FallbackMethod.None;
             MessageMaxLength = 65000;
-            TimeoutTimeMs = 900;
+            IdleTimeout = TimeSpan.FromMilliseconds(900);
             DirectP2PStartCondition = DirectP2PStartCondition.Jit;
             OverSendSuspectingThresholdInBytes = 15360;
             EnableNagleAlgorithm = true;
@@ -73,12 +46,6 @@ namespace ProudNet
             UpnpTcpAddrPortMapping = true;
             EnablePingTest = false;
             EmergencyLogLineCount = 0;
-        }
-
-        public ProudConfig(Guid version)
-            : this()
-        {
-            Version = version;
         }
     }
 }

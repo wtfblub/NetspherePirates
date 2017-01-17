@@ -1,4 +1,8 @@
-﻿namespace ProudNet
+﻿using System.Text;
+using DotNetty.Common.Utilities;
+using ProudNet.Server;
+
+namespace ProudNet
 {
     internal enum ProudCoreOpCode : byte
     {
@@ -146,5 +150,13 @@
     internal static class Constants
     {
         public const uint NetVersion = 196713;
+        public const short NetMagic = 0x5713;
+        public static readonly Encoding Encoding = Encoding.GetEncoding("Windows-1252");
+    }
+
+    internal static class ChannelAttributes
+    {
+        public static readonly AttributeKey<ProudServer> Server = AttributeKey<ProudServer>.ValueOf($"ProudNet-{nameof(Server)}");
+        public static readonly AttributeKey<ProudSession> Session = AttributeKey<ProudSession>.ValueOf($"ProudNet-{nameof(Session)}");
     }
 }

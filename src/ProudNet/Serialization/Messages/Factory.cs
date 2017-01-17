@@ -1,10 +1,10 @@
 ﻿namespace ProudNet.Serialization.Messages
 {
-    internal class MessageFactory : MessageFactory<ProudOpCode>
+    internal class RmiMessageFactory : MessageFactory<ProudOpCode, IMessage>
     {
-        public static MessageFactory Default { get; } = new MessageFactory();
+        public static RmiMessageFactory Default { get; } = new RmiMessageFactory();
 
-        public MessageFactory()
+        public RmiMessageFactory()
         {
             // C2S
             Register<ReliablePingMessage>(ProudOpCode.ReliablePing);
