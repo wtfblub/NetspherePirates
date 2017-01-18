@@ -51,7 +51,7 @@ namespace ProudNet.Server.Handlers
             try
             {
                 using (var src = new MemoryStream(message.Data))
-                using (var dst = new ByteBufferStream(buffer, false))
+                using (var dst = new WriteOnlyByteBufferStream(buffer, false))
                     crypt.Decrypt(src, dst, true);
 
                 buffer.SetIndex(0, 0);

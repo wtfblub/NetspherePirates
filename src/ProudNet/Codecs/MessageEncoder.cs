@@ -31,7 +31,7 @@ namespace ProudNet.Codecs
             {
                 var opCode = factory.GetOpCode(type);
                 buffer = context.Allocator.Buffer(2);
-                using (var w = new ByteBufferStream(buffer, false).ToBinaryWriter(false))
+                using (var w = new WriteOnlyByteBufferStream(buffer, false).ToBinaryWriter(false))
                 {
                     w.Write(opCode);
                     Serializer.Serialize(w, message);

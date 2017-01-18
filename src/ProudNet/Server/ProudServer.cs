@@ -85,7 +85,7 @@ namespace ProudNet.Server
                 _listenerChannel = new ServerBootstrap()
                     .Group(_eventLoopGroup)
                     .Channel<TcpServerSocketChannel>()
-                    .Handler(new ActionChannelInitializer<ISocketChannel>(ch => { }))
+                    .Handler(new ActionChannelInitializer<IServerSocketChannel>(ch => { }))
                     .ChildHandler(new ActionChannelInitializer<ISocketChannel>(ch =>
                     {
                         var userMessageHandler = new SimpleMessageHandler();
@@ -101,7 +101,7 @@ namespace ProudNet.Server
                             .AddLast(new CoreMessageDecoder())
                             .AddLast(new CoreMessageEncoder())
 
-                            .AddLast(new SimpleMessageHandler()
+                            .AddLast("coreHandler", new SimpleMessageHandler()
                                 .Add(new CoreHandler())
                                 .Add(new CoreServerHandler(this)))
 
@@ -110,7 +110,7 @@ namespace ProudNet.Server
 
                             // SimpleMessageHandler discards all handled messages
                             // So internal messages(if handled) wont reach the user messagehandler
-                            .AddLast(new SimpleMessageHandler()
+                            .AddLast("userHandler", new SimpleMessageHandler()
                                 .Add(new ServerHandler()))
 
                             .AddLast(userMessageHandler);

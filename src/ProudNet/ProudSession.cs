@@ -46,14 +46,13 @@ namespace ProudNet
         internal Task SendCoreAsync(object message)
         {
             ThrowIfDisposed();
-            return Channel.Pipeline.Context<CoreMessageEncoder>().WriteAndFlushAsync(message);
+            return Channel.Pipeline.Context("coreHandler").WriteAndFlushAsync(message);
         }
 
         internal Task SendInternalAsync(object message)
         {
             ThrowIfDisposed();
-            // TODO Internal RMI encoder
-            return Channel.Pipeline.Context<CoreMessageEncoder>().WriteAndFlushAsync(message);
+            return Channel.Pipeline.Context("userHandler").WriteAndFlushAsync(message);
         }
 
         private void ThrowIfDisposed()

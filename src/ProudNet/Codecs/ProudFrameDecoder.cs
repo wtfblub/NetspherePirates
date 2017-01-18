@@ -1,4 +1,4 @@
-﻿using BlubLib.DotNetty.Handlers;
+﻿using BlubLib.DotNetty.Codecs;
 using DotNetty.Buffers;
 
 namespace ProudNet.Codecs

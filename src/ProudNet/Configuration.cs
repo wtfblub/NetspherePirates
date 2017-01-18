@@ -30,6 +30,7 @@ namespace ProudNet
         public Configuration()
         {
             Version = Guid.Empty;
+            HostIdFactory = new HostIdFactory();
             ConnectTimeout = TimeSpan.FromSeconds(10);
 
             EnableServerLog = false;

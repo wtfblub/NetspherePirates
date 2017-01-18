@@ -14,7 +14,7 @@ namespace ProudNet.Codecs
         {
             var opCode = CoreMessageFactory.Default.GetOpCode(message.GetType());
             var buffer = context.Allocator.Buffer(sizeof(ProudCoreOpCode));
-            using (var w = new ByteBufferStream(buffer, false).ToBinaryWriter(false))
+            using (var w = new WriteOnlyByteBufferStream(buffer, false).ToBinaryWriter(false))
             {
                 w.WriteEnum(opCode);
                 Serializer.Serialize(w, (object)message);
