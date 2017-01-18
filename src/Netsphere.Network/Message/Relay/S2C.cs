@@ -1,10 +1,10 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Relay
 {
     [BlubContract]
-    public class SEnterLoginPlayerMessage : RelayMessage
+    public class SEnterLoginPlayerMessage : IRelayMessage
     {
         [BlubMember(0)]
         public uint HostId { get; set; } // Not sure, but proudnet thing for sure
@@ -29,7 +29,7 @@ namespace Netsphere.Network.Message.Relay
     }
 
     [BlubContract]
-    public class SNotifyLoginResultMessage : RelayMessage
+    public class SNotifyLoginResultMessage : IRelayMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }

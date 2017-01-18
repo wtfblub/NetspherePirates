@@ -2,12 +2,12 @@
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Auth;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Auth
 {
     [BlubContract]
-    public class SAuthInEuAckMessage : AuthMessage
+    public class SAuthInEuAckMessage : IAuthMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -62,7 +62,7 @@ namespace Netsphere.Network.Message.Auth
     }
 
     [BlubContract]
-    public class SServerListAckMessage : AuthMessage
+    public class SServerListAckMessage : IAuthMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ServerInfoDto[] ServerList { get; set; }

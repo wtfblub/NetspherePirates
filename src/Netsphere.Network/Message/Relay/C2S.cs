@@ -1,12 +1,12 @@
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Relay;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Relay
 {
     [BlubContract]
-    public class CRequestLoginMessage : RelayMessage
+    public class CRequestLoginMessage : IRelayMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
