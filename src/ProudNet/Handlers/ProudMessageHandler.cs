@@ -11,12 +11,14 @@ namespace ProudNet.Handlers
         {
             if (typeof(T) == typeof(ProudSession))
             {
-                value = DynamicCast<T>.From(context.Channel.GetAttribute(ChannelAttributes.Session));
+                var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
+                value = DynamicCast<T>.From(session);
                 return true;
             }
             if (typeof(ProudServer).IsAssignableFrom(typeof(T)))
             {
-                value = DynamicCast<T>.From(context.Channel.GetAttribute(ChannelAttributes.Server));
+                var server = context.Channel.GetAttribute(ChannelAttributes.Server).Get();
+                value = DynamicCast<T>.From(server);
                 return true;
             }
             return base.GetParameter(context, message, out value);

@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using BlubLib.DotNetty;
 using BlubLib.Serialization;
-using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Messages;
+using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.Codecs
 {
@@ -26,22 +25,15 @@ namespace ProudNet.Codecs
             var isInternal = RmiMessageFactory.Default.ContainsType(type);
             var factory = isInternal ? RmiMessageFactory.Default : _userMessageFactory;
 
-            IByteBuffer buffer = null;
-            try
+            // TODO Encryption/Compression etc
+
+            var opCode = factory.GetOpCode(type);
+            var buffer = context.Allocator.Buffer(2);
+            using (var w = new WriteOnlyByteBufferStream(buffer, true).ToBinaryWriter(false))
             {
-                var opCode = factory.GetOpCode(type);
-                buffer = context.Allocator.Buffer(2);
-                using (var w = new WriteOnlyByteBufferStream(buffer, false).ToBinaryWriter(false))
-                {
-                    w.Write(opCode);
-                    Serializer.Serialize(w, message);
-                }
-                output.Add(buffer);
-            }
-            catch (Exception ex)
-            {
-                buffer?.Release();
-                ex.Rethrow();
+                w.Write(opCode);
+                Serializer.Serialize(w, message);
+                output.Add(new RmiMessage { Data = buffer.ToArray() });
             }
         }
     }

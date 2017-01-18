@@ -48,19 +48,12 @@ namespace ProudNet.Server.Handlers
             }
 
             var buffer = context.Allocator.Buffer(message.Data.Length);
-            try
-            {
-                using (var src = new MemoryStream(message.Data))
-                using (var dst = new WriteOnlyByteBufferStream(buffer, false))
-                    crypt.Decrypt(src, dst, true);
+            using (var src = new MemoryStream(message.Data))
+            using (var dst = new WriteOnlyByteBufferStream(buffer, false))
+                crypt.Decrypt(src, dst, true);
 
-                buffer.SetIndex(0, 0);
-                context.Channel.Pipeline.Context<CoreMessageDecoder>().FireChannelRead(buffer);
-            }
-            finally
-            {
-                buffer.Release();
-            }
+            buffer.SetIndex(0, 0);
+            context.Channel.Pipeline.Context<CoreMessageDecoder>().FireChannelRead(buffer);
         }
 
         [MessageHandler(typeof(NotifyCSEncryptedSessionKeyMessage))]

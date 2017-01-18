@@ -12,14 +12,7 @@ namespace ProudNet.Handlers
         public void RmiMessage(IChannelHandlerContext context, RmiMessage message)
         {
             var buffer = Unpooled.WrappedBuffer(message.Data);
-            try
-            {
-                context.FireChannelRead(buffer);
-            }
-            finally
-            {
-                buffer.Release();
-            }
+            context.FireChannelRead(buffer);
         }
 
         [MessageHandler(typeof(CompressedMessage))]
@@ -27,14 +20,7 @@ namespace ProudNet.Handlers
         {
             var decompressed = message.Data.DecompressZLib();
             var buffer = Unpooled.WrappedBuffer(decompressed);
-            try
-            {
-                context.Channel.Pipeline.Context<CoreMessageDecoder>().FireChannelRead(buffer);
-            }
-            finally
-            {
-                buffer.Release();
-            }
+            context.Channel.Pipeline.Context<CoreMessageDecoder>().FireChannelRead(buffer);
         }
     }
 }

@@ -9,8 +9,11 @@ namespace ProudNet.Codecs
     {
         protected override void Encode(IChannelHandlerContext context, IByteBuffer message, List<object> output)
         {
-            var buffer = context.Allocator.Buffer(2 + 1 + message.ReadableBytes);
-            buffer.WriteShort(Constants.NetMagic)
+            var buffer = context.Allocator
+                .Buffer(2 + 1 + message.ReadableBytes)
+                .WithOrder(ByteOrder.LittleEndian)
+
+                .WriteShort(Constants.NetMagic)
                 .WriteScalar(message.ReadableBytes);
 
             output.Add(buffer);

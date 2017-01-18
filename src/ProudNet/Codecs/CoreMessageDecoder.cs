@@ -4,6 +4,7 @@ using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using ProudNet.Serialization.Messages.Core;
+using ReadOnlyByteBufferStream = BlubLib.DotNetty.ReadOnlyByteBufferStream;
 
 namespace ProudNet.Codecs
 {
