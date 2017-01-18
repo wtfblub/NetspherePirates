@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using ProudNet.Codecs;
+using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet
 {
@@ -43,16 +43,10 @@ namespace ProudNet
             return Channel.WriteAndFlushAsync(message);
         }
 
-        internal Task SendCoreAsync(object message)
+        internal Task SendAsync(ICoreMessage message)
         {
             ThrowIfDisposed();
             return Channel.Pipeline.Context("coreHandler").WriteAndFlushAsync(message);
-        }
-
-        internal Task SendInternalAsync(object message)
-        {
-            ThrowIfDisposed();
-            return Channel.Pipeline.Context("userHandler").WriteAndFlushAsync(message);
         }
 
         private void ThrowIfDisposed()

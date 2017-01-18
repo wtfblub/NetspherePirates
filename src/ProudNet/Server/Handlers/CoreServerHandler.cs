@@ -86,7 +86,7 @@ namespace ProudNet.Server.Handlers
                     blob = w.ToArray();
                 }
 
-                await session.SendCoreAsync(new NotifyCSSessionKeySuccessMessage(blob));
+                await session.SendAsync(new NotifyCSSessionKeySuccessMessage(blob));
             }
         }
 
@@ -96,7 +96,7 @@ namespace ProudNet.Server.Handlers
             if (message.InternalNetVersion != Constants.NetVersion ||
                     message.Version != _server.Configuration.Version)
             {
-                await session.SendCoreAsync(new NotifyProtocolVersionMismatchMessage());
+                await session.SendAsync(new NotifyProtocolVersionMismatchMessage());
                 await session.CloseAsync();
                 return;
             }
@@ -105,7 +105,7 @@ namespace ProudNet.Server.Handlers
             _server.AddSession(session);
             session.HandhsakeEvent.Set();
 
-            await session.SendCoreAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, ip));
+            await session.SendAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, ip));
         }
 
         [MessageHandler(typeof(UnreliablePingMessage))]
@@ -113,7 +113,7 @@ namespace ProudNet.Server.Handlers
         {
             session.UnreliablePing = TimeSpan.FromSeconds(message.Ping).TotalMilliseconds;
             var ts = DateTime.Now - _startTime.Value;
-            await session.SendCoreAsync(new UnreliablePongMessage(message.ClientTime, ts.TotalSeconds));
+            await session.SendAsync(new UnreliablePongMessage(message.ClientTime, ts.TotalSeconds));
         }
 
         [MessageHandler(typeof(SpeedHackDetectorPingMessage))]
@@ -212,7 +212,7 @@ namespace ProudNet.Server.Handlers
                 {
                     var target = _server.Sessions.GetValueOrDefault(destination.HostId);
                     if (target != null)
-                        await target.SendCoreAsync(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
+                        await target.SendAsync(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
                 }
             }
         }
@@ -268,7 +268,7 @@ namespace ProudNet.Server.Handlers
                 {
                     var target = _server.Sessions.GetValueOrDefault(destination);
                     if (target != null)
-                        await target.SendCoreAsync(new UnreliableRelay2Message(session.HostId, message.Data));
+                        await target.SendAsync(new UnreliableRelay2Message(session.HostId, message.Data));
                 }
             }
         }
@@ -285,7 +285,7 @@ namespace ProudNet.Server.Handlers
         //    session.UdpEndPoint = message.EndPoint;
         //    session.UdpLocalEndPoint = message.LocalEndPoint;
         //    session.UdpSocket = _filter.UdpSocket;
-        //    await session.SendCoreAsync(new NotifyClientServerUdpMatchedMessage(message.MagicNumber));
+        //    await session.SendAsync(new NotifyClientServerUdpMatchedMessage(message.MagicNumber));
         //}
 
         //[MessageHandler(typeof(PeerUdp_ServerHolepunchMessage))]
@@ -298,7 +298,7 @@ namespace ProudNet.Server.Handlers
         //    if (target == null || !target.UdpEnabled)
         //        return;
 
-        //    await session.SendCoreAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
+        //    await session.SendAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
         //}
 
         //[MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
@@ -311,7 +311,7 @@ namespace ProudNet.Server.Handlers
 
         //    // ToDo Refactor this
         //    await Task.Delay(2000);
-        //    await session.SendCoreAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, message.EndPoint));
+        //    await session.SendAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, message.EndPoint));
         //}
     }
 }

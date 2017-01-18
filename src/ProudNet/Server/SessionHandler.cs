@@ -38,7 +38,7 @@ namespace ProudNet.Server
                 EnablePingTest = _server.Configuration.EnablePingTest,
                 EmergencyLogLineCount = _server.Configuration.EmergencyLogLineCount
             };
-            await session.SendCoreAsync(new NotifyServerConnectionHintMessage(config));
+            await session.SendAsync(new NotifyServerConnectionHintMessage(config));
 
             using (var cts = new CancellationTokenSource(_server.Configuration.ConnectTimeout))
             {
@@ -53,7 +53,7 @@ namespace ProudNet.Server
 
                     //Logger<>.Error($"Handshake timeout for {remoteEndPoint}");
 
-                    await session.SendCoreAsync(new ConnectServerTimedoutMessage());
+                    await session.SendAsync(new ConnectServerTimedoutMessage());
                     await session.CloseAsync();
                     return;
                 }

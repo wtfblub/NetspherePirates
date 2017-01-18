@@ -110,7 +110,7 @@ namespace ProudNet.Server
 
                             // SimpleMessageHandler discards all handled messages
                             // So internal messages(if handled) wont reach the user messagehandler
-                            .AddLast("userHandler", new SimpleMessageHandler()
+                            .AddLast(new SimpleMessageHandler()
                                 .Add(new ServerHandler()))
 
                             .AddLast(userMessageHandler);

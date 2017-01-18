@@ -12,7 +12,7 @@ namespace ProudNet.Server.Handlers
         [MessageHandler(typeof(ReliablePingMessage))]
         public Task ReliablePing(ProudSession session)
         {
-            return session.SendCoreAsync(new ReliablePongMessage());
+            return session.SendAsync(new ReliablePongMessage());
         }
 
         [MessageHandler(typeof(P2PGroup_MemberJoin_AckMessage))]
@@ -32,7 +32,7 @@ namespace ProudNet.Server.Handlers
             if (connectionStateB.IsJoined)
             {
                 await remotePeer.SendAsync(new P2PRecycleCompleteMessage(connectionState.RemotePeer.HostId));
-                await connectionState.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(session.HostId));
+                await ((RemotePeer)connectionState.RemotePeer).SendAsync(new P2PRecycleCompleteMessage(session.HostId));
             }
         }
 
