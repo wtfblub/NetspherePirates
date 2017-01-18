@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BlubLib.DotNetty.SimpleRmi">
-      <HintPath>..\..\..\..\..\Coding\C#\BlubLib\build\dotnet\release\BlubLib.DotNetty.SimpleRmi.dll</HintPath>
+      <HintPath>..\..\libs\BlubLib.DotNetty.SimpleRmi.dll</HintPath>
     </Reference>
     <Reference Include="BlubLib.Serialization">
       <HintPath>..\..\libs\BlubLib.Serialization.dll</HintPath>
