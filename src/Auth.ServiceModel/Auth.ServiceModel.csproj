@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BlubLib.Network.SimpleRmi">
-      <HintPath>..\..\libs\BlubLib.Network.SimpleRmi.dll</HintPath>
+    <Reference Include="BlubLib.DotNetty.SimpleRmi">
+      <HintPath>..\..\..\..\..\Coding\C#\BlubLib\build\dotnet\release\BlubLib.DotNetty.SimpleRmi.dll</HintPath>
     </Reference>
     <Reference Include="BlubLib.Serialization">
       <HintPath>..\..\libs\BlubLib.Serialization.dll</HintPath>

@@ -1,28 +1,27 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using BlubLib.Network;
-using BlubLib.Network.Pipes;
-using BlubLib.Network.Transport.Sockets;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.Security.Cryptography;
 using Dapper.FastCrud;
 using Netsphere.Database.Auth;
 using Netsphere.Network.Message.Auth;
 using NLog;
+using ProudNet;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Service
 {
-    internal class AuthService : MessageHandler
+    internal class AuthService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CAuthInEUReqMessage))]
-        public async Task LoginHandler(ISession session, CAuthInEUReqMessage message)
+        public async Task LoginHandler(ProudSession session, CAuthInEUReqMessage message)
         {
-            var ip = ((IPEndPoint)((TcpTransport)session.Transport).Socket.RemoteEndPoint).Address.ToString();
+            var ip = session.RemoteEndPoint.Address.ToString();
             Logger.Debug($"Login from {ip} with username {message.Username}");
 
             AccountDto account;
@@ -119,7 +118,7 @@ namespace Netsphere.Network.Service
         }
 
         [MessageHandler(typeof(CServerListReqMessage))]
-        public Task ServerListHandler(AuthServer server, ISession session)
+        public Task ServerListHandler(AuthServer server, ProudSession session)
         {
             return session.SendAsync(new SServerListAckMessage(server.ServerManager.ToArray()));
         }

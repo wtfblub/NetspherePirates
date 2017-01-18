@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using BlubLib.Network.SimpleRmi;
+using BlubLib.DotNetty.SimpleRmi;
 
 namespace Auth.ServiceModel
 {
