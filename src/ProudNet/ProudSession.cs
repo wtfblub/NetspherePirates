@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet
@@ -39,8 +40,18 @@ namespace ProudNet
 
         public Task SendAsync(object message)
         {
+            return SendAsync(message, SendOptions.ReliableSecure);
+        }
+
+        public Task SendAsync(object message, SendOptions options)
+        {
             ThrowIfDisposed();
-            return Channel.WriteAndFlushAsync(message);
+            return Channel.WriteAndFlushAsync(new SendContext(message, options));
+        }
+
+        internal Task SendAsync(IMessage message)
+        {
+            return SendAsync(message, SendOptions.Reliable);
         }
 
         internal Task SendAsync(ICoreMessage message)

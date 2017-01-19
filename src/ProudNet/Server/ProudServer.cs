@@ -105,6 +105,7 @@ namespace ProudNet.Server
                                 .Add(new CoreHandler())
                                 .Add(new CoreServerHandler(this)))
 
+                            .AddLast(new SendContextEncoder())
                             .AddLast(new MessageDecoder(Configuration.MessageFactory))
                             .AddLast(new MessageEncoder(Configuration.MessageFactory))
 

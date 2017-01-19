@@ -6,11 +6,10 @@ using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Messages;
-using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.Codecs
 {
-    internal class MessageEncoder : MessageToMessageEncoder<object>
+    internal class MessageEncoder : MessageToMessageEncoder<SendContext>
     {
         private readonly MessageFactory _userMessageFactory;
 
@@ -19,22 +18,21 @@ namespace ProudNet.Codecs
             _userMessageFactory = userMessageFactory;
         }
 
-        protected override void Encode(IChannelHandlerContext context, object message, List<object> output)
+        protected override void Encode(IChannelHandlerContext context, SendContext message, List<object> output)
         {
-            var type = message.GetType();
+            var type = message.Message.GetType();
             var isInternal = RmiMessageFactory.Default.ContainsType(type);
             var factory = isInternal ? RmiMessageFactory.Default : _userMessageFactory;
 
-            // TODO Encryption/Compression etc
-
             var opCode = factory.GetOpCode(type);
             var buffer = context.Allocator.Buffer(2);
-            using (var w = new WriteOnlyByteBufferStream(buffer, true).ToBinaryWriter(false))
+            using (var w = new WriteOnlyByteBufferStream(buffer, false).ToBinaryWriter(false))
             {
                 w.Write(opCode);
-                Serializer.Serialize(w, message);
-                output.Add(new RmiMessage { Data = buffer.ToArray() });
+                Serializer.Serialize(w, message.Message);
             }
+            message.Message = buffer;
+            output.Add(message);
         }
     }
 }
