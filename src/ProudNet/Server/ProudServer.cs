@@ -23,6 +23,7 @@ namespace ProudNet.Server
         public bool IsRunning { get; private set; }
         internal Configuration Configuration { get; }
         public IReadOnlyDictionary<uint, ProudSession> Sessions => _sessions;
+        public P2PGroupManager P2PGroupManager { get; }
 
         public event EventHandler Started;
         public event EventHandler Stopping;
@@ -71,6 +72,7 @@ namespace ProudNet.Server
                 throw new ArgumentNullException(nameof(configuration.MessageFactory));
 
             Configuration = configuration;
+            P2PGroupManager = new P2PGroupManager(this);
         }
 
         public void Listen(IPEndPoint tcpListener, int[] udpListenerPorts = null)
@@ -143,6 +145,13 @@ namespace ProudNet.Server
             _listenerChannel.CloseAsync().WaitEx();
             _eventLoopGroup.ShutdownGracefullyAsync().WaitEx();
             OnStopped();
+        }
+
+        public async Task BroadcastAsync(object message)
+        {
+            foreach (var session in Sessions.Values)
+                await session.SendAsync(message)
+                    .ConfigureAwait(false);
         }
 
         internal void AddSession(ProudSession session)
