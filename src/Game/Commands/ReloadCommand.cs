@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Netsphere.Network;
 using Netsphere.Resource;
 
@@ -62,13 +63,13 @@ namespace Netsphere.Commands
                 else
                     plr.SendConsoleMessage(S4Color.Green + message);
 
-                server.BroadcastNotice(message);
+                server.BroadcastNoticeAsync(message).WaitEx();
 
                 server.ResourceCache.Clear(ResourceCacheType.Shop);
                 server.ResourceCache.GetShop();
 
                 message = "Reload completed";
-                server.BroadcastNotice(message);
+                server.BroadcastNoticeAsync(message).WaitEx();
                 if (plr == null)
                     Console.WriteLine(message);
                 else

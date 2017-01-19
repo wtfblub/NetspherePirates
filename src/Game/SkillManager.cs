@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Netsphere.Database.Game;
 using Netsphere.Network.Message.Game;
 
@@ -47,13 +48,13 @@ namespace Netsphere
             }
 
             var plr = _character.CharacterManager.Player;
-            plr.Session.Send(new SUseItemAckMessage
+            plr.Session.SendAsync(new SUseItemAckMessage
             {
                 CharacterSlot = _character.Slot,
                 ItemId = item.Id,
                 Action = UseItemAction.Equip,
                 EquipSlot = (byte) slot
-            });
+            }).WaitEx();
         }
 
         public void UnEquip(SkillSlot slot)
@@ -78,13 +79,13 @@ namespace Netsphere
                     throw new CharacterException("Invalid slot: " + slot);
             }
 
-            plr.Session.Send(new SUseItemAckMessage
+            plr.Session.SendAsync(new SUseItemAckMessage
             {
                 CharacterSlot = _character.Slot,
                 ItemId = item?.Id ?? 0,
                 Action = UseItemAction.UnEquip,
                 EquipSlot = (byte)slot
-            });
+            }).WaitEx();
         }
 
         public PlayerItem GetItem(SkillSlot slot)

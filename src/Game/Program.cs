@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 using BlubLib;
 using Dapper;
 using Dapper.FastCrud;
-using Netsphere.Database.Auth;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
+using ProudNet;
 
 namespace Netsphere
 {
@@ -44,7 +44,13 @@ namespace Netsphere
 
             Logger.Info("Starting server...");
 
-            GameServer.Instance.Start(Config.Instance.Listener);
+            ChatServer.Initialize(new Configuration());
+            RelayServer.Initialize(new Configuration());
+            GameServer.Initialize(new Configuration());
+
+            ChatServer.Instance.Listen(Config.Instance.ChatListener);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener);
+            GameServer.Instance.Listen(Config.Instance.Listener);
 
             Logger.Info("Ready for connections!");
 
@@ -83,6 +89,8 @@ namespace Netsphere
         {
             Logger.Info("Closing...");
 
+            ChatServer.Instance.Dispose();
+            RelayServer.Instance.Dispose();
             GameServer.Instance.Dispose();
             LogManager.Shutdown();
         }

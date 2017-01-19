@@ -4,8 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using BlubLib.Network.Pipes;
-using BlubLib.Network.Transport.Sockets;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.Security.Cryptography;
 using Dapper.FastCrud;
 using ExpressMapper.Extensions;
@@ -16,12 +15,13 @@ using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 using CLoginReqMessage = Netsphere.Network.Message.Game.CLoginReqMessage;
 using SLoginAckMessage = Netsphere.Network.Message.Game.SLoginAckMessage;
 
 namespace Netsphere.Network.Services
 {
-    internal class AuthService : MessageHandler
+    internal class AuthService : ProudMessageHandler
     {
         private static readonly Version s_version = new Version(0, 8, 31, 18574);
         // ReSharper disable once InconsistentNaming
@@ -32,7 +32,7 @@ namespace Netsphere.Network.Services
         {
             Logger.Info()
                 .Account(message.AccountId, message.Username)
-                .Message($"Login from {((TcpTransport)session.Transport).Socket.RemoteEndPoint}")
+                .Message($"Login from {session.RemoteEndPoint}")
                 .Write();
 
             if (message.Version != s_version)
@@ -166,17 +166,17 @@ namespace Netsphere.Network.Services
 
             using (var db = GameDatabase.Open())
             {
-                    var plrDto = (await db.FindAsync<PlayerDto>(statement => statement
-                            .Include<PlayerCharacterDto>(join => join.LeftOuterJoin())
-                            .Include<PlayerDenyDto>(join => join.LeftOuterJoin())
-                            .Include<PlayerItemDto>(join => join.LeftOuterJoin())
-                            .Include<PlayerLicenseDto>(join => join.LeftOuterJoin())
-                            .Include<PlayerMailDto>(join => join.LeftOuterJoin())
-                            .Include<PlayerSettingDto>(join => join.LeftOuterJoin())
-                            .Where($"{nameof(PlayerDto.Id):C} = @Id")
-                            .WithParameters(new { Id = message.AccountId }))
-                        .ConfigureAwait(false))
-                    .FirstOrDefault();
+                var plrDto = (await db.FindAsync<PlayerDto>(statement => statement
+                        .Include<PlayerCharacterDto>(join => join.LeftOuterJoin())
+                        .Include<PlayerDenyDto>(join => join.LeftOuterJoin())
+                        .Include<PlayerItemDto>(join => join.LeftOuterJoin())
+                        .Include<PlayerLicenseDto>(join => join.LeftOuterJoin())
+                        .Include<PlayerMailDto>(join => join.LeftOuterJoin())
+                        .Include<PlayerSettingDto>(join => join.LeftOuterJoin())
+                        .Where($"{nameof(PlayerDto.Id):C} = @Id")
+                        .WithParameters(new { Id = message.AccountId }))
+                    .ConfigureAwait(false))
+                .FirstOrDefault();
                 if (plrDto == null)
                 {
                     // first time connecting to this server
@@ -228,11 +228,12 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CCheckNickReqMessage))]
-        public async void CheckNickHandler(GameSession session, CCheckNickReqMessage message)
+        public async Task CheckNickHandler(GameSession session, CCheckNickReqMessage message)
         {
             if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
             {
-                session.Close();
+                await session.CloseAsync()
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -256,7 +257,8 @@ namespace Netsphere.Network.Services
         {
             if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
             {
-                session.Dispose();
+                await session.CloseAsync()
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -489,11 +491,11 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(Message.Chat.CLoginReqMessage))]
-        public void Chat_LoginHandler(ChatServer server, ChatSession session, Message.Chat.CLoginReqMessage message)
+        public async Task Chat_LoginHandler(ChatServer server, ChatSession session, Message.Chat.CLoginReqMessage message)
         {
             Logger.Info()
                 .Account(message.AccountId, "")
-                .Message($"Login from {((TcpTransport)session.Transport).Socket.RemoteEndPoint}")
+                .Message($"Login from {session.RemoteEndPoint}")
                 .Write();
 
             uint sessionId;
@@ -503,18 +505,20 @@ namespace Netsphere.Network.Services
                     .Account(message.AccountId, "")
                     .Message("Invalid sessionId")
                     .Write();
-                session.Send(new Message.Chat.SLoginAckMessage(2));
+                await session.SendAsync(new Message.Chat.SLoginAckMessage(2))
+                    .ConfigureAwait(false);
                 return;
             }
 
-            var plr = server.GameServer.PlayerManager[message.AccountId];
+            var plr = GameServer.Instance.PlayerManager[message.AccountId];
             if (plr == null)
             {
                 Logger.Error()
                     .Account(message.AccountId, "")
                     .Message("Login failed")
                     .Write();
-                session.Send(new Message.Chat.SLoginAckMessage(3));
+                await session.SendAsync(new Message.Chat.SLoginAckMessage(3))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -524,7 +528,8 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message("Already online")
                     .Write();
-                session.Send(new Message.Chat.SLoginAckMessage(4));
+                await session.SendAsync(new Message.Chat.SLoginAckMessage(4))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -535,27 +540,30 @@ namespace Netsphere.Network.Services
                 .Account(session)
                 .Message("Login success")
                 .Write();
-            session.Send(new Message.Chat.SLoginAckMessage(0));
-            session.Send(new Message.Chat.SDenyChatListAckMessage(plr.DenyManager.Select(d => d.Map<Deny, DenyDto>()).ToArray()));
+            await session.SendAsync(new Message.Chat.SLoginAckMessage(0))
+                .ConfigureAwait(false);
+            await session.SendAsync(new Message.Chat.SDenyChatListAckMessage(plr.DenyManager.Select(d => d.Map<Deny, DenyDto>()).ToArray()))
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(Message.Relay.CRequestLoginMessage))]
-        public void Relay_LoginHandler(RelayServer server, RelaySession session, Message.Relay.CRequestLoginMessage message)
+        public async Task Relay_LoginHandler(RelayServer server, RelaySession session, Message.Relay.CRequestLoginMessage message)
         {
-            var ip = (IPEndPoint)((TcpTransport)session.Transport).Socket.RemoteEndPoint;
+            var ip = session.RemoteEndPoint;
             Logger.Info()
                 .Account(message.AccountId, "")
                 .Message($"Login from {ip}")
                 .Write();
 
-            var plr = server.GameServer.PlayerManager[message.AccountId];
+            var plr = GameServer.Instance.PlayerManager[message.AccountId];
             if (plr == null)
             {
                 Logger.Error()
                     .Account(message.AccountId, "")
                     .Message("Login failed")
                     .Write();
-                session.Send(new Message.Relay.SNotifyLoginResultMessage(1));
+                await session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(1))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -565,18 +573,20 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message("Already online")
                     .Write();
-                session.Send(new Message.Relay.SNotifyLoginResultMessage(2));
+                await session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(2))
+                    .ConfigureAwait(false);
                 return;
             }
 
-            var gameIp = (IPEndPoint)((TcpTransport)plr.Session.Transport).Socket.RemoteEndPoint;
+            var gameIp = plr.Session.RemoteEndPoint;
             if (!gameIp.Address.Equals(ip.Address))
             {
                 Logger.Error()
                     .Account(message.AccountId, "")
                     .Message("Suspicious login")
                     .Write();
-                session.Send(new Message.Relay.SNotifyLoginResultMessage(3));
+                await session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(3))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -586,7 +596,8 @@ namespace Netsphere.Network.Services
                     .Account(message.AccountId, "")
                     .Message("Suspicious login(Not in a room/Invalid room id)")
                     .Write();
-                session.Send(new Message.Relay.SNotifyLoginResultMessage(4));
+                await session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(4))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -598,15 +609,19 @@ namespace Netsphere.Network.Services
                 .Message("Login success")
                 .Write();
 
-            session.Send(new Message.Relay.SEnterLoginPlayerMessage(plr.RoomInfo.Slot, plr.Account.Id, plr.Account.Nickname));
+            await session.SendAsync(new Message.Relay.SEnterLoginPlayerMessage(plr.RoomInfo.Slot, plr.Account.Id, plr.Account.Nickname))
+                .ConfigureAwait(false);
             foreach (var p in plr.Room.Players.Values.Where(p => p.RelaySession?.P2PGroup != null && p.Account.Id != plr.Account.Id))
             {
-                p.RelaySession.Send(new Message.Relay.SEnterLoginPlayerMessage(plr.RoomInfo.Slot, plr.Account.Id, plr.Account.Nickname));
-                session.Send(new Message.Relay.SEnterLoginPlayerMessage(p.RoomInfo.Slot, p.Account.Id, p.Account.Nickname));
+                await p.RelaySession.SendAsync(new Message.Relay.SEnterLoginPlayerMessage(plr.RoomInfo.Slot, plr.Account.Id, plr.Account.Nickname))
+                    .ConfigureAwait(false);
+                await session.SendAsync(new Message.Relay.SEnterLoginPlayerMessage(p.RoomInfo.Slot, p.Account.Id, p.Account.Nickname))
+                    .ConfigureAwait(false);
             }
 
-            plr.Room.Group.Join(session.HostId, true);
-            session.Send(new Message.Relay.SNotifyLoginResultMessage(0));
+            plr.Room.Group.Join(session.HostId);
+            await session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(0))
+                .ConfigureAwait(false);
 
             plr.RoomInfo.IsConnecting = false;
             plr.Room.OnPlayerJoined(new RoomPlayerEventArgs(plr));

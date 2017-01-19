@@ -1,124 +1,86 @@
 ﻿using System;
-using System.Buffers;
-using System.Net;
-using BlubLib.Network;
-using BlubLib.Network.Pipes;
-using BlubLib.Network.Transport.Sockets;
-using Netsphere.Network.Message;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Relay;
 using Netsphere.Network.Services;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
-using ProudNet.Message;
+using ProudNet.Server;
 
 namespace Netsphere.Network
 {
-    internal class RelayServer : TcpServer
+    internal class RelayServer : ProudServer
     {
+        public static RelayServer Instance { get; private set; }
+
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public GameServer GameServer { get; }
-
-        public RelayServer(GameServer gameServer)
-            : base(new RelaySessionFactory(), ArrayPool<byte>.Create(1 * 1024 * 1024, 50), Config.Instance.PlayerLimit)
+        public static void Initialize(Configuration config)
         {
-            GameServer = gameServer;
+            if (Instance != null)
+                throw new InvalidOperationException("Server is already initialized");
 
-            #region Filter Setup
+            config.Version = new Guid("{a43a97d1-9ec7-495e-ad5f-8fe45fde1151}");
+            config.MessageFactory = new RelayMessageFactory();
+            config.SessionFactory = new RelaySessionFactory();
 
-            var config = new ProudConfig(new Guid("{a43a97d1-9ec7-495e-ad5f-8fe45fde1151}"))
+            // ReSharper disable InconsistentNaming
+            Predicate<RelaySession> MustNotBeLoggedIn = session => !session.IsLoggedIn();
+            // ReSharper restore InconsistentNaming
+
+            config.MessageHandlers = new IMessageHandler[]
             {
-                UdpListener = new IPEndPoint(Config.Instance.Listener.Address, 22000),
-                UdpAddress = IPAddress.Parse(Config.Instance.IP),
-                EnableP2PEncryptedMessaging = false,
-                EncryptedMessageKeyLength = 0
-                //EnableServerLog = true,
-                //EmergencyLogLineCount = 1000
+                new FilteredMessageHandler<RelaySession>()
+                    .AddHandler(new AuthService())
+
+                    .RegisterRule<CRequestLoginMessage>(MustNotBeLoggedIn)
             };
-            var proudFilter = new ProudServerPipe(config);
-#if DEBUG
-            proudFilter.UnhandledProudCoreMessage += (s, e) =>
-            {
-                //var unk = e.Message as CoreUnknownMessage;
-                //if (unk != null)
-                    //_logger.Warn().Message("Unknown CoreMessage {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
-                //else
-                    Logger.Warn($"Unhandled UnhandledProudCoreMessage {e.Message.GetType().Name}");
-            };
-            proudFilter.UnhandledProudMessage += (s, e) =>
-            {
-                var unk = e.Message as ProudUnknownMessage;
-                if (unk != null)
-                    Logger.Warn($"Unknown ProudMessage {unk.OpCode}: {unk.Data.ToHexString()}");
-                else
-                    Logger.Warn($"Unhandled UnhandledProudMessage {e.Message.GetType().Name}");
-            };
-#endif
-            Pipeline.AddFirst("proudnet", proudFilter);
-            Pipeline.AddLast("s4_protocol", new NetspherePipe(new RelayMessageFactory()));
-
-            Pipeline.AddLast("firewall", new FirewallPipe())
-                .Add(new PacketFirewallRule<RelaySession>())
-                .Get<PacketFirewallRule<RelaySession>>()
-
-                .Register<CRequestLoginMessage>(s => !s.IsLoggedIn());
-
-            //FilterList.AddLast("spam_filter", new SpamFilter { RepeatLimit = 15, TimeFrame = TimeSpan.FromSeconds(3) });
-
-            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
-                .Add(new AuthService())
-                .Add(new RelayService())
-                .UnhandledMessage += OnUnhandledMessage;
-
-            #endregion
+            Instance = new RelayServer(config);
         }
+
+        private RelayServer(Configuration config)
+            : base(config)
+        { }
 
         #region Events
 
-        protected override void OnDisconnected(SessionEventArgs e)
+        protected override void OnDisconnected(ProudSession session)
         {
-            var session = (RelaySession)e.Session;
-            if (session.Player != null)
+            var relaySession = (RelaySession)session;
+            if (relaySession.Player != null)
             {
-                if (session.Player.Room != null)
-                    session.GameSession.Dispose();
+                if (relaySession.Player.Room != null)
+                    relaySession.GameSession.Dispose();
                 else
-                    session.Player.RelaySession = null;
+                    relaySession.Player.RelaySession = null;
             }
-            base.OnDisconnected(e);
+            base.OnDisconnected(session);
         }
 
-        protected override void OnError(ExceptionEventArgs e)
-        {
-            Logger.Error(e.Exception);
-            base.OnError(e);
-        }
+        //private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
+        //{
+        //    var session = (RelaySession)e.Session;
+        //    var message = (ProudMessage)e.Message;
+        //    //var unk = e.Message as RelayUnknownMessage;
 
-        private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
-        {
-            var session = (RelaySession)e.Session;
-            var message = (ProudMessage)e.Message;
-            //var unk = e.Message as RelayUnknownMessage;
+        //    if (session.Player?.Room == null)
+        //        return;
 
-            if (session.Player?.Room == null)
-                return;
+        //    //if (unk != null)
+        //    //_logger.Warn().Account(session).Message("Unk message {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
+        //    //else
+        //    Logger.Warn()
+        //        .Account(session)
+        //        .Message($"Unhandled message {e.Message.GetType().Name}")
+        //        .Write();
 
-            //if (unk != null)
-            //_logger.Warn().Account(session).Message("Unk message {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
-            //else
-            Logger.Warn()
-                .Account(session)
-                .Message($"Unhandled message {e.Message.GetType().Name}")
-                .Write();
-
-            //if (message.IsRelayed)
-            //{
-            //    var target = Sessions.Cast<RelaySession>().FirstOrDefault(s => s.RelayHostId == message.TargetHostId && s.P2PGroup == session.P2PGroup);
-            //    target?.SendRelay(message.SenderHostId, message);
-            //}
-        }
+        //    //if (message.IsRelayed)
+        //    //{
+        //    //    var target = Sessions.Cast<RelaySession>().FirstOrDefault(s => s.RelayHostId == message.TargetHostId && s.P2PGroup == session.P2PGroup);
+        //    //    target?.SendRelay(message.SenderHostId, message);
+        //    //}
+        //}
 
         #endregion
     }

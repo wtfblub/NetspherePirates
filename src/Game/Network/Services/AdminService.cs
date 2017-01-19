@@ -1,15 +1,17 @@
 ﻿using System;
-using BlubLib.Network.Pipes;
+using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class AdminService : MessageHandler
+    internal class AdminService : ProudMessageHandler
     {
         [MessageHandler(typeof(CAdminShowWindowReqMessage))]
-        public void ShowWindowHandler(GameSession session)
+        public Task ShowWindowHandler(GameSession session)
         {
-            session.Send(new SAdminShowWindowAckMessage(session.Player.Account.SecurityLevel <= SecurityLevel.User));
+            return session.SendAsync(new SAdminShowWindowAckMessage(session.Player.Account.SecurityLevel <= SecurityLevel.User));
         }
 
         [MessageHandler(typeof(CAdminActionReqMessage))]

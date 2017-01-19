@@ -38,11 +38,7 @@ namespace Netsphere
 
             Logger.Info("Starting server...");
 
-            AuthServer.Initialize(new Configuration
-            {
-                Version = new Guid("{9be73c0b-3b10-403e-be7d-9f222702a38c}")
-            });
-            
+            AuthServer.Initialize(new Configuration());
             AuthServer.Instance.Listen(Config.Instance.Listener);
 
             s_apiEventLoopGroup = new MultithreadEventLoopGroup(1);

@@ -1,22 +1,23 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using BlubLib.Network.Pipes;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class PrivateMessageService : MessageHandler
+    internal class PrivateMessageService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CNoteListReqMessage))]
-        public void CNoteListReq(ChatSession session, CNoteListReqMessage message)
+        public async Task CNoteListReq(ChatSession session, CNoteListReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
@@ -36,7 +37,8 @@ namespace Netsphere.Network.Services
             }
 
             var mails = session.Player.Mailbox.GetMailsByPage(message.Page);
-            session.Send(new SNoteListAckMessage(maxPages, message.Page, mails.Select(mail => mail.Map<Mail, NoteDto>()).ToArray()));
+            await session.SendAsync(new SNoteListAckMessage(maxPages, message.Page, mails.Select(mail => mail.Map<Mail, NoteDto>()).ToArray()))
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CReadNoteReqMessage))]

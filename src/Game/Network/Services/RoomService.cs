@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using BlubLib.Network.Pipes;
+using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Game.GameRules;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
@@ -10,29 +11,35 @@ using Netsphere.Network.Message.GameRule;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Fluent;
-using ProudNet;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class RoomService : MessageHandler
+    internal class RoomService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CEnterPlayerReqMessage))]
-        public void CEnterPlayerReq(GameSession session)
+        public async Task CEnterPlayerReq(GameSession session)
         {
             var plr = session.Player;
 
-            plr.Room.Broadcast(new SEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.RoomInfo.Mode, 0));
-            session.Send(new SChangeMasterAckMessage(plr.Room.Master.Account.Id));
-            session.Send(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id));
+            await plr.Room.BroadcastAsync(new SEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.RoomInfo.Mode, 0))
+                .ConfigureAwait(false);
 
-            plr.Room.BroadcastBriefing();
+            await session.SendAsync(new SChangeMasterAckMessage(plr.Room.Master.Account.Id))
+                .ConfigureAwait(false);
+
+            await session.SendAsync(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id))
+                .ConfigureAwait(false);
+
+            await plr.Room.BroadcastBriefingAsync()
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CMakeRoomReqMessage))]
-        public void CMakeRoomReq(GameSession session, CMakeRoomReqMessage message)
+        public async Task CMakeRoomReq(GameSession session, CMakeRoomReqMessage message)
         {
             var plr = session.Player;
             if (!plr.Channel.RoomManager.GameRuleFactory.Contains(message.Room.MatchKey.GameRule))
@@ -41,7 +48,8 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Game rule {message.Room.MatchKey.GameRule} does not exist")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -51,7 +59,8 @@ namespace Netsphere.Network.Services
                 Logger.Error()
                     .Account(plr).Message($"Map {message.Room.MatchKey.Map} does not exist")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
+                    .ConfigureAwait(false);
                 return;
             }
             if (!map.GameRules.Contains(message.Room.MatchKey.GameRule))
@@ -60,7 +69,8 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {message.Room.MatchKey.GameRule}")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -79,13 +89,13 @@ namespace Netsphere.Network.Services
                 IsNoIntrusion = message.Room.IsNoIntrusion,
 
                 ServerEndPoint = new IPEndPoint(IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayListener.Port)
-            }, GameServer.Instance.RelayServer.Pipeline.Get<ProudServerPipe>("proudnet").P2PGroupManager.Create());
+            }, RelayServer.Instance.P2PGroupManager.Create(true));
 
             room.Join(plr);
         }
 
         [MessageHandler(typeof(CGameRoomEnterReqMessage))]
-        public void CGameRoomEnterReq(GameSession session, CGameRoomEnterReqMessage message)
+        public async Task CGameRoomEnterReq(GameSession session, CGameRoomEnterReqMessage message)
         {
             Logger.Debug(JsonConvert.SerializeObject(message, Formatting.Indented));
 
@@ -97,12 +107,14 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Room {message.RoomId} in channel {plr.Channel.Id} not found")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom))
+                    .ConfigureAwait(false);
                 return;
             }
             if (room.IsChangingRules)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -112,15 +124,18 @@ namespace Netsphere.Network.Services
             }
             catch (RoomAccessDeniedException)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom))
+                    .ConfigureAwait(false);
             }
             catch (RoomLimitReachedException)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom))
+                    .ConfigureAwait(false);
             }
             catch (RoomException)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -169,7 +184,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CBeginRoundReqMessage))]
-        public void CBeginRoundReq(GameSession session)
+        public async Task CBeginRoundReq(GameSession session)
         {
             var plr = session.Player;
             var stateMachine = plr.Room.GameRuleManager.GameRule.StateMachine;
@@ -177,24 +192,26 @@ namespace Netsphere.Network.Services
             if (stateMachine.CanFire(GameRuleStateTrigger.StartGame))
                 stateMachine.Fire(GameRuleStateTrigger.StartGame);
             else
-                session.Send(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
+                await session.SendAsync(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""))
+                    .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CReadyRoundReqMessage))]
-        public void CReadyRoundReq(GameSession session)
+        public Task CReadyRoundReq(GameSession session)
         {
             var plr = session.Player;
 
             plr.RoomInfo.IsReady = !plr.RoomInfo.IsReady;
-            plr.Room.Broadcast(new SReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
+            return plr.Room.BroadcastAsync(new SReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
         }
 
         [MessageHandler(typeof(CEventMessageReqMessage))]
-        public void CEventMessageReq(GameSession session, CEventMessageReqMessage message)
+        public async Task CEventMessageReq(GameSession session, CEventMessageReqMessage message)
         {
             var plr = session.Player;
 
-            plr.Room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""));
+            await plr.Room.BroadcastAsync(new SEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""))
+                .ConfigureAwait(false);
             //if (message.Event == GameEventMessage.BallReset && plr == plr.Room.Host)
             //{
             //    plr.Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.BallReset, 0, 0, 0, ""));
@@ -210,12 +227,13 @@ namespace Netsphere.Network.Services
                     ? PlayerState.Alive
                     : PlayerState.Spectating;
 
-                plr.Room.BroadcastBriefing();
+                await plr.Room.BroadcastBriefingAsync()
+                    .ConfigureAwait(false);
             }
         }
 
         [MessageHandler(typeof(CItemsChangeReqMessage))]
-        public void CItemsChangeReq(GameSession session, CItemsChangeReqMessage message)
+        public async Task CItemsChangeReq(GameSession session, CItemsChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -245,11 +263,12 @@ namespace Netsphere.Network.Services
                 Unk8 = message.Unk1.Unk8
             };
 
-            plr.Room.Broadcast(new SItemsChangeAckMessage(unk1, message.Unk2));
+            await plr.Room.BroadcastAsync(new SItemsChangeAckMessage(unk1, message.Unk2))
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CAvatarChangeReqMessage))]
-        public void CAvatarChangeReq(GameSession session, CAvatarChangeReqMessage message)
+        public async Task CAvatarChangeReq(GameSession session, CAvatarChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -321,7 +340,8 @@ namespace Netsphere.Network.Services
                 unk1.Costumes[(int)slot] = item;
             }
 
-            plr.Room.Broadcast(new SAvatarChangeAckMessage(unk1, message.Unk2));
+            await plr.Room.BroadcastAsync(new SAvatarChangeAckMessage(unk1, message.Unk2))
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CChangeRuleNotifyReqMessage))]

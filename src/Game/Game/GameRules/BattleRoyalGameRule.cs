@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Netsphere.Network.Message.GameRule;
 
 // ReSharper disable once CheckNamespace
@@ -24,7 +25,7 @@ namespace Netsphere.Game.GameRules
                     return;
                 _first = value;
                 if (StateMachine.IsInState(GameRuleState.Playing))
-                    Room.Broadcast(new SGameRuleChangeTheFirstAckMessage(_first?.Account.Id ?? 0));
+                    Room.BroadcastAsync(new SGameRuleChangeTheFirstAckMessage(_first?.Account.Id ?? 0)).WaitEx();
             }
         }
 

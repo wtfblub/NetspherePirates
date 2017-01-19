@@ -1,19 +1,21 @@
-﻿using BlubLib.Network.Pipes;
+﻿using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class CharacterService : MessageHandler
+    internal class CharacterService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CCreateCharacterReqMessage))]
-        public void CreateCharacterHandler(GameSession session, CCreateCharacterReqMessage message)
+        public async Task CreateCharacterHandler(GameSession session, CCreateCharacterReqMessage message)
         {
             Logger.Info()
                 .Account(session)
@@ -30,12 +32,13 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed))
+                    .ConfigureAwait(false);
             }
         }
 
         [MessageHandler(typeof(CSelectCharacterReqMessage))]
-        public void SelectCharacterHandler(GameSession session, CSelectCharacterReqMessage message)
+        public async Task SelectCharacterHandler(GameSession session, CSelectCharacterReqMessage message)
         {
             var plr = session.Player;
 
@@ -43,7 +46,8 @@ namespace Netsphere.Network.Services
             if (plr.Room != null && plr.RoomInfo.State != PlayerState.Lobby &&
                 !plr.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.HalfTime))
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -62,12 +66,13 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed))
+                    .ConfigureAwait(false);
             }
         }
 
         [MessageHandler(typeof(CDeleteCharacterReqMessage))]
-        public void DeleteCharacterHandler(GameSession session, CDeleteCharacterReqMessage message)
+        public async Task DeleteCharacterHandler(GameSession session, CDeleteCharacterReqMessage message)
         {
             Logger.Info()
                 .Account(session)
@@ -84,7 +89,8 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed))
+                    .ConfigureAwait(false);
             }
         }
     }

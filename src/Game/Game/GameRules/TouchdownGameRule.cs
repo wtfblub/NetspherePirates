@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.GameRule;
 
@@ -116,7 +117,7 @@ namespace Netsphere.Game.GameRules
                         {
                             IsInTouchdown = false;
                             _touchdownTime = TimeSpan.Zero;
-                            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.ResetRound, 0, 0, 0, ""));
+                            Room.BroadcastAsync(new SEventMessageAckMessage(GameEventMessage.ResetRound, 0, 0, 0, "")).WaitEx();
                         }
                     }
                     else
@@ -142,9 +143,9 @@ namespace Netsphere.Game.GameRules
                 GetRecord(assist).OffenseAssistScore++;
 
             if (assist != null)
-                Room.Broadcast(new SScoreOffenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
+                Room.BroadcastAsync(new SScoreOffenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
             else
-                Room.Broadcast(new SScoreOffenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
+                Room.BroadcastAsync(new SScoreOffenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
         }
 
         public void OnScoreDefense(Player killer, Player assist, Player target, AttackAttribute attackAttribute)
@@ -157,9 +158,9 @@ namespace Netsphere.Game.GameRules
                 GetRecord(assist).OffenseAssistScore++;
 
             if (assist != null)
-                Room.Broadcast(new SScoreDefenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
+                Room.BroadcastAsync(new SScoreDefenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
             else
-                Room.Broadcast(new SScoreDefenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
+                Room.BroadcastAsync(new SScoreDefenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
         }
 
         public void OnScoreRebound(Player newPlr, Player oldPlr)
@@ -173,7 +174,7 @@ namespace Netsphere.Game.GameRules
                 GetRecord(newPlr).OffenseReboundScore++;
             }
 
-            Room.Broadcast(new SScoreReboundAckMessage(newPlr?.RoomInfo.PeerId ?? 0, oldPlr?.RoomInfo.PeerId ?? 0));
+            Room.BroadcastAsync(new SScoreReboundAckMessage(newPlr?.RoomInfo.PeerId ?? 0, oldPlr?.RoomInfo.PeerId ?? 0)).WaitEx();
         }
 
         public void OnScoreGoal(Player plr)
@@ -191,16 +192,16 @@ namespace Netsphere.Game.GameRules
             GetRecord(plr).TDScore++;
 
             if (assist != null)
-                Room.Broadcast(new SScoreGoalAssistAckMessage(plr.RoomInfo.PeerId, assist.RoomInfo.PeerId));
+                Room.BroadcastAsync(new SScoreGoalAssistAckMessage(plr.RoomInfo.PeerId, assist.RoomInfo.PeerId)).WaitEx();
             else
-                Room.Broadcast(new SScoreGoalAckMessage(plr.RoomInfo.PeerId));
+                Room.BroadcastAsync(new SScoreGoalAckMessage(plr.RoomInfo.PeerId)).WaitEx();
 
             var halfTime = TimeSpan.FromSeconds(Room.Options.TimeLimit.TotalSeconds / 2);
             var diff = halfTime - RoundTime;
             if (diff <= TimeSpan.FromSeconds(10)) // ToDo use const
                 return;
 
-            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)TouchdownWaitTime.TotalMilliseconds, 0, 0, ""));
+            Room.BroadcastAsync(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)TouchdownWaitTime.TotalMilliseconds, 0, 0, "")).WaitEx();
             _touchdownTime = TimeSpan.Zero;
         }
 

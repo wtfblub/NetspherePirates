@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Netsphere.Network;
 using Netsphere.Network.Message.Game;
 
@@ -75,7 +76,7 @@ namespace Netsphere.Commands
                     else
                     {
                         stateMachine.Fire(trigger);
-                        plr.Room.Broadcast(new SNoticeMessageAckMessage($"Current game state has been changed by {plr.Account.Nickname}"));
+                        plr.Room.BroadcastAsync(new SNoticeMessageAckMessage($"Current game state has been changed by {plr.Account.Nickname}")).WaitEx();
                     }
                 }
 

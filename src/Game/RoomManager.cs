@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Game;
@@ -44,7 +45,7 @@ namespace Netsphere
             return room;
         }
 
-        public Room Create(RoomCreationOptions options, ServerP2PGroup p2pGroup)
+        public Room Create(RoomCreationOptions options, IP2PGroup p2pGroup)
         {
             using (_sync.Lock())
             {
@@ -59,7 +60,7 @@ namespace Netsphere
                 var room = new Room(this, id, options, p2pGroup);
                 _rooms.TryAdd(id, room);
 
-                Channel.Broadcast(new SDeployGameRoomAckMessage(room.Map<Room, RoomDto>()));
+                Channel.BroadcastAsync(new SDeployGameRoomAckMessage(room.Map<Room, RoomDto>())).WaitEx();
 
                 return room;
             }
@@ -71,7 +72,7 @@ namespace Netsphere
                 throw new RoomException("Players are still in this room");
 
             _rooms.Remove(room.Id);
-            Channel.Broadcast(new SDisposeGameRoomAckMessage(room.Id));
+            Channel.BroadcastAsync(new SDisposeGameRoomAckMessage(room.Id)).WaitEx();
         }
 
         #region IReadOnlyCollection

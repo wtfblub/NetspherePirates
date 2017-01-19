@@ -1,9 +1,10 @@
-﻿using BlubLib.Network.Pipes;
+﻿using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.P2P;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class PeerService : MessageHandler
+    internal class PeerService : ProudMessageHandler
     {
         [MessageHandler(typeof(PlayerSpawnReqMessage))]
         public void PlayerSpawnReq(RelaySession session, PlayerSpawnReqMessage message)

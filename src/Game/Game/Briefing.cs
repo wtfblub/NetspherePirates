@@ -1,8 +1,6 @@
-﻿using System.Buffers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BlubLib.IO;
 using Netsphere.Game.GameRules;
 using Netsphere.Game.Systems;
 using Netsphere.Network;
@@ -70,7 +68,7 @@ namespace Netsphere.Game
 
         public byte[] ToArray(bool isResult)
         {
-            using (var w = new BinaryWriter(new PooledMemoryStream(GameServer.Instance.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 WriteData(w, isResult);
                 return w.ToArray();
