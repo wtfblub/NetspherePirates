@@ -36,6 +36,7 @@
             // SC
             Register<RmiMessage>(ProudCoreOpCode.Rmi);
             Register<EncryptedReliableMessage>(ProudCoreOpCode.EncryptedReliable);
+            Register<Encrypted_UnReliableMessage>(ProudCoreOpCode.Encrypted_UnReliable);
             Register<CompressedMessage>(ProudCoreOpCode.Compressed);
             Register<ReliableUdp_FrameMessage>(ProudCoreOpCode.ReliableUdp_Frame);
         }

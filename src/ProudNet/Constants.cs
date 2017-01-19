@@ -37,6 +37,7 @@ namespace ProudNet
         Rmi = 1,
         UserMessage = 2,
         EncryptedReliable = 36,
+        Encrypted_UnReliable = 37,
         Compressed = 38,
 
         // Unk
@@ -50,7 +51,6 @@ namespace ProudNet
         P2PReplyIndirectServerTimeAndPong = 33,
         S2CRoutedMulticast1 = 34,
         S2CRoutedMulticast2 = 35,
-        Encrypted_UnReliable = 37,
         RequestReceiveSpeedAtReceiverSide_NoRelay = 39,
         ReplyReceiveSpeedAtReceiverSide_NoRelay = 40,
         NotifyConnectionPeerRequestData = 41,

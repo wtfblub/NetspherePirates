@@ -52,8 +52,7 @@ namespace ProudNet.Server.Handlers
             using (var dst = new WriteOnlyByteBufferStream(buffer, false))
                 crypt.Decrypt(src, dst, true);
 
-            buffer.SetIndex(0, 0);
-            context.Channel.Pipeline.Context<CoreMessageDecoder>().FireChannelRead(buffer);
+            context.Channel.Pipeline.Context<ProudFrameDecoder>().FireChannelRead(buffer);
         }
 
         [MessageHandler(typeof(NotifyCSEncryptedSessionKeyMessage))]
@@ -94,11 +93,12 @@ namespace ProudNet.Server.Handlers
                 return;
             }
 
-            var ip = (IPEndPoint)((ISocketChannel)context.Channel).RemoteAddress;
             _server.AddSession(session);
             session.HandhsakeEvent.Set();
 
-            await session.SendAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, ip));
+            var remoteEndpoint = (IPEndPoint)((ISocketChannel)context.Channel).RemoteAddress;
+            remoteEndpoint = new IPEndPoint(remoteEndpoint.Address.MapToIPv4(), remoteEndpoint.Port);
+            await session.SendAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, remoteEndpoint));
         }
 
         [MessageHandler(typeof(UnreliablePingMessage))]

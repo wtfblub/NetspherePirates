@@ -20,7 +20,7 @@ namespace ProudNet.Handlers
         {
             var decompressed = message.Data.DecompressZLib();
             var buffer = Unpooled.WrappedBuffer(decompressed);
-            context.Channel.Pipeline.Context<CoreMessageDecoder>().FireChannelRead(buffer);
+            context.Channel.Pipeline.Context<ProudFrameDecoder>().FireChannelRead(buffer);
         }
     }
 }

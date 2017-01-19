@@ -39,6 +39,24 @@ namespace ProudNet.Serialization.Messages.Core
         }
     }
 
+    [BlubContract]
+    internal class Encrypted_UnReliableMessage : ICoreMessage
+    {
+        [BlubMember(0)]
+        public byte Unk { get; set; }
+
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
+
+        public Encrypted_UnReliableMessage()
+        { }
+
+        public Encrypted_UnReliableMessage(byte[] data)
+        {
+            Data = data;
+        }
+    }
+
     [BlubContract(typeof(Serializer))]
     internal class CompressedMessage : ICoreMessage
     {

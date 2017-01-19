@@ -2,6 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
+using BlubLib.IO;
 using BlubLib.Security.Cryptography;
 
 namespace ProudNet
@@ -24,16 +25,17 @@ namespace ProudNet
             if (RC4 == null)
                 throw new ObjectDisposedException(GetType().FullName);
 
-            if (reliable)
-            {
-                var counter = ++_encryptCounter;
-                dst.WriteByte((byte)(counter & 0x00FF));
-                dst.WriteByte((byte)(counter & 0xFF00));
-            }
-
             using (var encryptor = RC4.CreateEncryptor())
-            using (var cs = new CryptoStream(dst, encryptor, CryptoStreamMode.Write))
+            using (var cs = new CryptoStream(new NonClosingStream(dst), encryptor, CryptoStreamMode.Write))
+            {
+                if (reliable)
+                {
+                    var counter = (ushort)(Interlocked.Increment(ref _encryptCounter) - 1);
+                    cs.WriteByte((byte)(counter & 0x00FF));
+                    cs.WriteByte((byte)(counter >> 8));
+                }
                 src.CopyTo(cs);
+            }
         }
 
         public void Decrypt(Stream src, Stream dst, bool reliable)
@@ -46,7 +48,7 @@ namespace ProudNet
             {
                 if (reliable)
                 {
-                    var counter = Interlocked.Increment(ref _decryptCounter);
+                    var counter = (ushort)(Interlocked.Increment(ref _decryptCounter) - 1);
                     var messageCounter = cs.ReadByte() | cs.ReadByte() << 8;
 
                     if (counter != messageCounter)
