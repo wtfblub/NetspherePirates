@@ -55,7 +55,7 @@ namespace Netsphere.Network.Service
                     else
                     {
                         Logger.Error($"Wrong login for {message.Username}");
-                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
+                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw), SendOptions.Reliable)
                             .ConfigureAwait(false);
                         return;
                     }
@@ -82,7 +82,7 @@ namespace Netsphere.Network.Service
                     else
                     {
                         Logger.Error($"Wrong login for {message.Username}");
-                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw))
+                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw), SendOptions.Reliable)
                             .ConfigureAwait(false);
                         return;
                     }
@@ -94,7 +94,7 @@ namespace Netsphere.Network.Service
                 {
                     var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
                     Logger.Error($"{message.Username} is banned until {unbanDate}");
-                    await session.SendAsync(new SAuthInEuAckMessage(unbanDate))
+                    await session.SendAsync(new SAuthInEuAckMessage(unbanDate), SendOptions.Reliable)
                         .ConfigureAwait(false);
                     return;
                 }
@@ -113,14 +113,14 @@ namespace Netsphere.Network.Service
 
             // ToDo proper session generation
             var sessionId = Hash.GetUInt32<CRC32>($"<{account.Username}+{password}>");
-            await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId))
+            await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId), SendOptions.Reliable)
                     .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CServerListReqMessage))]
         public Task ServerListHandler(AuthServer server, ProudSession session)
         {
-            return session.SendAsync(new SServerListAckMessage(server.ServerManager.ToArray()));
+            return session.SendAsync(new SServerListAckMessage(server.ServerManager.ToArray()), SendOptions.Reliable);
         }
     }
 }
