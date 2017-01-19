@@ -85,10 +85,12 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="ISessionFactory.cs" />
     <Compile Include="P2PGroup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="ProudSession.cs" />
+    <Compile Include="ProudSessionFactory.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SendOptions.cs" />
     <Compile Include="Serialization\MessageFactory.cs" />

@@ -18,7 +18,7 @@ namespace ProudNet.Server
         public override async void ChannelActive(IChannelHandlerContext context)
         {
             var hostId = _server.Configuration.HostIdFactory.New();
-            var session = new ProudSession(hostId, context.Channel);
+            var session = _server.Configuration.SessionFactory.Create(hostId, context.Channel);
             context.Channel.GetAttribute(ChannelAttributes.Session).Set(session);
 
             var config = new NetConfigDto
