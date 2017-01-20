@@ -28,7 +28,7 @@ namespace Netsphere.Network.Services
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CLoginReqMessage))]
-        public async Task LoginHandler(GameServer server, GameSession session, CLoginReqMessage message)
+        public async Task LoginHandler(GameSession session, CLoginReqMessage message)
         {
             Logger.Info()
                 .Account(message.AccountId, message.Username)
@@ -47,7 +47,7 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            if (server.PlayerManager.Count >= Config.Instance.PlayerLimit)
+            if (GameServer.Instance.PlayerManager.Count >= Config.Instance.PlayerLimit)
             {
                 Logger.Error()
                     .Account(message.AccountId, message.Username)
@@ -148,11 +148,11 @@ namespace Netsphere.Network.Services
                     .Message("Kicking old connection")
                     .Write();
 
-                var oldPlr = server.PlayerManager.Get(account.Id);
+                var oldPlr = GameServer.Instance.PlayerManager.Get(account.Id);
                 oldPlr?.Disconnect();
             }
 
-            if (server.PlayerManager.Contains(account.Id))
+            if (GameServer.Instance.PlayerManager.Contains(account.Id))
             {
                 Logger.Error()
                     .Account(account)
@@ -197,7 +197,7 @@ namespace Netsphere.Network.Services
                 session.Player = new Player(session, account, plrDto);
             }
 
-            if (server.PlayerManager.Contains(session.Player))
+            if (GameServer.Instance.PlayerManager.Contains(session.Player))
             {
                 session.Player = null;
                 Logger.Error()
@@ -210,7 +210,7 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            server.PlayerManager.Add(session.Player);
+            GameServer.Instance.PlayerManager.Add(session.Player);
 
             Logger.Info()
                 .Account(account)
@@ -224,7 +224,7 @@ namespace Netsphere.Network.Services
                 .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(account.Nickname))
-                await LoginAsync(server, session).ConfigureAwait(false);
+                await LoginAsync(session).ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CCheckNickReqMessage))]
@@ -253,7 +253,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CCreateNickReqMessage))]
-        public async Task CreateNickHandler(GameServer server, GameSession session, CCreateNickReqMessage message)
+        public async Task CreateNickHandler(GameSession session, CCreateNickReqMessage message)
         {
             if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
             {
@@ -301,11 +301,11 @@ namespace Netsphere.Network.Services
                 .Message($"Created nickname {message.Nickname}")
                 .Write();
 
-            await LoginAsync(server, session)
+            await LoginAsync(session)
                 .ConfigureAwait(false);
         }
 
-        private static async Task LoginAsync(GameServer server, GameSession session)
+        private static async Task LoginAsync(GameSession session)
         {
             var plr = session.Player;
 

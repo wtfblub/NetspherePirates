@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using Auth.ServiceModel;
 using BlubLib.DotNetty.SimpleRmi;
@@ -71,24 +70,31 @@ namespace Netsphere
 
         private async Task Worker(TimeSpan diff)
         {
-            if (_channel == null || !_channel.Active)
+            try
             {
-                if (!await Connect().ConfigureAwait(false))
+                if (_channel == null || !_channel.Active)
+                {
+                    if (!await Connect().ConfigureAwait(false))
+                        return;
+                }
+
+                if (!_registered)
+                {
+                    await Register().ConfigureAwait(false);
                     return;
-            }
+                }
 
-            if (!_registered)
+                var result = await _channel.GetProxy<IServerlistService>()
+                    .Update(GameServer.Instance.Map<GameServer, ServerInfoDto>())
+                    .ConfigureAwait(false);
+
+                if (!result)
+                    await Register().ConfigureAwait(false);
+            }
+            catch (Exception ex)
             {
-                await Register().ConfigureAwait(false);
-                return;
+                Logger.Error(ex, "Unhandled exception");
             }
-
-            var result = await _channel.GetProxy<IServerlistService>()
-                .Update(GameServer.Instance.Map<GameServer, ServerInfoDto>())
-                .ConfigureAwait(false);
-
-            if (!result)
-                await Register().ConfigureAwait(false);
         }
 
         private void Client_Connected(object sender, EventArgs e)
@@ -113,12 +119,15 @@ namespace Netsphere
                 _channel = await _bootstrap.ConnectAsync(endPoint)
                     .ConfigureAwait(false);
             }
-            catch (SocketException ex)
+            catch (AggregateException ex)
             {
-                if (ex.SocketErrorCode != SocketError.ConnectionRefused)
-                    Logger.Error(ex, $"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
-                else
+                var baseException = ex.GetBaseException();
+                if (baseException is ConnectException)
+                {
                     Logger.Error($"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
+                    return false;
+                }
+                Logger.Error(baseException, $"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
                 return false;
             }
             catch (Exception ex)
@@ -153,6 +162,8 @@ namespace Netsphere
         {
             public event EventHandler Connected;
             public event EventHandler Disconnected;
+
+            public override bool IsSharable => true;
 
             public override void ChannelActive(IChannelHandlerContext context)
             {

@@ -29,7 +29,6 @@ namespace Netsphere.Network
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly ChatServer _chatServer;
         private readonly ILoop _worker;
         private readonly ServerlistManager _serverlistManager;
 
@@ -40,8 +39,6 @@ namespace Netsphere.Network
         public PlayerManager PlayerManager { get; }
         public ChannelManager ChannelManager { get; }
         public ResourceCache ResourceCache { get; }
-
-        public RelayServer RelayServer { get; }
 
         public static void Initialize(Configuration config)
         {
@@ -85,7 +82,6 @@ namespace Netsphere.Network
                     .RegisterRule<CGetChannelInfoReqMessage>(MustBeLoggedIn)
                     .RegisterRule<CChannelEnterReqMessage>(MustBeLoggedIn, MustNotBeInChannel)
                     .RegisterRule<CChannelLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CNewShopUpdateCheckReqMessage>(MustBeLoggedIn)
                     .RegisterRule<CLicensedReqMessage>(MustBeLoggedIn, MustBeInChannel)
                     .RegisterRule<CExerciseLicenceReqMessage>(MustBeLoggedIn, MustBeInChannel)
                     .RegisterRule<CBuyItemReqMessage>(MustBeLoggedIn)
@@ -166,8 +162,6 @@ namespace Netsphere.Network
         protected override void OnStarted()
         {
             ResourceCache.PreCache();
-            _chatServer.Listen(Config.Instance.ChatListener);
-            RelayServer.Listen(Config.Instance.RelayListener);
             _worker.Start();
             _serverlistManager.Start();
         }
@@ -176,8 +170,6 @@ namespace Netsphere.Network
         {
             _worker.Stop(new TimeSpan(0));
             _serverlistManager.Dispose();
-            _chatServer.Dispose();
-            RelayServer.Dispose();
         }
 
         protected override void OnDisconnected(ProudSession session)

@@ -32,21 +32,23 @@ namespace Netsphere
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
+            Logger.Info("Initializing...");
+
             AuthDatabase.Initialize();
             GameDatabase.Initialize();
-
-            FillShop();
 
             ItemIdGenerator.Initialize();
             CharacterIdGenerator.Initialize();
             LicenseIdGenerator.Initialize();
             DenyIdGenerator.Initialize();
 
-            Logger.Info("Starting server...");
-
             ChatServer.Initialize(new Configuration());
             RelayServer.Initialize(new Configuration());
             GameServer.Initialize(new Configuration());
+
+            FillShop();
+
+            Logger.Info("Starting server...");
 
             ChatServer.Instance.Listen(Config.Instance.ChatListener);
             RelayServer.Instance.Listen(Config.Instance.RelayListener);

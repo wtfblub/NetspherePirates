@@ -22,14 +22,13 @@ namespace Netsphere.Network
         public override async Task<bool> OnMessageReceived(IChannelHandlerContext context, object message)
         {
             List<Predicate<TSession>> predicates;
-            if (!_filter.TryGetValue(message.GetType(), out predicates))
-                return true;
+            _filter.TryGetValue(message.GetType(), out predicates);
 
             TSession session;
             if (!GetParameter(context, message, out session))
                 throw new Exception("Unable to retrieve session");
 
-            if (predicates.Any(predicate => !predicate(session)))
+            if (predicates != null && predicates.Any(predicate => !predicate(session)))
             {
                 Logger.Debug($"Dropping message {message.GetType().Name} from client {((ISocketChannel)context.Channel).RemoteAddress}");
                 return false;
