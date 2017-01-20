@@ -5,6 +5,7 @@ using Netsphere.Network.Services;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
+using ProudNet.Serialization;
 using ProudNet.Server;
 
 namespace Netsphere.Network
@@ -22,7 +23,7 @@ namespace Netsphere.Network
                 throw new InvalidOperationException("Server is already initialized");
 
             config.Version = new Guid("{a43a97d1-9ec7-495e-ad5f-8fe45fde1151}");
-            config.MessageFactory = new RelayMessageFactory();
+            config.MessageFactories = new MessageFactory[] { new RelayMessageFactory() };
             config.SessionFactory = new RelaySessionFactory();
 
             // ReSharper disable InconsistentNaming

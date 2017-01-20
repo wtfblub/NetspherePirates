@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
@@ -11,11 +12,11 @@ namespace ProudNet.Codecs
 {
     internal class MessageDecoder : MessageToMessageDecoder<IByteBuffer>
     {
-        private readonly MessageFactory _userMessageFactory;
+        private readonly MessageFactory[] _userMessageFactories;
 
-        public MessageDecoder(MessageFactory userMessageFactory)
+        public MessageDecoder(MessageFactory[] userMessageFactories)
         {
-            _userMessageFactory = userMessageFactory;
+            _userMessageFactories = userMessageFactories;
         }
 
         protected override void Decode(IChannelHandlerContext context, IByteBuffer message, List<object> output)
@@ -23,9 +24,15 @@ namespace ProudNet.Codecs
             using (var r = new ReadOnlyByteBufferStream(message, false).ToBinaryReader(false))
             {
                 var opCode = r.ReadUInt16();
-                output.Add(opCode >= 64000
-                    ? RmiMessageFactory.Default.GetMessage(opCode, r)
-                    : _userMessageFactory.GetMessage(opCode, r));
+                var isInternal = opCode >= 64000;
+                var factory = isInternal
+                    ? RmiMessageFactory.Default
+                    : _userMessageFactories.FirstOrDefault(userFactory => userFactory.ContainsOpCode(opCode));
+
+                if (factory == null)
+                    throw new ProudException($"No {nameof(MessageFactory)} found for opcode {opCode}");
+
+                output.Add(factory.GetMessage(opCode, r));
             }
         }
     }

@@ -107,6 +107,9 @@ namespace Netsphere
 
         public void Update(TimeSpan delta)
         {
+            if (Players.Count == 0)
+                return;
+
             if (Host != null)
             {
                 _hostUpdateTimer += delta;
@@ -188,7 +191,7 @@ namespace Netsphere
             if (plr.Room != this)
                 return;
 
-            Group.Leave(plr.RoomInfo.Slot);
+            Group.Leave(plr.RelaySession.HostId);
             BroadcastAsync(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason)).WaitEx();
 
             if (roomLeaveReason == RoomLeaveReason.Kicked ||

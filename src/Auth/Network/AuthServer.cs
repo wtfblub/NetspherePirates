@@ -6,6 +6,7 @@ using BlubLib.Threading.Tasks;
 using Netsphere.Network.Message.Auth;
 using Netsphere.Network.Service;
 using ProudNet;
+using ProudNet.Serialization;
 using ProudNet.Server;
 
 namespace Netsphere.Network
@@ -24,7 +25,7 @@ namespace Netsphere.Network
                 throw new InvalidOperationException("Server is already initialized");
 
             config.Version = new Guid("{9be73c0b-3b10-403e-be7d-9f222702a38c}");
-            config.MessageFactory = new AuthMessageFactory();
+            config.MessageFactories = new MessageFactory[] { new AuthMessageFactory() };
             config.MessageHandlers = new IMessageHandler[] { new AuthService() };
             Instance = new AuthServer(config);
         }

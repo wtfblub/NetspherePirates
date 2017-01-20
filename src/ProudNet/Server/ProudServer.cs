@@ -68,8 +68,8 @@ namespace ProudNet.Server
             if (configuration.HostIdFactory == null)
                 throw new ArgumentNullException(nameof(configuration.HostIdFactory));
 
-            if (configuration.MessageFactory == null)
-                throw new ArgumentNullException(nameof(configuration.MessageFactory));
+            if (configuration.MessageFactories == null)
+                throw new ArgumentNullException(nameof(configuration.MessageFactories));
 
             Configuration = configuration;
             P2PGroupManager = new P2PGroupManager(this);
@@ -108,8 +108,8 @@ namespace ProudNet.Server
                                 .Add(new CoreServerHandler(this)))
 
                             .AddLast(new SendContextEncoder())
-                            .AddLast(new MessageDecoder(Configuration.MessageFactory))
-                            .AddLast(new MessageEncoder(Configuration.MessageFactory))
+                            .AddLast(new MessageDecoder(Configuration.MessageFactories))
+                            .AddLast(new MessageEncoder(Configuration.MessageFactories))
 
                             // SimpleMessageHandler discards all handled messages
                             // So internal messages(if handled) wont reach the user messagehandler

@@ -10,7 +10,7 @@ namespace ProudNet
         public IHostIdFactory HostIdFactory { get; set; }
         public ISessionFactory SessionFactory { get; set; }
         public TimeSpan ConnectTimeout { get; set; }
-        public MessageFactory MessageFactory { get; set; }
+        public MessageFactory[] MessageFactories { get; set; }
         public IMessageHandler[] MessageHandlers { get; set; }
 
         public bool EnableServerLog { get; set; }
