@@ -9,7 +9,7 @@ namespace ProudNet.Handlers
     {
         protected override bool GetParameter<T>(IChannelHandlerContext context, object message, out T value)
         {
-            if (typeof(T) == typeof(ProudSession))
+            if (typeof(ProudSession).IsAssignableFrom(typeof(T)))
             {
                 var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
                 value = DynamicCast<T>.From(session);
