@@ -4,7 +4,7 @@ using DotNetty.Transport.Channels;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Messages.Core;
 
-namespace ProudNet.Server
+namespace ProudNet.Server.Handlers
 {
     internal class SessionHandler : ChannelHandlerAdapter
     {

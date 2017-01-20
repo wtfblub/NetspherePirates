@@ -11,7 +11,7 @@ namespace ProudNet
 
     public class HostIdFactory : IHostIdFactory
     {
-        private long _counter;
+        private long _counter = 1000;
         private readonly ConcurrentStack<uint> _pool = new ConcurrentStack<uint>();
 
         public uint New()

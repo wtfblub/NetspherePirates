@@ -117,7 +117,7 @@
     <Compile Include="Server\P2PGroupManager.cs" />
     <Compile Include="Server\ProudServer.cs" />
     <Compile Include="Server\RemotePeer.cs" />
-    <Compile Include="Server\SessionHandler.cs" />
+    <Compile Include="Server\Handlers\SessionHandler.cs" />
     <Compile Include="Server\Handlers\CoreServerHandler.cs" />
     <Compile Include="Handlers\ProudMessageHandler.cs" />
     <Compile Include="Server\Handlers\ServerHandler.cs" />
