@@ -14,7 +14,7 @@ namespace Netsphere.Game
         {
             Add(GameRule.Touchdown, room => new TouchdownGameRule(room));
             Add(GameRule.Deathmatch, room => new DeathmatchGameRule(room));
-            //Add(GameRule.Chaser, room => new ChaserGameRule(room));
+            Add(GameRule.Chaser, room => new ChaserGameRule(room));
             Add(GameRule.BattleRoyal, room => new BattleRoyalGameRule(room));
         }
 
