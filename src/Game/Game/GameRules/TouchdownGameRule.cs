@@ -117,7 +117,7 @@ namespace Netsphere.Game.GameRules
                         {
                             IsInTouchdown = false;
                             _touchdownTime = TimeSpan.Zero;
-                            Room.BroadcastAsync(new SEventMessageAckMessage(GameEventMessage.ResetRound, 0, 0, 0, "")).WaitEx();
+                            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.ResetRound, 0, 0, 0, ""));
                         }
                     }
                     else
@@ -143,9 +143,9 @@ namespace Netsphere.Game.GameRules
                 GetRecord(assist).OffenseAssistScore++;
 
             if (assist != null)
-                Room.BroadcastAsync(new SScoreOffenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
+                Room.Broadcast(new SScoreOffenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
             else
-                Room.BroadcastAsync(new SScoreOffenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
+                Room.Broadcast(new SScoreOffenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
         }
 
         public void OnScoreDefense(Player killer, Player assist, Player target, AttackAttribute attackAttribute)
@@ -158,9 +158,9 @@ namespace Netsphere.Game.GameRules
                 GetRecord(assist).OffenseAssistScore++;
 
             if (assist != null)
-                Room.BroadcastAsync(new SScoreDefenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
+                Room.Broadcast(new SScoreDefenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
             else
-                Room.BroadcastAsync(new SScoreDefenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute))).WaitEx();
+                Room.Broadcast(new SScoreDefenseAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
         }
 
         public void OnScoreRebound(Player newPlr, Player oldPlr)
@@ -174,7 +174,7 @@ namespace Netsphere.Game.GameRules
                 GetRecord(newPlr).OffenseReboundScore++;
             }
 
-            Room.BroadcastAsync(new SScoreReboundAckMessage(newPlr?.RoomInfo.PeerId ?? 0, oldPlr?.RoomInfo.PeerId ?? 0)).WaitEx();
+            Room.Broadcast(new SScoreReboundAckMessage(newPlr?.RoomInfo.PeerId ?? 0, oldPlr?.RoomInfo.PeerId ?? 0));
         }
 
         public void OnScoreGoal(Player plr)
@@ -192,16 +192,16 @@ namespace Netsphere.Game.GameRules
             GetRecord(plr).TDScore++;
 
             if (assist != null)
-                Room.BroadcastAsync(new SScoreGoalAssistAckMessage(plr.RoomInfo.PeerId, assist.RoomInfo.PeerId)).WaitEx();
+                Room.Broadcast(new SScoreGoalAssistAckMessage(plr.RoomInfo.PeerId, assist.RoomInfo.PeerId));
             else
-                Room.BroadcastAsync(new SScoreGoalAckMessage(plr.RoomInfo.PeerId)).WaitEx();
+                Room.Broadcast(new SScoreGoalAckMessage(plr.RoomInfo.PeerId));
 
             var halfTime = TimeSpan.FromSeconds(Room.Options.TimeLimit.TotalSeconds / 2);
             var diff = halfTime - RoundTime;
             if (diff <= TimeSpan.FromSeconds(10)) // ToDo use const
                 return;
 
-            Room.BroadcastAsync(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)TouchdownWaitTime.TotalMilliseconds, 0, 0, "")).WaitEx();
+            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)TouchdownWaitTime.TotalMilliseconds, 0, 0, ""));
             _touchdownTime = TimeSpan.Zero;
         }
 

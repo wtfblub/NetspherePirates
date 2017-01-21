@@ -63,13 +63,13 @@ namespace Netsphere.Commands
                 else
                     plr.SendConsoleMessage(S4Color.Green + message);
 
-                server.BroadcastNoticeAsync(message).WaitEx();
+                server.BroadcastNoticeAsync(message);
 
                 server.ResourceCache.Clear(ResourceCacheType.Shop);
                 server.ResourceCache.GetShop();
 
                 message = "Reload completed";
-                server.BroadcastNoticeAsync(message).WaitEx();
+                server.BroadcastNoticeAsync(message);
                 if (plr == null)
                     Console.WriteLine(message);
                 else

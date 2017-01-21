@@ -76,7 +76,7 @@ namespace Netsphere.Commands
                     else
                     {
                         stateMachine.Fire(trigger);
-                        plr.Room.BroadcastAsync(new SNoticeMessageAckMessage($"Current game state has been changed by {plr.Account.Nickname}")).WaitEx();
+                        plr.Room.Broadcast(new SNoticeMessageAckMessage($"Current game state has been changed by {plr.Account.Nickname}"));
                     }
                 }
 

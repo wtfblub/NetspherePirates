@@ -73,7 +73,7 @@ namespace Netsphere
         {
             var item = new PlayerItem(this, shopItemInfo, price, color, effect, DateTimeOffset.Now, count);
             _items.TryAdd(item.Id, item);
-            Player.Session.SendAsync(new SInventoryActionAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>())).WaitEx();
+            Player.Session.SendAsync(new SInventoryActionAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>()));
             return item;
         }
 
@@ -100,7 +100,7 @@ namespace Netsphere
             if (item.ExistsInDatabase)
                 _itemsToDelete.Push(item);
 
-            Player.Session.SendAsync(new SDeleteItemInventoryAckMessage(item.Id)).WaitEx();
+            Player.Session.SendAsync(new SDeleteItemInventoryAckMessage(item.Id));
         }
 
         internal void Save(IDbConnection db)

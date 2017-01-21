@@ -65,8 +65,8 @@ namespace Netsphere.Game.GameRules
                 }
                 else
                 {
-                    Room.BroadcastAsync(new SEventMessageAckMessage(GameEventMessage.HalfTimeIn, 2, 0, 0,
-                        ((int)(PreHalfTimeWaitTime - RoundTime).TotalSeconds + 1).ToString())).WaitEx();
+                    Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.HalfTimeIn, 2, 0, 0,
+                        ((int)(PreHalfTimeWaitTime - RoundTime).TotalSeconds + 1).ToString()));
                 }
             }
 
@@ -89,8 +89,8 @@ namespace Netsphere.Game.GameRules
                 }
                 else
                 {
-                    Room.BroadcastAsync(new SEventMessageAckMessage(GameEventMessage.ResultIn, 3, 0, 0,
-                        (int)(PreResultWaitTime - RoundTime).TotalSeconds + 1 + " second(s)")).WaitEx();
+                    Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.ResultIn, 3, 0, 0,
+                        (int)(PreResultWaitTime - RoundTime).TotalSeconds + 1 + " second(s)"));
                 }
             }
 
@@ -116,15 +116,15 @@ namespace Netsphere.Game.GameRules
             {
                 assist.RoomInfo.Stats.KillAssists++;
 
-                Room.BroadcastAsync(
+                Room.Broadcast(
                     new SScoreKillAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId,
-                        target.RoomInfo.PeerId, attackAttribute))).WaitEx();
+                        target.RoomInfo.PeerId, attackAttribute)));
             }
             else
             {
-                Room.BroadcastAsync(
+                Room.Broadcast(
                     new SScoreKillAckMessage(new ScoreDto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId,
-                        attackAttribute))).WaitEx();
+                        attackAttribute)));
             }
         }
 
@@ -132,20 +132,20 @@ namespace Netsphere.Game.GameRules
         {
             target.RoomInfo.Stats.Deaths++;
 
-            Room.BroadcastAsync(
+            Room.Broadcast(
                 new SScoreTeamKillAckMessage(new Score2Dto(killer.RoomInfo.PeerId, target.RoomInfo.PeerId,
-                    attackAttribute))).WaitEx();
+                    attackAttribute)));
         }
 
         public virtual void OnScoreHeal(Player plr)
         {
-            Room.BroadcastAsync(new SScoreHealAssistAckMessage(plr.RoomInfo.PeerId)).WaitEx();
+            Room.Broadcast(new SScoreHealAssistAckMessage(plr.RoomInfo.PeerId));
         }
 
         public virtual void OnScoreSuicide(Player plr)
         {
             plr.RoomInfo.Stats.Deaths++;
-            Room.BroadcastAsync(new SScoreSuicideAckMessage(plr.RoomInfo.PeerId, AttackAttribute.KillOneSelf)).WaitEx();
+            Room.Broadcast(new SScoreSuicideAckMessage(plr.RoomInfo.PeerId, AttackAttribute.KillOneSelf));
         }
 
         #endregion
@@ -172,20 +172,20 @@ namespace Netsphere.Game.GameRules
                         plr.RoomInfo.State = plr.RoomInfo.Mode == PlayerGameMode.Normal
                             ? PlayerState.Alive
                             : PlayerState.Spectating;
-                        plr.Session.SendAsync(new SBeginRoundAckMessage()).WaitEx();
+                        plr.Session.SendAsync(new SBeginRoundAckMessage());
                     }
 
-                    Room.BroadcastBriefingAsync().WaitEx();
-                    Room.BroadcastAsync(new SChangeStateAckMessage(GameState.Playing)).WaitEx();
-                    Room.BroadcastAsync(new SChangeSubStateAckMessage(GameTimeState.FirstHalf)).WaitEx();
+                    Room.BroadcastBriefing();
+                    Room.Broadcast(new SChangeStateAckMessage(GameState.Playing));
+                    Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
                     break;
 
                 case GameRuleState.HalfTime:
-                    Room.BroadcastAsync(new SChangeSubStateAckMessage(GameTimeState.HalfTime)).WaitEx();
+                    Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.HalfTime));
                     break;
 
                 case GameRuleState.SecondHalf:
-                    Room.BroadcastAsync(new SChangeSubStateAckMessage(GameTimeState.SecondHalf)).WaitEx();
+                    Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.SecondHalf));
                     break;
 
                 case GameRuleState.Result:
@@ -211,8 +211,8 @@ namespace Netsphere.Game.GameRules
                     foreach (var plr in Room.TeamManager.Players.Where(plr => plr.RoomInfo.State != PlayerState.Lobby))
                         plr.RoomInfo.State = PlayerState.Waiting;
 
-                    Room.BroadcastAsync(new SChangeStateAckMessage(GameState.Result)).WaitEx();
-                    Room.BroadcastBriefingAsync(true).WaitEx();
+                    Room.Broadcast(new SChangeStateAckMessage(GameState.Result));
+                    Room.BroadcastBriefing(true);
                     break;
 
                 case GameRuleState.Waiting:
@@ -222,8 +222,8 @@ namespace Netsphere.Game.GameRules
                         plr.RoomInfo.State = PlayerState.Lobby;
                     }
 
-                    Room.BroadcastAsync(new SChangeStateAckMessage(GameState.Waiting)).WaitEx();
-                    Room.BroadcastBriefingAsync().WaitEx();
+                    Room.Broadcast(new SChangeStateAckMessage(GameState.Waiting));
+                    Room.BroadcastBriefing();
                     break;
             }
         }

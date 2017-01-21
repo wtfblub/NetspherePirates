@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
@@ -232,8 +231,7 @@ namespace Netsphere.Network.Services
         {
             if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
             {
-                await session.CloseAsync()
-                    .ConfigureAwait(false);
+                session.CloseAsync();
                 return;
             }
 
@@ -257,8 +255,7 @@ namespace Netsphere.Network.Services
         {
             if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
             {
-                await session.CloseAsync()
-                    .ConfigureAwait(false);
+                session.CloseAsync();
                 return;
             }
 

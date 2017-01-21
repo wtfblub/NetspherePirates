@@ -91,7 +91,7 @@ namespace Netsphere
 
             var charStyle = new CharacterStyle(@char.Gender, @char.Hair.Variation, @char.Face.Variation,
                 @char.Shirt.Variation, @char.Pants.Variation, @char.Slot);
-            Player.Session.SendAsync(new SSuccessCreateCharacterAckMessage(@char.Slot, charStyle)).WaitEx();
+            Player.Session.SendAsync(new SSuccessCreateCharacterAckMessage(@char.Slot, charStyle));
 
             return @char;
         }
@@ -109,7 +109,7 @@ namespace Netsphere
                 Player.NeedsToSave = true;
 
             CurrentSlot = slot;
-            Player.Session.SendAsync(new SSuccessSelectCharacterAckMessage(CurrentSlot)).WaitEx();
+            Player.Session.SendAsync(new SSuccessSelectCharacterAckMessage(CurrentSlot));
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Netsphere
             _characters.Remove(slot);
             if (@char.ExistsInDatabase)
                 _charactersToDelete.Push(@char);
-            Player.Session.SendAsync(new SSuccessDeleteCharacterAckMessage(slot)).WaitEx();
+            Player.Session.SendAsync(new SSuccessDeleteCharacterAckMessage(slot));
         }
 
         internal void Save(IDbConnection db)

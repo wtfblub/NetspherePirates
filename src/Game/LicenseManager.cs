@@ -75,7 +75,7 @@ namespace Netsphere
             {
                 license = new License(itemLicense, DateTimeOffset.Now, 1);
                 _licenses.TryAdd(itemLicense, license);
-                _player.Session.SendAsync(new SLicensedAckMessage(itemLicense, licenseReward?.ItemNumber ?? 0)).WaitEx();
+                _player.Session.SendAsync(new SLicensedAckMessage(itemLicense, licenseReward?.ItemNumber ?? 0));
 
                 Logger.Info()
                     .Account(_player)

@@ -63,27 +63,27 @@ namespace Netsphere
         protected virtual void OnPlayerJoining(RoomPlayerEventArgs e)
         {
             PlayerJoining?.Invoke(this, e);
-            RoomManager.Channel.BroadcastAsync(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>())).WaitEx();
-            RoomManager.Channel.BroadcastAsync(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>())).WaitEx();
+            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         internal virtual void OnPlayerJoined(RoomPlayerEventArgs e)
         {
             PlayerJoined?.Invoke(this, e);
-            RoomManager.Channel.BroadcastAsync(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>())).WaitEx();
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         protected virtual void OnPlayerLeft(RoomPlayerEventArgs e)
         {
             PlayerLeft?.Invoke(this, e);
-            RoomManager.Channel.BroadcastAsync(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>())).WaitEx();
-            RoomManager.Channel.BroadcastAsync(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>())).WaitEx();
+            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         protected virtual void OnStateChanged()
         {
             StateChanged?.Invoke(this, EventArgs.Empty);
-            RoomManager.Channel.BroadcastAsync(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>())).WaitEx();
+            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
         }
 
         #endregion
@@ -134,7 +134,7 @@ namespace Netsphere
                 {
                     GameRuleManager.MapInfo = GameServer.Instance.ResourceCache.GetMaps()[Options.MatchKey.Map];
                     GameRuleManager.GameRule = RoomManager.GameRuleFactory.Get(Options.MatchKey.GameRule, this);
-                    BroadcastAsync(new SChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>())).WaitEx();
+                    Broadcast(new SChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
                     IsChangingRules = false;
                 }
             }
@@ -179,10 +179,10 @@ namespace Netsphere
                 Creator = plr;
             }
 
-            BroadcastAsync(new SEnteredPlayerAckMessage(plr.Map<Player, RoomPlayerDto>())).WaitEx();
-            plr.Session.SendAsync(new SSuccessEnterRoomAckMessage(this.Map<Room, EnterRoomInfoDto>())).WaitEx();
-            plr.Session.SendAsync(new SIdsInfoAckMessage(0, plr.RoomInfo.Slot)).WaitEx();
-            plr.Session.SendAsync(new SEnteredPlayerListAckMessage(_players.Values.Select(p => p.Map<Player, RoomPlayerDto>()).ToArray())).WaitEx();
+            Broadcast(new SEnteredPlayerAckMessage(plr.Map<Player, RoomPlayerDto>()));
+            plr.Session.SendAsync(new SSuccessEnterRoomAckMessage(this.Map<Room, EnterRoomInfoDto>()));
+            plr.Session.SendAsync(new SIdsInfoAckMessage(0, plr.RoomInfo.Slot));
+            plr.Session.SendAsync(new SEnteredPlayerListAckMessage(_players.Values.Select(p => p.Map<Player, RoomPlayerDto>()).ToArray()));
             OnPlayerJoining(new RoomPlayerEventArgs(plr));
         }
 
@@ -192,7 +192,7 @@ namespace Netsphere
                 return;
 
             Group.Leave(plr.RelaySession.HostId);
-            BroadcastAsync(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason)).WaitEx();
+            Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
 
             if (roomLeaveReason == RoomLeaveReason.Kicked ||
                 roomLeaveReason == RoomLeaveReason.ModeratorKick ||
@@ -203,7 +203,7 @@ namespace Netsphere
             plr.RoomInfo.Team.Leave(plr);
             _players.Remove(plr.Account.Id);
             plr.Room = null;
-            plr.Session.SendAsync(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id)).WaitEx();
+            plr.Session.SendAsync(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(new RoomPlayerEventArgs(plr));
 
@@ -245,7 +245,7 @@ namespace Netsphere
                 return;
 
             Master = plr;
-            BroadcastAsync(new SChangeMasterAckMessage(Master.Account.Id)).WaitEx();
+            Broadcast(new SChangeMasterAckMessage(Master.Account.Id));
         }
 
         public void ChangeHost(Player plr)
@@ -256,7 +256,7 @@ namespace Netsphere
             // TODO Add Room extension?
             Logger.Debug($"<Room {Id}> Changing host to {plr.Account.Nickname} - Ping:{plr.Session.UnreliablePing} ms");
             Host = plr;
-            BroadcastAsync(new SChangeRefeReeAckMessage(Host.Account.Id)).WaitEx();
+            Broadcast(new SChangeRefeReeAckMessage(Host.Account.Id));
         }
 
         public void ChangeRules(ChangeRuleDto options)
@@ -270,7 +270,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Game rule {options.MatchKey.GameRule} does not exist")
                     .Write();
-                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask)).WaitEx();
+                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -281,7 +281,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Map {options.MatchKey.Map} does not exist")
                     .Write();
-                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask)).WaitEx();
+                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -291,7 +291,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {options.MatchKey.GameRule}")
                     .Write();
-                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask)).WaitEx();
+                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -309,7 +309,7 @@ namespace Netsphere
             Options.ItemLimit = options.ItemLimit;
             Options.IsNoIntrusion = options.IsNoIntrusion;
 
-            BroadcastAsync(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>())).WaitEx();
+            Broadcast(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
         }
 
         private Player GetPlayerWithLowestPing()
@@ -319,7 +319,7 @@ namespace Netsphere
 
         private void TeamManager_TeamChanged(object sender, TeamChangedEventArgs e)
         {
-            RoomManager.Channel.BroadcastAsync(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>())).WaitEx();
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         private void GameRuleManager_OnGameRuleChanged(object sender, EventArgs e)
@@ -331,37 +331,34 @@ namespace Netsphere
                 plr.RoomInfo.Stats = GameRuleManager.GameRule.GetPlayerRecord(plr);
                 TeamManager.Join(plr);
             }
-            BroadcastBriefingAsync().WaitEx();
+            BroadcastBriefing();
         }
 
         #region Broadcast
 
-        public async Task BroadcastAsync(IGameMessage message)
+        public void Broadcast(IGameMessage message)
         {
             foreach (var plr in _players.Values)
-                await plr.Session.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.Session.SendAsync(message);
         }
 
-        public async Task BroadcastAsync(IGameRuleMessage message)
+        public void Broadcast(IGameRuleMessage message)
         {
             foreach (var plr in _players.Values)
-                await plr.Session.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.Session.SendAsync(message);
         }
 
-        public async Task BroadcastAsync(IChatMessage message)
+        public void Broadcast(IChatMessage message)
         {
             foreach (var plr in _players.Values)
-                await plr.Session.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.Session.SendAsync(message);
         }
 
-        public Task BroadcastBriefingAsync(bool isResult = false)
+        public void BroadcastBriefing(bool isResult = false)
         {
             var gameRule = GameRuleManager.GameRule;
             //var isResult = gameRule.StateMachine.IsInState(GameRuleState.Result);
-            return BroadcastAsync(new SBriefingAckMessage(isResult, false, gameRule.Briefing.ToArray(isResult)));
+            Broadcast(new SBriefingAckMessage(isResult, false, gameRule.Briefing.ToArray(isResult)));
         }
 
         #endregion

@@ -159,7 +159,7 @@ namespace Netsphere.Commands
                             Durability = newDurability,
                             Unk2 = 0,
                             Unk3 = 0
-                        } })).WaitEx();
+                        } }));
 
                         break;
 

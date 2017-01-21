@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Network;
 using Netsphere.Network.Data.Chat;
@@ -64,16 +63,16 @@ namespace Netsphere
             if (Players.Count >= PlayerLimit)
                 throw new ChannelLimitReachedException();
 
-            BroadcastAsync(new SChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>())).WaitEx();
+            Broadcast(new SChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
 
             _players.Add(plr.Account.Id, plr);
             plr.SentPlayerList = false;
             plr.Channel = this;
 
-            plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelEnter)).WaitEx();
+            plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelEnter));
             OnPlayerJoined(new ChannelPlayerJoinedEventArgs(this, plr));
 
-            plr.ChatSession.SendAsync(new SNoteReminderInfoAckMessage((byte)plr.Mailbox.Count(mail => mail.IsNew), 0, 0)).WaitEx();
+            plr.ChatSession.SendAsync(new SNoteReminderInfoAckMessage((byte)plr.Mailbox.Count(mail => mail.IsNew), 0, 0));
         }
 
         public void Leave(Player plr)
@@ -84,33 +83,30 @@ namespace Netsphere
             _players.Remove(plr.Account.Id);
             plr.Channel = null;
 
-            BroadcastAsync(new SChannelLeavePlayerAckMessage(plr.Account.Id)).WaitEx();
+            Broadcast(new SChannelLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(new ChannelPlayerLeftEventArgs(this, plr));
-            plr.Session?.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLeave)).WaitEx();
+            plr.Session?.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
         }
 
-        public async Task SendChatMessageAsync(Player plr, string message)
+        public void SendChatMessage(Player plr, string message)
         {
             OnMessage(new ChannelMessageEventArgs(this, plr, message));
 
             foreach (var p in Players.Values.Where(p => !p.DenyManager.Contains(plr.Account.Id) && p.Room == null))
-                await p.ChatSession.SendAsync(new SChatMessageAckMessage(ChatType.Channel, plr.Account.Id, plr.Account.Nickname, message))
-                    .ConfigureAwait(false);
+                p.ChatSession.SendAsync(new SChatMessageAckMessage(ChatType.Channel, plr.Account.Id, plr.Account.Nickname, message));
         }
 
-        public async Task BroadcastAsync(IGameMessage message, bool excludeRooms = false)
+        public void Broadcast(IGameMessage message, bool excludeRooms = false)
         {
             foreach (var plr in Players.Values.Where(plr => !excludeRooms || plr.Room == null))
-                await plr.Session.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.Session.SendAsync(message);
         }
 
-        public async Task BroadcastAsync(IChatMessage message, bool excludeRooms = false)
+        public void Broadcast(IChatMessage message, bool excludeRooms = false)
         {
             foreach (var plr in Players.Values.Where(plr => !excludeRooms || plr.Room == null))
-                await plr.ChatSession.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.ChatSession.SendAsync(message);
         }
     }
 }

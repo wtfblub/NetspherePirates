@@ -21,21 +21,14 @@ namespace Netsphere.Network.Services
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CEnterPlayerReqMessage))]
-        public async Task CEnterPlayerReq(GameSession session)
+        public void CEnterPlayerReq(GameSession session)
         {
             var plr = session.Player;
 
-            await plr.Room.BroadcastAsync(new SEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.RoomInfo.Mode, 0))
-                .ConfigureAwait(false);
-
-            await session.SendAsync(new SChangeMasterAckMessage(plr.Room.Master.Account.Id))
-                .ConfigureAwait(false);
-
-            await session.SendAsync(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id))
-                .ConfigureAwait(false);
-
-            await plr.Room.BroadcastBriefingAsync()
-                .ConfigureAwait(false);
+            plr.Room.Broadcast(new SEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.RoomInfo.Mode, 0));
+            session.SendAsync(new SChangeMasterAckMessage(plr.Room.Master.Account.Id));
+            session.SendAsync(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id));
+            plr.Room.BroadcastBriefing();
         }
 
         [MessageHandler(typeof(CMakeRoomReqMessage))]
@@ -197,21 +190,20 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CReadyRoundReqMessage))]
-        public Task CReadyRoundReq(GameSession session)
+        public void CReadyRoundReq(GameSession session)
         {
             var plr = session.Player;
 
             plr.RoomInfo.IsReady = !plr.RoomInfo.IsReady;
-            return plr.Room.BroadcastAsync(new SReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
+            plr.Room.Broadcast(new SReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
         }
 
         [MessageHandler(typeof(CEventMessageReqMessage))]
-        public async Task CEventMessageReq(GameSession session, CEventMessageReqMessage message)
+        public void CEventMessageReq(GameSession session, CEventMessageReqMessage message)
         {
             var plr = session.Player;
 
-            await plr.Room.BroadcastAsync(new SEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""))
-                .ConfigureAwait(false);
+            plr.Room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""));
             //if (message.Event == GameEventMessage.BallReset && plr == plr.Room.Host)
             //{
             //    plr.Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.BallReset, 0, 0, 0, ""));
@@ -227,13 +219,12 @@ namespace Netsphere.Network.Services
                     ? PlayerState.Alive
                     : PlayerState.Spectating;
 
-                await plr.Room.BroadcastBriefingAsync()
-                    .ConfigureAwait(false);
+                plr.Room.BroadcastBriefing();
             }
         }
 
         [MessageHandler(typeof(CItemsChangeReqMessage))]
-        public async Task CItemsChangeReq(GameSession session, CItemsChangeReqMessage message)
+        public void CItemsChangeReq(GameSession session, CItemsChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -263,12 +254,11 @@ namespace Netsphere.Network.Services
                 Unk8 = message.Unk1.Unk8
             };
 
-            await plr.Room.BroadcastAsync(new SItemsChangeAckMessage(unk1, message.Unk2))
-                .ConfigureAwait(false);
+            plr.Room.Broadcast(new SItemsChangeAckMessage(unk1, message.Unk2));
         }
 
         [MessageHandler(typeof(CAvatarChangeReqMessage))]
-        public async Task CAvatarChangeReq(GameSession session, CAvatarChangeReqMessage message)
+        public void CAvatarChangeReq(GameSession session, CAvatarChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -340,8 +330,7 @@ namespace Netsphere.Network.Services
                 unk1.Costumes[(int)slot] = item;
             }
 
-            await plr.Room.BroadcastAsync(new SAvatarChangeAckMessage(unk1, message.Unk2))
-                .ConfigureAwait(false);
+            plr.Room.Broadcast(new SAvatarChangeAckMessage(unk1, message.Unk2));
         }
 
         [MessageHandler(typeof(CChangeRuleNotifyReqMessage))]

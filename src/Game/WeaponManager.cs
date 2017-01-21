@@ -58,7 +58,7 @@ namespace Netsphere
                 ItemId = item.Id,
                 Action = UseItemAction.Equip,
                 EquipSlot = (byte)slot
-            }).WaitEx();
+            });
         }
 
         public void UnEquip(WeaponSlot slot)
@@ -91,7 +91,7 @@ namespace Netsphere
                 ItemId = item?.Id ?? 0,
                 Action = UseItemAction.UnEquip,
                 EquipSlot = (byte)slot
-            }).WaitEx();
+            });
         }
 
         public PlayerItem GetItem(WeaponSlot slot)

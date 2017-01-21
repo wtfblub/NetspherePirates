@@ -215,7 +215,7 @@ namespace Netsphere
             if (!leveledUp)
                 return false;
 
-            Channel?.BroadcastAsync(new SUserDataAckMessage(this.Map<Player, UserDataDto>())).WaitEx();
+            Channel?.Broadcast(new SUserDataAckMessage(this.Map<Player, UserDataDto>()));
 
             // ToDo Do we need to update inside rooms too?
 
@@ -277,7 +277,7 @@ namespace Netsphere
         /// <param name="message">The message to send</param>
         public void SendConsoleMessage(string message)
         {
-            Session.SendAsync(new SAdminActionAckMessage { Result = 1, Message = message }).WaitEx();
+            Session.SendAsync(new SAdminActionAckMessage { Result = 1, Message = message });
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace Netsphere
         /// <param name="message">The message to send</param>
         public void SendNotice(string message)
         {
-            Session.SendAsync(new SNoticeMessageAckMessage(message)).WaitEx();
+            Session.SendAsync(new SNoticeMessageAckMessage(message));
         }
 
         /// <summary>

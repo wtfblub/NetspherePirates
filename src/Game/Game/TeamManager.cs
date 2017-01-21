@@ -78,7 +78,7 @@ namespace Netsphere.Game.Systems
 
             if (plr.RoomInfo.IsReady)
             {
-                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady)).WaitEx();
+                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                 throw new RoomException("Player is already ready");
             }
 
@@ -94,7 +94,7 @@ namespace Netsphere.Game.Systems
             }
             catch (TeamLimitReachedException)
             {
-                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full)).WaitEx();
+                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
             }
         }
 
@@ -114,7 +114,7 @@ namespace Netsphere.Game.Systems
 
             if (plr.RoomInfo.IsReady)
             {
-                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady)).WaitEx();
+                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                 throw new RoomException("Player is already ready");
             }
 
@@ -124,7 +124,7 @@ namespace Netsphere.Game.Systems
                 case PlayerGameMode.Normal:
                     if (team.Players.Count() >= team.PlayerLimit)
                     {
-                        plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full)).WaitEx();
+                        plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
                     }
                     break;
@@ -132,7 +132,7 @@ namespace Netsphere.Game.Systems
                 case PlayerGameMode.Spectate:
                     if (team.Spectators.Count() >= team.SpectatorLimit)
                     {
-                        plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full)).WaitEx();
+                        plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
                     }
                     break;
@@ -142,30 +142,27 @@ namespace Netsphere.Game.Systems
             }
 
             plr.RoomInfo.Mode = mode;
-            BroadcastAsync(new SPlayerGameModeChangeAckMessage(plr.Account.Id, mode)).WaitEx();
+            Broadcast(new SPlayerGameModeChangeAckMessage(plr.Account.Id, mode));
         }
 
         #region Broadcast
 
-        public async Task BroadcastAsync(IGameMessage message)
+        public void Broadcast(IGameMessage message)
         {
             foreach (var team in _teams.Values)
-                await team.BroadcastAsync(message)
-                    .ConfigureAwait(false);
+                team.Broadcast(message);
         }
 
-        public async Task BroadcastAsync(IGameRuleMessage message)
+        public void Broadcast(IGameRuleMessage message)
         {
             foreach (var team in _teams.Values)
-                await team.BroadcastAsync(message)
-                    .ConfigureAwait(false);
+                team.Broadcast(message);
         }
 
-        public async Task BroadcastAsync(IChatMessage message)
+        public void Broadcast(IChatMessage message)
         {
             foreach (var team in _teams.Values)
-                await team.BroadcastAsync(message)
-                    .ConfigureAwait(false);
+                team.Broadcast(message);
         }
 
         #endregion
@@ -271,7 +268,7 @@ namespace Netsphere.Game.Systems
             _players.TryAdd(plr.RoomInfo.Slot, plr);
 
             if (isChange)
-                TeamManager.BroadcastAsync(new SChangeTeamAckMessage(plr.Account.Id, Team, plr.RoomInfo.Mode)).WaitEx();
+                TeamManager.Broadcast(new SChangeTeamAckMessage(plr.Account.Id, Team, plr.RoomInfo.Mode));
 
             OnPlayerJoined(plr);
         }
@@ -289,25 +286,22 @@ namespace Netsphere.Game.Systems
 
         #region Broadcast
 
-        public async Task BroadcastAsync(IGameMessage message)
+        public void Broadcast(IGameMessage message)
         {
             foreach (var plr in _players.Values)
-                await plr.Session.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.Session.SendAsync(message);
         }
 
-        public async Task BroadcastAsync(IGameRuleMessage message)
+        public void Broadcast(IGameRuleMessage message)
         {
             foreach (var plr in _players.Values)
-                await plr.Session.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.Session.SendAsync(message);
         }
 
-        public async Task BroadcastAsync(IChatMessage message)
+        public void Broadcast(IChatMessage message)
         {
             foreach (var plr in _players.Values)
-                await plr.ChatSession.SendAsync(message)
-                    .ConfigureAwait(false);
+                plr.ChatSession.SendAsync(message);
         }
 
         #endregion

@@ -77,8 +77,7 @@ namespace Netsphere.Network.Services
             switch (message.ChatType)
             {
                 case ChatType.Channel:
-                    await session.Player.Channel.SendChatMessageAsync(session.Player, message.Message)
-                        .ConfigureAwait(false);
+                    session.Player.Channel.SendChatMessage(session.Player, message.Message);
                     break;
 
                 case ChatType.Club:
