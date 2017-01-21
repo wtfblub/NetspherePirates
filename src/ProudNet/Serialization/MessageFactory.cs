@@ -25,14 +25,14 @@ namespace ProudNet.Serialization
             if (_opCodeLookup.TryGetValue(type, out opCode))
                 return opCode;
 
-            throw new ProudException($"No opCode found for type {type.FullName}");
+            throw new ProudException($"No opcode found for type {type.FullName}");
         }
 
         public object GetMessage(ushort opCode, Stream stream)
         {
             Type type;
             if (!_typeLookup.TryGetValue(opCode, out type))
-                throw new ProudException($"No type found for opCode {opCode}");
+                throw new ProudException($"No type found for opcode {opCode}");
 
             return Serializer.Deserialize(stream, type);
         }
@@ -41,7 +41,11 @@ namespace ProudNet.Serialization
         {
             Type type;
             if (!_typeLookup.TryGetValue(opCode, out type))
-                throw new ProudException($"No type found for opCode {opCode}");
+#if DEBUG
+                throw new ProudBadOpCodeException(opCode, reader.ReadToEnd());
+#else
+            throw new ProudBadOpCodeException(opCode);
+#endif
 
             return Serializer.Deserialize(reader, type);
         }

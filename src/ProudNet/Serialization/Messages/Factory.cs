@@ -8,6 +8,7 @@
         {
             // C2S
             Register<ReliablePingMessage>(ProudOpCode.ReliablePing);
+            Register<P2P_NotifyDirectP2PDisconnectedMessage>(ProudOpCode.P2P_NotifyDirectP2PDisconnected);
             Register<P2PGroup_MemberJoin_AckMessage>(ProudOpCode.P2PGroup_MemberJoin_Ack);
             Register<NotifyP2PHolepunchSuccessMessage>(ProudOpCode.NotifyP2PHolepunchSuccess);
             Register<ShutdownTcpMessage>(ProudOpCode.ShutdownTcp);
@@ -16,6 +17,7 @@
             Register<NotifyNatDeviceNameDetectedMessage>(ProudOpCode.NotifyNatDeviceNameDetected);
             Register<C2S_RequestCreateUdpSocketMessage>(ProudOpCode.C2S_RequestCreateUdpSocket);
             Register<C2S_CreateUdpSocketAckMessage>(ProudOpCode.C2S_CreateUdpSocketAck);
+            Register<ReportC2CUdpMessageCountMessage>(ProudOpCode.ReportC2CUdpMessageCount);
             Register<ReportC2SUdpMessageTrialCountMessage>(ProudOpCode.ReportC2SUdpMessageTrialCount);
 
             // S2C

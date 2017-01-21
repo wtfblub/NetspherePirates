@@ -20,4 +20,17 @@ namespace Netsphere.Network.Message.Relay
         [BlubMember(3)]
         public bool CreatedRoom { get; set; }
     }
+
+    [BlubContract]
+    public class CNotifyP2PLogMessage : IRelayMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public short Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public byte Unk3 { get; set; }
+    }
 }

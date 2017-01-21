@@ -30,7 +30,13 @@ namespace ProudNet.Codecs
                     : _userMessageFactories.FirstOrDefault(userFactory => userFactory.ContainsOpCode(opCode));
 
                 if (factory == null)
+                {
+#if DEBUG
+                    throw new ProudBadOpCodeException(opCode, message.ToArray());
+#else
                     throw new ProudException($"No {nameof(MessageFactory)} found for opcode {opCode}");
+#endif
+                }
 
                 output.Add(factory.GetMessage(opCode, r));
             }

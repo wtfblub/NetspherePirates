@@ -40,30 +40,22 @@ namespace ProudNet
 
         public Task SendAsync(object message)
         {
-            return SendAsync(message, SendOptions.ReliableSecure);
+            return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.ReliableSecure);
         }
 
         public Task SendAsync(object message, SendOptions options)
         {
-            ThrowIfDisposed();
-            return Channel.WriteAndFlushAsync(new SendContext(message, options));
+            return _disposed ? Task.CompletedTask : Channel.WriteAndFlushAsync(new SendContext(message, options));
         }
 
         internal Task SendAsync(IMessage message)
         {
-            return SendAsync(message, SendOptions.Reliable);
+            return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.Reliable);
         }
 
         internal Task SendAsync(ICoreMessage message)
         {
-            ThrowIfDisposed();
-            return Channel.Pipeline.Context("coreHandler").WriteAndFlushAsync(message);
-        }
-
-        private void ThrowIfDisposed()
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
+            return _disposed ? Task.CompletedTask : Channel.Pipeline.Context("coreHandler").WriteAndFlushAsync(message);
         }
 
         public Task CloseAsync()

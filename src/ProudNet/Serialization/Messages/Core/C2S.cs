@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Net;
 using BlubLib.Serialization;
 using ProudNet.Serialization.Serializers;
@@ -118,12 +117,13 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public RelayDestinationDto[] Destination { get; set; }
 
-        [BlubMember(1, typeof(StreamWithScalarSerializer))]
-        public Stream Data { get; set; }
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
 
         public ReliableRelay1Message()
         {
             Destination = Array.Empty<RelayDestinationDto>();
+            Data = Array.Empty<byte>();
         }
     }
 
@@ -139,12 +139,13 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public uint[] Destination { get; set; }
 
-        [BlubMember(3, typeof(StreamWithScalarSerializer))]
-        public Stream Data { get; set; }
+        [BlubMember(3, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
 
         public UnreliableRelay1Message()
         {
             Destination = Array.Empty<uint>();
+            Data = Array.Empty<byte>();
         }
     }
 }

@@ -191,15 +191,15 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public RelayDestinationDto Destination { get; set; }
 
-        [BlubMember(1, typeof(StreamWithScalarSerializer))]
-        public Stream Data { get; set; }
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
 
         public ReliableRelay2Message()
         {
             Destination = new RelayDestinationDto();
         }
 
-        public ReliableRelay2Message(RelayDestinationDto destination, Stream data)
+        public ReliableRelay2Message(RelayDestinationDto destination, byte[] data)
         {
             Destination = destination;
             Data = data;
@@ -212,13 +212,13 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public uint HostId { get; set; }
 
-        [BlubMember(1, typeof(StreamWithScalarSerializer))]
-        public Stream Data { get; set; }
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
 
         public UnreliableRelay2Message()
         { }
 
-        public UnreliableRelay2Message(uint hostId, Stream data)
+        public UnreliableRelay2Message(uint hostId, byte[] data)
         {
             HostId = hostId;
             Data = data;

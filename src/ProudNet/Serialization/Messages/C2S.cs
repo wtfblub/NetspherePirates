@@ -12,6 +12,16 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
+    internal class P2P_NotifyDirectP2PDisconnectedMessage : IMessage
+    {
+        [BlubMember(0)]
+        public uint RemotePeerHostId { get; set; }
+
+        [BlubMember(1)]
+        public uint Reason { get; set; }
+    }
+
+    [BlubContract]
     internal class P2PGroup_MemberJoin_AckMessage : IMessage
     {
         [BlubMember(0)]
@@ -97,6 +107,19 @@ namespace ProudNet.Serialization.Messages
     {
         [BlubMember(0)]
         public bool Success { get; set; }
+    }
+
+    [BlubContract]
+    internal class ReportC2CUdpMessageCountMessage : IMessage
+    {
+        [BlubMember(0)]
+        public uint HostId { get; set; }
+
+        [BlubMember(1)]
+        public uint UdpMessageTrialCount { get; set; }
+
+        [BlubMember(2)]
+        public uint UdpMessageSuccessCount { get; set; }
     }
 
     [BlubContract]

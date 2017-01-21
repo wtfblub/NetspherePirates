@@ -22,6 +22,7 @@ namespace Netsphere.Network.Message.Relay
 
             // C2S
             Register<CRequestLoginMessage>(RelayOpCode.CRequestLogin);
+            Register<CNotifyP2PLogMessage>(RelayOpCode.CNotifyP2PLog);
         }
     }
 }
