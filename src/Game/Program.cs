@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using BlubLib;
 using Dapper;
 using Dapper.FastCrud;
+using DotNetty.Transport.Channels;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Newtonsoft.Json;
@@ -50,9 +51,10 @@ namespace Netsphere
 
             Logger.Info("Starting server...");
 
-            ChatServer.Instance.Listen(Config.Instance.ChatListener);
-            RelayServer.Instance.Listen(Config.Instance.RelayListener);
-            GameServer.Instance.Listen(Config.Instance.Listener);
+            var eventLoopGroup = new MultithreadEventLoopGroup();
+            ChatServer.Instance.Listen(Config.Instance.ChatListener, eventLoopGroup: eventLoopGroup);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener, eventLoopGroup: eventLoopGroup);
+            GameServer.Instance.Listen(Config.Instance.Listener, eventLoopGroup: eventLoopGroup);
 
             Logger.Info("Ready for connections!");
 

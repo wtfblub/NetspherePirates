@@ -75,13 +75,13 @@ namespace ProudNet.Server
             P2PGroupManager = new P2PGroupManager(this);
         }
 
-        public void Listen(IPEndPoint tcpListener, int[] udpListenerPorts = null)
+        public void Listen(IPEndPoint tcpListener, int[] udpListenerPorts = null, IEventLoopGroup eventLoopGroup = null)
         {
             ThrowIfDisposed();
 
             // TODO UDP listener
 
-            _eventLoopGroup = new MultithreadEventLoopGroup();
+            _eventLoopGroup = eventLoopGroup ?? new MultithreadEventLoopGroup();
             try
             {
                 _listenerChannel = new ServerBootstrap()
