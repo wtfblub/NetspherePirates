@@ -49,7 +49,7 @@ namespace Netsphere
         public Player Host { get; private set; }
         public Player Creator { get; private set; }
 
-        public IP2PGroup Group { get; }
+        public P2PGroup Group { get; }
 
         public bool IsChangingRules { get; private set; }
 
@@ -88,7 +88,7 @@ namespace Netsphere
 
         #endregion
 
-        public Room(RoomManager roomManager, uint id, RoomCreationOptions options, IP2PGroup group)
+        public Room(RoomManager roomManager, uint id, RoomCreationOptions options, P2PGroup group)
         {
             RoomManager = roomManager;
             Id = id;

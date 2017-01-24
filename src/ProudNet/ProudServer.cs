@@ -9,9 +9,8 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using ProudNet.Codecs;
 using ProudNet.Handlers;
-using ProudNet.Server.Handlers;
 
-namespace ProudNet.Server
+namespace ProudNet
 {
     public class ProudServer : IDisposable
     {
@@ -104,8 +103,7 @@ namespace ProudNet.Server
                             .AddLast(new CoreMessageEncoder())
 
                             .AddLast("coreHandler", new SimpleMessageHandler()
-                                .Add(new CoreHandler())
-                                .Add(new CoreServerHandler(this)))
+                                .Add(new CoreHandler(this)))
 
                             .AddLast(new SendContextEncoder())
                             .AddLast(new MessageDecoder(Configuration.MessageFactories))

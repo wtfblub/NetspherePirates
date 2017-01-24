@@ -1,7 +1,6 @@
 ﻿using BlubLib;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using DotNetty.Transport.Channels;
-using ProudNet.Server;
 
 namespace ProudNet.Handlers
 {

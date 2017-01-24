@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using DotNetty.Common.Utilities;
-using ProudNet.Server;
 
 namespace ProudNet
 {

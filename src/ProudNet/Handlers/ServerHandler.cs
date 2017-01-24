@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
-using ProudNet.Handlers;
 using ProudNet.Serialization.Messages;
 
-namespace ProudNet.Server.Handlers
+namespace ProudNet.Handlers
 {
     internal class ServerHandler : ProudMessageHandler
     {
@@ -21,18 +20,18 @@ namespace ProudNet.Server.Handlers
             if (session.P2PGroup == null || session.HostId == message.AddedMemberHostId)
                 return;
 
-            var remotePeer = (RemotePeer)session.P2PGroup.Members[session.HostId];
+            var remotePeer = session.P2PGroup.Members[session.HostId];
             var connectionState = remotePeer.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
 
             if (connectionState.EventId != message.EventId)
                 return;
 
             connectionState.IsJoined = true;
-            var connectionStateB = ((RemotePeer)connectionState.RemotePeer).ConnectionStates[session.HostId];
+            var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
             if (connectionStateB.IsJoined)
             {
                 await remotePeer.SendAsync(new P2PRecycleCompleteMessage(connectionState.RemotePeer.HostId));
-                await ((RemotePeer)connectionState.RemotePeer).SendAsync(new P2PRecycleCompleteMessage(session.HostId));
+                await connectionState.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(session.HostId));
             }
         }
 
@@ -43,8 +42,8 @@ namespace ProudNet.Server.Handlers
             if (group == null || (session.HostId != message.A && session.HostId != message.B))
                 return;
 
-            var remotePeerA = (RemotePeer)group.Members.GetValueOrDefault(message.A);
-            var remotePeerB = (RemotePeer)group.Members.GetValueOrDefault(message.B);
+            var remotePeerA = group.Members.GetValueOrDefault(message.A);
+            var remotePeerB = group.Members.GetValueOrDefault(message.B);
 
             if (remotePeerA == null || remotePeerB == null)
                 return;
@@ -90,8 +89,8 @@ namespace ProudNet.Server.Handlers
             if (group == null)
                 return;
 
-            var remotePeerA = (RemotePeer)group.Members.GetValueOrDefault(session.HostId);
-            var remotePeerB = (RemotePeer)group.Members.GetValueOrDefault(message.HostId);
+            var remotePeerA = group.Members.GetValueOrDefault(session.HostId);
+            var remotePeerB = group.Members.GetValueOrDefault(message.HostId);
 
             if (remotePeerA == null || remotePeerB == null)
                 return;

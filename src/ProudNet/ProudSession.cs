@@ -19,7 +19,7 @@ namespace ProudNet
         public IPEndPoint LocalEndPoint => (IPEndPoint)Channel.LocalAddress;
 
         public uint HostId { get; }
-        public IP2PGroup P2PGroup { get; internal set; }
+        public P2PGroup P2PGroup { get; internal set; }
         public bool UdpEnabled { get; internal set; }
         public IPEndPoint UdpEndPoint { get; internal set; }
         public IPEndPoint UdpLocalEndPoint { get; internal set; }

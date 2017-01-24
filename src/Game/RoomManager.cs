@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Game;
@@ -45,7 +44,7 @@ namespace Netsphere
             return room;
         }
 
-        public Room Create(RoomCreationOptions options, IP2PGroup p2pGroup)
+        public Room Create(RoomCreationOptions options, P2PGroup p2pGroup)
         {
             using (_sync.Lock())
             {

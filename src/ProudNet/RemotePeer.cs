@@ -1,17 +1,17 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace ProudNet.Server
+namespace ProudNet
 {
-    internal class RemotePeer : IRemotePeer
+    public class RemotePeer
     {
-        public IP2PGroup Group { get; }
+        public P2PGroup Group { get; }
         public uint HostId { get; }
         internal Crypt Crypt { get; }
         internal ConcurrentDictionary<uint, P2PConnectionState> ConnectionStates { get; }
         internal ProudSession Session { get; }
 
-        public RemotePeer(IP2PGroup group, ProudSession session, Crypt crypt)
+        internal RemotePeer(P2PGroup group, ProudSession session, Crypt crypt)
         {
             Group = group;
             HostId = session.HostId;

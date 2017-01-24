@@ -6,7 +6,6 @@ using NLog;
 using NLog.Fluent;
 using ProudNet;
 using ProudNet.Serialization;
-using ProudNet.Server;
 
 namespace Netsphere.Network
 {

@@ -7,7 +7,6 @@ using Netsphere.Network.Message.Auth;
 using Netsphere.Network.Service;
 using ProudNet;
 using ProudNet.Serialization;
-using ProudNet.Server;
 
 namespace Netsphere.Network
 {

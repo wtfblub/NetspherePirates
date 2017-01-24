@@ -13,7 +13,6 @@ using Netsphere.Resource;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
-using ProudNet.Server;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Services;
