@@ -149,8 +149,8 @@ namespace ProudNet
 
         public static IByteBuffer ReadStruct(this IByteBuffer @this)
         {
-            var size = @this.ReadScalar();
-            return @this.ReadBytes(size);
+            var length = @this.ReadScalar();
+            return @this.ReadSlice(length);
         }
 
         public static string ReadProudString(this IByteBuffer @this)

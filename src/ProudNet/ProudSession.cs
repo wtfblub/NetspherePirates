@@ -20,14 +20,16 @@ namespace ProudNet
 
         public uint HostId { get; }
         public P2PGroup P2PGroup { get; internal set; }
-        public bool UdpEnabled { get; internal set; }
         public IPEndPoint UdpEndPoint { get; internal set; }
         public IPEndPoint UdpLocalEndPoint { get; internal set; }
 
+        internal bool UdpEnabled { get; set; }
         internal ushort UdpSessionId { get; set; }
         internal Crypt Crypt { get; set; }
         internal DateTime LastSpeedHackDetectorPing { get; set; }
         internal AsyncManualResetEvent HandhsakeEvent { get; set; }
+        internal Guid HolepunchMagicNumber { get; set; }
+        internal UdpSocket UdpSocket { get; set; }
 
         public double UnreliablePing { get; internal set; }
 
@@ -56,6 +58,13 @@ namespace ProudNet
         internal Task SendAsync(ICoreMessage message)
         {
             return _disposed ? Task.CompletedTask : Channel.Pipeline.Context("coreHandler").WriteAndFlushAsync(message);
+        }
+
+        internal Task SendUdpIfAvailableAsync(ICoreMessage message)
+        {
+            return UdpEnabled
+                ? UdpSocket.SendAsync(message, UdpEndPoint)
+                : SendAsync(message);
         }
 
         public Task CloseAsync()

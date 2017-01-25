@@ -18,12 +18,17 @@ namespace ProudNet
         private IEventLoopGroup _eventLoopGroup;
         private IChannel _listenerChannel;
         private readonly ConcurrentDictionary<uint, ProudSession> _sessions = new ConcurrentDictionary<uint, ProudSession>();
+        private readonly ConcurrentDictionary<uint, ProudSession> _sessionsByUdpId = new ConcurrentDictionary<uint, ProudSession>();
 
         public bool IsRunning { get; private set; }
-        internal Configuration Configuration { get; }
         public IReadOnlyDictionary<uint, ProudSession> Sessions => _sessions;
         public P2PGroupManager P2PGroupManager { get; }
 
+        internal Configuration Configuration { get; }
+        internal ConcurrentDictionary<uint, ProudSession> SessionsByUdpId => _sessionsByUdpId;
+        internal UdpSocketManager UdpSocketManager { get; }
+
+        #region Events
         public event EventHandler Started;
         public event EventHandler Stopping;
         public event EventHandler Stopped;
@@ -67,6 +72,7 @@ namespace ProudNet
         {
             OnError(e);
         }
+        #endregion
 
         public ProudServer(Configuration configuration)
         {
@@ -84,13 +90,12 @@ namespace ProudNet
 
             Configuration = configuration;
             P2PGroupManager = new P2PGroupManager(this);
+            UdpSocketManager = new UdpSocketManager(this);
         }
 
         public void Listen(IPEndPoint tcpListener, int[] udpListenerPorts = null, IEventLoopGroup eventLoopGroup = null)
         {
             ThrowIfDisposed();
-
-            // TODO UDP listener
 
             _eventLoopGroup = eventLoopGroup ?? new MultithreadEventLoopGroup();
             try
@@ -131,7 +136,10 @@ namespace ProudNet
                     .ChildOption(ChannelOption.TcpNodelay, !Configuration.EnableNagleAlgorithm)
                     .ChildAttribute(ChannelAttributes.Session, default(ProudSession))
                     .ChildAttribute(ChannelAttributes.Server, this)
-                    .BindAsync(tcpListener).Result;
+                    .BindAsync(tcpListener).WaitEx();
+
+                if (udpListenerPorts != null)
+                    UdpSocketManager.Listen(tcpListener.Address, udpListenerPorts, _eventLoopGroup);
             }
             catch (Exception ex)
             {
@@ -152,16 +160,16 @@ namespace ProudNet
             _disposed = true;
 
             OnStopping();
+            UdpSocketManager.Dispose();
             _listenerChannel.CloseAsync().WaitEx();
             _eventLoopGroup.ShutdownGracefullyAsync().WaitEx();
             OnStopped();
         }
 
-        public async Task BroadcastAsync(object message)
+        public void Broadcast(object message)
         {
             foreach (var session in Sessions.Values)
-                await session.SendAsync(message)
-                    .ConfigureAwait(false);
+                session.SendAsync(message);
         }
 
         internal void AddSession(ProudSession session)
@@ -173,6 +181,7 @@ namespace ProudNet
         internal void RemoveSession(ProudSession session)
         {
             _sessions.Remove(session.HostId);
+            SessionsByUdpId.Remove(session.UdpSessionId);
             OnDisconnected(session);
         }
 

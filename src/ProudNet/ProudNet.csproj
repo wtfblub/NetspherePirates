@@ -78,6 +78,10 @@
     <Compile Include="Codecs\MessageDecoder.cs" />
     <Compile Include="Codecs\MessageEncoder.cs" />
     <Compile Include="Codecs\ProudFrameEncoder.cs" />
+    <Compile Include="Codecs\UdpFrameDecoder.cs" />
+    <Compile Include="Codecs\UdpFrameEncoder.cs" />
+    <Compile Include="Codecs\UdpHandler.cs" />
+    <Compile Include="Codecs\UdpMessage.cs" />
     <Compile Include="Crypt.cs" />
     <Compile Include="ErrorEventArgs.cs" />
     <Compile Include="Handlers\SendContextEncoder.cs" />
@@ -122,6 +126,8 @@
     <Compile Include="Handlers\ProudMessageHandler.cs" />
     <Compile Include="Handlers\ServerHandler.cs" />
     <Compile Include="Handlers\CoreHandler.cs" />
+    <Compile Include="UdpSocket.cs" />
+    <Compile Include="UdpSocketManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

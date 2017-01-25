@@ -1,8 +1,12 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
+using Microsoft.Extensions.Logging;
 using ProudNet.Serialization.Messages;
+using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.Handlers
 {
@@ -117,26 +121,28 @@ namespace ProudNet.Handlers
         public void NotifyNatDeviceNameDetected()
         { }
 
-        //[MessageHandler(typeof(C2S_RequestCreateUdpSocketMessage))]
-        //public void C2S_RequestCreateUdpSocket(ProudSession session)
-        //{
-        //    if (session.P2PGroup == null || _filter.Config.UdpListener == null)
-        //        return;
+        [MessageHandler(typeof(C2S_RequestCreateUdpSocketMessage))]
+        public void C2S_RequestCreateUdpSocket(ProudServer server, ProudSession session)
+        {
+            if (session.P2PGroup == null || !server.UdpSocketManager.IsRunning)
+                return;
 
-        //    Logger<>.Debug($"Client:{session.HostId} - Requesting UdpSocket");
-        //    var endPoint = new IPEndPoint(_filter.Config.UdpAddress, _filter.Config.UdpListener.Port);
-        //    session.Send(new S2C_RequestCreateUdpSocketMessage(endPoint));
-        //}
+            //Logger<>.Debug($"Client:{session.HostId} - Requesting UdpSocket");
+            var socket = server.UdpSocketManager.NextSocket();
+            session.UdpSocket = socket;
+            session.HolepunchMagicNumber = Guid.NewGuid();
+            session.SendAsync(new S2C_RequestCreateUdpSocketMessage((IPEndPoint)socket.Channel.RemoteAddress));
+        }
 
-        //[MessageHandler(typeof(C2S_CreateUdpSocketAckMessage))]
-        //public void C2S_CreateUdpSocketAck(ProudSession session, C2S_CreateUdpSocketAckMessage message)
-        //{
-        //    if (session.P2PGroup == null || _filter.Config.UdpListener == null)
-        //        return;
+        [MessageHandler(typeof(C2S_CreateUdpSocketAckMessage))]
+        public void C2S_CreateUdpSocketAck(ProudServer server, ProudSession session, C2S_CreateUdpSocketAckMessage message)
+        {
+            if (session.P2PGroup == null || !server.UdpSocketManager.IsRunning)
+                return;
 
-        //    Logger<>.Debug($"Client:{session.HostId} - Starting server holepunch");
-        //    session.Send(new RequestStartServerHolepunchMessage(session.Guid));
-        //}
+            //Logger<>.Debug($"Client:{session.HostId} - Starting server holepunch");
+            session.SendAsync(new RequestStartServerHolepunchMessage(session.HolepunchMagicNumber));
+        }
 
         [MessageHandler(typeof(ReportC2SUdpMessageTrialCountMessage))]
         public void ReportC2SUdpMessageTrialCount()

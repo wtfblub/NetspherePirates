@@ -231,9 +231,9 @@ namespace Netsphere.Network
 
         #endregion
 
-        public Task BroadcastNoticeAsync(string message)
+        public void BroadcastNotice(string message)
         {
-            return BroadcastAsync(new SNoticeMessageAckMessage(message));
+            Broadcast(new SNoticeMessageAckMessage(message));
         }
 
         private void Worker(TimeSpan delta)

@@ -1,9 +1,12 @@
-﻿namespace ProudNet
+﻿using System.Net;
+
+namespace ProudNet
 {
     internal class SendContext
     {
         public object Message { get; set; }
         public SendOptions SendOptions { get; set; }
+        public EndPoint UdpEndPoint { get; set; }
 
         public SendContext()
         { }

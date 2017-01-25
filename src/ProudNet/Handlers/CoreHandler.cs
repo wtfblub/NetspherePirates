@@ -13,6 +13,7 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using ProudNet.Codecs;
 using ProudNet.Serialization;
+using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.Handlers
@@ -150,78 +151,9 @@ namespace ProudNet.Handlers
                     return;
                 }
 
-                if (destination.HostId == 2)
-                {
-                    //#region Hardcoded ServerMember
-
-                    //ProudCoreOpCode opCode;
-                    //byte[] data;
-                    //using (var r = message.Data.ToBinaryReader())
-                    //{
-                    //    opCode = r.ReadEnum<ProudCoreOpCode>();
-                    //    data = r.ReadToEnd();
-                    //}
-
-                    //if (opCode == ProudCoreOpCode.Rmi)
-                    //{
-                    //    var core = new RmiMessage(data)
-                    //    {
-                    //        IsRelayed = true,
-                    //        SenderHostId = session.HostId,
-                    //        TargetHostId = destination.HostId
-                    //    };
-                    //    e.Message = core;
-                    //    _filter.OnMessageReceived(e);
-                    //}
-                    //else if (opCode == ProudCoreOpCode.ReliableUdp_Frame)
-                    //{
-                    //    ReliableUdp_FrameMessage udpFrameMessage;
-                    //    using (var r = data.ToBinaryReader())
-                    //        udpFrameMessage = Serializer.Deserialize<ReliableUdp_FrameMessage>(r);
-
-                    //    using (var r = udpFrameMessage.Data.ToBinaryReader())
-                    //    {
-                    //        opCode = r.ReadEnum<ProudCoreOpCode>();
-                    //        data = r.ReadToEnd();
-                    //    }
-
-                    //    CoreMessage core;
-                    //    if (opCode == ProudCoreOpCode.Rmi)
-                    //    {
-                    //        core = new RmiMessage(data)
-                    //        {
-                    //            IsRelayed = true,
-                    //            SenderHostId = session.HostId,
-                    //            TargetHostId = destination.HostId
-                    //        };
-                    //    }
-                    //    else if (opCode == ProudCoreOpCode.EncryptedReliable)
-                    //    {
-                    //        using (var r = data.ToBinaryReader())
-                    //            core = Serializer.Deserialize<EncryptedReliableMessage>(r);
-                    //        core.IsRelayed = true;
-                    //        core.SenderHostId = session.HostId;
-                    //        core.TargetHostId = destination.HostId;
-                    //    }
-                    //    else
-                    //        throw new ProudException($"Invalid opCode {opCode}");
-
-                    //    e.Message = core;
-                    //    _filter.OnMessageReceived(e);
-                    //}
-                    //else
-                    //{
-                    //    throw new ProudException($"Invalid opCode {opCode}");
-                    //}
-
-                    //#endregion
-                }
-                else
-                {
-                    var target = _server.Sessions.GetValueOrDefault(destination.HostId);
-                    if (target != null)
-                        await target.SendAsync(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
-                }
+                var target = _server.Sessions.GetValueOrDefault(destination.HostId);
+                if (target != null)
+                    await target.SendAsync(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
             }
         }
 
@@ -242,84 +174,51 @@ namespace ProudNet.Handlers
                     return;
                 }
 
-                if (destination == 2)
-                {
-                    //#region Hardcoded ServerMember
-
-                    //ProudCoreOpCode opCode;
-                    //byte[] data;
-                    //using (var r = message.Data.ToBinaryReader())
-                    //{
-                    //    opCode = r.ReadEnum<ProudCoreOpCode>();
-                    //    data = r.ReadToEnd();
-                    //}
-
-                    //if (opCode == ProudCoreOpCode.Rmi)
-                    //{
-                    //    var core = new RmiMessage(data)
-                    //    {
-                    //        IsRelayed = true,
-                    //        SenderHostId = session.HostId,
-                    //        TargetHostId = destination
-                    //    };
-                    //    e.Message = core;
-                    //    _filter.OnMessageReceived(e);
-                    //}
-                    //else
-                    //{
-                    //    throw new ProudException($"Invalid opCode {opCode}");
-                    //}
-
-                    //#endregion
-                }
-                else
-                {
-                    var target = _server.Sessions.GetValueOrDefault(destination);
-                    if (target != null)
-                        await target.SendAsync(new UnreliableRelay2Message(session.HostId, message.Data));
-                }
+                var target = _server.Sessions.GetValueOrDefault(destination);
+                if (target != null)
+                    await target.SendUdpIfAvailableAsync(new UnreliableRelay2Message(session.HostId, message.Data));
             }
         }
 
-        //[MessageHandler(typeof(NotifyHolepunchSuccessMessage))]
-        //public async Task NotifyHolepunchSuccess(IChannel channel, ProudSession session, NotifyHolepunchSuccessMessage message)
-        //{
-        //    if (session.P2PGroup == null || _filter.Config.UdpListener == null || session.Guid != message.MagicNumber)
-        //        return;
+        [MessageHandler(typeof(NotifyHolepunchSuccessMessage))]
+        public void NotifyHolepunchSuccess(ProudServer server, ProudSession session, NotifyHolepunchSuccessMessage message)
+        {
+            if (session.P2PGroup == null || !_server.UdpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
+                return;
 
-        //    //Logger<>.Debug($"Client:{session.HostId} - Server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
+            //Logger<>.Debug($"Client:{session.HostId} - Server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
 
-        //    session.UdpEnabled = true;
-        //    session.UdpEndPoint = message.EndPoint;
-        //    session.UdpLocalEndPoint = message.LocalEndPoint;
-        //    session.UdpSocket = _filter.UdpSocket;
-        //    await session.SendAsync(new NotifyClientServerUdpMatchedMessage(message.MagicNumber));
-        //}
+            session.UdpEnabled = true;
+            session.UdpLocalEndPoint = message.LocalEndPoint;
+            session.SendAsync(new NotifyClientServerUdpMatchedMessage(message.MagicNumber));
+        }
 
-        //[MessageHandler(typeof(PeerUdp_ServerHolepunchMessage))]
-        //public async Task PeerUdp_ServerHolepunch(IChannel channel, ProudSession session, PeerUdp_ServerHolepunchMessage message)
-        //{
-        //    if (!session.UdpEnabled || _filter.Config.UdpListener == null)
-        //        return;
+        [MessageHandler(typeof(PeerUdp_ServerHolepunchMessage))]
+        public void PeerUdp_ServerHolepunch(IChannel channel, ProudSession session, PeerUdp_ServerHolepunchMessage message)
+        {
+            if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
+                return;
 
-        //    var target = _server.SessionLookupByHostId.GetValueOrDefault(message.HostId);
-        //    if (target == null || !target.UdpEnabled)
-        //        return;
+            var target = session.P2PGroup.Members.GetValueOrDefault(message.HostId).Session;
+            if (target == null || !target.UdpEnabled)
+                return;
 
-        //    await session.SendAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
-        //}
+            session.SendAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
+        }
 
-        //[MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
-        //public async Task PeerUdp_NotifyHolepunchSuccess(IChannel channel, ProudSession session, PeerUdp_NotifyHolepunchSuccessMessage message)
-        //{
-        //    if (!session.UdpEnabled || _filter.Config.UdpListener == null)
-        //        return;
+        [MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
+        public async Task PeerUdp_NotifyHolepunchSuccess(IChannel channel, ProudSession session, PeerUdp_NotifyHolepunchSuccessMessage message)
+        {
+            if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
+                return;
 
-        //    //Logger<>.Debug($"Client:{session.HostId} - Peer server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
+            //Logger<>.Debug($"Client:{session.HostId} - Peer server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
 
-        //    // ToDo Refactor this
-        //    await Task.Delay(2000);
-        //    await session.SendAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, message.EndPoint));
-        //}
+            // ToDo Refactor this
+            await Task.Delay(2000)
+                .ConfigureAwait(false);
+            await session.SendAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, message.EndPoint))
+                .ConfigureAwait(false);
+        }
     }
 }

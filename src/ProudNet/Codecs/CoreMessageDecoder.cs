@@ -12,10 +12,15 @@ namespace ProudNet.Codecs
     {
         protected override void Decode(IChannelHandlerContext context, IByteBuffer message, List<object> output)
         {
-            using (var r = new ReadOnlyByteBufferStream(message, false).ToBinaryReader(false))
+            output.Add(Decode(message));
+        }
+
+        public static ICoreMessage Decode(IByteBuffer buffer)
+        {
+            using (var r = new ReadOnlyByteBufferStream(buffer, false).ToBinaryReader(false))
             {
                 var opCode = r.ReadEnum<ProudCoreOpCode>();
-                output.Add(CoreMessageFactory.Default.GetMessage(opCode, r));
+                return CoreMessageFactory.Default.GetMessage(opCode, r);
             }
         }
     }
