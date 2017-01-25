@@ -5,6 +5,8 @@ using BlubLib.Threading;
 using BlubLib.Threading.Tasks;
 using Netsphere.Network.Message.Auth;
 using Netsphere.Network.Service;
+using NLog;
+using NLog.Fluent;
 using ProudNet;
 using ProudNet.Serialization;
 
@@ -12,6 +14,9 @@ namespace Netsphere.Network
 {
     internal class AuthServer : ProudServer
     {
+        // ReSharper disable once InconsistentNaming
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public static AuthServer Instance { get; private set; }
 
         private readonly ILoop _worker;
@@ -46,6 +51,14 @@ namespace Netsphere.Network
         {
             _worker.Stop();
             base.OnStopping();
+        }
+
+        protected override void OnError(ErrorEventArgs e)
+        {
+            Logger.Error()
+                .Exception(e.Exception)
+                .Write();
+            base.OnError(e);
         }
 
         private Task Worker(TimeSpan delta)

@@ -79,6 +79,7 @@
     <Compile Include="Codecs\MessageEncoder.cs" />
     <Compile Include="Codecs\ProudFrameEncoder.cs" />
     <Compile Include="Crypt.cs" />
+    <Compile Include="ErrorEventArgs.cs" />
     <Compile Include="Handlers\SendContextEncoder.cs" />
     <Compile Include="HostIdFactory.cs" />
     <Compile Include="Codecs\ProudFrameDecoder.cs" />

@@ -65,6 +65,16 @@ namespace Netsphere.Network
             base.OnDisconnected(session);
         }
 
+        protected override void OnError(ErrorEventArgs e)
+        {
+            var log = Logger.Error();
+            if (e.Session != null)
+                log = log.Account((ChatSession)e.Session);
+            log.Exception(e.Exception)
+                .Write();
+            base.OnError(e);
+        }
+
         //private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
         //{
         //    var session = (ChatSession)e.Session;

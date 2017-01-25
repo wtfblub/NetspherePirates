@@ -31,6 +31,8 @@ namespace ProudNet
         public event EventHandler<ProudSession> Connected;
         public event EventHandler<ProudSession> Disconnected;
 
+        public event EventHandler<ErrorEventArgs> Error;
+
         protected virtual void OnStarted()
         {
             Started?.Invoke(this, EventArgs.Empty);
@@ -54,6 +56,16 @@ namespace ProudNet
         protected virtual void OnDisconnected(ProudSession session)
         {
             Disconnected?.Invoke(this, session);
+        }
+
+        protected virtual void OnError(ErrorEventArgs e)
+        {
+            Error?.Invoke(this, e);
+        }
+
+        internal void RaiseError(ErrorEventArgs e)
+        {
+            OnError(e);
         }
 
         public ProudServer(Configuration configuration)
