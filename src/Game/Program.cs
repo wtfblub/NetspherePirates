@@ -53,7 +53,7 @@ namespace Netsphere
 
             var eventLoopGroup = new MultithreadEventLoopGroup();
             ChatServer.Instance.Listen(Config.Instance.ChatListener, eventLoopGroup: eventLoopGroup);
-            RelayServer.Instance.Listen(Config.Instance.RelayListener, new[] { 30000 }, eventLoopGroup);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener, Config.Instance.RelayUdpPorts, eventLoopGroup);
             GameServer.Instance.Listen(Config.Instance.Listener, eventLoopGroup: eventLoopGroup);
 
             Logger.Info("Ready for connections!");

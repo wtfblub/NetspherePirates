@@ -33,6 +33,9 @@ namespace Netsphere
         [JsonConverter(typeof(IPEndPointConverter))]
         public IPEndPoint RelayListener { get; set; }
 
+        [JsonProperty("listener_relay_udp_ports")]
+        public int[] RelayUdpPorts { get; set; }
+
         [JsonProperty("player_limit")]
         public int PlayerLimit { get; set; }
 
