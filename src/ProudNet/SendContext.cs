@@ -6,7 +6,7 @@ namespace ProudNet
     {
         public object Message { get; set; }
         public SendOptions SendOptions { get; set; }
-        public EndPoint UdpEndPoint { get; set; }
+        public IPEndPoint UdpEndPoint { get; set; }
 
         public SendContext()
         { }

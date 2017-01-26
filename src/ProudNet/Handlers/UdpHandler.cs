@@ -4,9 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
+using ProudNet.Codecs;
 using ProudNet.Serialization.Messages.Core;
 
-namespace ProudNet.Codecs
+namespace ProudNet.Handlers
 {
     internal class UdpHandler : ChannelHandlerAdapter
     {
@@ -46,7 +47,8 @@ namespace ProudNet.Codecs
                     session.UdpSessionId = message.SessionId;
                     session.UdpEndPoint = message.EndPoint;
                     _server.SessionsByUdpId[session.UdpSessionId] = session;
-                    session.SendAsync(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint));
+
+                    session.SendUdpAsync(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint));
                     return;
                 }
 
@@ -76,8 +78,8 @@ namespace ProudNet.Codecs
                 return base.WriteAsync(context, new UdpMessage
                 {
                     Flag = 43981,
-                    Length = buffer.ReadableBytes,
-                    Content = buffer
+                    Content = buffer,
+                    EndPoint = sendContext.UdpEndPoint
                 });
             }
             catch (Exception ex)

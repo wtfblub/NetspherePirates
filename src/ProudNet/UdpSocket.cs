@@ -5,6 +5,7 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using ProudNet.Codecs;
+using ProudNet.Handlers;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet

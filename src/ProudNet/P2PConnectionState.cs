@@ -6,6 +6,7 @@ namespace ProudNet
     {
         public RemotePeer RemotePeer { get; }
         public uint EventId { get; }
+        public bool PeerUdpHolepunchSuccess { get; set; }
         public bool IsJoined { get; set; }
         public bool JitTriggered { get; set; }
         public bool HolepunchSuccess { get; set; }

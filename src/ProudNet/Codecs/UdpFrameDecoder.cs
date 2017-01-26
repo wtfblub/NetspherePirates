@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
@@ -34,6 +35,7 @@ namespace ProudNet.Codecs
             // ReadStruct uses a slice
             content.Retain();
 
+            var endPoint = (IPEndPoint)message.Sender;
             output.Add(new UdpMessage
             {
                 Flag = flag,
@@ -41,7 +43,8 @@ namespace ProudNet.Codecs
                 Length = length,
                 Id = id,
                 FragId = fragId,
-                Content = buffer
+                Content = buffer,
+                EndPoint = new IPEndPoint(endPoint.Address.MapToIPv4(), endPoint.Port)
             });
         }
     }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
-using Microsoft.Extensions.Logging;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
 
@@ -19,7 +18,7 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(P2PGroup_MemberJoin_AckMessage))]
-        public async Task P2PGroupMemberJoinAck(ProudSession session, P2PGroup_MemberJoin_AckMessage message)
+        public void P2PGroupMemberJoinAck(ProudSession session, P2PGroup_MemberJoin_AckMessage message)
         {
             if (session.P2PGroup == null || session.HostId == message.AddedMemberHostId)
                 return;
@@ -34,13 +33,13 @@ namespace ProudNet.Handlers
             var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
             if (connectionStateB.IsJoined)
             {
-                await remotePeer.SendAsync(new P2PRecycleCompleteMessage(connectionState.RemotePeer.HostId));
-                await connectionState.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(session.HostId));
+                remotePeer.SendAsync(new P2PRecycleCompleteMessage(connectionState.RemotePeer.HostId));
+                connectionState.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(session.HostId));
             }
         }
 
         [MessageHandler(typeof(NotifyP2PHolepunchSuccessMessage))]
-        public async Task NotifyP2PHolepunchSuccess(ProudSession session, NotifyP2PHolepunchSuccessMessage message)
+        public void NotifyP2PHolepunchSuccess(ProudSession session, NotifyP2PHolepunchSuccessMessage message)
         {
             var group = session.P2PGroup;
             if (group == null || (session.HostId != message.A && session.HostId != message.B))
@@ -68,15 +67,15 @@ namespace ProudNet.Handlers
                 var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr, message.ABRecvAddr,
                     message.BASendAddr, message.BARecvAddr);
 
-                await remotePeerA.SendAsync(notify);
-                await remotePeerB.SendAsync(notify);
+                remotePeerA.SendAsync(notify);
+                remotePeerB.SendAsync(notify);
             }
         }
 
         [MessageHandler(typeof(ShutdownTcpMessage))]
-        public Task ShutdownTcp(ProudSession session)
+        public void ShutdownTcp(ProudSession session)
         {
-            return session.CloseAsync();
+            session.CloseAsync();
         }
 
         [MessageHandler(typeof(NotifyLogMessage))]
@@ -86,7 +85,7 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(NotifyJitDirectP2PTriggeredMessage))]
-        public async Task NotifyJitDirectP2PTriggered(ProudSession session, NotifyJitDirectP2PTriggeredMessage message)
+        public void NotifyJitDirectP2PTriggered(ProudSession session, NotifyJitDirectP2PTriggeredMessage message)
         {
             var group = session.P2PGroup;
 
@@ -112,8 +111,8 @@ namespace ProudNet.Handlers
 
             if (stateA.JitTriggered && stateB.JitTriggered)
             {
-                await remotePeerA.SendAsync(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
-                await remotePeerB.SendAsync(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
+                remotePeerA.SendAsync(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
+                remotePeerB.SendAsync(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
             }
         }
 
@@ -131,7 +130,8 @@ namespace ProudNet.Handlers
             var socket = server.UdpSocketManager.NextSocket();
             session.UdpSocket = socket;
             session.HolepunchMagicNumber = Guid.NewGuid();
-            session.SendAsync(new S2C_RequestCreateUdpSocketMessage((IPEndPoint)socket.Channel.RemoteAddress));
+            var endPoint = (IPEndPoint) socket.Channel.LocalAddress;
+            session.SendAsync(new S2C_RequestCreateUdpSocketMessage(new IPEndPoint(endPoint.Address.MapToIPv4(), endPoint.Port)));
         }
 
         [MessageHandler(typeof(C2S_CreateUdpSocketAckMessage))]

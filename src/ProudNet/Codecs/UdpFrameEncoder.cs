@@ -14,13 +14,17 @@ namespace ProudNet.Codecs
             var buffer = context.Allocator.Buffer().WithOrder(ByteOrder.LittleEndian);
             try
             {
-                buffer.WriteUnsignedShort(message.Flag)
-                    .WriteUnsignedShort(message.SessionId)
-                    .WriteInt(message.Length)
-                    .WriteUnsignedInt(message.Id)
-                    .WriteUnsignedInt(message.FragId)
-                    .WriteShort(Constants.NetMagic)
-                    .WriteStruct(message.Content);
+                buffer.WriteShort(message.Flag)
+                    .WriteShort(message.SessionId)
+                    .WriteInt(0)
+                    .WriteInt((int)message.Id)
+                    .WriteInt((int)message.FragId);
+
+                var headerLength = buffer.ReadableBytes;
+                buffer.WriteShort(Constants.NetMagic)
+                    .WriteStruct(message.Content)
+                    .SetInt(4, buffer.ReadableBytes - headerLength);
+
                 output.Add(new DatagramPacket(buffer, message.EndPoint));
             }
             catch (Exception ex)

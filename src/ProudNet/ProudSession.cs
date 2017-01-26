@@ -67,6 +67,11 @@ namespace ProudNet
                 : SendAsync(message);
         }
 
+        internal Task SendUdpAsync(ICoreMessage message)
+        {
+            return UdpSocket.SendAsync(message, UdpEndPoint);
+        }
+
         public Task CloseAsync()
         {
             if (_disposed)

@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using BlubLib.DotNetty;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using DotNetty.Buffers;
@@ -18,7 +18,7 @@ using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.Handlers
 {
-    internal class CoreHandler : MessageHandler
+    internal class CoreHandler : ProudMessageHandler
     {
         private readonly ProudServer _server;
         private readonly Lazy<DateTime> _startTime = new Lazy<DateTime>(() => Process.GetCurrentProcess().StartTime);
@@ -72,7 +72,7 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(NotifyCSEncryptedSessionKeyMessage))]
-        public async Task NotifyCSEncryptedSessionKeyMessage(IChannelHandlerContext context, ProudSession session, NotifyCSEncryptedSessionKeyMessage message)
+        public void NotifyCSEncryptedSessionKeyMessage(IChannelHandlerContext context, ProudSession session, NotifyCSEncryptedSessionKeyMessage message)
         {
             using (var rsa = new RSACryptoServiceProvider(1024))
             {
@@ -94,18 +94,18 @@ namespace ProudNet.Handlers
                     blob = w.ToArray();
                 }
 
-                await session.SendAsync(new NotifyCSSessionKeySuccessMessage(blob));
+                session.SendAsync(new NotifyCSSessionKeySuccessMessage(blob));
             }
         }
 
         [MessageHandler(typeof(NotifyServerConnectionRequestDataMessage))]
-        public async Task NotifyServerConnectionRequestDataMessage(IChannelHandlerContext context, ProudSession session, NotifyServerConnectionRequestDataMessage message)
+        public void NotifyServerConnectionRequestDataMessage(IChannelHandlerContext context, ProudSession session, NotifyServerConnectionRequestDataMessage message)
         {
             if (message.InternalNetVersion != Constants.NetVersion ||
                     message.Version != _server.Configuration.Version)
             {
-                await session.SendAsync(new NotifyProtocolVersionMismatchMessage());
-                await session.CloseAsync();
+                session.SendAsync(new NotifyProtocolVersionMismatchMessage());
+                session.CloseAsync();
                 return;
             }
 
@@ -114,15 +114,15 @@ namespace ProudNet.Handlers
 
             var remoteEndpoint = (IPEndPoint)((ISocketChannel)context.Channel).RemoteAddress;
             remoteEndpoint = new IPEndPoint(remoteEndpoint.Address.MapToIPv4(), remoteEndpoint.Port);
-            await session.SendAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, remoteEndpoint));
+            session.SendAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, remoteEndpoint));
         }
 
         [MessageHandler(typeof(UnreliablePingMessage))]
-        public async Task UnreliablePingHandler(IChannelHandlerContext context, ProudSession session, UnreliablePingMessage message)
+        public void UnreliablePingHandler(IChannelHandlerContext context, ProudSession session, UnreliablePingMessage message)
         {
             session.UnreliablePing = TimeSpan.FromSeconds(message.Ping).TotalMilliseconds;
             var ts = DateTime.Now - _startTime.Value;
-            await session.SendAsync(new UnreliablePongMessage(message.ClientTime, ts.TotalSeconds));
+            session.SendUdpIfAvailableAsync(new UnreliablePongMessage(message.ClientTime, ts.TotalSeconds));
         }
 
         [MessageHandler(typeof(SpeedHackDetectorPingMessage))]
@@ -132,7 +132,7 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(ReliableRelay1Message))]
-        public async Task ReliableRelayHandler(IChannel channel, ProudSession session, ReliableRelay1Message message)
+        public void ReliableRelayHandler(IChannel channel, ProudSession session, ReliableRelay1Message message)
         {
             if (session.P2PGroup == null)
                 return;
@@ -152,13 +152,12 @@ namespace ProudNet.Handlers
                 }
 
                 var target = _server.Sessions.GetValueOrDefault(destination.HostId);
-                if (target != null)
-                    await target.SendAsync(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
+                target?.SendAsync(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
             }
         }
 
         [MessageHandler(typeof(UnreliableRelay1Message))]
-        public async Task UnreliableRelayHandler(IChannel channel, ProudSession session, UnreliableRelay1Message message)
+        public void UnreliableRelayHandler(IChannel channel, ProudSession session, UnreliableRelay1Message message)
         {
             foreach (var destination in message.Destination.Where(id => id != session.HostId))
             {
@@ -175,9 +174,19 @@ namespace ProudNet.Handlers
                 }
 
                 var target = _server.Sessions.GetValueOrDefault(destination);
-                if (target != null)
-                    await target.SendUdpIfAvailableAsync(new UnreliableRelay2Message(session.HostId, message.Data));
+                target?.SendUdpIfAvailableAsync(new UnreliableRelay2Message(session.HostId, message.Data));
             }
+        }
+
+        [MessageHandler(typeof(ServerHolepunchMessage))]
+        public void NotifyHolepunchSuccess(ProudServer server, ProudSession session, ServerHolepunchMessage message)
+        {
+            if (session.P2PGroup == null || !_server.UdpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
+                return;
+
+            //Logger<>.Debug($"Client:{session.HostId} - Server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
+
+            session.SendUdpAsync(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint));
         }
 
         [MessageHandler(typeof(NotifyHolepunchSuccessMessage))]
@@ -190,7 +199,7 @@ namespace ProudNet.Handlers
 
             session.UdpEnabled = true;
             session.UdpLocalEndPoint = message.LocalEndPoint;
-            session.SendAsync(new NotifyClientServerUdpMatchedMessage(message.MagicNumber));
+            session.SendUdpAsync(new NotifyClientServerUdpMatchedMessage(message.MagicNumber));
         }
 
         [MessageHandler(typeof(PeerUdp_ServerHolepunchMessage))]
@@ -203,22 +212,27 @@ namespace ProudNet.Handlers
             if (target == null || !target.UdpEnabled)
                 return;
 
-            session.SendAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
+            session.SendUdpAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
         }
 
         [MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
-        public async Task PeerUdp_NotifyHolepunchSuccess(IChannel channel, ProudSession session, PeerUdp_NotifyHolepunchSuccessMessage message)
+        public void PeerUdp_NotifyHolepunchSuccess(IChannel channel, ProudSession session, PeerUdp_NotifyHolepunchSuccessMessage message)
         {
             if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
                 return;
 
             //Logger<>.Debug($"Client:{session.HostId} - Peer server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
 
-            // ToDo Refactor this
-            await Task.Delay(2000)
-                .ConfigureAwait(false);
-            await session.SendAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, message.EndPoint))
-                .ConfigureAwait(false);
+            var remotePeer = session.P2PGroup.Members[session.HostId];
+            var connectionState = remotePeer.ConnectionStates.GetValueOrDefault(message.HostId);
+
+            connectionState.PeerUdpHolepunchSuccess = true;
+            var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
+            if (connectionStateB.PeerUdpHolepunchSuccess)
+            {
+                remotePeer.SendAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, message.EndPoint));
+                connectionState.RemotePeer.SendAsync(new RequestP2PHolepunchMessage(session.HostId, session.UdpLocalEndPoint, session.UdpEndPoint));
+            }
         }
     }
 }
