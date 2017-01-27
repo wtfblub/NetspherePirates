@@ -68,11 +68,11 @@ namespace ProudNet
             if (!_members.TryRemove(hostId, out memberToLeave))
                 return;
 
-            var session = _server.Sessions[hostId];
+            var session = memberToLeave.Session;
             session.P2PGroup = null;
             session.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
 
-            foreach (var member in _members.Values.Where(entry => entry.HostId != hostId).Cast<RemotePeer>())
+            foreach (var member in _members.Values.Where(entry => entry.HostId != hostId))
             {
                 var memberSession = _server.Sessions[member.HostId];
                 memberSession.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
