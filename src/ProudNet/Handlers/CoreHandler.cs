@@ -111,10 +111,7 @@ namespace ProudNet.Handlers
 
             _server.AddSession(session);
             session.HandhsakeEvent.Set();
-
-            var remoteEndpoint = (IPEndPoint)((ISocketChannel)context.Channel).RemoteAddress;
-            remoteEndpoint = new IPEndPoint(remoteEndpoint.Address.MapToIPv4(), remoteEndpoint.Port);
-            session.SendAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, remoteEndpoint));
+            session.SendAsync(new NotifyServerConnectSuccessMessage(session.HostId, _server.Configuration.Version, session.RemoteEndPoint));
         }
 
         [MessageHandler(typeof(UnreliablePingMessage))]

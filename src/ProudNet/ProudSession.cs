@@ -15,8 +15,8 @@ namespace ProudNet
 
         public ISocketChannel Channel { get; }
         public bool IsConnected => Channel.Active;
-        public IPEndPoint RemoteEndPoint => (IPEndPoint)Channel.RemoteAddress;
-        public IPEndPoint LocalEndPoint => (IPEndPoint)Channel.LocalAddress;
+        public IPEndPoint RemoteEndPoint { get; }
+        public IPEndPoint LocalEndPoint { get; }
 
         public uint HostId { get; }
         public P2PGroup P2PGroup { get; internal set; }
@@ -38,6 +38,12 @@ namespace ProudNet
             HostId = hostId;
             Channel = (ISocketChannel)channel;
             HandhsakeEvent = new AsyncManualResetEvent();
+
+            var remoteEndPoint = (IPEndPoint)Channel.RemoteAddress;
+            RemoteEndPoint = new IPEndPoint(remoteEndPoint.Address.MapToIPv4(), remoteEndPoint.Port);
+
+            var localEndPoint = (IPEndPoint)Channel.LocalAddress;
+            LocalEndPoint = new IPEndPoint(localEndPoint.Address.MapToIPv4(), localEndPoint.Port);
         }
 
         public Task SendAsync(object message)
