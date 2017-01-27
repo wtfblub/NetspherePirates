@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using BlubLib;
 using Dapper;
@@ -53,7 +54,7 @@ namespace Netsphere
 
             var eventLoopGroup = new MultithreadEventLoopGroup();
             ChatServer.Instance.Listen(Config.Instance.ChatListener, eventLoopGroup: eventLoopGroup);
-            RelayServer.Instance.Listen(Config.Instance.RelayListener, Config.Instance.RelayUdpPorts, eventLoopGroup);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts, eventLoopGroup);
             GameServer.Instance.Listen(Config.Instance.Listener, eventLoopGroup: eventLoopGroup);
 
             Logger.Info("Ready for connections!");

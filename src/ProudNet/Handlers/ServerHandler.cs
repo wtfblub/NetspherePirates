@@ -130,8 +130,7 @@ namespace ProudNet.Handlers
             var socket = server.UdpSocketManager.NextSocket();
             session.UdpSocket = socket;
             session.HolepunchMagicNumber = Guid.NewGuid();
-            var endPoint = (IPEndPoint) socket.Channel.LocalAddress;
-            session.SendAsync(new S2C_RequestCreateUdpSocketMessage(new IPEndPoint(endPoint.Address.MapToIPv4(), endPoint.Port)));
+            session.SendAsync(new S2C_RequestCreateUdpSocketMessage(new IPEndPoint(server.UdpSocketManager.Address, ((IPEndPoint)socket.Channel.RemoteAddress).Port)));
         }
 
         [MessageHandler(typeof(C2S_CreateUdpSocketAckMessage))]

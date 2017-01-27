@@ -93,7 +93,7 @@ namespace ProudNet
             UdpSocketManager = new UdpSocketManager(this);
         }
 
-        public void Listen(IPEndPoint tcpListener, int[] udpListenerPorts = null, IEventLoopGroup eventLoopGroup = null)
+        public void Listen(IPEndPoint tcpListener, IPAddress udpAddress = null, int[] udpListenerPorts = null, IEventLoopGroup eventLoopGroup = null)
         {
             ThrowIfDisposed();
 
@@ -139,7 +139,7 @@ namespace ProudNet
                     .BindAsync(tcpListener).WaitEx();
 
                 if (udpListenerPorts != null)
-                    UdpSocketManager.Listen(tcpListener.Address, udpListenerPorts, _eventLoopGroup);
+                    UdpSocketManager.Listen(udpAddress, tcpListener.Address, udpListenerPorts, _eventLoopGroup);
             }
             catch (Exception ex)
             {

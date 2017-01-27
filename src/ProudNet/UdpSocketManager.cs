@@ -14,21 +14,35 @@ namespace ProudNet
 
         public bool IsRunning => Sockets.Count > 0;
         public IReadOnlyList<UdpSocket> Sockets => _sockets;
+        public IPAddress Address { get; private set; }
 
         public UdpSocketManager(ProudServer server)
         {
             _server = server;
         }
 
-        public void Listen(IPAddress address, int[] ports, IEventLoopGroup eventLoopGroup)
+        public void Listen(IPAddress address, IPAddress listenerAddress, int[] ports, IEventLoopGroup eventLoopGroup)
         {
+            if (address == null)
+                throw new ArgumentNullException(nameof(address));
+
+            if (listenerAddress == null)
+                throw new ArgumentNullException(nameof(listenerAddress));
+
+            if (ports == null || ports.Length == 0)
+                throw new ArgumentNullException(nameof(ports));
+
+            if (eventLoopGroup == null)
+                throw new ArgumentNullException(nameof(eventLoopGroup));
+
             if (IsRunning)
                 throw new InvalidOperationException($"{nameof(UdpSocketManager)} is already running");
 
+            Address = address;
             foreach (var port in ports)
             {
                 var socket = new UdpSocket(_server);
-                socket.Listen(new IPEndPoint(address, port), eventLoopGroup);
+                socket.Listen(new IPEndPoint(listenerAddress, port), eventLoopGroup);
                 _sockets.Add(socket);
             }
         }
