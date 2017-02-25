@@ -1,33 +1,37 @@
 ﻿using System.Linq;
-using BlubLib.Network.Pipes;
+using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class ChannelService : MessageHandler
+    internal class ChannelService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CGetChannelInfoReqMessage))]
-        public void CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)
+        public async Task CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)
         {
             switch (message.Request)
             {
                 case ChannelInfoRequest.ChannelList:
-                    session.Send(new SChannelListInfoAckMessage(GameServer.Instance.ChannelManager.Select(c => c.Map<Channel, ChannelInfoDto>()).ToArray()));
+                    await session.SendAsync(new SChannelListInfoAckMessage(GameServer.Instance.ChannelManager.Select(c => c.Map<Channel, ChannelInfoDto>()).ToArray()))
+                        .ConfigureAwait(false);
                     break;
 
                 case ChannelInfoRequest.RoomList:
                 case ChannelInfoRequest.RoomList2:
                     if (session.Player.Channel == null)
                         return;
-                    session.Send(new SGameRoomListAckMessage(session.Player.Channel.RoomManager.Select(r => r.Map<Room, RoomDto>()).ToArray()));
+                    await session.SendAsync(new SGameRoomListAckMessage(session.Player.Channel.RoomManager.Select(r => r.Map<Room, RoomDto>()).ToArray()))
+                        .ConfigureAwait(false);
                     break;
 
                 default:
@@ -40,12 +44,13 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CChannelEnterReqMessage))]
-        public void CChannelEnterReq(GameSession session, CChannelEnterReqMessage message)
+        public async Task CChannelEnterReq(GameSession session, CChannelEnterReqMessage message)
         {
             var channel = GameServer.Instance.ChannelManager[message.Channel];
             if (channel == null)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.NonExistingChannel));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.NonExistingChannel))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -55,7 +60,8 @@ namespace Netsphere.Network.Services
             }
             catch (ChannelLimitReachedException)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelLimitReached));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLimitReached))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -66,7 +72,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CChatMessageReqMessage))]
-        public void CChatMessageReq(ChatSession session, CChatMessageReqMessage message)
+        public async Task CChatMessageReq(ChatSession session, CChatMessageReqMessage message)
         {
             switch (message.ChatType)
             {
@@ -76,7 +82,8 @@ namespace Netsphere.Network.Services
 
                 case ChatType.Club:
                     // ToDo Change this when clans are implemented
-                    session.Send(new SChatMessageAckMessage(ChatType.Club, session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
+                    await session.SendAsync(new SChatMessageAckMessage(ChatType.Club, session.Player.Account.Id, session.Player.Account.Nickname, message.Message))
+                        .ConfigureAwait(false);
                     break;
 
                 default:
@@ -89,40 +96,43 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CWhisperChatMessageReqMessage))]
-        public void CWhisperChatMessageReq(ChatSession session, CWhisperChatMessageReqMessage message)
+        public async Task CWhisperChatMessageReq(ChatSession session, CWhisperChatMessageReqMessage message)
         {
             var toPlr = GameServer.Instance.PlayerManager.Get(message.ToNickname);
 
             // ToDo Is there an answer for this case?
             if (toPlr == null)
             {
-                session.Player.ChatSession.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is not online"));
+                await session.Player.ChatSession.SendAsync(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is not online"))
+                    .ConfigureAwait(false);
                 return;
             }
 
             // ToDo Is there an answer for this case?
             if (toPlr.DenyManager.Contains(session.Player.Account.Id))
             {
-                session.Player.ChatSession.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is ignoring you"));
+                await session.Player.ChatSession.SendAsync(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is ignoring you"))
+                    .ConfigureAwait(false);
                 return;
             }
 
-            toPlr.ChatSession.Send(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname,
-                session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
+            await toPlr.ChatSession.SendAsync(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname,
+                session.Player.Account.Id, session.Player.Account.Nickname, message.Message))
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CQuickStartReqMessage))]
-        public void CQuickStartReq(GameSession session, CQuickStartReqMessage message)
+        public Task CQuickStartReq(GameSession session, CQuickStartReqMessage message)
         {
             //ToDo - Logic
-            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
         }
 
         [MessageHandler(typeof(CTaskRequestReqMessage))]
-        public void TaskRequestReq(GameSession session, CTaskRequestReqMessage message)
+        public Task TaskRequestReq(GameSession session, CTaskRequestReqMessage message)
         {
             //ToDo - Logic
-            session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
         }
     }
 }

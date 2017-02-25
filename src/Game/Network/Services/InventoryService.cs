@@ -1,18 +1,19 @@
 ﻿using System.Threading.Tasks;
-using BlubLib.Network.Pipes;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class InventoryService : MessageHandler
+    internal class InventoryService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CUseItemReqMessage))]
-        public void UseItemHandler(GameSession session, CUseItemReqMessage message)
+        public async Task UseItemHandler(GameSession session, CUseItemReqMessage message)
         {
             var plr = session.Player;
             var @char = plr.CharacterManager[message.CharacterSlot];
@@ -20,7 +21,8 @@ namespace Netsphere.Network.Services
 
             if (@char == null || item == null || (plr.Room != null && plr.RoomInfo.State != PlayerState.Lobby))
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -43,7 +45,8 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Exception(ex)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -124,7 +127,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"Item {message.ItemId} not found")
                     .Write();
-                await session.SendAsync(new SRefundItemAckMessage {Result = ItemRefundResult.Failed})
+                await session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed })
                     .ConfigureAwait(false);
                 return;
             }
@@ -161,7 +164,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CDiscardItemReqMessage))]
-        public void DiscardItemHandler(GameSession session, CRefundItemReqMessage message)
+        public async Task DiscardItemHandler(GameSession session, CRefundItemReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
 
@@ -172,7 +175,8 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"Item {message.ItemId} not found")
                     .Write();
-                session.Send(new SDiscardItemAckMessage { Result = 2 });
+                await session.SendAsync(new SDiscardItemAckMessage { Result = 2 })
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -183,7 +187,8 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
-                session.Send(new SDiscardItemAckMessage { Result = 2 });
+                await session.SendAsync(new SDiscardItemAckMessage { Result = 2 })
+                    .ConfigureAwait(false);
                 return;
             }
             if (shopItem.IsDestroyable)
@@ -192,18 +197,21 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"Cannot discard {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
-                session.Send(new SDiscardItemAckMessage { Result = 2 });
+                await session.SendAsync(new SDiscardItemAckMessage { Result = 2 })
+                    .ConfigureAwait(false);
                 return;
             }
 
             session.Player.Inventory.Remove(item);
-            session.Send(new SDiscardItemAckMessage { Result = 0, ItemId = item.Id });
+            await session.SendAsync(new SDiscardItemAckMessage { Result = 0, ItemId = item.Id })
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CUseCapsuleReqMessage))]
-        public void UseCapsuleReq(GameSession session, CUseCapsuleReqMessage message)
+        public async Task UseCapsuleReq(GameSession session, CUseCapsuleReqMessage message)
         {
-            session.Send(new SServerResultInfoAckMessage((ServerResult)1));
+            await session.SendAsync(new SServerResultInfoAckMessage((ServerResult)1))
+                .ConfigureAwait(false);
             //session.Send(new SUseCapsuleAckMessage(new List<CapsuleRewardDto>
             //{
             //    new CapsuleRewardDto(CapsuleRewardType.Item, 0, 64, 0),

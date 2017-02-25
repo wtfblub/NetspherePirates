@@ -40,7 +40,7 @@ namespace Netsphere
         internal void Add(Mail mail)
         {
             if (_mails.TryAdd(mail.Id, mail))
-                UpdateReminder();
+                UpdateReminderAsync();
         }
 
         public async Task<bool> SendAsync(string receiver, string title, string message)
@@ -96,14 +96,9 @@ namespace Netsphere
                 _mails.Remove(mail.Id);
                 _mailsToDelete.Push(mail);
             }
-            UpdateReminder();
+            UpdateReminderAsync();
 
             return changed;
-        }
-
-        public void UpdateReminder()
-        {
-            Player.ChatSession.Send(new SNoteReminderInfoAckMessage((byte)this.Count(m => m.IsNew), 0, 0));
         }
 
         public Task UpdateReminderAsync()

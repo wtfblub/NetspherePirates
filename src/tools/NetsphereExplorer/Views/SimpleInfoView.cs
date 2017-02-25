@@ -1,5 +1,5 @@
 ﻿using System.Drawing;
-using System.Windows.Forms;
+using BlubLib.GUI;
 using View = BlubLib.GUI.Controls.View;
 
 namespace NetsphereExplorer.Views

@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Buffers;
-using System.Net;
-using System.Net.Configuration;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using Auth.ServiceModel;
-using BlubLib.Network;
-using BlubLib.Network.SimpleRmi;
-using BlubLib.Network.Transport.Sockets;
+using BlubLib.DotNetty.SimpleRmi;
 using BlubLib.Threading;
 using BlubLib.Threading.Tasks;
+using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using ExpressMapper.Extensions;
 using Netsphere.Network;
 using NLog;
-using TcpClient = BlubLib.Network.Transport.Sockets.TcpClient;
 
 namespace Netsphere
 {
@@ -22,19 +18,29 @@ namespace Netsphere
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly ISocketClient _client;
+        private readonly IEventLoopGroup _eventLoopGroup;
+        private readonly Bootstrap _bootstrap;
+        private IChannel _channel;
         private readonly ILoop _worker;
         private bool _userDisconnect;
         private bool _registered;
 
         public ServerlistManager()
         {
-            _client = new TcpClient(new SessionFactory(), ArrayPool<byte>.Shared);
-            _client.Pipeline.AddFirst("rmi", new SimpleRmiPipe());
-            _worker = new TaskLoop(Config.Instance.AuthAPI.UpdateInterval, Worker);
+            var handler = new Handler();
+            handler.Connected += Client_Connected;
+            handler.Disconnected += Client_Disconnected;
 
-            _client.Connected += Client_Connected;
-            _client.Disconnected += Client_Disconnected;
+            _eventLoopGroup = new MultithreadEventLoopGroup(1);
+            _bootstrap = new Bootstrap()
+                .Group(_eventLoopGroup)
+                .Channel<TcpSocketChannel>()
+                .Handler(new ActionChannelInitializer<IChannel>(ch =>
+                {
+                    ch.Pipeline.AddLast(new SimpleRmiHandler())
+                    .AddLast(handler);
+                }));
+            _worker = new TaskLoop(Config.Instance.AuthAPI.UpdateInterval, Worker);
         }
 
         public void Start()
@@ -50,45 +56,53 @@ namespace Netsphere
             _userDisconnect = true;
             try
             {
-                if (_client.IsConnected && _registered)
-                    _client.GetProxy<IServerlistService>("rmi").Remove((byte) Config.Instance.Id);
+                if (_channel != null && _channel.Active && _registered)
+                    _channel.GetProxy<IServerlistService>().Remove((byte)Config.Instance.Id);
             }
             catch
             {
                 // ignored
             }
 
-            _client.Dispose();
+            _channel.CloseAsync().WaitEx();
+            _eventLoopGroup.ShutdownGracefullyAsync().WaitEx();
         }
 
         private async Task Worker(TimeSpan diff)
         {
-            if (!_client.IsConnected)
+            try
             {
-                if (!await Connect().ConfigureAwait(false))
+                if (_channel == null || !_channel.Active)
+                {
+                    if (!await Connect().ConfigureAwait(false))
+                        return;
+                }
+
+                if (!_registered)
+                {
+                    await Register().ConfigureAwait(false);
                     return;
-            }
+                }
 
-            if (!_registered)
+                var result = await _channel.GetProxy<IServerlistService>()
+                    .Update(GameServer.Instance.Map<GameServer, ServerInfoDto>())
+                    .ConfigureAwait(false);
+
+                if (!result)
+                    await Register().ConfigureAwait(false);
+            }
+            catch (Exception ex)
             {
-                await Register().ConfigureAwait(false);
-                return;
+                Logger.Error(ex, "Unhandled exception");
             }
-
-            var result = await _client.GetProxy<IServerlistService>("rmi")
-                .Update(GameServer.Instance.Map<GameServer, ServerInfoDto>())
-                .ConfigureAwait(false);
-
-            if (!result)
-                await Register().ConfigureAwait(false);
         }
 
-        private void Client_Connected(object sender, SessionEventArgs e)
+        private void Client_Connected(object sender, EventArgs e)
         {
             Logger.Info($"Connected to authserver on endpoint {Config.Instance.AuthAPI.EndPoint}");
         }
 
-        private void Client_Disconnected(object sender, SessionEventArgs e)
+        private void Client_Disconnected(object sender, EventArgs e)
         {
             _registered = false;
             if (_userDisconnect)
@@ -102,15 +116,18 @@ namespace Netsphere
             var endPoint = Config.Instance.AuthAPI.EndPoint;
             try
             {
-                await _client.ConnectAsync(endPoint)
+                _channel = await _bootstrap.ConnectAsync(endPoint)
                     .ConfigureAwait(false);
             }
-            catch (SocketException ex)
+            catch (AggregateException ex)
             {
-                if(ex.SocketErrorCode != SocketError.ConnectionRefused)
-                    Logger.Error(ex, $"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
-                else
+                var baseException = ex.GetBaseException();
+                if (baseException is ConnectException)
+                {
                     Logger.Error($"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
+                    return false;
+                }
+                Logger.Error(baseException, $"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
                 return false;
             }
             catch (Exception ex)
@@ -124,7 +141,7 @@ namespace Netsphere
 
         private async Task<bool> Register()
         {
-            var result = await _client.GetProxy<IServerlistService>("rmi")
+            var result = await _channel.GetProxy<IServerlistService>()
                    .Register(GameServer.Instance.Map<GameServer, ServerInfoDto>())
                    .ConfigureAwait(false);
 
@@ -139,6 +156,26 @@ namespace Netsphere
                     break;
             }
             return false;
+        }
+
+        private class Handler : ChannelHandlerAdapter
+        {
+            public event EventHandler Connected;
+            public event EventHandler Disconnected;
+
+            public override bool IsSharable => true;
+
+            public override void ChannelActive(IChannelHandlerContext context)
+            {
+                Connected?.Invoke(this, EventArgs.Empty);
+                base.ChannelActive(context);
+            }
+
+            public override void ChannelInactive(IChannelHandlerContext context)
+            {
+                Disconnected?.Invoke(this, EventArgs.Empty);
+                base.ChannelInactive(context);
+            }
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using BlubLib.Serialization;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Chat
 {
     [BlubContract]
-    public class CLoginReqMessage : ChatMessage
+    public class CLoginReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -19,7 +19,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CDenyChatReqMessage : ChatMessage
+    public class CDenyChatReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public DenyAction Action { get; set; }
@@ -29,7 +29,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CFriendReqMessage : ChatMessage
+    public class CFriendReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Action { get; set; }
@@ -42,14 +42,14 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CCheckCombiNameReqMessage : ChatMessage
+    public class CCheckCombiNameReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Name { get; set; }
     }
 
     [BlubContract]
-    public class CCombiReqMessage : ChatMessage
+    public class CCombiReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -65,14 +65,14 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CGetUserDataReqMessage : ChatMessage
+    public class CGetUserDataReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract]
-    public class CSetUserDataReqMessage : ChatMessage
+    public class CSetUserDataReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -82,7 +82,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CChatMessageReqMessage : ChatMessage
+    public class CChatMessageReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ChatType ChatType { get; set; }
@@ -92,7 +92,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CWhisperChatMessageReqMessage : ChatMessage
+    public class CWhisperChatMessageReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string ToNickname { get; set; }
@@ -102,14 +102,14 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CInvitationPlayerReqMessage : ChatMessage
+    public class CInvitationPlayerReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract]
-    public class CNoteListReqMessage : ChatMessage
+    public class CNoteListReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public byte Page { get; set; }
@@ -119,7 +119,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CSendNoteReqMessage : ChatMessage
+    public class CSendNoteReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Receiver { get; set; }
@@ -141,21 +141,21 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CReadNoteReqMessage : ChatMessage
+    public class CReadNoteReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Id { get; set; }
     }
 
     [BlubContract]
-    public class CDeleteNoteReqMessage : ChatMessage
+    public class CDeleteNoteReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Notes { get; set; }
     }
 
     [BlubContract]
-    public class CNoteReminderInfoReqMessage : ChatMessage
+    public class CNoteReminderInfoReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Unk { get; set; }

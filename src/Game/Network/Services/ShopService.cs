@@ -1,34 +1,33 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using BlubLib.IO;
-using BlubLib.Network;
-using BlubLib.Network.Pipes;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class ShopService : MessageHandler
+    internal class ShopService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CNewShopUpdateCheckReqMessage))]
-        public void ShopUpdateCheckHandler(IService service, GameSession session, CNewShopUpdateCheckReqMessage message)
+        public async Task ShopUpdateCheckHandler(GameSession session, CNewShopUpdateCheckReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
             var version = shop.Version;
-            session.Send(new SNewShopUpdateCheckAckMessage
+            await session.SendAsync(new SNewShopUpdateCheckAckMessage
             {
                 Date01 = version,
                 Date02 = version,
                 Date03 = version,
                 Date04 = version,
                 Unk = 0
-            });
+            }).ConfigureAwait(false);
             //session.Send(new SRandomShopInfoAckMessage
             //{
             //    Info = new RandomShopDto
@@ -53,75 +52,75 @@ namespace Netsphere.Network.Services
 
             #region NewShopPrice
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Serialize(shop.Prices.Values.ToArray());
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                await session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopPrice,
                     Data = w.ToArray(),
                     Date = version
-                });
+                }).ConfigureAwait(false);
             }
 
             #endregion
 
             #region NewShopEffect
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Serialize(shop.Effects.Values.ToArray());
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                await session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopEffect,
                     Data = w.ToArray(),
                     Date = version
-                });
+                }).ConfigureAwait(false);
             }
 
             #endregion
 
             #region NewShopItem
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Serialize(shop.Items.Values.ToArray());
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                await session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopItem,
                     Data = w.ToArray(),
                     Date = version
-                });
+                }).ConfigureAwait(false);
             }
 
             #endregion
 
             // ToDo
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Write(0);
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                await session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopUniqueItem,
                     Data = w.ToArray(),
                     Date = version
-                });
+                }).ConfigureAwait(false);
             }
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Write(new byte[200]);
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                await session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = (ShopResourceType)16,
                     Data = w.ToArray(),
                     Date = version
-                });
+                }).ConfigureAwait(false);
             }
         }
 
@@ -317,14 +316,14 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CRandomShopRollingStartReqMessage))]
-        public void RandomShopRollHandler(GameSession session, CRandomShopRollingStartReqMessage message)
+        public async Task RandomShopRollHandler(GameSession session, CRandomShopRollingStartReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
 
-            session.Send(new SRandomShopItemInfoAckMessage
+            await session.SendAsync(new SRandomShopItemInfoAckMessage
             {
                 Item = new RandomShopItemDto()
-            });
+            }).ConfigureAwait(false);
             //session.Send(new SRandomShopItemInfoAckMessage
             //{
             //    Item = new RandomShopItemDto
@@ -340,14 +339,14 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CRandomShopItemSaleReqMessage))]
-        public void RandomShopItemSaleHandler(GameSession session, CRandomShopItemSaleReqMessage message)
+        public async Task RandomShopItemSaleHandler(GameSession session, CRandomShopItemSaleReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
 
-            session.Send(new SRandomShopItemInfoAckMessage
+            await session.SendAsync(new SRandomShopItemInfoAckMessage
             {
                 Item = new RandomShopItemDto()
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

@@ -1,90 +1,64 @@
 ﻿using System;
-using System.Buffers;
-using System.Net;
 using System.Threading.Tasks;
-using BlubLib.Network;
-using BlubLib.Network.Pipes;
-using BlubLib.Network.Transport.Sockets;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.Threading;
 using BlubLib.Threading.Tasks;
-using Netsphere.Network.Message;
+using Netsphere.Network.Message.Auth;
 using Netsphere.Network.Service;
 using NLog;
+using NLog.Fluent;
 using ProudNet;
-using ProudNet.Message;
+using ProudNet.Serialization;
 
 namespace Netsphere.Network
 {
-    internal class AuthServer : TcpServer
+    internal class AuthServer : ProudServer
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        public static AuthServer Instance { get; } = new AuthServer();
+
+        public static AuthServer Instance { get; private set; }
 
         private readonly ILoop _worker;
 
         public ServerManager ServerManager { get; }
 
-        private AuthServer()
-            : base(new ProudSessionFactory(), ArrayPool<byte>.Create(1 * 1024 * 1024, Config.Instance.MaxConnections), Config.Instance.MaxConnections)
+        public static void Initialize(Configuration config)
         {
-            var config = new ProudConfig(new Guid("{9be73c0b-3b10-403e-be7d-9f222702a38c}"));
-            var proudFilter = new ProudServerPipe(config);
-#if DEBUG
-            proudFilter.UnhandledProudCoreMessage += OnUnhandledProudCoreMessage;
-            proudFilter.UnhandledProudMessage += OnUnhandledProudMessage;
-#endif
-            Pipeline.AddFirst("proudnet", proudFilter);
-            Pipeline.AddLast("s4_protocol", new NetspherePipe(new AuthMessageFactory()));
-            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
-                .Add(new AuthService())
-                .UnhandledMessage += OnUnhandledMessage;
+            if (Instance != null)
+                throw new InvalidOperationException("Server is already initialized");
 
+            config.Version = new Guid("{9be73c0b-3b10-403e-be7d-9f222702a38c}");
+            config.MessageFactories = new MessageFactory[] { new AuthMessageFactory() };
+            config.MessageHandlers = new IMessageHandler[] { new AuthService() };
+            Instance = new AuthServer(config);
+        }
+
+        private AuthServer(Configuration config)
+            : base(config)
+        {
             _worker = new TaskLoop(TimeSpan.FromSeconds(10), Worker);
             ServerManager = new ServerManager();
         }
 
-#if DEBUG
-        private void OnUnhandledProudCoreMessage(object s, MessageReceivedEventArgs e)
-        {
-            Logger.Warn($"Unhandled ProudCoreMessage {e.Message.GetType().Name}");
-        }
-
-        private void OnUnhandledProudMessage(object s, MessageReceivedEventArgs e)
-        {
-            var message = e.Message as ProudUnknownMessage;
-            if (message == null)
-            {
-                Logger.Warn($"Unhandled ProudMessage {e.Message.GetType().Name}");
-            }
-            else
-            {
-                Logger.Warn($"Unknown ProudMessage {message.OpCode}: {message.Data.ToHexString()}");
-            }
-        }
-#endif
-
-        private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
-        {
-            Logger.Warn($"Unhandled message {e.Message.GetType().Name}");
-        }
-
-        protected override void OnError(ExceptionEventArgs ex)
-        {
-            Logger.Error(ex.Exception);
-            base.OnError(ex);
-        }
-
-        public override void Start(IPEndPoint localEP)
+        protected override void OnStarted()
         {
             _worker.Start();
-            base.Start(localEP);
+            base.OnStarted();
         }
 
-        public override void Dispose()
+        protected override void OnStopping()
         {
             _worker.Stop();
-            base.Dispose();
+            base.OnStopping();
+        }
+
+        protected override void OnError(ErrorEventArgs e)
+        {
+            Logger.Error()
+                .Exception(e.Exception)
+                .Write();
+            base.OnError(e);
         }
 
         private Task Worker(TimeSpan delta)

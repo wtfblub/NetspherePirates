@@ -2,7 +2,7 @@
 using BlubLib.Serialization;
 using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 using SlimMath;
 
 namespace Netsphere.Network.Data.P2P

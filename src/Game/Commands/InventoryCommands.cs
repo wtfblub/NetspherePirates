@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Netsphere.Network;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
@@ -152,7 +153,7 @@ namespace Netsphere.Commands
                         if (!int.TryParse(args[2], out newDurability))
                             return false;
 
-                        plr.Session.Send(new SItemDurabilityInfoAckMessage(new[]{new ItemDurabilityInfoDto
+                        plr.Session.SendAsync(new SItemDurabilityInfoAckMessage(new[]{new ItemDurabilityInfoDto
                         {
                             ItemId = item.Id,
                             Durability = newDurability,

@@ -44,7 +44,7 @@ namespace Netsphere
             return room;
         }
 
-        public Room Create(RoomCreationOptions options, ServerP2PGroup p2pGroup)
+        public Room Create(RoomCreationOptions options, P2PGroup p2pGroup)
         {
             using (_sync.Lock())
             {

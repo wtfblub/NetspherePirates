@@ -6,11 +6,11 @@ using Netsphere.Network.Serializers;
 namespace Netsphere.Network.Message.GameRule
 {
     [BlubContract]
-    public class CEnterPlayerReqMessage : GameRuleMessage
+    public class CEnterPlayerReqMessage : IGameRuleMessage
     { }
 
     [BlubContract]
-    public class CLeavePlayerRequestReqMessage : GameRuleMessage
+    public class CLeavePlayerRequestReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -20,7 +20,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CChangeTeamReqMessage : GameRuleMessage
+    public class CChangeTeamReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public Team Team { get; set; }
@@ -30,18 +30,18 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CAutoAssingTeamReqMessage : GameRuleMessage
+    public class CAutoAssingTeamReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class CAutoMixingTeamReqMessage : GameRuleMessage
+    public class CAutoMixingTeamReqMessage : IGameRuleMessage
     { }
 
     [BlubContract]
-    public class CMixChangeTeamReqMessage : GameRuleMessage
+    public class CMixChangeTeamReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -57,7 +57,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CEventMessageReqMessage : GameRuleMessage
+    public class CEventMessageReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public GameEventMessage Event { get; set; }
@@ -76,25 +76,25 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CReadyRoundReqMessage : GameRuleMessage
+    public class CReadyRoundReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public bool IsReady { get; set; }
     }
 
     [BlubContract]
-    public class CBeginRoundReqMessage : GameRuleMessage
+    public class CBeginRoundReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public bool IsReady { get; set; }
     }
 
     [BlubContract]
-    public class CAvatarDurabilityDecreaseReqMessage : GameRuleMessage
+    public class CAvatarDurabilityDecreaseReqMessage : IGameRuleMessage
     { }
 
     [BlubContract]
-    public class CAvatarChangeReqMessage : GameRuleMessage
+    public class CAvatarChangeReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeAvatarUnk1Dto Unk1 { get; set; }
@@ -110,7 +110,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CChangeRuleNotifyReqMessage : GameRuleMessage
+    public class CChangeRuleNotifyReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeRuleDto Settings { get; set; }
@@ -122,70 +122,70 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CMissionScoreReqMessage : GameRuleMessage
+    public class CMissionScoreReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk { get; set; }
     }
 
     [BlubContract]
-    public class CScoreKillReqMessage : GameRuleMessage
+    public class CScoreKillReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreDto Score { get; set; }
     }
 
     [BlubContract]
-    public class CScoreKillAssistReqMessage : GameRuleMessage
+    public class CScoreKillAssistReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreAssist2Dto Score { get; set; }
     }
 
     [BlubContract]
-    public class CScoreOffenseReqMessage : GameRuleMessage
+    public class CScoreOffenseReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public Score2Dto Score { get; set; }
     }
 
     [BlubContract]
-    public class CScoreOffenseAssistReqMessage : GameRuleMessage
+    public class CScoreOffenseAssistReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreAssist2Dto Score { get; set; }
     }
 
     [BlubContract]
-    public class CScoreDefenseReqMessage : GameRuleMessage
+    public class CScoreDefenseReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public Score2Dto Score { get; set; }
     }
 
     [BlubContract]
-    public class CScoreDefenseAssistReqMessage : GameRuleMessage
+    public class CScoreDefenseAssistReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreAssist2Dto Score { get; set; }
     }
 
     [BlubContract]
-    public class CScoreHealAssistReqMessage : GameRuleMessage
+    public class CScoreHealAssistReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
     }
 
     [BlubContract]
-    public class CScoreGoalReqMessage : GameRuleMessage
+    public class CScoreGoalReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId PeerId { get; set; }
     }
 
     [BlubContract]
-    public class CScoreReboundReqMessage : GameRuleMessage
+    public class CScoreReboundReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId NewId { get; set; }
@@ -195,7 +195,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CScoreSuicideReqMessage : GameRuleMessage
+    public class CScoreSuicideReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
@@ -205,14 +205,14 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CScoreTeamKillReqMessage : GameRuleMessage
+    public class CScoreTeamKillReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public Score2Dto Score { get; set; }
     }
 
     [BlubContract]
-    public class CItemsChangeReqMessage : GameRuleMessage
+    public class CItemsChangeReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeItemsUnkDto Unk1 { get; set; }
@@ -228,21 +228,21 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CPlayerGameModeChangeReqMessage : GameRuleMessage
+    public class CPlayerGameModeChangeReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public PlayerGameMode Mode { get; set; }
     }
 
     [BlubContract]
-    public class CArcadeAttackPointReqMessage : GameRuleMessage
+    public class CArcadeAttackPointReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk { get; set; }
     }
 
     [BlubContract]
-    public class CArcadeScoreSyncReqMessage : GameRuleMessage
+    public class CArcadeScoreSyncReqMessage : IGameRuleMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
@@ -254,7 +254,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CArcadeBeginRoundReqMessage : GameRuleMessage
+    public class CArcadeBeginRoundReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -264,7 +264,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CArcadeStageClearReqMessage : GameRuleMessage
+    public class CArcadeStageClearReqMessage : IGameRuleMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
@@ -276,7 +276,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CArcadeStageFailedReqMessage : GameRuleMessage
+    public class CArcadeStageFailedReqMessage : IGameRuleMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
@@ -288,7 +288,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CArcadeStageInfoReqMessage : GameRuleMessage
+    public class CArcadeStageInfoReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -298,14 +298,14 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CArcadeEnablePlayTimeReqMessage : GameRuleMessage
+    public class CArcadeEnablePlayTimeReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class CArcadeRespawnReqMessage : GameRuleMessage
+    public class CArcadeRespawnReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -315,7 +315,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CArcadeStageReadyReqMessage : GameRuleMessage
+    public class CArcadeStageReadyReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -325,7 +325,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CArcadeStageSelectReqMessage : GameRuleMessage
+    public class CArcadeStageSelectReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -335,7 +335,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CSlaughterAttackPointReqMessage : GameRuleMessage
+    public class CSlaughterAttackPointReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -348,32 +348,32 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CSlaughterHealPointReqMessage : GameRuleMessage
+    public class CSlaughterHealPointReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public float Unk { get; set; }
     }
 
     [BlubContract]
-    public class CArcadeLoadingSucceesReqMessage : GameRuleMessage
+    public class CArcadeLoadingSucceesReqMessage : IGameRuleMessage
     { }
 
     [BlubContract]
-    public class CUseCoinReqMessage : GameRuleMessage
+    public class CUseCoinReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk { get; set; }
     }
 
     [BlubContract]
-    public class CBeginResponeReqMessage : GameRuleMessage
+    public class CBeginResponeReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong Unk { get; set; }
     }
 
     [BlubContract]
-    public class CWeaponFireReqMessage : GameRuleMessage
+    public class CWeaponFireReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -389,7 +389,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CCompulsionLeaveRequestReqMessage : GameRuleMessage
+    public class CCompulsionLeaveRequestReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -402,7 +402,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class CCompulsionLeaveVoteReqMessage : GameRuleMessage
+    public class CCompulsionLeaveVoteReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }

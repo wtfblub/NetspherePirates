@@ -5,12 +5,12 @@ using BlubLib.Serialization;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Serializers;
 using ProudNet;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Game
 {
     [BlubContract]
-    public class SLoginAckMessage : GameMessage
+    public class SLoginAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -37,7 +37,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SBeginAccountInfoAckMessage : GameMessage
+    public class SBeginAccountInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; } // IsGM?
@@ -95,7 +95,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SOpenCharacterInfoAckMessage : GameMessage
+    public class SOpenCharacterInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
@@ -117,7 +117,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SCharacterEquipInfoAckMessage : GameMessage
+    public class SCharacterEquipInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
@@ -140,7 +140,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract(typeof(Serializer))]
-    public class SInventoryInfoAckMessage : GameMessage
+    public class SInventoryInfoAckMessage : IGameMessage
     {
         public ItemDto[] Items { get; set; }
 
@@ -192,7 +192,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SSuccessDeleteCharacterAckMessage : GameMessage
+    public class SSuccessDeleteCharacterAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
@@ -207,7 +207,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SSuccessSelectCharacterAckMessage : GameMessage
+    public class SSuccessSelectCharacterAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
@@ -222,7 +222,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SSuccessCreateCharacterAckMessage : GameMessage
+    public class SSuccessCreateCharacterAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
@@ -251,7 +251,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SServerResultInfoAckMessage : GameMessage
+    public class SServerResultInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ServerResult Result { get; set; }
@@ -266,14 +266,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SCreateNickAckMessage : GameMessage
+    public class SCreateNickAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Nickname { get; set; }
     }
 
     [BlubContract]
-    public class SCheckNickAckMessage : GameMessage
+    public class SCheckNickAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(IntBooleanSerializer))]
         public bool IsTaken { get; set; }
@@ -288,7 +288,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SUseItemAckMessage : GameMessage
+    public class SUseItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte CharacterSlot { get; set; }
@@ -304,7 +304,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SInventoryActionAckMessage : GameMessage
+    public class SInventoryActionAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public InventoryAction Action { get; set; }
@@ -325,7 +325,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SIdsInfoAckMessage : GameMessage
+    public class SIdsInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
@@ -344,7 +344,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SEnteredPlayerAckMessage : GameMessage
+    public class SEnteredPlayerAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public RoomPlayerDto Player { get; set; }
@@ -361,7 +361,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SEnteredPlayerClubInfoAckMessage : GameMessage
+    public class SEnteredPlayerClubInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public PlayerClubInfoDto Player { get; set; }
@@ -373,7 +373,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SEnteredPlayerListAckMessage : GameMessage
+    public class SEnteredPlayerListAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public RoomPlayerDto[] Players { get; set; }
@@ -390,7 +390,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SEnteredPlayerClubInfoListAckMessage : GameMessage
+    public class SEnteredPlayerClubInfoListAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public PlayerClubInfoDto[] Players { get; set; }
@@ -402,7 +402,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SSuccessEnterRoomAckMessage : GameMessage
+    public class SSuccessEnterRoomAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public EnterRoomInfoDto RoomInfo { get; set; }
@@ -419,7 +419,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SLeavePlayerAckMessage : GameMessage
+    public class SLeavePlayerAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -435,7 +435,7 @@ namespace Netsphere.Network.Message.Game
 
     [BlubContract]
     [Obsolete("This handler is empty inside the client")]
-    public class SJoinTunnelPlayerAckMessage : GameMessage
+    public class SJoinTunnelPlayerAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -445,7 +445,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class STimeSyncAckMessage : GameMessage
+    public class STimeSyncAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint ClientTime { get; set; }
@@ -455,14 +455,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SPlayTogetherSignAckMessage : GameMessage
+    public class SPlayTogetherSignAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class SPlayTogetherInfoAckMessage : GameMessage
+    public class SPlayTogetherInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
@@ -472,7 +472,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SPlayTogetherSignInfoAckMessage : GameMessage
+    public class SPlayTogetherSignInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -482,11 +482,11 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SPlayTogetherCancelAckMessage : GameMessage
+    public class SPlayTogetherCancelAckMessage : IGameMessage
     { }
 
     [BlubContract]
-    public class SChangeGameRoomAckMessage : GameMessage
+    public class SChangeGameRoomAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public RoomDto Room { get; set; }
@@ -503,22 +503,22 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SNewShopUpdateRequestAckMessage : GameMessage
+    public class SNewShopUpdateRequestAckMessage : IGameMessage
     { }
 
     [BlubContract]
-    public class SLogoutAckMessage : GameMessage
+    public class SLogoutAckMessage : IGameMessage
     { }
 
     [BlubContract]
-    public class SPlayTogetherKickAckMessage : GameMessage
+    public class SPlayTogetherKickAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract]
-    public class SChannelListInfoAckMessage : GameMessage
+    public class SChannelListInfoAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ChannelInfoDto[] Channels { get; set; }
@@ -535,7 +535,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SChannelDeployPlayerAckMessage : GameMessage
+    public class SChannelDeployPlayerAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -553,14 +553,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SChannelDisposePlayerAckMessage : GameMessage
+    public class SChannelDisposePlayerAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract(typeof(Serializer))]
-    public class SGameRoomListAckMessage : GameMessage
+    public class SGameRoomListAckMessage : IGameMessage
     {
         public ChannelInfoRequest ListType { get; set; }
         public RoomDto[] Rooms { get; set; }
@@ -619,7 +619,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SDeployGameRoomAckMessage : GameMessage
+    public class SDeployGameRoomAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public RoomDto Room { get; set; }
@@ -636,7 +636,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SDisposeGameRoomAckMessage : GameMessage
+    public class SDisposeGameRoomAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint RoomId { get; set; }
@@ -651,14 +651,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SGamePingAverageAckMessage : GameMessage
+    public class SGamePingAverageAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; } // ping?
     }
 
     [BlubContract]
-    public class SBuyItemAckMessage : GameMessage
+    public class SBuyItemAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Ids { get; set; }
@@ -690,7 +690,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SRepairItemAckMessage : GameMessage
+    public class SRepairItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ItemRepairResult Result { get; set; }
@@ -700,7 +700,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SItemDurabilityInfoAckMessage : GameMessage
+    public class SItemDurabilityInfoAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDurabilityInfoDto[] Items { get; set; }
@@ -718,7 +718,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SRefundItemAckMessage : GameMessage
+    public class SRefundItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ItemRefundResult Result { get; set; }
@@ -728,7 +728,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SRefreshCashInfoAckMessage : GameMessage
+    public class SRefreshCashInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint PEN { get; set; }
@@ -747,7 +747,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SAdminActionAckMessage : GameMessage
+    public class SAdminActionAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Result { get; set; }
@@ -762,7 +762,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SAdminShowWindowAckMessage : GameMessage
+    public class SAdminShowWindowAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public bool DisableConsole { get; set; }
@@ -777,7 +777,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SNoticeMessageAckMessage : GameMessage
+    public class SNoticeMessageAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Message { get; set; }
@@ -793,7 +793,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SCharacterSlotInfoAckMessage : GameMessage
+    public class SCharacterSlotInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte CharacterCount { get; set; }
@@ -806,7 +806,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SRefreshInvalidEquipItemAckMessage : GameMessage
+    public class SRefreshInvalidEquipItemAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Items { get; set; }
@@ -818,7 +818,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SClearInvalidateItemAckMessage : GameMessage
+    public class SClearInvalidateItemAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public InvalidateItemInfoDto[] Items { get; set; }
@@ -830,7 +830,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SRefreshItemTimeInfoAckMessage : GameMessage
+    public class SRefreshItemTimeInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -844,21 +844,21 @@ namespace Netsphere.Network.Message.Game
 
     [BlubContract]
     [Obsolete("This handler is empty inside the client")]
-    public class SEnableAccountStatusAckMessage : GameMessage
+    public class SEnableAccountStatusAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class SActiveEquipPresetAckMessage : GameMessage
+    public class SActiveEquipPresetAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class SMyLicenseInfoAckMessage : GameMessage
+    public class SMyLicenseInfoAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public uint[] Licenses { get; set; }
@@ -875,7 +875,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SLicensedAckMessage : GameMessage
+    public class SLicensedAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ItemLicense ItemLicense { get; set; }
@@ -894,14 +894,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SCoinEventAckMessage : GameMessage
+    public class SCoinEventAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class SCombiCompensationAckMessage : GameMessage
+    public class SCombiCompensationAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -920,7 +920,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SClubInfoAckMessage : GameMessage
+    public class SClubInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public PlayerClubInfoDto ClubInfo { get; set; }
@@ -937,7 +937,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SClubHistoryAckMessage : GameMessage
+    public class SClubHistoryAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ClubHistoryDto History { get; set; }
@@ -949,7 +949,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SEquipedBoostItemAckMessage : GameMessage
+    public class SEquipedBoostItemAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Items { get; set; }
@@ -961,7 +961,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SGetClubInfoAckMessage : GameMessage
+    public class SGetClubInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ClubInfoDto ClubInfo { get; set; }
@@ -973,7 +973,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class STaskInfoAckMessage : GameMessage
+    public class STaskInfoAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public TaskDto[] Tasks { get; set; }
@@ -985,7 +985,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class STaskUpdateAckMessage : GameMessage
+    public class STaskUpdateAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint TaskId { get; set; }
@@ -995,7 +995,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class STaskRequestAckMessage : GameMessage
+    public class STaskRequestAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint TaskId { get; set; }
@@ -1011,7 +1011,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SExchangeItemAckMessage : GameMessage
+    public class SExchangeItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -1021,7 +1021,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class STaskIngameUpdateAckMessage : GameMessage
+    public class STaskIngameUpdateAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint TaskId { get; set; }
@@ -1031,21 +1031,21 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class STaskRemoveAckMessage : GameMessage
+    public class STaskRemoveAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint TaskId { get; set; }
     }
 
     [BlubContract]
-    public class SRandomShopChanceInfoAckMessage : GameMessage
+    public class SRandomShopChanceInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Progress { get; set; }
     }
 
     [BlubContract]
-    public class SRandomShopItemInfoAckMessage : GameMessage
+    public class SRandomShopItemInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public RandomShopItemDto Item { get; set; }
@@ -1057,7 +1057,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SRandomShopInfoAckMessage : GameMessage
+    public class SRandomShopInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public RandomShopDto Info { get; set; }
@@ -1069,7 +1069,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SSetCoinAckMessage : GameMessage
+    public class SSetCoinAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint ArcadeCoins { get; set; }
@@ -1079,21 +1079,21 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SApplyEsperChipItemAckMessage : GameMessage
+    public class SApplyEsperChipItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public EsperChipItemInfoDto Chip { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeRewardInfoAckMessage : GameMessage
+    public class SArcadeRewardInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ArcadeRewardDto Reward { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeMapScoreAckMessage : GameMessage
+    public class SArcadeMapScoreAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeMapScoreDto[] Scores { get; set; }
@@ -1105,7 +1105,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SArcadeStageScoreAckMessage : GameMessage
+    public class SArcadeStageScoreAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeStageScoreDto[] Scores { get; set; }
@@ -1117,7 +1117,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SMixedTeamBriefingInfoAckMessage : GameMessage
+    public class SMixedTeamBriefingInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
@@ -1132,14 +1132,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SSetGameMoneyAckMessage : GameMessage
+    public class SSetGameMoneyAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class SUseCapsuleAckMessage : GameMessage
+    public class SUseCapsuleAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public CapsuleRewardDto[] Rewards { get; set; }
@@ -1166,7 +1166,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SHGWKickAckMessage : GameMessage
+    public class SHGWKickAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Message { get; set; }
@@ -1178,7 +1178,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SClubJoinAckMessage : GameMessage
+    public class SClubJoinAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
@@ -1193,14 +1193,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SClubUnJoinAckMessage : GameMessage
+    public class SClubUnJoinAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class SNewShopUpdateCheckAckMessage : GameMessage
+    public class SNewShopUpdateCheckAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
@@ -1227,7 +1227,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SNewShopUpdateInfoAckMessage : GameMessage
+    public class SNewShopUpdateInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ShopResourceType Type { get; set; }
@@ -1252,7 +1252,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SUseChangeNickItemAckMessage : GameMessage
+    public class SUseChangeNickItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Result { get; set; }
@@ -1270,7 +1270,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SUseResetRecordItemAckMessage : GameMessage
+    public class SUseResetRecordItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Result { get; set; }
@@ -1280,14 +1280,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SUseCoinFillingItemAckMessage : GameMessage
+    public class SUseCoinFillingItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Result { get; set; }
     }
 
     [BlubContract]
-    public class SDiscardItemAckMessage : GameMessage
+    public class SDiscardItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Result { get; set; }
@@ -1297,7 +1297,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SDeleteItemInventoryAckMessage : GameMessage
+    public class SDeleteItemInventoryAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
@@ -1312,7 +1312,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SClubAddressAckMessage : GameMessage
+    public class SClubAddressAckMessage : IGameMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Fingerprint { get; set; }
@@ -1333,7 +1333,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SSmallLoudSpeakerAckMessage : GameMessage
+    public class SSmallLoudSpeakerAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -1355,25 +1355,25 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class SIngameEquipCheckAckMessage : GameMessage
+    public class SIngameEquipCheckAckMessage : IGameMessage
     { }
 
     [BlubContract]
-    public class SUseCoinRandomShopChanceAckMessage : GameMessage
+    public class SUseCoinRandomShopChanceAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class SChangeNickCancelAckMessage : GameMessage
+    public class SChangeNickCancelAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class SEventRewardAckMessage : GameMessage
+    public class SEventRewardAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }

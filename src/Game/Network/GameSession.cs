@@ -1,4 +1,4 @@
-﻿using BlubLib.Network;
+﻿using DotNetty.Transport.Channels;
 using ProudNet;
 
 namespace Netsphere.Network
@@ -8,16 +8,16 @@ namespace Netsphere.Network
         public Player Player { get; set; }
         //public ChatSession ChatSession { get; set; }
 
-        public GameSession(IService service, ITransport transport)
-            : base(service, transport)
+        public GameSession(uint hostId, IChannel channel)
+            : base(hostId, channel)
         { }
     }
 
     internal class GameSessionFactory : ISessionFactory
     {
-        public ISession GetSession(IService service, ITransport transport)
+        public ProudSession Create(uint hostId, IChannel channel)
         {
-            return new GameSession(service, transport);
+            return new GameSession(hostId, channel);
         }
     }
 }

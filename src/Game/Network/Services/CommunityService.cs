@@ -1,15 +1,17 @@
 ﻿using System.Linq;
-using BlubLib.Network.Pipes;
+using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class CommunityService : MessageHandler
+    internal class CommunityService : ProudMessageHandler
     {
         [MessageHandler(typeof(CSetUserDataReqMessage))]
-        public void SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)
+        public async Task SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)
         {
             var plr = session.Player;
             if (message.UserData.ChannelId > 0 && !plr.SentPlayerList && plr.Channel != null)
@@ -17,7 +19,8 @@ namespace Netsphere.Network.Services
                 // We can't send the channel player list in Channel.Join because the client only accepts it here :/
                 plr.SentPlayerList = true;
                 var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
-                session.Send(new SChannelPlayerListAckMessage(data));
+                await session.SendAsync(new SChannelPlayerListAckMessage(data))
+                    .ConfigureAwait(false);
             }
 
             // Save settings if any of them changed
@@ -40,12 +43,13 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CGetUserDataReqMessage))]
-        public void GetUserDataHandler(ChatSession session, CGetUserDataReqMessage message)
+        public async Task GetUserDataHandler(ChatSession session, CGetUserDataReqMessage message)
         {
             var plr = session.Player;
             if (plr.Account.Id == message.AccountId)
             {
-                session.Send(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()));
+                await session.SendAsync(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()))
+                    .ConfigureAwait(false);
                 return;
             }
 
@@ -64,13 +68,13 @@ namespace Netsphere.Network.Services
                     return;
             }
 
-            session.Send(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
+            await session.SendAsync(new SUserDataAckMessage(target.Map<Player, UserDataDto>()))
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CDenyChatReqMessage))]
-        public void DenyHandler(ChatServer service, ChatSession session, CDenyChatReqMessage message)
+        public async Task DenyHandler(ChatServer service, ChatSession session, CDenyChatReqMessage message)
         {
-            var server = service.GameServer;
             var plr = session.Player;
 
             if (message.Deny.AccountId == plr.Account.Id)
@@ -83,12 +87,13 @@ namespace Netsphere.Network.Services
                     if (plr.DenyManager.Contains(message.Deny.AccountId))
                         return;
 
-                    var target = server.PlayerManager[message.Deny.AccountId];
+                    var target = GameServer.Instance.PlayerManager[message.Deny.AccountId];
                     if (target == null)
                         return;
 
                     deny = plr.DenyManager.Add(target);
-                    session.Send(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
+                    await session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()))
+                        .ConfigureAwait(false);
                     break;
 
                 case DenyAction.Remove:
@@ -97,7 +102,8 @@ namespace Netsphere.Network.Services
                         return;
 
                     plr.DenyManager.Remove(message.Deny.AccountId);
-                    session.Send(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
+                    await session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()))
+                        .ConfigureAwait(false);
                     break;
             }
         }

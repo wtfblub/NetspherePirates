@@ -1,75 +1,139 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using BlubLib.Network;
-using BlubLib.Network.Message;
 using BlubLib.Threading.Tasks;
-using ProudNet.Message;
-using ProudNet.Message.Core;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
+using ProudNet.Serialization.Messages;
+using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet
 {
-    public class ProudSession : Session
+    public class ProudSession : IDisposable
     {
-        public double UnreliablePing { get; internal set; }
-        public uint HostId { get; internal set; }
-        public IP2PGroup P2PGroup { get; internal set; }
-        public bool UdpEnabled { get; internal set; }
+        private bool _disposed;
+
+        public ISocketChannel Channel { get; }
+        public bool IsConnected => Channel.Active;
+        public IPEndPoint RemoteEndPoint { get; }
+        public IPEndPoint LocalEndPoint { get; }
+
+        public uint HostId { get; }
+        public P2PGroup P2PGroup { get; internal set; }
         public IPEndPoint UdpEndPoint { get; internal set; }
         public IPEndPoint UdpLocalEndPoint { get; internal set; }
 
-        internal EncryptContext EncryptContext { get; set; }
-        internal DateTime LastSpeedHackDetectorPing { get; set; }
-        internal AsyncManualResetEvent ReadyEvent { get; set; }
-        internal UdpServerSocket UdpSocket { get; set; }
+        internal bool UdpEnabled { get; set; }
         internal ushort UdpSessionId { get; set; }
+        internal Crypt Crypt { get; set; }
+        internal DateTime LastSpeedHackDetectorPing { get; set; }
+        internal AsyncManualResetEvent HandhsakeEvent { get; set; }
+        internal Guid HolepunchMagicNumber { get; set; }
+        internal UdpSocket UdpSocket { get; set; }
 
-        public ProudSession(IService service, ITransport processor)
-            : base(service, processor)
+        public double UnreliablePing { get; internal set; }
+
+        public ProudSession(uint hostId, IChannel channel)
         {
-            ReadyEvent = new AsyncManualResetEvent();
+            HostId = hostId;
+            Channel = (ISocketChannel)channel;
+            HandhsakeEvent = new AsyncManualResetEvent();
+
+            var remoteEndPoint = (IPEndPoint)Channel.RemoteAddress;
+            RemoteEndPoint = new IPEndPoint(remoteEndPoint.Address.MapToIPv4(), remoteEndPoint.Port);
+
+            var localEndPoint = (IPEndPoint)Channel.LocalAddress;
+            LocalEndPoint = new IPEndPoint(localEndPoint.Address.MapToIPv4(), localEndPoint.Port);
         }
 
-        public override async Task SendAsync(IMessage message)
+        public Task SendAsync(object message)
         {
-            var coreMessage = message as CoreMessage;
-            if (coreMessage != null)
-            {
-                if (UdpEnabled)
-                {
-                    if (message is UnreliableRelay2Message ||
-                        message is PeerUdp_ServerHolepunchAckMessage ||
-                        message is UnreliablePongMessage)
-                    {
-
-                        await UdpSocket.SendAsync(this, coreMessage)
-                            .ConfigureAwait(false);
-                        return;
-                    }
-                }
-                var pipe = Service.Pipeline.Get("proudnet_protocol");
-                await pipe.OnSendMessage(new MessageEventArgs(this, message))
-                    .ConfigureAwait(false);
-                return;
-            }
-
-            await base.SendAsync(message)
-                .ConfigureAwait(false);
+            return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.ReliableSecure);
         }
 
-        public override void Close()
+        public Task SendAsync(object message, SendOptions options)
         {
-            Send(new ShutdownTcpAckMessage());
-
-            base.Close();
-
-            if (EncryptContext != null)
-            {
-                EncryptContext.Dispose();
-                EncryptContext = null;
-            }
-
-            ReadyEvent.Reset();
+            return _disposed ? Task.CompletedTask : Channel.WriteAndFlushAsync(new SendContext(message, options));
         }
+
+        internal Task SendAsync(IMessage message)
+        {
+            return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.Reliable);
+        }
+
+        internal Task SendAsync(ICoreMessage message)
+        {
+            return _disposed ? Task.CompletedTask : Channel.Pipeline.Context("coreHandler").WriteAndFlushAsync(message);
+        }
+
+        internal Task SendUdpIfAvailableAsync(ICoreMessage message)
+        {
+            return UdpEnabled
+                ? UdpSocket.SendAsync(message, UdpEndPoint)
+                : SendAsync(message);
+        }
+
+        internal Task SendUdpAsync(ICoreMessage message)
+        {
+            return UdpSocket.SendAsync(message, UdpEndPoint);
+        }
+
+        public Task CloseAsync()
+        {
+            if (_disposed)
+                return Task.CompletedTask;
+
+            _disposed = true;
+
+            Crypt?.Dispose();
+            return Channel?.CloseAsync();
+        }
+
+        public void Dispose()
+        {
+            CloseAsync().WaitEx();
+        }
+
+        //public override async Task SendAsync(IMessage message)
+        //{
+        //    var coreMessage = message as CoreMessage;
+        //    if (coreMessage != null)
+        //    {
+        //        if (UdpEnabled)
+        //        {
+        //            if (message is UnreliableRelay2Message ||
+        //                message is PeerUdp_ServerHolepunchAckMessage ||
+        //                message is UnreliablePongMessage)
+        //            {
+
+        //                await UdpSocket.SendAsync(this, coreMessage)
+        //                    .ConfigureAwait(false);
+        //                return;
+        //            }
+        //        }
+        //        var pipe = Service.Pipeline.Get("proudnet_protocol");
+        //        await pipe.OnSendMessage(new MessageEventArgs(this, message))
+        //            .ConfigureAwait(false);
+        //        return;
+        //    }
+
+        //    await base.SendAsync(message)
+        //        .ConfigureAwait(false);
+        //}
+
+        //public override void Close()
+        //{
+        //    Send(new ShutdownTcpAckMessage());
+
+        //    base.Close();
+
+        //    if (EncryptContext != null)
+        //    {
+        //        EncryptContext.Dispose();
+        //        EncryptContext = null;
+        //    }
+
+        //    ReadyEvent.Reset();
+        //}
     }
 }

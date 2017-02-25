@@ -135,7 +135,7 @@ namespace NetsphereExplorer.Views
 
                 case OperationStatus.Paused:
                     pbProgress.Style = ProgressBarStyle.Continuous;
-                    pbProgress.State = ProgressBarState.Pause;
+                    pbProgress.State = ProgressBarState.Paused;
                     break;
 
                 case OperationStatus.Cancel:

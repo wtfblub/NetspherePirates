@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Runtime.ExceptionServices;
-using Netsphere.Network;
+﻿using System.IO;
 
 // ReSharper disable once CheckNamespace
 namespace Netsphere.Game

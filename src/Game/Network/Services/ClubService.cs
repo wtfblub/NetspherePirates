@@ -1,24 +1,27 @@
-﻿using BlubLib.Network.Pipes;
+﻿using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class ClubService : MessageHandler
+    internal class ClubService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CClubAddressReqMessage))]
-        public void CClubAddressReq(GameSession session, CClubAddressReqMessage message)
+        public async Task CClubAddressReq(GameSession session, CClubAddressReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
                 .Message($"RequestId:{message.RequestId} LanguageId:{message.LanguageId} Command:{message.Command}")
                 .Write();
 
-            session.Send(new SClubAddressAckMessage("Kappa", 123));
+            await session.SendAsync(new SClubAddressAckMessage("Kappa", 123))
+                .ConfigureAwait(false);
         }
 
         [MessageHandler(typeof(CClubInfoReqMessage))]

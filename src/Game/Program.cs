@@ -4,15 +4,17 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using BlubLib;
 using Dapper;
 using Dapper.FastCrud;
-using Netsphere.Database.Auth;
+using DotNetty.Transport.Channels;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
+using ProudNet;
 
 namespace Netsphere
 {
@@ -32,19 +34,28 @@ namespace Netsphere
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
+            Logger.Info("Initializing...");
+
             AuthDatabase.Initialize();
             GameDatabase.Initialize();
-
-            FillShop();
 
             ItemIdGenerator.Initialize();
             CharacterIdGenerator.Initialize();
             LicenseIdGenerator.Initialize();
             DenyIdGenerator.Initialize();
 
+            ChatServer.Initialize(new Configuration());
+            RelayServer.Initialize(new Configuration());
+            GameServer.Initialize(new Configuration());
+
+            FillShop();
+
             Logger.Info("Starting server...");
 
-            GameServer.Instance.Start(Config.Instance.Listener);
+            var eventLoopGroup = new MultithreadEventLoopGroup();
+            ChatServer.Instance.Listen(Config.Instance.ChatListener, eventLoopGroup: eventLoopGroup);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts, eventLoopGroup);
+            GameServer.Instance.Listen(Config.Instance.Listener, eventLoopGroup: eventLoopGroup);
 
             Logger.Info("Ready for connections!");
 
@@ -83,6 +94,8 @@ namespace Netsphere
         {
             Logger.Info("Closing...");
 
+            ChatServer.Instance.Dispose();
+            RelayServer.Instance.Dispose();
             GameServer.Instance.Dispose();
             LogManager.Shutdown();
         }

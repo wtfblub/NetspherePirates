@@ -1,18 +1,20 @@
-﻿using BlubLib.Network.Pipes;
+﻿using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class GeneralService : MessageHandler
+    internal class GeneralService : ProudMessageHandler
     {
         [MessageHandler(typeof(CTimeSyncReqMessage))]
-        public void TimeSyncHandler(GameSession session, CTimeSyncReqMessage message)
+        public async Task TimeSyncHandler(GameSession session, CTimeSyncReqMessage message)
         {
-            session.Send(new STimeSyncAckMessage
+            await session.SendAsync(new STimeSyncAckMessage
             {
                 ClientTime = message.Time,
                 ServerTime = (uint)Program.AppTime.ElapsedMilliseconds
-            });
+            }).ConfigureAwait(false);
         }
     }
 }

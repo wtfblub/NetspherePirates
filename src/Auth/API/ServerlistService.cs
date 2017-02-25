@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Auth.ServiceModel;
-using BlubLib.Network.SimpleRmi;
+using BlubLib.DotNetty.SimpleRmi;
+using DotNetty.Common.Utilities;
 using Netsphere.Network;
-using Newtonsoft.Json;
 
 namespace Netsphere.API
 {
@@ -11,6 +11,7 @@ namespace Netsphere.API
     {
         public async Task<RegisterResult> Register(ServerInfoDto serverInfo)
         {
+            UpdateLastActivity();
             return AuthServer.Instance.ServerManager.Add(serverInfo)
                     ? RegisterResult.OK
                     : RegisterResult.AlreadyExists;
@@ -18,13 +19,19 @@ namespace Netsphere.API
 
         public async Task<bool> Update(ServerInfoDto serverInfo)
         {
-            ((APISession)CurrentSession).LastActivity = DateTimeOffset.Now;
+            UpdateLastActivity();
             return AuthServer.Instance.ServerManager.Update(serverInfo);
         }
 
         public async Task<bool> Remove(byte id)
         {
             return AuthServer.Instance.ServerManager.Remove(id);
+        }
+
+        private void UpdateLastActivity()
+        {
+            var state = CurrentContext.Channel.GetAttribute(ChannelAttributes.State).Get();
+            state.LastActivity = DateTimeOffset.Now;
         }
     }
 }

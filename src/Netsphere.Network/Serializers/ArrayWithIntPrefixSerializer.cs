@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using BlubLib.Serialization;
-using ProudNet.Serializers;
 using Sigil;
 using Sigil.NonGeneric;
 
@@ -36,8 +35,8 @@ namespace Netsphere.Network.Serializers
         public void EmitDeserialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
-            var emptyArray = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "EmptyArray" + Guid.NewGuid());
-            var end = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "End" + Guid.NewGuid());
+            var emptyArray = emiter.DefineLabel();
+            var end = emiter.DefineLabel();
 
             using (var length = emiter.DeclareLocal<int>("length"))
             {
@@ -56,8 +55,8 @@ namespace Netsphere.Network.Serializers
                 emiter.NewArray(elementType);
                 emiter.StoreLocal(value);
 
-                var loop = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "Loop" + Guid.NewGuid());
-                var loopCheck = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "LoopCheck" + Guid.NewGuid());
+                var loop = emiter.DefineLabel();
+                var loopCheck = emiter.DefineLabel();
 
                 // Little optimization for byte arrays
                 if (elementType == typeof(byte))
@@ -127,8 +126,8 @@ namespace Netsphere.Network.Serializers
 
                 emiter.CallSerializerForType(length.LocalType, length);
 
-                var loop = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "Loop" + Guid.NewGuid());
-                var loopCheck = emiter.DefineLabel(nameof(ArrayWithScalarSerializer) + "LoopCheck" + Guid.NewGuid());
+                var loop = emiter.DefineLabel();
+                var loopCheck = emiter.DefineLabel();
 
                 using (var element = emiter.DeclareLocal(elementType, "element"))
                 using (var i = emiter.DeclareLocal<int>("i"))

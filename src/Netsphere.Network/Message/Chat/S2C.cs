@@ -5,12 +5,12 @@ using BlubLib.Serialization;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Serializers;
 using ProudNet;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Chat
 {
     [BlubContract]
-    public class SLoginAckMessage : ChatMessage
+    public class SLoginAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Result { get; set; }
@@ -25,7 +25,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SFriendAckMessage : ChatMessage
+    public class SFriendAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
@@ -56,7 +56,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SFriendListAckMessage : ChatMessage
+    public class SFriendListAckMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public FriendDto[] Friends { get; set; }
@@ -73,7 +73,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SCombiAckMessage : ChatMessage
+    public class SCombiAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
@@ -98,7 +98,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SCombiListAckMessage : ChatMessage
+    public class SCombiListAckMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public CombiDto[] Combies { get; set; }
@@ -115,7 +115,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SCheckCombiNameAckMessage : ChatMessage
+    public class SCheckCombiNameAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -136,7 +136,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SDenyChatAckMessage : ChatMessage
+    public class SDenyChatAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
@@ -161,7 +161,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SDenyChatListAckMessage : ChatMessage
+    public class SDenyChatListAckMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public DenyDto[] Denies { get; set; }
@@ -178,7 +178,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SUserDataAckMessage : ChatMessage
+    public class SUserDataAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
@@ -198,7 +198,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SUserDataListAckMessage : ChatMessage
+    public class SUserDataListAckMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public UserDataDto[] UserData { get; set; }
@@ -215,7 +215,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract(typeof(Serializer))]
-    public class SChannelPlayerListAckMessage : ChatMessage
+    public class SChannelPlayerListAckMessage : IChatMessage
     {
         public UserDataWithNickDto[] UserData { get; set; }
 
@@ -272,7 +272,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SChannelEnterPlayerAckMessage : ChatMessage
+    public class SChannelEnterPlayerAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public UserDataWithNickDto UserData { get; set; }
@@ -289,7 +289,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SChannelLeavePlayerAckMessage : ChatMessage
+    public class SChannelLeavePlayerAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -304,7 +304,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SChatMessageAckMessage : ChatMessage
+    public class SChatMessageAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ChatType ChatType { get; set; }
@@ -334,7 +334,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SWhisperChatMessageAckMessage : ChatMessage
+    public class SWhisperChatMessageAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
@@ -369,7 +369,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SInvitationPlayerAckMessage : ChatMessage
+    public class SInvitationPlayerAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -395,7 +395,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SClanMemberListAckMessage : ChatMessage
+    public class SClanMemberListAckMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public UserDataWithNickLongDto[] Players { get; set; }
@@ -412,7 +412,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SNoteListAckMessage : ChatMessage
+    public class SNoteListAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int PageCount { get; set; }
@@ -441,7 +441,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SSendNoteAckMessage : ChatMessage
+    public class SSendNoteAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
@@ -456,7 +456,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SReadNoteAckMessage : ChatMessage
+    public class SReadNoteAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Id { get; set; }
@@ -481,7 +481,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SDeleteNoteAckMessage : ChatMessage
+    public class SDeleteNoteAckMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public DeleteNoteDto[] Notes { get; set; }
@@ -498,7 +498,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SNoteErrorAckMessage : ChatMessage
+    public class SNoteErrorAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Unk { get; set; }
@@ -513,7 +513,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SNoteReminderInfoAckMessage : ChatMessage
+    public class SNoteReminderInfoAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public byte NoteCount { get; set; }

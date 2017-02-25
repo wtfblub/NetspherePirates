@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Game.Systems;
@@ -9,14 +10,12 @@ using Netsphere.Network;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Data.GameRule;
-using Netsphere.Network.Message;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
-using ChatMessage = Netsphere.Network.Message.ChatMessage;
 using SLeavePlayerAckMessage = Netsphere.Network.Message.GameRule.SLeavePlayerAckMessage;
 
 namespace Netsphere
@@ -50,7 +49,7 @@ namespace Netsphere
         public Player Host { get; private set; }
         public Player Creator { get; private set; }
 
-        public ServerP2PGroup Group { get; }
+        public P2PGroup Group { get; }
 
         public bool IsChangingRules { get; private set; }
 
@@ -65,20 +64,20 @@ namespace Netsphere
         {
             PlayerJoining?.Invoke(this, e);
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
-            RoomManager.Channel.BroadcastChat(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         internal virtual void OnPlayerJoined(RoomPlayerEventArgs e)
         {
             PlayerJoined?.Invoke(this, e);
-            RoomManager.Channel.BroadcastChat(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         protected virtual void OnPlayerLeft(RoomPlayerEventArgs e)
         {
             PlayerLeft?.Invoke(this, e);
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
-            RoomManager.Channel.BroadcastChat(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         protected virtual void OnStateChanged()
@@ -89,7 +88,7 @@ namespace Netsphere
 
         #endregion
 
-        public Room(RoomManager roomManager, uint id, RoomCreationOptions options, ServerP2PGroup group)
+        public Room(RoomManager roomManager, uint id, RoomCreationOptions options, P2PGroup group)
         {
             RoomManager = roomManager;
             Id = id;
@@ -104,12 +103,13 @@ namespace Netsphere
             GameRuleManager.GameRuleChanged += GameRuleManager_OnGameRuleChanged;
             GameRuleManager.MapInfo = GameServer.Instance.ResourceCache.GetMaps()[options.MatchKey.Map];
             GameRuleManager.GameRule = RoomManager.GameRuleFactory.Get(Options.MatchKey.GameRule, this);
-
-            Group.Join(2, false);
         }
 
         public void Update(TimeSpan delta)
         {
+            if (Players.Count == 0)
+                return;
+
             if (Host != null)
             {
                 _hostUpdateTimer += delta;
@@ -180,9 +180,9 @@ namespace Netsphere
             }
 
             Broadcast(new SEnteredPlayerAckMessage(plr.Map<Player, RoomPlayerDto>()));
-            plr.Session.Send(new SSuccessEnterRoomAckMessage(this.Map<Room, EnterRoomInfoDto>()));
-            plr.Session.Send(new SIdsInfoAckMessage(0, plr.RoomInfo.Slot));
-            plr.Session.Send(new SEnteredPlayerListAckMessage(_players.Values.Select(p => p.Map<Player, RoomPlayerDto>()).ToArray()));
+            plr.Session.SendAsync(new SSuccessEnterRoomAckMessage(this.Map<Room, EnterRoomInfoDto>()));
+            plr.Session.SendAsync(new SIdsInfoAckMessage(0, plr.RoomInfo.Slot));
+            plr.Session.SendAsync(new SEnteredPlayerListAckMessage(_players.Values.Select(p => p.Map<Player, RoomPlayerDto>()).ToArray()));
             OnPlayerJoining(new RoomPlayerEventArgs(plr));
         }
 
@@ -191,7 +191,7 @@ namespace Netsphere
             if (plr.Room != this)
                 return;
 
-            Group.Leave(plr.RoomInfo.Slot);
+            Group.Leave(plr.RelaySession.HostId);
             Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
 
             if (roomLeaveReason == RoomLeaveReason.Kicked ||
@@ -203,7 +203,7 @@ namespace Netsphere
             plr.RoomInfo.Team.Leave(plr);
             _players.Remove(plr.Account.Id);
             plr.Room = null;
-            plr.Session.Send(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id));
+            plr.Session.SendAsync(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(new RoomPlayerEventArgs(plr));
 
@@ -270,7 +270,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Game rule {options.MatchKey.GameRule} does not exist")
                     .Write();
-                Master.Session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -281,7 +281,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Map {options.MatchKey.Map} does not exist")
                     .Write();
-                Master.Session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -291,7 +291,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {options.MatchKey.GameRule}")
                     .Write();
-                Master.Session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -319,7 +319,7 @@ namespace Netsphere
 
         private void TeamManager_TeamChanged(object sender, TeamChangedEventArgs e)
         {
-            RoomManager.Channel.BroadcastChat(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         private void GameRuleManager_OnGameRuleChanged(object sender, EventArgs e)
@@ -336,35 +336,23 @@ namespace Netsphere
 
         #region Broadcast
 
-        public void Broadcast(GameMessage message)
+        public void Broadcast(IGameMessage message)
         {
             foreach (var plr in _players.Values)
-                plr.Session.Send(message);
+                plr.Session.SendAsync(message);
         }
 
-        public void Broadcast(GameRuleMessage message)
+        public void Broadcast(IGameRuleMessage message)
         {
             foreach (var plr in _players.Values)
-                plr.Session.Send(message);
+                plr.Session.SendAsync(message);
         }
 
-        public void Broadcast(ChatMessage message)
+        public void Broadcast(IChatMessage message)
         {
             foreach (var plr in _players.Values)
-                plr.Session.Send(message);
+                plr.Session.SendAsync(message);
         }
-
-        //public void Broadcast(uint sender, P2PMessage message)
-        //{
-        //    var peerMessage = new PacketMessage(false, message.ToArray());
-        //    foreach (var plr in _players.Values.Where(plr => plr.RoomInfo.PeerId.PeerId.Slot != sender))
-        //    {
-        //        peerMessage.SenderHostId = sender;
-        //        peerMessage.TargetHostId = plr.RelaySession.HostId;
-        //        peerMessage.IsRelayed = true;
-        //        plr.Session.Send(peerMessage);
-        //    }
-        //}
 
         public void BroadcastBriefing(bool isResult = false)
         {
