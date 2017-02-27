@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
@@ -15,6 +16,8 @@ namespace Netsphere.Network.Services
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        private static Random _random = new Random();
 
         [MessageHandler(typeof(CGetChannelInfoReqMessage))]
         public async Task CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)
@@ -124,8 +127,35 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CQuickStartReqMessage))]
         public Task CQuickStartReq(GameSession session, CQuickStartReqMessage message)
         {
-            //ToDo - Logic
-            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+            if (session.Player.Channel == null)
+                return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+
+            var rooms = session.Player.Channel.RoomManager.Select(r => r.Map<Room, RoomDto>()).ToArray();
+
+            System.Collections.Generic.List < RoomDto > fittingRooms = new System.Collections.Generic.List<RoomDto>();
+            foreach(RoomDto room in rooms)
+            {
+                if (!room.HasPassword)
+                {
+                    if ((uint)room.MatchKey.GameRule == message.GameRule)
+                    {
+                        if (room.State.Equals(GameState.Waiting) || (room.State.Equals(GameState.Playing) && !room.IsNoIntrusion)){
+                            fittingRooms.Add(room);
+                        }
+                    }
+                }
+            }
+
+            if (fittingRooms.Count() > 0)
+            {
+                var roomId = fittingRooms[_random.Next(fittingRooms.Count())].RoomId;
+                
+                session.Player.Channel.RoomManager.Get(roomId).Join(session.Player);
+
+                return Task.FromResult(0); // We don't message the Client here, because "Room.Join(...)" already does it.
+            }
+
+            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.QuickJoinFailed));
         }
 
         [MessageHandler(typeof(CTaskRequestReqMessage))]
