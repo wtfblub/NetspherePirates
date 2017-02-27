@@ -1,5 +1,6 @@
 ﻿using System;
 using BlubLib.Serialization;
+using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Serializers;
 using ProudNet.Serialization.Serializers;
@@ -61,8 +62,8 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class CQuickStartReqMessage : IGameMessage
     {
-        [BlubMember(0)]
-        public byte Unk { get; set; }
+        [BlubMember(3, typeof(EnumSerializer), typeof(byte))]
+        public Netsphere.GameRule Rule { get; set; }
     }
 
     [BlubContract]
