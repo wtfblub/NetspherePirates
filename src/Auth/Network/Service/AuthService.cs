@@ -31,8 +31,7 @@ namespace Netsphere.Network.Service
                 var result = await db.FindAsync<AccountDto>(statement => statement
                         .Where($"{nameof(AccountDto.Username):C} = @{nameof(message.Username)}")
                         .Include<BanDto>(join => join.LeftOuterJoin())
-                        .WithParameters(new { message.Username }))
-                    .ConfigureAwait(false);
+                        .WithParameters(new { message.Username }));
                 account = result.FirstOrDefault();
 
                 if (account == null)
@@ -49,14 +48,12 @@ namespace Netsphere.Network.Service
                         account.Salt = Hash.GetString<SHA1CryptoServiceProvider>(bytes);
                         account.Password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
 
-                        await db.InsertAsync(account)
-                            .ConfigureAwait(false);
+                        await db.InsertAsync(account);
                     }
                     else
                     {
                         Logger.Error($"Wrong login for {message.Username}");
-                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw), SendOptions.Reliable)
-                            .ConfigureAwait(false);
+                        session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw));
                         return;
                     }
                 }
@@ -76,14 +73,12 @@ namespace Netsphere.Network.Service
                         account.Password = password;
                         account.Salt = salt;
 
-                        await db.UpdateAsync(account)
-                            .ConfigureAwait(false);
+                        await db.UpdateAsync(account);
                     }
                     else
                     {
                         Logger.Error($"Wrong login for {message.Username}");
-                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw), SendOptions.Reliable)
-                            .ConfigureAwait(false);
+                        session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw));
                         return;
                     }
                 }
@@ -94,8 +89,7 @@ namespace Netsphere.Network.Service
                 {
                     var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
                     Logger.Error($"{message.Username} is banned until {unbanDate}");
-                    await session.SendAsync(new SAuthInEuAckMessage(unbanDate), SendOptions.Reliable)
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SAuthInEuAckMessage(unbanDate));
                     return;
                 }
 
@@ -107,20 +101,18 @@ namespace Netsphere.Network.Service
                     Date = DateTimeOffset.Now.ToUnixTimeSeconds(),
                     IP = ip
                 };
-                await db.InsertAsync(entry)
-                    .ConfigureAwait(false);
+                await db.InsertAsync(entry);
             }
 
             // ToDo proper session generation
             var sessionId = Hash.GetUInt32<CRC32>($"<{account.Username}+{password}>");
-            await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId), SendOptions.Reliable)
-                    .ConfigureAwait(false);
+            session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
         }
 
         [MessageHandler(typeof(CServerListReqMessage))]
-        public Task ServerListHandler(AuthServer server, ProudSession session)
+        public void ServerListHandler(AuthServer server, ProudSession session)
         {
-            return session.SendAsync(new SServerListAckMessage(server.ServerManager.ToArray()), SendOptions.Reliable);
+            session.SendAsync(new SServerListAckMessage(server.ServerManager.ToArray()), SendOptions.Reliable);
         }
     }
 }

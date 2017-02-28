@@ -8,13 +8,13 @@ namespace Netsphere.Network.Services
     internal class GeneralService : ProudMessageHandler
     {
         [MessageHandler(typeof(CTimeSyncReqMessage))]
-        public async Task TimeSyncHandler(GameSession session, CTimeSyncReqMessage message)
+        public void TimeSyncHandler(GameSession session, CTimeSyncReqMessage message)
         {
-            await session.SendAsync(new STimeSyncAckMessage
+            session.SendAsync(new STimeSyncAckMessage
             {
                 ClientTime = message.Time,
                 ServerTime = (uint)Program.AppTime.ElapsedMilliseconds
-            }).ConfigureAwait(false);
+            });
         }
     }
 }

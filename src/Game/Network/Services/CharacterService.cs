@@ -15,7 +15,7 @@ namespace Netsphere.Network.Services
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CCreateCharacterReqMessage))]
-        public async Task CreateCharacterHandler(GameSession session, CCreateCharacterReqMessage message)
+        public void CreateCharacterHandler(GameSession session, CCreateCharacterReqMessage message)
         {
             Logger.Info()
                 .Account(session)
@@ -32,13 +32,12 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
             }
         }
 
         [MessageHandler(typeof(CSelectCharacterReqMessage))]
-        public async Task SelectCharacterHandler(GameSession session, CSelectCharacterReqMessage message)
+        public void SelectCharacterHandler(GameSession session, CSelectCharacterReqMessage message)
         {
             var plr = session.Player;
 
@@ -46,8 +45,7 @@ namespace Netsphere.Network.Services
             if (plr.Room != null && plr.RoomInfo.State != PlayerState.Lobby &&
                 !plr.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.HalfTime))
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
                 return;
             }
 
@@ -66,13 +64,12 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
             }
         }
 
         [MessageHandler(typeof(CDeleteCharacterReqMessage))]
-        public async Task DeleteCharacterHandler(GameSession session, CDeleteCharacterReqMessage message)
+        public void DeleteCharacterHandler(GameSession session, CDeleteCharacterReqMessage message)
         {
             Logger.Info()
                 .Account(session)
@@ -89,8 +86,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed));
             }
         }
     }

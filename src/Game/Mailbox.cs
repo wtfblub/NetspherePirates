@@ -53,8 +53,7 @@ namespace Netsphere
             {
                 account = (await db.FindAsync<AccountDto>(statement => statement
                            .Where($"{nameof(AccountDto.Nickname):C} = @{nameof(receiver)}")
-                           .WithParameters(new { receiver }))
-                        .ConfigureAwait(false))
+                           .WithParameters(new { receiver })))
                     .FirstOrDefault();
             }
             if (account == null)
@@ -72,7 +71,7 @@ namespace Netsphere
                     IsMailNew = true,
                     IsMailDeleted = false
                 };
-                await db.InsertAsync(mailDto).ConfigureAwait(false);
+                await db.InsertAsync(mailDto);
 
                 var plr = GameServer.Instance.PlayerManager.Get(receiver);
                 plr?.Mailbox.Add(new Mail(mailDto));

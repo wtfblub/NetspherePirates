@@ -11,7 +11,7 @@ namespace Netsphere.Network.Services
     internal class CommunityService : ProudMessageHandler
     {
         [MessageHandler(typeof(CSetUserDataReqMessage))]
-        public async Task SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)
+        public void SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)
         {
             var plr = session.Player;
             if (message.UserData.ChannelId > 0 && !plr.SentPlayerList && plr.Channel != null)
@@ -19,8 +19,7 @@ namespace Netsphere.Network.Services
                 // We can't send the channel player list in Channel.Join because the client only accepts it here :/
                 plr.SentPlayerList = true;
                 var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
-                await session.SendAsync(new SChannelPlayerListAckMessage(data))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SChannelPlayerListAckMessage(data));
             }
 
             // Save settings if any of them changed
@@ -43,13 +42,12 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CGetUserDataReqMessage))]
-        public async Task GetUserDataHandler(ChatSession session, CGetUserDataReqMessage message)
+        public void GetUserDataHandler(ChatSession session, CGetUserDataReqMessage message)
         {
             var plr = session.Player;
             if (plr.Account.Id == message.AccountId)
             {
-                await session.SendAsync(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()));
                 return;
             }
 
@@ -68,12 +66,11 @@ namespace Netsphere.Network.Services
                     return;
             }
 
-            await session.SendAsync(new SUserDataAckMessage(target.Map<Player, UserDataDto>()))
-                .ConfigureAwait(false);
+            session.SendAsync(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
         }
 
         [MessageHandler(typeof(CDenyChatReqMessage))]
-        public async Task DenyHandler(ChatServer service, ChatSession session, CDenyChatReqMessage message)
+        public void DenyHandler(ChatServer service, ChatSession session, CDenyChatReqMessage message)
         {
             var plr = session.Player;
 
@@ -92,8 +89,7 @@ namespace Netsphere.Network.Services
                         return;
 
                     deny = plr.DenyManager.Add(target);
-                    await session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()))
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
                     break;
 
                 case DenyAction.Remove:
@@ -102,8 +98,7 @@ namespace Netsphere.Network.Services
                         return;
 
                     plr.DenyManager.Remove(message.Deny.AccountId);
-                    await session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()))
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
                     break;
             }
         }

@@ -13,15 +13,14 @@ namespace Netsphere.Network.Services
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CClubAddressReqMessage))]
-        public async Task CClubAddressReq(GameSession session, CClubAddressReqMessage message)
+        public void CClubAddressReq(GameSession session, CClubAddressReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
                 .Message($"RequestId:{message.RequestId} LanguageId:{message.LanguageId} Command:{message.Command}")
                 .Write();
 
-            await session.SendAsync(new SClubAddressAckMessage("Kappa", 123))
-                .ConfigureAwait(false);
+            session.SendAsync(new SClubAddressAckMessage("Kappa", 123));
         }
 
         [MessageHandler(typeof(CClubInfoReqMessage))]

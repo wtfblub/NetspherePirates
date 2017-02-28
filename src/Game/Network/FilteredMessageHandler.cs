@@ -37,8 +37,7 @@ namespace Netsphere.Network
             var handled = false;
             foreach (var messageHandler in _messageHandlers)
             {
-                var result = await messageHandler.OnMessageReceived(context, message)
-                    .ConfigureAwait(false);
+                var result = await messageHandler.OnMessageReceived(context, message);
                 if (result)
                     handled = true;
             }

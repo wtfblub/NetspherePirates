@@ -32,7 +32,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CMakeRoomReqMessage))]
-        public async Task CMakeRoomReq(GameSession session, CMakeRoomReqMessage message)
+        public void CMakeRoomReq(GameSession session, CMakeRoomReqMessage message)
         {
             var plr = session.Player;
             if (!plr.Channel.RoomManager.GameRuleFactory.Contains(message.Room.MatchKey.GameRule))
@@ -41,8 +41,7 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Game rule {message.Room.MatchKey.GameRule} does not exist")
                     .Write();
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -52,8 +51,7 @@ namespace Netsphere.Network.Services
                 Logger.Error()
                     .Account(plr).Message($"Map {message.Room.MatchKey.Map} does not exist")
                     .Write();
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
             if (!map.GameRules.Contains(message.Room.MatchKey.GameRule))
@@ -62,8 +60,7 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {message.Room.MatchKey.GameRule}")
                     .Write();
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -88,7 +85,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CGameRoomEnterReqMessage))]
-        public async Task CGameRoomEnterReq(GameSession session, CGameRoomEnterReqMessage message)
+        public void CGameRoomEnterReq(GameSession session, CGameRoomEnterReqMessage message)
         {
             Logger.Debug(JsonConvert.SerializeObject(message, Formatting.Indented));
 
@@ -100,14 +97,12 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Room {message.RoomId} in channel {plr.Channel.Id} not found")
                     .Write();
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
                 return;
             }
             if (room.IsChangingRules)
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
                 return;
             }
 
@@ -117,18 +112,15 @@ namespace Netsphere.Network.Services
             }
             catch (RoomAccessDeniedException)
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
             }
             catch (RoomLimitReachedException)
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
             }
             catch (RoomException)
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
             }
         }
 
@@ -177,7 +169,7 @@ namespace Netsphere.Network.Services
         }
 
         [MessageHandler(typeof(CBeginRoundReqMessage))]
-        public async Task CBeginRoundReq(GameSession session)
+        public void CBeginRoundReq(GameSession session)
         {
             var plr = session.Player;
             var stateMachine = plr.Room.GameRuleManager.GameRule.StateMachine;
@@ -185,8 +177,7 @@ namespace Netsphere.Network.Services
             if (stateMachine.CanFire(GameRuleStateTrigger.StartGame))
                 stateMachine.Fire(GameRuleStateTrigger.StartGame);
             else
-                await session.SendAsync(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
         }
 
         [MessageHandler(typeof(CReadyRoundReqMessage))]
