@@ -52,10 +52,11 @@ namespace Netsphere
 
             Logger.Info("Starting server...");
 
-            var eventLoopGroup = new MultithreadEventLoopGroup();
-            ChatServer.Instance.Listen(Config.Instance.ChatListener, eventLoopGroup: eventLoopGroup);
-            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts, eventLoopGroup);
-            GameServer.Instance.Listen(Config.Instance.Listener, eventLoopGroup: eventLoopGroup);
+            var listenerThreads = new MultithreadEventLoopGroup(Config.Instance.ListenerThreads);
+            var workerThreads = new MultithreadEventLoopGroup(Config.Instance.WorkerThreads);
+            ChatServer.Instance.Listen(Config.Instance.ChatListener, listenerEventLoopGroup: listenerThreads, workerEventLoopGroup: workerThreads);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts, listenerThreads, workerThreads);
+            GameServer.Instance.Listen(Config.Instance.Listener, listenerEventLoopGroup: listenerThreads, workerEventLoopGroup: workerThreads);
 
             Logger.Info("Ready for connections!");
 

@@ -15,7 +15,8 @@ namespace ProudNet
     public class ProudServer : IDisposable
     {
         private bool _disposed;
-        private IEventLoopGroup _eventLoopGroup;
+        private IEventLoopGroup _listenerEventLoopGroup;
+        private IEventLoopGroup _workerEventLoopGroup;
         private IChannel _listenerChannel;
         private readonly ConcurrentDictionary<uint, ProudSession> _sessions = new ConcurrentDictionary<uint, ProudSession>();
         private readonly ConcurrentDictionary<uint, ProudSession> _sessionsByUdpId = new ConcurrentDictionary<uint, ProudSession>();
@@ -93,15 +94,16 @@ namespace ProudNet
             UdpSocketManager = new UdpSocketManager(this);
         }
 
-        public void Listen(IPEndPoint tcpListener, IPAddress udpAddress = null, int[] udpListenerPorts = null, IEventLoopGroup eventLoopGroup = null)
+        public void Listen(IPEndPoint tcpListener, IPAddress udpAddress = null, int[] udpListenerPorts = null, IEventLoopGroup listenerEventLoopGroup = null, IEventLoopGroup workerEventLoopGroup = null)
         {
             ThrowIfDisposed();
-
-            _eventLoopGroup = eventLoopGroup ?? new MultithreadEventLoopGroup();
+            
+            _listenerEventLoopGroup = listenerEventLoopGroup ?? new MultithreadEventLoopGroup(1);
+            _workerEventLoopGroup = workerEventLoopGroup ?? new MultithreadEventLoopGroup();
             try
             {
                 _listenerChannel = new ServerBootstrap()
-                    .Group(_eventLoopGroup)
+                    .Group(_listenerEventLoopGroup, _workerEventLoopGroup)
                     .Channel<TcpServerSocketChannel>()
                     .Handler(new ActionChannelInitializer<IServerSocketChannel>(ch => { }))
                     .ChildHandler(new ActionChannelInitializer<ISocketChannel>(ch =>
@@ -139,12 +141,14 @@ namespace ProudNet
                     .BindAsync(tcpListener).WaitEx();
 
                 if (udpListenerPorts != null)
-                    UdpSocketManager.Listen(udpAddress, tcpListener.Address, udpListenerPorts, _eventLoopGroup);
+                    UdpSocketManager.Listen(udpAddress, tcpListener.Address, udpListenerPorts, _workerEventLoopGroup);
             }
             catch (Exception ex)
             {
-                _eventLoopGroup.ShutdownGracefullyAsync();
-                _eventLoopGroup = null;
+                _listenerEventLoopGroup.ShutdownGracefullyAsync();
+                _listenerEventLoopGroup = null;
+                _workerEventLoopGroup.ShutdownGracefullyAsync();
+                _workerEventLoopGroup = null;
                 ex.Rethrow();
             }
 
@@ -162,7 +166,8 @@ namespace ProudNet
             OnStopping();
             UdpSocketManager.Dispose();
             _listenerChannel.CloseAsync().WaitEx();
-            _eventLoopGroup.ShutdownGracefullyAsync().WaitEx();
+            _listenerEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
+            _workerEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
             OnStopped();
         }
 
