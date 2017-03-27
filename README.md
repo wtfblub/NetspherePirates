@@ -1,4 +1,4 @@
-# NetspherePirates [![Build status](https://ci.appveyor.com/api/projects/status/6p6dlgsq6wowijc2?svg=true)](https://ci.appveyor.com/project/wtfblub/netspherepirates)
+# NetspherePirates [![Build status](https://ci.appveyor.com/api/projects/status/xih9n36ar655rayl?svg=true)](https://ci.appveyor.com/project/wtfblub/netspherepirates)
 Experimental S4 League server emulator for patch 26(Season 1).
 
 ### Requirements

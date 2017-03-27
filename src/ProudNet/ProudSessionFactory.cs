@@ -1,12 +1,12 @@
-﻿using BlubLib.Network;
+﻿using DotNetty.Transport.Channels;
 
 namespace ProudNet
 {
     public class ProudSessionFactory : ISessionFactory
     {
-        public ISession GetSession(IService service, ITransport processor)
+        public ProudSession Create(uint hostId, IChannel channel)
         {
-            return new ProudSession(service, processor);
+            return new ProudSession(hostId, channel);
         }
     }
 }

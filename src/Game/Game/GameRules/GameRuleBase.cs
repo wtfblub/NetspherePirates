@@ -171,7 +171,7 @@ namespace Netsphere.Game.GameRules
                         plr.RoomInfo.State = plr.RoomInfo.Mode == PlayerGameMode.Normal
                             ? PlayerState.Alive
                             : PlayerState.Spectating;
-                        plr.Session.Send(new SBeginRoundAckMessage());
+                        plr.Session.SendAsync(new SBeginRoundAckMessage());
                     }
 
                     Room.BroadcastBriefing();

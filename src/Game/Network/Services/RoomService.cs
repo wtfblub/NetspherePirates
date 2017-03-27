@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using BlubLib.Network.Pipes;
+using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Game.GameRules;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
@@ -10,11 +11,11 @@ using Netsphere.Network.Message.GameRule;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Fluent;
-using ProudNet;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class RoomService : MessageHandler
+    internal class RoomService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -25,9 +26,8 @@ namespace Netsphere.Network.Services
             var plr = session.Player;
 
             plr.Room.Broadcast(new SEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.RoomInfo.Mode, 0));
-            session.Send(new SChangeMasterAckMessage(plr.Room.Master.Account.Id));
-            session.Send(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id));
-
+            session.SendAsync(new SChangeMasterAckMessage(plr.Room.Master.Account.Id));
+            session.SendAsync(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id));
             plr.Room.BroadcastBriefing();
         }
 
@@ -41,7 +41,7 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Game rule {message.Room.MatchKey.GameRule} does not exist")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -51,7 +51,7 @@ namespace Netsphere.Network.Services
                 Logger.Error()
                     .Account(plr).Message($"Map {message.Room.MatchKey.Map} does not exist")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
             if (!map.GameRules.Contains(message.Room.MatchKey.GameRule))
@@ -60,7 +60,7 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {message.Room.MatchKey.GameRule}")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace Netsphere.Network.Services
                 IsNoIntrusion = message.Room.IsNoIntrusion,
 
                 ServerEndPoint = new IPEndPoint(IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayListener.Port)
-            }, GameServer.Instance.RelayServer.Pipeline.Get<ProudServerPipe>("proudnet").P2PGroupManager.Create());
+            }, RelayServer.Instance.P2PGroupManager.Create(true));
 
             room.Join(plr);
         }
@@ -97,12 +97,12 @@ namespace Netsphere.Network.Services
                     .Account(plr)
                     .Message($"Room {message.RoomId} in channel {plr.Channel.Id} not found")
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
                 return;
             }
             if (room.IsChangingRules)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
                 return;
             }
 
@@ -112,15 +112,15 @@ namespace Netsphere.Network.Services
             }
             catch (RoomAccessDeniedException)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
             }
             catch (RoomLimitReachedException)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
             }
             catch (RoomException)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
             }
         }
 
@@ -177,7 +177,7 @@ namespace Netsphere.Network.Services
             if (stateMachine.CanFire(GameRuleStateTrigger.StartGame))
                 stateMachine.Fire(GameRuleStateTrigger.StartGame);
             else
-                session.Send(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
+                session.SendAsync(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
         }
 
         [MessageHandler(typeof(CReadyRoundReqMessage))]
@@ -369,14 +369,13 @@ namespace Netsphere.Network.Services
         public void CScoreKillReq(GameSession session, CScoreKillReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Score.Target != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Score.Target;
 
             var room = plr.Room;
-            var killer = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Killer);
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return;
+            killer.RoomInfo.PeerId = message.Score.Killer;
 
             room.GameRuleManager.GameRule.OnScoreKill(killer, null, plr, message.Score.Weapon);
         }
@@ -385,18 +384,18 @@ namespace Netsphere.Network.Services
         public void CScoreKillAssistReq(GameSession session, CScoreKillAssistReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Score.Target != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Score.Target;
 
             var room = plr.Room;
-            var assist = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Assist);
+            var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
             if (assist == null)
                 return;
+            assist.RoomInfo.PeerId = message.Score.Assist;
 
-            var killer = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Killer);
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return;
+            killer.RoomInfo.PeerId = message.Score.Killer;
 
             room.GameRuleManager.GameRule.OnScoreKill(killer, assist, plr, message.Score.Weapon);
         }
@@ -405,14 +404,13 @@ namespace Netsphere.Network.Services
         public void CScoreOffenseReq(GameSession session, CScoreOffenseReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Score.Target != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Score.Target;
 
             var room = plr.Room;
-            var killer = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Killer);
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return;
+            killer.RoomInfo.PeerId = message.Score.Killer;
 
             if (room.Options.MatchKey.GameRule == GameRule.Touchdown)
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreOffense(killer, null, plr, message.Score.Weapon);
@@ -422,18 +420,18 @@ namespace Netsphere.Network.Services
         public void CScoreOffenseAssistReq(GameSession session, CScoreOffenseAssistReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Score.Target != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Score.Target;
 
             var room = plr.Room;
-            var assist = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Assist);
+            var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
             if (assist == null)
                 return;
+            assist.RoomInfo.PeerId = message.Score.Assist;
 
-            var killer = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Killer);
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return;
+            killer.RoomInfo.PeerId = message.Score.Killer;
 
             if (room.Options.MatchKey.GameRule == GameRule.Touchdown)
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreOffense(killer, assist, plr, message.Score.Weapon);
@@ -443,14 +441,13 @@ namespace Netsphere.Network.Services
         public void CScoreDefenseReq(GameSession session, CScoreDefenseReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Score.Target != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Score.Target;
 
             var room = plr.Room;
-            var killer = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Killer);
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return;
+            killer.RoomInfo.PeerId = message.Score.Killer;
 
             if (room.Options.MatchKey.GameRule == GameRule.Touchdown)
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreDefense(killer, null, plr, message.Score.Weapon);
@@ -460,18 +457,18 @@ namespace Netsphere.Network.Services
         public void CScoreDefenseAssistReq(GameSession session, CScoreDefenseAssistReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Score.Target != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Score.Target;
 
             var room = plr.Room;
-            var assist = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Assist);
+            var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
             if (assist == null)
                 return;
+            assist.RoomInfo.PeerId = message.Score.Assist;
 
-            var killer = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Killer);
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return;
+            killer.RoomInfo.PeerId = message.Score.Killer;
 
             if (room.Options.MatchKey.GameRule == GameRule.Touchdown)
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreDefense(killer, assist, plr, message.Score.Weapon);
@@ -481,14 +478,13 @@ namespace Netsphere.Network.Services
         public void CScoreTeamKillReq(GameSession session, CScoreTeamKillReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Score.Target != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Score.Target;
 
             var room = plr.Room;
-            var killer = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.Score.Killer);
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return;
+            killer.RoomInfo.PeerId = message.Score.Killer;
 
             room.GameRuleManager.GameRule.OnScoreKill(killer, null, plr, message.Score.Weapon);
         }
@@ -497,9 +493,7 @@ namespace Netsphere.Network.Services
         public void CScoreHealAssistReq(GameSession session, CScoreHealAssistReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Id != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Id;
 
             var room = plr.Room;
             room.GameRuleManager.GameRule.OnScoreHeal(plr);
@@ -509,9 +503,7 @@ namespace Netsphere.Network.Services
         public void CScoreSuicideReq(GameSession session, CScoreSuicideReqMessage message)
         {
             var plr = session.Player;
-
-            if (message.Id != plr.RoomInfo.PeerId)
-                return;
+            plr.RoomInfo.PeerId = message.Id;
 
             var room = plr.Room;
             room.GameRuleManager.GameRule.OnScoreSuicide(plr);
@@ -527,10 +519,16 @@ namespace Netsphere.Network.Services
             Player oldPlr = null;
 
             if (message.NewId != 0)
-                newPlr = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.NewId);
+                newPlr = room.Players.GetValueOrDefault(message.NewId.AccountId);
 
             if (message.OldId != 0)
-                oldPlr = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.OldId);
+                oldPlr = room.Players.GetValueOrDefault(message.OldId.AccountId);
+
+            if (newPlr != null)
+                newPlr.RoomInfo.PeerId = message.NewId;
+
+            if (oldPlr != null)
+                oldPlr.RoomInfo.PeerId = message.OldId;
 
             if (room.Options.MatchKey.GameRule == GameRule.Touchdown)
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreRebound(newPlr, oldPlr);
@@ -542,9 +540,10 @@ namespace Netsphere.Network.Services
             var plr = session.Player;
             var room = plr.Room;
 
-            var target = room.Players.Values.FirstOrDefault(p => p.RoomInfo.PeerId == message.PeerId);
+            var target = room.Players.GetValueOrDefault(message.PeerId.AccountId);
             if (target == null)
                 return;
+            target.RoomInfo.PeerId = message.PeerId;
 
             if (room.Options.MatchKey.GameRule == GameRule.Touchdown)
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreGoal(target);

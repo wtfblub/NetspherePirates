@@ -40,7 +40,7 @@ namespace Netsphere
         internal void Add(Mail mail)
         {
             if (_mails.TryAdd(mail.Id, mail))
-                UpdateReminder();
+                UpdateReminderAsync();
         }
 
         public async Task<bool> SendAsync(string receiver, string title, string message)
@@ -53,8 +53,7 @@ namespace Netsphere
             {
                 account = (await db.FindAsync<AccountDto>(statement => statement
                            .Where($"{nameof(AccountDto.Nickname):C} = @{nameof(receiver)}")
-                           .WithParameters(new { receiver }))
-                        .ConfigureAwait(false))
+                           .WithParameters(new { receiver })))
                     .FirstOrDefault();
             }
             if (account == null)
@@ -72,7 +71,7 @@ namespace Netsphere
                     IsMailNew = true,
                     IsMailDeleted = false
                 };
-                await db.InsertAsync(mailDto).ConfigureAwait(false);
+                await db.InsertAsync(mailDto);
 
                 var plr = GameServer.Instance.PlayerManager.Get(receiver);
                 plr?.Mailbox.Add(new Mail(mailDto));
@@ -96,14 +95,9 @@ namespace Netsphere
                 _mails.Remove(mail.Id);
                 _mailsToDelete.Push(mail);
             }
-            UpdateReminder();
+            UpdateReminderAsync();
 
             return changed;
-        }
-
-        public void UpdateReminder()
-        {
-            Player.ChatSession.Send(new SNoteReminderInfoAckMessage((byte)this.Count(m => m.IsNew), 0, 0));
         }
 
         public Task UpdateReminderAsync()

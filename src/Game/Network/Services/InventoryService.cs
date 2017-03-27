@@ -1,12 +1,13 @@
 ﻿using System.Threading.Tasks;
-using BlubLib.Network.Pipes;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class InventoryService : MessageHandler
+    internal class InventoryService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -20,7 +21,7 @@ namespace Netsphere.Network.Services
 
             if (@char == null || item == null || (plr.Room != null && plr.RoomInfo.State != PlayerState.Lobby))
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -43,7 +44,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Exception(ex)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
             }
         }
 
@@ -61,8 +62,7 @@ namespace Netsphere.Network.Services
                         .Account(session)
                         .Message($"Item {id} not found")
                         .Write();
-                    await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error0 })
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error0 });
                     return;
                 }
                 if (item.Durability == -1)
@@ -71,16 +71,14 @@ namespace Netsphere.Network.Services
                         .Account(session)
                         .Message($"Item {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period} can not be repaired")
                         .Write();
-                    await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error1 })
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error1 });
                     return;
                 }
 
                 var cost = item.CalculateRepair();
                 if (session.Player.PEN < cost)
                 {
-                    await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.NotEnoughMoney })
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.NotEnoughMoney });
                     return;
                 }
 
@@ -91,29 +89,25 @@ namespace Netsphere.Network.Services
                         .Account(session)
                         .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                         .Write();
-                    await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error4 })
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error4 });
                     return;
                 }
                 if (item.Durability >= price.Durability)
                 {
-                    await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.OK, ItemId = item.Id })
-                        .ConfigureAwait(false);
+                    await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.OK, ItemId = item.Id });
                     continue;
                 }
 
                 item.Durability = price.Durability;
                 session.Player.PEN -= cost;
 
-                await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.OK, ItemId = item.Id })
-                        .ConfigureAwait(false);
-                await session.SendAsync(new SRefreshCashInfoAckMessage { PEN = session.Player.PEN, AP = session.Player.AP })
-                        .ConfigureAwait(false);
+                await session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.OK, ItemId = item.Id });
+                await session.SendAsync(new SRefreshCashInfoAckMessage { PEN = session.Player.PEN, AP = session.Player.AP });
             }
         }
 
         [MessageHandler(typeof(CRefundItemReqMessage))]
-        public async Task RefundItemHandler(GameSession session, CRefundItemReqMessage message)
+        public void RefundItemHandler(GameSession session, CRefundItemReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
 
@@ -124,8 +118,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"Item {message.ItemId} not found")
                     .Write();
-                await session.SendAsync(new SRefundItemAckMessage {Result = ItemRefundResult.Failed})
-                    .ConfigureAwait(false);
+                session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed });
                 return;
             }
 
@@ -136,8 +129,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
-                await session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed })
-                    .ConfigureAwait(false);
+                session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed });
                 return;
             }
             if (!price.CanRefund)
@@ -146,18 +138,15 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"Cannot refund {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
-                await session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed })
-                    .ConfigureAwait(false);
+                session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed });
                 return;
             }
 
             session.Player.PEN += item.CalculateRefund();
             session.Player.Inventory.Remove(item);
 
-            await session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.OK, ItemId = item.Id })
-                    .ConfigureAwait(false);
-            await session.SendAsync(new SRefreshCashInfoAckMessage { PEN = session.Player.PEN, AP = session.Player.AP })
-                    .ConfigureAwait(false);
+            session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.OK, ItemId = item.Id });
+            session.SendAsync(new SRefreshCashInfoAckMessage { PEN = session.Player.PEN, AP = session.Player.AP });
         }
 
         [MessageHandler(typeof(CDiscardItemReqMessage))]
@@ -172,7 +161,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"Item {message.ItemId} not found")
                     .Write();
-                session.Send(new SDiscardItemAckMessage { Result = 2 });
+                session.SendAsync(new SDiscardItemAckMessage { Result = 2 });
                 return;
             }
 
@@ -183,27 +172,28 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
-                session.Send(new SDiscardItemAckMessage { Result = 2 });
+                session.SendAsync(new SDiscardItemAckMessage { Result = 2 });
                 return;
             }
+
             if (shopItem.IsDestroyable)
             {
                 Logger.Error()
                     .Account(session)
                     .Message($"Cannot discard {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
                     .Write();
-                session.Send(new SDiscardItemAckMessage { Result = 2 });
+                session.SendAsync(new SDiscardItemAckMessage { Result = 2 });
                 return;
             }
 
             session.Player.Inventory.Remove(item);
-            session.Send(new SDiscardItemAckMessage { Result = 0, ItemId = item.Id });
+            session.SendAsync(new SDiscardItemAckMessage { Result = 0, ItemId = item.Id });
         }
 
         [MessageHandler(typeof(CUseCapsuleReqMessage))]
         public void UseCapsuleReq(GameSession session, CUseCapsuleReqMessage message)
         {
-            session.Send(new SServerResultInfoAckMessage((ServerResult)1));
+            session.SendAsync(new SServerResultInfoAckMessage((ServerResult)1));
             //session.Send(new SUseCapsuleAckMessage(new List<CapsuleRewardDto>
             //{
             //    new CapsuleRewardDto(CapsuleRewardType.Item, 0, 64, 0),

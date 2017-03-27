@@ -1,27 +1,26 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using BlubLib.IO;
-using BlubLib.Network;
-using BlubLib.Network.Pipes;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class ShopService : MessageHandler
+    internal class ShopService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(CNewShopUpdateCheckReqMessage))]
-        public void ShopUpdateCheckHandler(IService service, GameSession session, CNewShopUpdateCheckReqMessage message)
+        public void ShopUpdateCheckHandler(GameSession session, CNewShopUpdateCheckReqMessage message)
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
             var version = shop.Version;
-            session.Send(new SNewShopUpdateCheckAckMessage
+            session.SendAsync(new SNewShopUpdateCheckAckMessage
             {
                 Date01 = version,
                 Date02 = version,
@@ -53,11 +52,11 @@ namespace Netsphere.Network.Services
 
             #region NewShopPrice
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Serialize(shop.Prices.Values.ToArray());
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopPrice,
                     Data = w.ToArray(),
@@ -69,11 +68,11 @@ namespace Netsphere.Network.Services
 
             #region NewShopEffect
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Serialize(shop.Effects.Values.ToArray());
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopEffect,
                     Data = w.ToArray(),
@@ -85,11 +84,11 @@ namespace Netsphere.Network.Services
 
             #region NewShopItem
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Serialize(shop.Items.Values.ToArray());
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopItem,
                     Data = w.ToArray(),
@@ -100,11 +99,11 @@ namespace Netsphere.Network.Services
             #endregion
 
             // ToDo
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Write(0);
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopUniqueItem,
                     Data = w.ToArray(),
@@ -112,11 +111,11 @@ namespace Netsphere.Network.Services
                 });
             }
 
-            using (var w = new BinaryWriter(new PooledMemoryStream(service.ArrayPool)))
+            using (var w = new BinaryWriter(new MemoryStream()))
             {
                 w.Write(new byte[200]);
 
-                session.Send(new SNewShopUpdateInfoAckMessage
+                session.SendAsync(new SNewShopUpdateInfoAckMessage
                 {
                     Type = (ShopResourceType)16,
                     Data = w.ToArray(),
@@ -173,8 +172,7 @@ namespace Netsphere.Network.Services
                         .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType}")
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
+                    session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
                 }
                 if (!shopItemInfo.IsEnabled)
@@ -184,9 +182,7 @@ namespace Netsphere.Network.Services
                         .Message($"No shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} is not enabled")
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
-
+                    session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
                 }
 
@@ -199,11 +195,10 @@ namespace Netsphere.Network.Services
                         .Message($"Invalid price group for shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType}")
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
-
+                    session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
                 }
+
                 if (!price.IsEnabled)
                 {
                     Logger.Error()
@@ -211,9 +206,7 @@ namespace Netsphere.Network.Services
                         .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} is not enabled")
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
-
+                    session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
                 }
 
@@ -224,9 +217,7 @@ namespace Netsphere.Network.Services
                         .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} has no color {item.Color}")
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                        .ConfigureAwait(false);
-
+                    session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
                 }
 
@@ -239,9 +230,7 @@ namespace Netsphere.Network.Services
                             .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} has no effect {item.Effect}")
                             .Write();
 
-                        await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                                .ConfigureAwait(false);
-
+                        session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem));
                         return;
                     }
                 }
@@ -255,22 +244,17 @@ namespace Netsphere.Network.Services
                         .Message($"Doesn't have license {shopItemInfo.ShopItem.License}")
                         .Write();
 
-                    await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem))
-                            .ConfigureAwait(false);
-
+                    session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
                 }
 
                 // ToDo missing price types
-
                 switch (shopItemInfo.PriceGroup.PriceType)
                 {
                     case ItemPriceType.PEN:
                         if (plr.PEN < price.Price)
                         {
-                            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney))
-                                .ConfigureAwait(false);
-
+                            session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
                             return;
                         }
                         plr.PEN -= (uint)price.Price;
@@ -280,9 +264,7 @@ namespace Netsphere.Network.Services
                     case ItemPriceType.Premium:
                         if (plr.AP < price.Price)
                         {
-                            await session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney))
-                                .ConfigureAwait(false);
-
+                            session.SendAsync(new SBuyItemAckMessage(ItemBuyResult.NotEnoughMoney));
                             return;
                         }
                         plr.AP -= (uint)price.Price;
@@ -309,10 +291,8 @@ namespace Netsphere.Network.Services
 
                 var plrItem = session.Player.Inventory.Create(shopItemInfo, price, item.Color, item.Effect, (uint)(price.PeriodType == ItemPeriodType.Units ? price.Period : 0));
 
-                await session.SendAsync(new SBuyItemAckMessage(new[] { plrItem.Id }, item))
-                    .ConfigureAwait(false);
-                await session.SendAsync(new SRefreshCashInfoAckMessage(plr.PEN, plr.AP))
-                    .ConfigureAwait(false);
+                await session.SendAsync(new SBuyItemAckMessage(new[] { plrItem.Id }, item));
+                await session.SendAsync(new SRefreshCashInfoAckMessage(plr.PEN, plr.AP));
             }
         }
 
@@ -321,7 +301,7 @@ namespace Netsphere.Network.Services
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
 
-            session.Send(new SRandomShopItemInfoAckMessage
+            session.SendAsync(new SRandomShopItemInfoAckMessage
             {
                 Item = new RandomShopItemDto()
             });
@@ -344,7 +324,7 @@ namespace Netsphere.Network.Services
         {
             var shop = GameServer.Instance.ResourceCache.GetShop();
 
-            session.Send(new SRandomShopItemInfoAckMessage
+            session.SendAsync(new SRandomShopItemInfoAckMessage
             {
                 Item = new RandomShopItemDto()
             });

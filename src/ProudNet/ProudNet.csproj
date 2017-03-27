@@ -35,63 +35,109 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\libs\BlubLib.dll</HintPath>
     </Reference>
-    <Reference Include="BlubLib.Network, Version=1.2.196.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\libs\BlubLib.Network.dll</HintPath>
+    <Reference Include="BlubLib.DotNetty">
+      <HintPath>..\..\libs\BlubLib.DotNetty.dll</HintPath>
     </Reference>
     <Reference Include="BlubLib.Serialization">
       <HintPath>..\..\libs\BlubLib.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="DotNetty.Buffers, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DotNetty.Buffers.0.4.2\lib\net451\DotNetty.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="DotNetty.Codecs, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DotNetty.Codecs.0.4.2\lib\net451\DotNetty.Codecs.dll</HintPath>
+    </Reference>
+    <Reference Include="DotNetty.Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DotNetty.Common.0.4.2\lib\net451\DotNetty.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="DotNetty.Transport, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DotNetty.Transport.0.4.2\lib\net451\DotNetty.Transport.dll</HintPath>
     </Reference>
     <Reference Include="DotNetZip, Version=1.10.1.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DotNetZip.1.10.1\lib\net20\DotNetZip.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NLog.4.3.9\lib\net45\NLog.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Extensions.Logging.1.1.0\lib\netstandard1.1\Microsoft.Extensions.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Extensions.Logging.Abstractions.1.1.0\lib\netstandard1.1\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Sigil">
       <HintPath>..\..\libs\Sigil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EncryptContext.cs" />
-    <Compile Include="ProudProtocol.cs" />
+    <Compile Include="Codecs\CoreMessageDecoder.cs" />
+    <Compile Include="Codecs\CoreMessageEncoder.cs" />
+    <Compile Include="Codecs\MessageDecoder.cs" />
+    <Compile Include="Codecs\MessageEncoder.cs" />
+    <Compile Include="Codecs\ProudFrameEncoder.cs" />
+    <Compile Include="Codecs\UdpFrameDecoder.cs" />
+    <Compile Include="Codecs\UdpFrameEncoder.cs" />
+    <Compile Include="Handlers\UdpHandler.cs" />
+    <Compile Include="Codecs\UdpMessage.cs" />
+    <Compile Include="Crypt.cs" />
+    <Compile Include="ErrorEventArgs.cs" />
+    <Compile Include="Handlers\SendContextEncoder.cs" />
+    <Compile Include="HostIdFactory.cs" />
+    <Compile Include="Codecs\ProudFrameDecoder.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Data\RelayDestinationDto.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="ProudPipe.cs" />
-    <Compile Include="ProudServerPipe.cs" />
-    <Compile Include="Message\S2C.cs" />
-    <Compile Include="Message\C2S.cs" />
-    <Compile Include="Message\Core\C2S.cs" />
-    <Compile Include="Message\Core\CoreMapper.cs" />
-    <Compile Include="Message\Core\CoreMessage.cs" />
-    <Compile Include="Message\Core\S2C.cs" />
-    <Compile Include="Message\Core\SC.cs" />
-    <Compile Include="Message\ProudMapper.cs" />
-    <Compile Include="Message\ProudMessage.cs" />
-    <Compile Include="P2PGroup.cs" />
+    <Compile Include="ISessionFactory.cs" />
+    <Compile Include="P2PConnectionState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProudConfig.cs" />
-    <Compile Include="Serializers\ArrayWithScalarSerializer.cs" />
-    <Compile Include="Serializers\IPEndPointAddressStringSerializer.cs" />
-    <Compile Include="Serializers\IPEndPointSerializer.cs" />
-    <Compile Include="Serializers\ScalarSerializer.cs" />
-    <Compile Include="Serializers\ReadToEndSerializer.cs" />
-    <Compile Include="Serializers\StringSerializer.cs" />
-    <Compile Include="Services\ProudCoreServerService.cs" />
-    <Compile Include="Services\ProudServerService.cs" />
-    <Compile Include="Services\ProudCoreService.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="ProudSession.cs" />
     <Compile Include="ProudSessionFactory.cs" />
+    <Compile Include="SendContext.cs" />
+    <Compile Include="SendOptions.cs" />
+    <Compile Include="Serialization\MessageFactory.cs" />
+    <Compile Include="Serialization\Messages\Core\C2S.cs" />
+    <Compile Include="Serialization\Messages\Core\Factory.cs" />
+    <Compile Include="Serialization\Messages\C2S.cs" />
+    <Compile Include="Serialization\Messages\Core\ICoreMessage.cs" />
+    <Compile Include="Serialization\Messages\Factory.cs" />
+    <Compile Include="Serialization\Messages\IMessage.cs" />
+    <Compile Include="Serialization\Messages\S2C.cs" />
+    <Compile Include="Serialization\Messages\Core\S2C.cs" />
+    <Compile Include="Serialization\Messages\Core\SC.cs" />
+    <Compile Include="Serialization\NetConfigDto.cs" />
+    <Compile Include="Serialization\RelayDestinationDto.cs" />
+    <Compile Include="Serialization\Serializers\ArrayWithScalarSerializer.cs" />
+    <Compile Include="Serialization\Serializers\IPEndPointAddressStringSerializer.cs" />
+    <Compile Include="Serialization\Serializers\IPEndPointSerializer.cs" />
+    <Compile Include="Serialization\Serializers\ReadToEndSerializer.cs" />
+    <Compile Include="Serialization\Serializers\ScalarSerializer.cs" />
+    <Compile Include="Serialization\Serializers\StreamSerializer.cs" />
+    <Compile Include="Serialization\Serializers\StreamWithScalarSerializer.cs" />
+    <Compile Include="Serialization\Serializers\StringSerializer.cs" />
+    <Compile Include="P2PGroup.cs" />
+    <Compile Include="P2PGroupManager.cs" />
+    <Compile Include="ProudServer.cs" />
+    <Compile Include="RemotePeer.cs" />
+    <Compile Include="Handlers\SessionHandler.cs" />
+    <Compile Include="Handlers\ProudMessageHandler.cs" />
+    <Compile Include="Handlers\ServerHandler.cs" />
+    <Compile Include="Handlers\CoreHandler.cs" />
+    <Compile Include="UdpSocket.cs" />
+    <Compile Include="UdpSocketManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

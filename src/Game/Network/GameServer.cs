@@ -1,38 +1,34 @@
 ﻿using System;
-using System.Buffers;
 using System.Linq;
 using System.Net;
 using Auth.ServiceModel;
-using BlubLib.Network;
-using BlubLib.Network.Pipes;
-using BlubLib.Network.Transport.Sockets;
 using BlubLib.Threading;
 using ExpressMapper;
-using ExpressMapper.Extensions;
 using Netsphere.Commands;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Data.GameRule;
-using Netsphere.Network.Message;
 using Netsphere.Network.Message.Game;
-using Netsphere.Network.Message.GameRule;
-using Netsphere.Network.Services;
 using Netsphere.Resource;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
-using BlubLib.Network.Message;
+using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
+using Netsphere.Network.Services;
+using Netsphere.Network.Message.GameRule;
+using ExpressMapper.Extensions;
+using ProudNet.Serialization;
 
 namespace Netsphere.Network
 {
-    internal class GameServer : TcpServer
+    internal class GameServer : ProudServer
     {
-        public static GameServer Instance { get; } = new GameServer();
+        public static GameServer Instance { get; private set; }
 
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly ChatServer _chatServer;
         private readonly ILoop _worker;
         private readonly ServerlistManager _serverlistManager;
 
@@ -44,22 +40,14 @@ namespace Netsphere.Network
         public ChannelManager ChannelManager { get; }
         public ResourceCache ResourceCache { get; }
 
-        public RelayServer RelayServer { get; }
-
-        private GameServer()
-            : base(new GameSessionFactory(), ArrayPool<byte>.Create(1 * 1024 * 1024, 50), Config.Instance.PlayerLimit)
+        public static void Initialize(Configuration config)
         {
-            #region Filter Setup
+            if (Instance != null)
+                throw new InvalidOperationException("Server is already initialized");
 
-            var config = new ProudConfig(new Guid("{beb92241-8333-4117-ab92-9b4af78c688f}"));
-            var proudFilter = new ProudServerPipe(config);
-#if DEBUG
-            proudFilter.UnhandledProudCoreMessage += (s, e) => Logger.Warn($"Unhandled ProudCoreMessage {e.Message.GetType().Name}");
-            proudFilter.UnhandledProudMessage +=
-                (s, e) => Logger.Warn($"Unhandled UnhandledProudMessage {e.Message.GetType().Name}: {e.Message.ToArray().ToHexString()}");
-#endif
-            Pipeline.AddFirst("proudnet", proudFilter);
-            Pipeline.AddLast("s4_protocol", new NetspherePipe(new GameMessageFactory()));
+            config.Version = new Guid("{beb92241-8333-4117-ab92-9b4af78c688f}");
+            config.MessageFactories = new MessageFactory[] { new GameMessageFactory(), new GameRuleMessageFactory() };
+            config.SessionFactory = new GameSessionFactory();
 
             // ReSharper disable InconsistentNaming
             Predicate<GameSession> MustBeLoggedIn = session => session.IsLoggedIn();
@@ -72,82 +60,88 @@ namespace Netsphere.Network
             Predicate<GameSession> MustBeRoomMaster = session => session.Player.Room.Master == session.Player;
             // ReSharper restore InconsistentNaming
 
-            Pipeline.AddLast("firewall", new FirewallPipe())
-                .Add(new PacketFirewallRule<GameSession>())
-                .Get<PacketFirewallRule<GameSession>>()
+            config.MessageHandlers = new IMessageHandler[]
+            {
+                new FilteredMessageHandler<GameSession>()
+                    .AddHandler(new AuthService())
+                    .AddHandler(new CharacterService())
+                    .AddHandler(new GeneralService())
+                    .AddHandler(new AdminService())
+                    .AddHandler(new ChannelService())
+                    .AddHandler(new ShopService())
+                    .AddHandler(new InventoryService())
+                    .AddHandler(new RoomService())
+                    .AddHandler(new ClubService())
 
-                .Register<CLoginReqMessage>(MustNotBeLoggedIn)
-                .Register<CCreateCharacterReqMessage>(MustBeLoggedIn)
-                .Register<CSelectCharacterReqMessage>(MustBeLoggedIn)
-                .Register<CDeleteCharacterReqMessage>(MustBeLoggedIn)
-                .Register<CAdminShowWindowReqMessage>(MustBeLoggedIn)
-                .Register<CAdminActionReqMessage>(MustBeLoggedIn)
-                .Register<CGetChannelInfoReqMessage>(MustBeLoggedIn)
-                .Register<CChannelEnterReqMessage>(MustBeLoggedIn, MustNotBeInChannel)
-                .Register<CChannelLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CNewShopUpdateCheckReqMessage>(MustBeLoggedIn)
-                .Register<CLicensedReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CExerciseLicenceReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CBuyItemReqMessage>(MustBeLoggedIn)
-                .Register<CRandomShopRollingStartReqMessage>(MustBeLoggedIn)
-                .Register<CRandomShopItemSaleReqMessage>(MustBeLoggedIn)
-                .Register<CUseItemReqMessage>(MustBeLoggedIn)
-                .Register<CRepairItemReqMessage>(MustBeLoggedIn)
-                .Register<CRefundItemReqMessage>(MustBeLoggedIn)
-                .Register<CDiscardItemReqMessage>(MustBeLoggedIn)
-                .Register<CEnterPlayerReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, session => session.Player.RoomInfo.IsConnecting)
-                .Register<CMakeRoomReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
-                .Register<CGameRoomEnterReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
-                .Register<CJoinTunnelInfoReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CChangeTeamReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CPlayerGameModeChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreKillAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreOffenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreOffenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreDefenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreDefenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreTeamKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreHealAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreSuicideReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CScoreReboundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
-                    session => session.Player.RoomInfo.State != PlayerState.Lobby &&
-                        session.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CScoreGoalReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
-                    session => session.Player.RoomInfo.State != PlayerState.Lobby &&
-                        session.Player.RoomInfo.State != PlayerState.Spectating)
-                .Register<CBeginRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster)
-                .Register<CReadyRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, session => session.Player.RoomInfo.State == PlayerState.Lobby)
-                .Register<CEventMessageReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                .Register<CItemsChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, session => session.Player.RoomInfo.State == PlayerState.Lobby)
-                .Register<CAvatarChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
-                    session => session.Player.RoomInfo.State == PlayerState.Lobby ||
-                        session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.HalfTime))
-                .Register<CChangeRuleNotifyReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster,
-                    session => session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
-                .Register<CClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CLeavePlayerRequestReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom);
+                    .RegisterRule<CLoginReqMessage>(MustNotBeLoggedIn)
+                    .RegisterRule<CCreateCharacterReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CSelectCharacterReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CDeleteCharacterReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CAdminShowWindowReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CAdminActionReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CGetChannelInfoReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CChannelEnterReqMessage>(MustBeLoggedIn, MustNotBeInChannel)
+                    .RegisterRule<CChannelLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CLicensedReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CExerciseLicenceReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CBuyItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CRandomShopRollingStartReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CRandomShopItemSaleReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CUseItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CRepairItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CRefundItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CDiscardItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CEnterPlayerReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                        session => session.Player.RoomInfo.IsConnecting)
+                    .RegisterRule<CMakeRoomReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
+                    .RegisterRule<CGameRoomEnterReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
+                    .RegisterRule<CJoinTunnelInfoReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CChangeTeamReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CPlayerGameModeChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreKillAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreOffenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreOffenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreDefenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreDefenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreTeamKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreHealAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreSuicideReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CScoreReboundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
+                        session => session.Player.RoomInfo.State != PlayerState.Lobby &&
+                                   session.Player.RoomInfo.State != PlayerState.Spectating)
+                    .RegisterRule<CScoreGoalReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
+                        session => session.Player.RoomInfo.State != PlayerState.Lobby &&
+                                   session.Player.RoomInfo.State != PlayerState.Spectating)
+                    .RegisterRule<CBeginRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster)
+                    .RegisterRule<CReadyRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                        session => session.Player.RoomInfo.State == PlayerState.Lobby)
+                    .RegisterRule<CEventMessageReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<CItemsChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                        session => session.Player.RoomInfo.State == PlayerState.Lobby)
+                    .RegisterRule<CAvatarChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                        session => session.Player.RoomInfo.State == PlayerState.Lobby ||
+                                   session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(
+                                       GameRuleState.HalfTime))
+                    .RegisterRule<CChangeRuleNotifyReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                        MustBeRoomMaster,
+                        session =>
+                            session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
+                    .RegisterRule<CClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CLeavePlayerRequestReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
 
-            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
-                .Add(new AuthService())
-                .Add(new CharacterService())
-                .Add(new GeneralService())
-                .Add(new AdminService())
-                .Add(new ChannelService())
-                .Add(new ShopService())
-                .Add(new InventoryService())
-                .Add(new RoomService())
-                .Add(new ClubService())
-                .UnhandledMessage += OnUnhandledMessage;
+            };
 
-            #endregion
+            Instance = new GameServer(config);
+        }
 
+        private GameServer(Configuration config)
+            : base(config)
+        {
             RegisterMappings();
 
             //ServerTime = TimeSpan.Zero;
-            _chatServer = new ChatServer(this);
-            RelayServer = new RelayServer(this);
 
             CommandManager = new CommandManager(this);
             CommandManager.Add(new ServerCommand())
@@ -165,93 +159,81 @@ namespace Netsphere.Network
 
         #region Events
 
-        protected override void OnDisconnected(SessionEventArgs e)
-        {
-            var session = (GameSession)e.Session;
-            if (session.Player != null)
-            {
-                session.Player.Room?.Leave(session.Player);
-                session.Player.Channel?.Leave(session.Player);
-
-                session.Player.Save();
-
-                PlayerManager.Remove(session.Player);
-
-                Logger.Debug()
-                    .Account(session)
-                    .Message("Disconnected")
-                    .Write();
-
-                if (session.Player.ChatSession != null)
-                {
-                    session.Player.ChatSession.GameSession = null;
-                    session.Player.ChatSession.Close();
-                }
-
-                if (session.Player.RelaySession != null)
-                {
-                    session.Player.RelaySession.GameSession = null;
-                    session.Player.RelaySession.Close();
-                }
-
-                session.Player.Session = null;
-                session.Player.ChatSession = null;
-                session.Player.RelaySession = null;
-                session.Player = null;
-            }
-            base.OnDisconnected(e);
-        }
-
-        protected override void OnError(ExceptionEventArgs e)
-        {
-            Logger.Error(e.Exception);
-            base.OnError(e);
-        }
-
-        private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
-        {
-            var session = (GameSession)e.Session;
-            Logger.Warn()
-                .Account(session)
-                .Message($"Unhandled message {e.Message.GetType().Name}")
-                .Write();
-        }
-
-        #endregion
-
-        public override void Start(IPEndPoint localEP)
+        protected override void OnStarted()
         {
             ResourceCache.PreCache();
-            base.Start(localEP);
-            _chatServer.Start(Config.Instance.ChatListener);
-            RelayServer.Start(Config.Instance.RelayListener);
             _worker.Start();
             _serverlistManager.Start();
         }
 
-        public override void Stop()
+        protected override void OnStopping()
         {
             _worker.Stop(new TimeSpan(0));
-
             _serverlistManager.Dispose();
-            _chatServer.Stop();
-            RelayServer.Stop();
-            base.Stop();
         }
 
-        public override void Dispose()
+        protected override void OnDisconnected(ProudSession session)
         {
-            _worker.Stop(new TimeSpan(0));
+            var gameSession = (GameSession)session;
+            if (gameSession.Player != null)
+            {
+                gameSession.Player.Room?.Leave(gameSession.Player);
+                gameSession.Player.Channel?.Leave(gameSession.Player);
 
-            _serverlistManager.Dispose();
-            _chatServer.Dispose();
-            RelayServer.Dispose();
-            base.Dispose();
+                gameSession.Player.Save();
+
+                PlayerManager.Remove(gameSession.Player);
+
+                Logger.Debug()
+                    .Account(gameSession)
+                    .Message("Disconnected")
+                    .Write();
+
+                if (gameSession.Player.ChatSession != null)
+                {
+                    gameSession.Player.ChatSession.GameSession = null;
+                    gameSession.Player.ChatSession.Dispose();
+                }
+
+                if (gameSession.Player.RelaySession != null)
+                {
+                    gameSession.Player.RelaySession.GameSession = null;
+                    gameSession.Player.RelaySession.Dispose();
+                }
+
+                gameSession.Player.Session = null;
+                gameSession.Player.ChatSession = null;
+                gameSession.Player.RelaySession = null;
+                gameSession.Player = null;
+            }
+
+            base.OnDisconnected(session);
         }
+
+        protected override void OnError(ErrorEventArgs e)
+        {
+            var log = Logger.Error();
+            if (e.Session != null)
+                log = log.Account((GameSession)e.Session);
+            log.Exception(e.Exception)
+                .Write();
+            base.OnError(e);
+        }
+
+        //private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
+        //{
+        //    var session = (GameSession)e.Session;
+        //    Logger.Warn()
+        //        .Account(session)
+        //        .Message($"Unhandled message {e.Message.GetType().Name}")
+        //        .Write();
+        //}
+
+        #endregion
 
         public void BroadcastNotice(string message)
         {
-            Send(new SNoticeMessageAckMessage(message));
+            Broadcast(new SNoticeMessageAckMessage(message));
         }
 
         private void Worker(TimeSpan delta)

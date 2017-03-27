@@ -33,6 +33,15 @@ namespace Netsphere
         [JsonConverter(typeof(IPEndPointConverter))]
         public IPEndPoint RelayListener { get; set; }
 
+        [JsonProperty("listener_relay_udp_ports")]
+        public int[] RelayUdpPorts { get; set; }
+        
+        [JsonProperty("listener_threads")]
+        public int ListenerThreads { get; set; }
+        
+        [JsonProperty("worker_threads")]
+        public int WorkerThreads { get; set; }
+
         [JsonProperty("player_limit")]
         public int PlayerLimit { get; set; }
 
@@ -75,6 +84,8 @@ namespace Netsphere
             Listener = new IPEndPoint(IPAddress.Loopback, 28003);
             ChatListener = new IPEndPoint(IPAddress.Loopback, 28004);
             RelayListener = new IPEndPoint(IPAddress.Loopback, 28005);
+            ListenerThreads = 1;
+            WorkerThreads = -1;
             IP = "127.0.0.1";
             PlayerLimit = 100;
             SecurityLevel = SecurityLevel.User;

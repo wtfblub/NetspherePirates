@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Dapper.FastCrud;
 using Netsphere.Database.Game;
 using Netsphere.Network;
@@ -90,7 +91,7 @@ namespace Netsphere
 
             var charStyle = new CharacterStyle(@char.Gender, @char.Hair.Variation, @char.Face.Variation,
                 @char.Shirt.Variation, @char.Pants.Variation, @char.Slot);
-            Player.Session.Send(new SSuccessCreateCharacterAckMessage(@char.Slot, charStyle));
+            Player.Session.SendAsync(new SSuccessCreateCharacterAckMessage(@char.Slot, charStyle));
 
             return @char;
         }
@@ -108,7 +109,7 @@ namespace Netsphere
                 Player.NeedsToSave = true;
 
             CurrentSlot = slot;
-            Player.Session.Send(new SSuccessSelectCharacterAckMessage(CurrentSlot));
+            Player.Session.SendAsync(new SSuccessSelectCharacterAckMessage(CurrentSlot));
         }
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace Netsphere
             _characters.Remove(slot);
             if (@char.ExistsInDatabase)
                 _charactersToDelete.Push(@char);
-            Player.Session.Send(new SSuccessDeleteCharacterAckMessage(slot));
+            Player.Session.SendAsync(new SSuccessDeleteCharacterAckMessage(slot));
         }
 
         internal void Save(IDbConnection db)

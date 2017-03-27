@@ -1,6 +1,6 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serializers;
 using System.Net;
+using ProudNet.Serialization.Serializers;
 
 namespace Auth.ServiceModel
 {

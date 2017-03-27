@@ -1,71 +1,48 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using BlubLib.Network.Message;
-using ProudNet.Message;
+using ProudNet.Serialization.Messages;
 
 namespace ProudNet
 {
-    public interface IP2PGroup
+    public class P2PGroup
     {
-        ProudPipe Filter { get; }
-        uint HostId { get; }
-        IReadOnlyDictionary<uint, IRemotePeer> Members { get; }
-    }
+        private readonly ConcurrentDictionary<uint, RemotePeer> _members = new ConcurrentDictionary<uint, RemotePeer>();
+        private readonly ProudServer _server;
 
-    public interface IRemotePeer
-    {
-        IP2PGroup Group { get; }
-        uint HostId { get; }
-        bool DirectP2PAllowed { get; }
-
-        void Send(IMessage message);
-        Task SendAsync(IMessage message);
-    }
-
-    public class ServerP2PGroup : IP2PGroup
-    {
-        private readonly ConcurrentDictionary<uint, IRemotePeer> _members = new ConcurrentDictionary<uint, IRemotePeer>();
-        private readonly ProudServerPipe _filter;
-
-        public ProudPipe Filter => _filter;
         public uint HostId { get; }
-        public IReadOnlyDictionary<uint, IRemotePeer> Members => _members;
+        public bool AllowDirectP2P { get; }
+        public IReadOnlyDictionary<uint, RemotePeer> Members => _members;
 
-        public ServerP2PGroup(ProudServerPipe filter, uint hostId)
+        internal P2PGroup(ProudServer server, bool allowDirectP2P)
         {
-            _filter = filter;
-            HostId = hostId;
+            _server = server;
+            HostId = _server.Configuration.HostIdFactory.New();
+            AllowDirectP2P = allowDirectP2P;
         }
 
-        public void Join(uint hostId, bool directP2P)
+        public void Join(uint hostId)
         {
-            var encrypted = Filter.Config.EnableP2PEncryptedMessaging;
-            EncryptContext encryptContext = null;
+            var encrypted = _server.Configuration.EnableP2PEncryptedMessaging;
+            Crypt crypt = null;
             if (encrypted)
-                encryptContext = new EncryptContext(Filter.Config.EncryptedMessageKeyLength);
+                crypt = new Crypt(_server.Configuration.EncryptedMessageKeyLength);
 
-            var remotePeer = new ServerRemotePeer(this, hostId, directP2P, encryptContext);
+            var session = _server.Sessions[hostId];
+            var remotePeer = new RemotePeer(this, session, crypt);
             if (!_members.TryAdd(hostId, remotePeer))
                 throw new ProudException($"Member {hostId} is already in P2PGroup {HostId}");
 
-            var session = _filter.SessionLookupByHostId.GetValueOrDefault(hostId);
-            if (session != null)
-            {
-                session.P2PGroup = this;
+            session.P2PGroup = this;
 
-                if (encrypted)
-                    session.Send(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, encryptContext.RC4.Key, directP2P));
-                else
-                    session.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, directP2P));
-            }
+            if (encrypted)
+                session.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, crypt.RC4.Key, AllowDirectP2P));
+            else
+                session.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, AllowDirectP2P));
 
-            foreach (var member in _members.Values.Where(member => member.HostId != hostId).Cast<ServerRemotePeer>())
+            foreach (var member in _members.Values.Where(member => member.HostId != hostId).Cast<RemotePeer>())
             {
-                var memberSession = _filter.SessionLookupByHostId.GetValueOrDefault(member.HostId);
+                var memberSession = _server.Sessions[member.HostId];
 
                 var stateA = new P2PConnectionState(member);
                 var stateB = new P2PConnectionState(remotePeer);
@@ -74,174 +51,34 @@ namespace ProudNet
                 member.ConnectionStates[remotePeer.HostId] = stateB;
                 if (encrypted)
                 {
-                    memberSession?.Send(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, encryptContext.RC4.Key, directP2P));
-                    session?.Send(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId, member.EncryptContext.RC4.Key, directP2P));
+                    memberSession.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.RC4.Key, AllowDirectP2P));
+                    session.SendAsync(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId, member.Crypt.RC4.Key, AllowDirectP2P));
                 }
                 else
                 {
-                    memberSession?.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, stateB.EventId, directP2P));
-                    session?.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, member.HostId, stateA.EventId, directP2P));
+                    memberSession.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, stateB.EventId, AllowDirectP2P));
+                    session.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, member.HostId, stateA.EventId, AllowDirectP2P));
                 }
             }
         }
 
         public void Leave(uint hostId)
         {
-            IRemotePeer memberToLeave;
+            RemotePeer memberToLeave;
             if (!_members.TryRemove(hostId, out memberToLeave))
                 return;
 
-            var session = _filter.SessionLookupByHostId.GetValueOrDefault(hostId);
-            if (session != null)
-            {
-                session.P2PGroup = null;
-                session.Send(new P2PGroup_MemberLeaveMessage(hostId, HostId));
-            }
+            var session = memberToLeave.Session;
+            session.P2PGroup = null;
+            session.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
 
-            foreach (var member in _members.Values.Where(entry => entry.HostId != hostId).Cast<ServerRemotePeer>())
+            foreach (var member in _members.Values.Where(entry => entry.HostId != hostId))
             {
-                var memberSession = _filter.SessionLookupByHostId.GetValueOrDefault(member.HostId);
-                memberSession?.Send(new P2PGroup_MemberLeaveMessage(hostId, HostId));
-                session?.Send(new P2PGroup_MemberLeaveMessage(member.HostId, HostId));
-
+                var memberSession = _server.Sessions[member.HostId];
+                memberSession.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
+                session.SendAsync(new P2PGroup_MemberLeaveMessage(member.HostId, HostId));
                 member.ConnectionStates.Remove(hostId);
             }
         }
-    }
-
-    internal class ServerRemotePeer : IRemotePeer
-    {
-        public IP2PGroup Group { get; }
-        public uint HostId { get; }
-        public bool DirectP2PAllowed { get; }
-        internal EncryptContext EncryptContext { get; }
-        internal ConcurrentDictionary<uint, P2PConnectionState> ConnectionStates { get; }
-
-        public ServerRemotePeer(IP2PGroup @group, uint hostId, bool directP2PAllowed, EncryptContext encryptContext)
-        {
-            Group = @group;
-            HostId = hostId;
-            DirectP2PAllowed = directP2PAllowed;
-            EncryptContext = encryptContext;
-            ConnectionStates = new ConcurrentDictionary<uint, P2PConnectionState>();
-        }
-
-        public void Send(IMessage message)
-        {
-            var filter = (ProudServerPipe) Group.Filter;
-            var session = filter.SessionLookupByHostId.GetValueOrDefault(HostId);
-            session?.Send(message);
-        }
-
-        public Task SendAsync(IMessage message)
-        {
-            var filter = (ProudServerPipe)Group.Filter;
-            var session = filter.SessionLookupByHostId.GetValueOrDefault(HostId);
-            return session?.SendAsync(message) ?? Task.CompletedTask;
-        }
-    }
-
-    internal class P2PConnectionState
-    {
-        public ServerRemotePeer RemotePeer { get; }
-        public uint EventId { get; }
-        public bool IsJoined { get; set; }
-        public bool JitTriggered { get; set; }
-        public bool HolepunchSuccess { get; set; }
-
-        public P2PConnectionState(ServerRemotePeer remotePeer)
-        {
-            RemotePeer = remotePeer;
-            EventId = (uint)Guid.NewGuid().GetHashCode();
-        }
-    }
-
-    public class ServerP2PGroupManager : IReadOnlyDictionary<uint, ServerP2PGroup>
-    {
-        private readonly ConcurrentDictionary<uint, ServerP2PGroup> _groups = new ConcurrentDictionary<uint, ServerP2PGroup>();
-        private readonly ProudServerPipe _filter;
-
-        internal ServerP2PGroupManager(ProudServerPipe filter)
-        {
-            _filter = filter;
-        }
-
-        public ServerP2PGroup Create()
-        {
-            var group = new ServerP2PGroup(_filter, _filter.GetNextHostId());
-            _groups.TryAdd(group.HostId, group);
-            return group;
-        }
-
-        public async Task<ServerP2PGroup> CreateAsync()
-        {
-            var group = new ServerP2PGroup(_filter, await _filter.GetNextHostIdAsync().ConfigureAwait(false));
-            _groups.TryAdd(group.HostId, group);
-            return group;
-        }
-
-        public void Remove(uint groupHostId)
-        {
-            ServerP2PGroup group;
-
-            if (_groups.TryRemove(groupHostId, out group))
-            {
-                foreach (var member in group.Members)
-                    group.Leave(member.Key);
-
-                _filter.FreeHostId(group.HostId);
-            }
-        }
-
-        public void Remove(ServerP2PGroup group)
-        {
-            if (_groups.Remove(group.HostId))
-            {
-                foreach (var member in group.Members)
-                    group.Leave(member.Key);
-
-                _filter.FreeHostId(group.HostId);
-            }
-        }
-
-        #region IReadOnlyDictionary
-
-        public int Count => _groups.Count;
-
-        public IEnumerable<uint> Keys => _groups.Keys;
-
-        public IEnumerable<ServerP2PGroup> Values => _groups.Values;
-
-        public bool ContainsKey(uint key)
-        {
-            return _groups.ContainsKey(key);
-        }
-
-        public bool TryGetValue(uint key, out ServerP2PGroup value)
-        {
-            return _groups.TryGetValue(key, out value);
-        }
-
-        public ServerP2PGroup this[uint key]
-        {
-            get
-            {
-                ServerP2PGroup group;
-                TryGetValue(key, out group);
-                return group;
-            }
-        }
-
-        public IEnumerator<KeyValuePair<uint, ServerP2PGroup>> GetEnumerator()
-        {
-            return _groups.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        #endregion
     }
 }

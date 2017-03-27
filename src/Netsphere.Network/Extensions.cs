@@ -8,17 +8,17 @@ namespace Netsphere.Network
 {
     public static class NetsphereExtensions
     {
-        private static readonly AsyncLock Sync = new AsyncLock();
+        private static readonly AsyncLock s_sync = new AsyncLock();
 
         public static byte[] CompressLZO(this byte[] data)
         {
-            using (Sync.Lock())
+            using (s_sync.Lock())
                 return miniLzo.Compress(data);
         }
 
         public static byte[] DecompressLZO(this byte[] data, int realSize)
         {
-            using (Sync.Lock())
+            using (s_sync.Lock())
                 return miniLzo.Decompress(data, realSize);
         }
 

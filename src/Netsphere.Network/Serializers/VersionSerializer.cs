@@ -58,7 +58,7 @@ namespace Netsphere.Network.Serializers
 
         public void EmitDeserialize(Emit emiter, Local value)
         {
-            var ok = emiter.DefineLabel(nameof(VersionSerializer) + "OK" + Guid.NewGuid());
+            var ok = emiter.DefineLabel();
 
             using (var array = emiter.DeclareLocal<ushort[]>("array"))
             {

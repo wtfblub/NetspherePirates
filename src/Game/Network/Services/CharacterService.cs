@@ -1,13 +1,15 @@
-﻿using BlubLib.Network.Pipes;
+﻿using System.Threading.Tasks;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class CharacterService : MessageHandler
+    internal class CharacterService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -30,7 +32,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
             }
         }
 
@@ -43,7 +45,7 @@ namespace Netsphere.Network.Services
             if (plr.Room != null && plr.RoomInfo.State != PlayerState.Lobby &&
                 !plr.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.HalfTime))
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
                 return;
             }
 
@@ -62,7 +64,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
             }
         }
 
@@ -84,7 +86,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message(ex.Message)
                     .Write();
-                session.Send(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed));
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed));
             }
         }
     }

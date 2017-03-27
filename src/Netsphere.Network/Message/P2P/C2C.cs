@@ -6,13 +6,13 @@ using BlubLib.IO;
 using BlubLib.Serialization;
 using Netsphere.Network.Data.P2P;
 using Netsphere.Network.Serializers;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 using SlimMath;
 
 namespace Netsphere.Network.Message.P2P
 {
     [BlubContract]
-    public class PlayerSpawnReqMessage : P2PMessage
+    public class PlayerSpawnReqMessage : IP2PMessage
     {
         [BlubMember(0)]
         public CharacterDto Character { get; set; }
@@ -29,7 +29,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class PlayerSpawnAckMessage : P2PMessage
+    public class PlayerSpawnAckMessage : IP2PMessage
     {
         [BlubMember(0)]
         public CharacterDto Character { get; set; }
@@ -47,7 +47,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class AbilitySyncMessage : P2PMessage
+    public class AbilitySyncMessage : IP2PMessage
     {
         [BlubMember(0, typeof(CompressedFloatSerializer))]
         public float Unk { get; set; }
@@ -62,7 +62,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class EquippingItemSyncMessage : P2PMessage
+    public class EquippingItemSyncMessage : IP2PMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ItemDto[] Costumes { get; set; }
@@ -84,9 +84,9 @@ namespace Netsphere.Network.Message.P2P
             Values = Array.Empty<ItemDto>();
         }
     }
-    
+
     [BlubContract(typeof(Serializer))]
-    public class DamageInfoMessage : P2PMessage
+    public class DamageInfoMessage : IP2PMessage
     {
         public PeerId Target { get; set; }
         public AttackAttribute AttackAttribute { get; set; }
@@ -195,7 +195,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class DamageRemoteInfoMessage : P2PMessage
+    public class DamageRemoteInfoMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Target { get; set; }
@@ -231,7 +231,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class SnapShotMessage : P2PMessage
+    public class SnapShotMessage : IP2PMessage
     {
         [BlubMember(0)]
         public uint Time { get; set; }
@@ -261,7 +261,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class StateSyncMessage : P2PMessage
+    public class StateSyncMessage : IP2PMessage
     {
         [BlubMember(0)]
         public uint GameTime { get; set; }
@@ -293,7 +293,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class BGEffectMessage : P2PMessage
+    public class BGEffectMessage : IP2PMessage
     {
         [BlubMember(0)]
         public int Unk1 { get; set; }
@@ -329,7 +329,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class DefensivePowerMessage : P2PMessage
+    public class DefensivePowerMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId PeerId { get; set; }
@@ -344,7 +344,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class BlastObjectDestroyMessage : P2PMessage
+    public class BlastObjectDestroyMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Player { get; set; }
@@ -360,7 +360,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class BlastObjectRespawnMessage : P2PMessage
+    public class BlastObjectRespawnMessage : IP2PMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk { get; set; }
@@ -372,7 +372,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class MindEnergyMessage : P2PMessage
+    public class MindEnergyMessage : IP2PMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -399,14 +399,14 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class DamageShieldMessage : P2PMessage
+    public class DamageShieldMessage : IP2PMessage
     {
         [BlubMember(0, typeof(CompressedFloatSerializer))]
         public float Unk { get; set; }
     }
 
     [BlubContract]
-    public class AimedPointMessage : P2PMessage
+    public class AimedPointMessage : IP2PMessage
     {
         [BlubMember(0, typeof(CompressedVectorSerializer))]
         public Vector3 Unk1 { get; set; }
@@ -422,7 +422,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class OnOffMessage : P2PMessage
+    public class OnOffMessage : IP2PMessage
     {
         [BlubMember(0)]
         public byte Action { get; set; }
@@ -435,7 +435,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class SentryGunSpawnMessage : P2PMessage
+    public class SentryGunSpawnMessage : IP2PMessage
     {
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
@@ -469,7 +469,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class SentryGunStateMessage : P2PMessage
+    public class SentryGunStateMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
@@ -482,14 +482,14 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class SentryGunDestructionMessage : P2PMessage
+    public class SentryGunDestructionMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
     }
 
     [BlubContract]
-    public class SentryGunDestruction2Message : P2PMessage
+    public class SentryGunDestruction2Message : IP2PMessage
     {
         [BlubMember(0)]
         public int Unk1 { get; set; }
@@ -499,7 +499,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class GrenadeSpawnMessage : P2PMessage
+    public class GrenadeSpawnMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
@@ -533,7 +533,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class GrenadeSnapShotMessage : P2PMessage
+    public class GrenadeSnapShotMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
@@ -556,7 +556,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class GrenadeSnapShot2Message : P2PMessage
+    public class GrenadeSnapShot2Message : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
@@ -572,7 +572,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class ObstructionSpawnMessage : P2PMessage
+    public class ObstructionSpawnMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Owner { get; set; }
@@ -605,7 +605,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class ObstructionDestroyMessage : P2PMessage
+    public class ObstructionDestroyMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
@@ -620,7 +620,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class ObstructionDamageMessage : P2PMessage
+    public class ObstructionDamageMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
@@ -630,7 +630,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class SyncObjectObstructionMessage : P2PMessage
+    public class SyncObjectObstructionMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Owner { get; set; }
@@ -678,7 +678,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class BlastObjectSyncMessage : P2PMessage
+    public class BlastObjectSyncMessage : IP2PMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk { get; set; }
@@ -690,7 +690,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class BallSyncMessage : P2PMessage
+    public class BallSyncMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Player { get; set; }
@@ -716,7 +716,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class BallSnapShotMessage : P2PMessage
+    public class BallSnapShotMessage : IP2PMessage
     {
         [BlubMember(0, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
@@ -738,14 +738,14 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class ArcadeFinMessage : P2PMessage
+    public class ArcadeFinMessage : IP2PMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class AttachArcadeItemMessage : P2PMessage
+    public class AttachArcadeItemMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Id { get; set; }
@@ -755,7 +755,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class HPSyncMessage : P2PMessage
+    public class HPSyncMessage : IP2PMessage
     {
         [BlubMember(0, typeof(CompressedFloatSerializer))]
         public float Value { get; set; }
@@ -774,7 +774,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class Unk38Message : P2PMessage
+    public class Unk38Message : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Unk1 { get; set; }
@@ -790,7 +790,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class ExposeClubMarkMessage : P2PMessage
+    public class ExposeClubMarkMessage : IP2PMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -800,7 +800,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class ReflectRateMessage : P2PMessage
+    public class ReflectRateMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Unk1 { get; set; }
@@ -810,7 +810,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class ConditionInfoMessage : P2PMessage
+    public class ConditionInfoMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Unused { get; set; }
@@ -839,7 +839,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class AbilityChangeSyncMessage : P2PMessage
+    public class AbilityChangeSyncMessage : IP2PMessage
     {
         [BlubMember(0)]
         public int Unk1 { get; set; }
@@ -870,7 +870,7 @@ namespace Netsphere.Network.Message.P2P
     }
 
     [BlubContract]
-    public class HealHPMessage : P2PMessage
+    public class HealHPMessage : IP2PMessage
     {
         [BlubMember(0)]
         public PeerId Unk1 { get; set; }

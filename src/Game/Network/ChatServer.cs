@@ -1,39 +1,29 @@
 ﻿using System;
-using System.Buffers;
-using BlubLib.Network;
-using BlubLib.Network.Message;
-using BlubLib.Network.Pipes;
-using BlubLib.Network.Transport.Sockets;
-using Netsphere.Network.Message;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Services;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
+using ProudNet.Serialization;
 
 namespace Netsphere.Network
 {
-    internal class ChatServer : TcpServer
+    internal class ChatServer : ProudServer
     {
+        public static ChatServer Instance { get; private set; }
+
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public GameServer GameServer { get; private set; }
-
-        public ChatServer(GameServer server)
-            : base(new ChatSessionFactory(), ArrayPool<byte>.Create(1 * 1024 * 1024, 50), Config.Instance.PlayerLimit)
+        public static void Initialize(Configuration config)
         {
-            #region Filter Setup
+            if (Instance != null)
+                throw new InvalidOperationException("Server is already initialized");
 
-            var config = new ProudConfig(new Guid("{97d36acf-8cc0-4dfb-bcc9-97cab255e2bc}"));
-            var proudFilter = new ProudServerPipe(config);
-#if DEBUG
-            proudFilter.UnhandledProudCoreMessage += (s, e) => Logger.Warn($"Unhandled ProudCoreMessage {e.Message.GetType().Name}");
-            proudFilter.UnhandledProudMessage +=
-                (s, e) => Logger.Warn($"Unhandled UnhandledProudMessage {e.Message.GetType().Name}: {e.Message.ToArray().ToHexString()}");
-#endif
-            Pipeline.AddFirst("proudnet", proudFilter);
-            Pipeline.AddLast("s4_protocol", new NetspherePipe(new ChatMessageFactory()));
+            config.Version = new Guid("{97d36acf-8cc0-4dfb-bcc9-97cab255e2bc}");
+            config.MessageFactories = new MessageFactory[] { new ChatMessageFactory() };
+            config.SessionFactory = new ChatSessionFactory();
 
             // ReSharper disable InconsistentNaming
             Predicate<ChatSession> MustBeLoggedIn = session => session.IsLoggedIn();
@@ -41,56 +31,58 @@ namespace Netsphere.Network
             Predicate<ChatSession> MustBeInChannel = session => session.Player.Channel != null;
             // ReSharper restore InconsistentNaming
 
-            Pipeline.AddLast("firewall", new FirewallPipe())
-                .Add(new PacketFirewallRule<ChatSession>())
-                .Get<PacketFirewallRule<ChatSession>>()
+            config.MessageHandlers = new IMessageHandler[]
+            {
+                new FilteredMessageHandler<ChatSession>()
+                    .AddHandler(new AuthService())
+                    .AddHandler(new CommunityService())
+                    .AddHandler(new ChannelService())
+                    .AddHandler(new PrivateMessageService())
 
-                .Register<CLoginReqMessage>(MustNotBeLoggedIn)
-                .Register<CSetUserDataReqMessage>(MustBeLoggedIn)
-                .Register<CGetUserDataReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CDenyChatReqMessage>(MustBeLoggedIn)
-                .Register<CChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CWhisperChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CNoteListReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CReadNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CDeleteNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                .Register<CSendNoteReqMessage>(MustBeLoggedIn, MustBeInChannel);
-
-            Pipeline.AddLast("s4_service", new MessageHandlerPipe())
-                .Add(new AuthService())
-                .Add(new CommunityService())
-                .Add(new ChannelService())
-                .Add(new PrivateMessageService())
-                .UnhandledMessage += OnUnhandledMessage;
-
-            #endregion
-
-            GameServer = server;
+                    .RegisterRule<CLoginReqMessage>(MustNotBeLoggedIn)
+                    .RegisterRule<CSetUserDataReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CGetUserDataReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CDenyChatReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CWhisperChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CNoteListReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CReadNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CDeleteNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<CSendNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
+            };
+            Instance = new ChatServer(config);
         }
+
+        private ChatServer(Configuration config)
+            : base(config)
+        { }
 
         #region Events
 
-        protected override void OnDisconnected(SessionEventArgs e)
+        protected override void OnDisconnected(ProudSession session)
         {
-            var session = (ChatSession)e.Session;
-            session.GameSession?.Dispose();
-            base.OnDisconnected(e);
+            ((ChatSession)session).GameSession?.Dispose();
+            base.OnDisconnected(session);
         }
 
-        protected override void OnError(ExceptionEventArgs e)
+        protected override void OnError(ErrorEventArgs e)
         {
-            Logger.Error(e.Exception);
+            var log = Logger.Error();
+            if (e.Session != null)
+                log = log.Account((ChatSession)e.Session);
+            log.Exception(e.Exception)
+                .Write();
             base.OnError(e);
         }
 
-        private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
-        {
-            var session = (ChatSession)e.Session;
-            Logger.Warn()
-                .Account(session)
-                .Message($"Unhandled message {e.Message.GetType().Name}")
-                .Write();
-        }
+        //private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
+        //{
+        //    var session = (ChatSession)e.Session;
+        //    Logger.Warn()
+        //        .Account(session)
+        //        .Message($"Unhandled message {e.Message.GetType().Name}")
+        //        .Write();
+        //}
 
         #endregion
     }

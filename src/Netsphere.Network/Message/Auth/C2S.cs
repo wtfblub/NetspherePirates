@@ -1,10 +1,10 @@
 using BlubLib.Serialization;
-using ProudNet.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Auth
 {
     [BlubContract]
-    public class CAuthInEUReqMessage : AuthMessage
+    public class CAuthInEUReqMessage : IAuthMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Username { get; set; }
@@ -32,6 +32,6 @@ namespace Netsphere.Network.Message.Auth
     }
 
     [BlubContract]
-    public class CServerListReqMessage : AuthMessage
+    public class CServerListReqMessage : IAuthMessage
     { }
 }

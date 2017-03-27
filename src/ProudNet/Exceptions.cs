@@ -20,11 +20,19 @@ namespace ProudNet
     public class ProudBadOpCodeException : Exception
     {
         internal ProudBadOpCodeException(ProudCoreOpCode opCode)
-            : base($"Invalid opCopde {opCode}")
+            : base($"Invalid opcopde {opCode}")
         { }
 
         internal ProudBadOpCodeException(ProudCoreOpCode opCode, IEnumerable<byte> data)
-            : base($"Invalid opCopde {opCode}: {data.ToHexString()}")
+            : base($"Invalid opcopde {opCode}: {data.ToHexString()}")
+        { }
+
+        internal ProudBadOpCodeException(ushort opCode)
+            : base($"Invalid opcopde {opCode}")
+        { }
+
+        internal ProudBadOpCodeException(ushort opCode, IEnumerable<byte> data)
+            : base($"Invalid opcopde {opCode}: {data.ToHexString()}")
         { }
     }
 

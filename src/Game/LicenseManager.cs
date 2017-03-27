@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Dapper.FastCrud;
 using Netsphere.Database.Game;
 using Netsphere.Network;
@@ -74,7 +75,7 @@ namespace Netsphere
             {
                 license = new License(itemLicense, DateTimeOffset.Now, 1);
                 _licenses.TryAdd(itemLicense, license);
-                _player.Session.Send(new SLicensedAckMessage(itemLicense, licenseReward?.ItemNumber ?? 0));
+                _player.Session.SendAsync(new SLicensedAckMessage(itemLicense, licenseReward?.ItemNumber ?? 0));
 
                 Logger.Info()
                     .Account(_player)

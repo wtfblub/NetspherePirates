@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper.FastCrud;
 using ExpressMapper.Extensions;
 using Netsphere.Database.Game;
@@ -214,7 +215,7 @@ namespace Netsphere
             if (!leveledUp)
                 return false;
 
-            Channel?.BroadcastChat(new SUserDataAckMessage(this.Map<Player, UserDataDto>()));
+            Channel?.Broadcast(new SUserDataAckMessage(this.Map<Player, UserDataDto>()));
 
             // ToDo Do we need to update inside rooms too?
 
@@ -276,7 +277,7 @@ namespace Netsphere
         /// <param name="message">The message to send</param>
         public void SendConsoleMessage(string message)
         {
-            Session.Send(new SAdminActionAckMessage { Result = 1, Message = message });
+            Session.SendAsync(new SAdminActionAckMessage { Result = 1, Message = message });
         }
 
         /// <summary>
@@ -285,7 +286,7 @@ namespace Netsphere
         /// <param name="message">The message to send</param>
         public void SendNotice(string message)
         {
-            Session.Send(new SNoticeMessageAckMessage(message));
+            Session.SendAsync(new SNoticeMessageAckMessage(message));
         }
 
         /// <summary>

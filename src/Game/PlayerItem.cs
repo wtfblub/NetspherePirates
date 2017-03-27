@@ -119,7 +119,7 @@ namespace Netsphere
             return GetShopItemInfo().PriceGroup.GetPrice(PeriodType, Period);
         }
 
-        public async Task LoseDurabilityAsync(int loss)
+        public Task LoseDurabilityAsync(int loss)
         {
             if (loss < 0)
                 throw new ArgumentOutOfRangeException(nameof(loss));
@@ -128,14 +128,13 @@ namespace Netsphere
                 throw new InvalidOperationException("Player is not inside a room");
 
             if (Durability == -1)
-                return;
+                return Task.CompletedTask;
 
             Durability -= loss;
             if (Durability < 0)
                 Durability = 0;
 
-            await Inventory.Player.Session.SendAsync(new SItemDurabilityInfoAckMessage(new[] { this.Map<PlayerItem, ItemDurabilityInfoDto>() }))
-                        .ConfigureAwait(false);
+            return Inventory.Player.Session.SendAsync(new SItemDurabilityInfoAckMessage(new[] { this.Map<PlayerItem, ItemDurabilityInfoDto>() }));
         }
 
         public uint CalculateRefund()

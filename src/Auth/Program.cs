@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 using BlubLib;
 using Dapper;
 using Dapper.FastCrud;
+using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using Netsphere.API;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using NLog;
+using ProudNet;
 
 namespace Netsphere
 {
@@ -17,7 +21,8 @@ namespace Netsphere
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static APIServer s_apiHost;
+        private static IEventLoopGroup s_apiEventLoopGroup;
+        private static IChannel s_apiHost;
 
         private static void Main()
         {
@@ -33,16 +38,24 @@ namespace Netsphere
 
             Logger.Info("Starting server...");
 
-            AuthServer.Instance.Start(Config.Instance.Listener);
-            s_apiHost = new APIServer();
-            s_apiHost.Start(Config.Instance.API.Listener);
+            AuthServer.Initialize(new Configuration());
+            AuthServer.Instance.Listen(Config.Instance.Listener);
+
+            s_apiEventLoopGroup = new MultithreadEventLoopGroup(1);
+            s_apiHost = new ServerBootstrap()
+                .Group(s_apiEventLoopGroup)
+                .Channel<TcpServerSocketChannel>()
+                .Handler(new ActionChannelInitializer<IChannel>(ch => { }))
+                .ChildHandler(new ActionChannelInitializer<IChannel>(ch =>
+                {
+                    ch.Pipeline.AddLast(new APIServerHandler());
+                }))
+                .BindAsync(Config.Instance.API.Listener).WaitEx();
 
             Logger.Info("Ready for connections!");
 
             if (Config.Instance.NoobMode)
-            {
                 Logger.Warn("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!");
-            }
 
             Console.CancelKeyPress += OnCancelKeyPress;
             while (true)
@@ -68,8 +81,8 @@ namespace Netsphere
         private static void Exit()
         {
             Logger.Info("Closing...");
-
-            s_apiHost.Dispose();
+            s_apiHost.CloseAsync().WaitEx();
+            s_apiEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
             AuthServer.Instance.Dispose();
             LogManager.Shutdown();
         }

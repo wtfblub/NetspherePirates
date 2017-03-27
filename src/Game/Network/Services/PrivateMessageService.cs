@@ -1,16 +1,17 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using BlubLib.Network.Pipes;
+using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Fluent;
+using ProudNet.Handlers;
 
 namespace Netsphere.Network.Services
 {
-    internal class PrivateMessageService : MessageHandler
+    internal class PrivateMessageService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -36,11 +37,11 @@ namespace Netsphere.Network.Services
             }
 
             var mails = session.Player.Mailbox.GetMailsByPage(message.Page);
-            session.Send(new SNoteListAckMessage(maxPages, message.Page, mails.Select(mail => mail.Map<Mail, NoteDto>()).ToArray()));
+            session.SendAsync(new SNoteListAckMessage(maxPages, message.Page, mails.Select(mail => mail.Map<Mail, NoteDto>()).ToArray()));
         }
 
         [MessageHandler(typeof(CReadNoteReqMessage))]
-        public async Task CReadNoteReq(ChatSession session, CReadNoteReqMessage message)
+        public void CReadNoteReq(ChatSession session, CReadNoteReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
@@ -55,21 +56,17 @@ namespace Netsphere.Network.Services
                     .Message($"Mail {message.Id} not found")
                     .Write();
 
-                await session.SendAsync(new SReadNoteAckMessage(0, new NoteContentDto(), 1))
-                    .ConfigureAwait(false);
+                session.SendAsync(new SReadNoteAckMessage(0, new NoteContentDto(), 1));
                 return;
             }
 
             mail.IsNew = false;
-            await session.Player.Mailbox.UpdateReminderAsync()
-                .ConfigureAwait(false);
-
-            await session.SendAsync(new SReadNoteAckMessage(mail.Id, mail.Map<Mail, NoteContentDto>(), 0))
-                .ConfigureAwait(false);
+            session.Player.Mailbox.UpdateReminderAsync();
+            session.SendAsync(new SReadNoteAckMessage(mail.Id, mail.Map<Mail, NoteContentDto>(), 0));
         }
 
         [MessageHandler(typeof(CDeleteNoteReqMessage))]
-        public async Task CDeleteNoteReq(ChatSession session, CDeleteNoteReqMessage message)
+        public void CDeleteNoteReq(ChatSession session, CDeleteNoteReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
@@ -77,8 +74,7 @@ namespace Netsphere.Network.Services
                 .Write();
 
             session.Player.Mailbox.Remove(message.Notes);
-            await session.SendAsync(new SDeleteNoteAckMessage())
-                .ConfigureAwait(false);
+            session.SendAsync(new SDeleteNoteAckMessage());
         }
 
         [MessageHandler(typeof(CSendNoteReqMessage))]
@@ -108,9 +104,8 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            var result = await session.Player.Mailbox.SendAsync(message.Receiver, message.Title, message.Message)
-                        .ConfigureAwait(false);
-            await session.SendAsync(new SSendNoteAckMessage(result ? 0 : 1)).ConfigureAwait(false);
+            var result = await session.Player.Mailbox.SendAsync(message.Receiver, message.Title, message.Message);
+            session.SendAsync(new SSendNoteAckMessage(result ? 0 : 1));
         }
     }
 }

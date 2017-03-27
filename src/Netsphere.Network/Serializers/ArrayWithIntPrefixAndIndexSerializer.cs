@@ -16,8 +16,8 @@ namespace Netsphere.Network.Serializers
         public void EmitDeserialize(Emit emiter, Local value)
         {
             var elementType = value.LocalType.GetElementType();
-            var emptyArray = emiter.DefineLabel(nameof(ArrayWithIntPrefixAndIndexSerializer) + "EmptyArray" + Guid.NewGuid());
-            var end = emiter.DefineLabel(nameof(ArrayWithIntPrefixAndIndexSerializer) + "End" + Guid.NewGuid());
+            var emptyArray = emiter.DefineLabel();
+            var end = emiter.DefineLabel();
 
             using (var length = emiter.DeclareLocal<int>("length"))
             {
@@ -36,8 +36,8 @@ namespace Netsphere.Network.Serializers
                 emiter.NewArray(elementType);
                 emiter.StoreLocal(value);
 
-                var loop = emiter.DefineLabel(nameof(ArrayWithIntPrefixAndIndexSerializer) + "Loop" + Guid.NewGuid());
-                var loopCheck = emiter.DefineLabel(nameof(ArrayWithIntPrefixAndIndexSerializer) + "LoopCheck" + Guid.NewGuid());
+                var loop = emiter.DefineLabel();
+                var loopCheck = emiter.DefineLabel();
 
                 using (var element = emiter.DeclareLocal(elementType, "element"))
                 using (var i = emiter.DeclareLocal<int>("i"))
@@ -94,8 +94,8 @@ namespace Netsphere.Network.Serializers
 
                 emiter.CallSerializerForType(length.LocalType, length);
 
-                var loop = emiter.DefineLabel(nameof(ArrayWithIntPrefixAndIndexSerializer) + "Loop" + Guid.NewGuid());
-                var loopCheck = emiter.DefineLabel(nameof(ArrayWithIntPrefixAndIndexSerializer) + "LoopCheck" + Guid.NewGuid());
+                var loop = emiter.DefineLabel();
+                var loopCheck = emiter.DefineLabel();
 
                 using (var element = emiter.DeclareLocal(elementType, "element"))
                 using (var i = emiter.DeclareLocal<int>("i"))

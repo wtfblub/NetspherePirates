@@ -38,7 +38,7 @@
             this.chName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.vistaMenu = new BlubLib.GUI.Controls.VistaMenu(this.components);
+            this.vistaMenu = new BlubLib.GUI.Components.VistaMenu(this.components);
             this.miRemoveFolder = new System.Windows.Forms.MenuItem();
             this.miAddToFolder = new System.Windows.Forms.MenuItem();
             this.miExtractFolder = new System.Windows.Forms.MenuItem();
@@ -239,7 +239,7 @@
         private System.Windows.Forms.ImageList imageList;
         private System.Windows.Forms.ColumnHeader chName;
         private System.Windows.Forms.ColumnHeader chSize;
-        private BlubLib.GUI.Controls.VistaMenu vistaMenu;
+        private BlubLib.GUI.Components.VistaMenu vistaMenu;
         private System.Windows.Forms.ContextMenu cmFolders;
         private System.Windows.Forms.MenuItem miExtractFolder;
         private System.Windows.Forms.MenuItem miAddToFolder;

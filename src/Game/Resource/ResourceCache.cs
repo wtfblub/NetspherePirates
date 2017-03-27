@@ -55,7 +55,7 @@ namespace Netsphere.Resource
             {
                 Logger.Debug("Caching...");
                 value = _loader.LoadChannels().ToList();
-                _cache.AddOrUpdate(ResourceCacheType.Channels, value);
+                _cache.Set(ResourceCacheType.Channels, value);
             }
             return value;
         }
@@ -67,7 +67,7 @@ namespace Netsphere.Resource
             {
                 Logger.Debug("Caching...");
                 value = _loader.LoadEffects().ToDictionary(effect => effect.Id);
-                _cache.AddOrUpdate(ResourceCacheType.Effects, value);
+                _cache.Set(ResourceCacheType.Effects, value);
             }
 
             return value;
@@ -80,7 +80,7 @@ namespace Netsphere.Resource
             {
                 Logger.Debug("Caching...");
                 value = _loader.LoadItems().ToDictionary(item => item.ItemNumber);
-                _cache.AddOrUpdate(ResourceCacheType.Items, value);
+                _cache.Set(ResourceCacheType.Items, value);
             }
 
             return value;
@@ -93,7 +93,7 @@ namespace Netsphere.Resource
             {
                 Logger.Debug("Caching...");
                 value = _loader.LoadDefaultItems().ToList();
-                _cache.AddOrUpdate(ResourceCacheType.DefaultItems, value);
+                _cache.Set(ResourceCacheType.DefaultItems, value);
             }
 
             return value;
@@ -106,7 +106,7 @@ namespace Netsphere.Resource
             {
                 Logger.Debug("Caching...");
                 value = new ShopResources();
-                _cache.AddOrUpdate(ResourceCacheType.Shop, value);
+                _cache.Set(ResourceCacheType.Shop, value);
             }
             if (string.IsNullOrWhiteSpace(value.Version))
                 value.Load();
@@ -121,7 +121,7 @@ namespace Netsphere.Resource
             {
                 Logger.Debug("Caching...");
                 value = _loader.LoadExperience().ToDictionary(e => e.Level);
-                _cache.AddOrUpdate(ResourceCacheType.Exp, value);
+                _cache.Set(ResourceCacheType.Exp, value);
             }
 
             return value;
@@ -134,7 +134,7 @@ namespace Netsphere.Resource
             {
                 Logger.Debug("Caching...");
                 value = _loader.LoadMaps().ToDictionary(maps => maps.Id);
-                _cache.AddOrUpdate(ResourceCacheType.Maps, value);
+                _cache.Set(ResourceCacheType.Maps, value);
             }
 
             return value;
@@ -148,7 +148,7 @@ namespace Netsphere.Resource
                 Logger.Debug("Caching...");
 
                 value = _loader.LoadGameTempos().ToDictionary(t => t.Name);
-                _cache.AddOrUpdate(ResourceCacheType.GameTempo, value);
+                _cache.Set(ResourceCacheType.GameTempo, value);
             }
 
             return value;
@@ -181,19 +181,14 @@ namespace Netsphere.Resource
             return cache.Get<T>(type.ToString());
         }
 
-        public static void AddOrUpdate(this ICache cache, ResourceCacheType type, object value)
+        public static void Set(this ICache cache, ResourceCacheType type, object value)
         {
-            cache.AddOrUpdate(type.ToString(), value);
+            cache.Set(type.ToString(), value);
         }
 
-        public static void AddOrUpdate(this ICache cache, ResourceCacheType type, object value, TimeSpan ts)
+        public static void Set(this ICache cache, ResourceCacheType type, object value, TimeSpan ts)
         {
-            cache.AddOrUpdate(type.ToString(), value, ts);
-        }
-
-        public static void AddOrUpdate(this ICache cache, ResourceCacheType type, object value, long ttl)
-        {
-            cache.AddOrUpdate(type.ToString(), value, ttl);
+            cache.Set(type.ToString(), value, ts);
         }
     }
 }

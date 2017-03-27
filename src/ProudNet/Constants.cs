@@ -1,4 +1,7 @@
-﻿namespace ProudNet
+﻿using System.Text;
+using DotNetty.Common.Utilities;
+
+namespace ProudNet
 {
     internal enum ProudCoreOpCode : byte
     {
@@ -33,6 +36,7 @@
         Rmi = 1,
         UserMessage = 2,
         EncryptedReliable = 36,
+        Encrypted_UnReliable = 37,
         Compressed = 38,
 
         // Unk
@@ -46,7 +50,6 @@
         P2PReplyIndirectServerTimeAndPong = 33,
         S2CRoutedMulticast1 = 34,
         S2CRoutedMulticast2 = 35,
-        Encrypted_UnReliable = 37,
         RequestReceiveSpeedAtReceiverSide_NoRelay = 39,
         ReplyReceiveSpeedAtReceiverSide_NoRelay = 40,
         NotifyConnectionPeerRequestData = 41,
@@ -105,6 +108,11 @@
         S2C_CreateUdpSocketAck = 64519,
     }
 
+    public enum HostId : uint
+    {
+        Server = 0
+    }
+
     public enum FallbackMethod : byte
     {
         None = 0,
@@ -136,5 +144,18 @@
         System,
         Holepunch,
         HolepunchFreqFail
+    }
+
+    internal static class Constants
+    {
+        public const uint NetVersion = 196713;
+        public const short NetMagic = 0x5713;
+        public static readonly Encoding Encoding = Encoding.GetEncoding("Windows-1252");
+    }
+
+    internal static class ChannelAttributes
+    {
+        public static readonly AttributeKey<ProudServer> Server = AttributeKey<ProudServer>.ValueOf($"ProudNet-{nameof(Server)}");
+        public static readonly AttributeKey<ProudSession> Session = AttributeKey<ProudSession>.ValueOf($"ProudNet-{nameof(Session)}");
     }
 }
