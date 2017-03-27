@@ -36,9 +36,9 @@ namespace Netsphere.Network.Service
 
                 if (account == null)
                 {
-                    if (Config.Instance.NoobMode)
+                    if (Config.Instance.NoobMode || Config.Instance.AutoRegister)
                     {
-                        // NoobMode: Create a new account if non exists
+                        // NoobMode/AutoRegister: Create a new account if non exists
                         account = new AccountDto { Username = message.Username };
 
                         var bytes = new byte[16];
@@ -63,7 +63,7 @@ namespace Netsphere.Network.Service
                 {
                     if (Config.Instance.NoobMode)
                     {
-                        // Noob Mode: Save new password
+                        // NoobMode: Overwrites password
                         var bytes = new byte[16];
                         using (var rng = new RNGCryptoServiceProvider())
                             rng.GetBytes(bytes);
