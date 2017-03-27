@@ -100,9 +100,16 @@ namespace Netsphere.Network.Services
                 session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
                 return;
             }
+
             if (room.IsChangingRules)
             {
                 session.SendAsync(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(room.Options.Password) && !room.Options.Password.Equals(message.Password))
+            {
+                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.PasswordError));
                 return;
             }
 
