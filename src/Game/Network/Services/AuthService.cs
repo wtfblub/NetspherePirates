@@ -176,7 +176,8 @@ namespace Netsphere.Network.Services
                         PEN = Config.Instance.Game.StartPEN,
                         AP = Config.Instance.Game.StartAP,
                         Coins1 = Config.Instance.Game.StartCoins1,
-                        Coins2 = Config.Instance.Game.StartCoins2
+                        Coins2 = Config.Instance.Game.StartCoins2,
+                        TotalExperience = (int)GameServer.Instance.ResourceCache.GetExperience().ToList()[Config.Instance.Game.StartLevel].Value.TotalExperience
                     };
 
                     await db.InsertAsync(plrDto);
