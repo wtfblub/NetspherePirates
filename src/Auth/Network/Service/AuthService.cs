@@ -35,9 +35,9 @@ namespace Netsphere.Network.Service
 
                 if (account == null)
                 {
-                    if (Config.Instance.NoobMode)
+                    if (Config.Instance.NoobMode || Config.Instance.AutoRegister)
                     {
-                        // NoobMode: Create a new account if non exists
+                        // NoobMode/AutoRegister: Create a new account if non exists
                         account = new AccountDto { Username = message.Username };
 
                         var newSalt = new byte[24];

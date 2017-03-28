@@ -25,6 +25,9 @@ namespace Netsphere
         [JsonProperty("noob_mode")]
         public bool NoobMode { get; set; }
 
+        [JsonProperty("auto_register")]
+        public bool AutoRegister { get; set; }
+
         [JsonProperty("database")]
         public DatabasesConfig Database { get; set; }
 
@@ -47,6 +50,7 @@ namespace Netsphere
             MaxConnections = 100;
             API = new APIConfig();
             NoobMode = true;
+            AutoRegister = false;
             Database = new DatabasesConfig();
         }
 
