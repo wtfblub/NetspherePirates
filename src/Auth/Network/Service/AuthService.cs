@@ -25,7 +25,6 @@ namespace Netsphere.Network.Service
             Logger.Debug($"Login from {ip} with username {message.Username}");
 
             AccountDto account;
-            string password;
             using (var db = AuthDatabase.Open())
             {
                 var result = await db.FindAsync<AccountDto>(statement => statement
@@ -41,12 +40,16 @@ namespace Netsphere.Network.Service
                         // NoobMode/AutoRegister: Create a new account if non exists
                         account = new AccountDto { Username = message.Username };
 
-                        var bytes = new byte[16];
-                        using (var rng = new RNGCryptoServiceProvider())
-                            rng.GetBytes(bytes);
+                        var newSalt = new byte[24];
+                        using (var csprng = new RNGCryptoServiceProvider())
+                            csprng.GetBytes(newSalt);
+                        
+                        var hash = new byte[24];
+                        using (var pbkdf2 = new Rfc2898DeriveBytes(message.Password, newSalt, 24000))
+                            hash = pbkdf2.GetBytes(24);
 
-                        account.Salt = Hash.GetString<SHA1CryptoServiceProvider>(bytes);
-                        account.Password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
+                        account.Password = Convert.ToBase64String(hash);
+                        account.Salt = Convert.ToBase64String(newSalt);
 
                         await db.InsertAsync(account);
                     }
@@ -58,20 +61,35 @@ namespace Netsphere.Network.Service
                     }
                 }
 
-                password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + account.Salt);
-                if (string.IsNullOrWhiteSpace(account.Password) || !account.Password.Equals(password, StringComparison.InvariantCultureIgnoreCase))
+                var salt = Convert.FromBase64String(account.Salt);
+                
+                var passwordGuess = new byte[24];
+                using (var pbkdf2 = new Rfc2898DeriveBytes(message.Password, salt, 24000))
+                    passwordGuess = pbkdf2.GetBytes(24);
+                
+                var actualPassword = Convert.FromBase64String(account.Password);
+                
+                uint difference = (uint)passwordGuess.Length ^ (uint)actualPassword.Length;
+                for (var i = 0; i < passwordGuess.Length && i < actualPassword.Length; i++)
+                {
+                    difference |= (uint)(passwordGuess[i] ^ actualPassword[i]);
+                }
+                
+                if (difference != 0 || string.IsNullOrWhiteSpace(account.Password))
                 {
                     if (Config.Instance.NoobMode)
                     {
-                        // NoobMode: Overwrites password
-                        var bytes = new byte[16];
-                        using (var rng = new RNGCryptoServiceProvider())
-                            rng.GetBytes(bytes);
+                        // Noob Mode: Save new password
+                        var newSalt = new byte[24];
+                        using (var csprng = new RNGCryptoServiceProvider())
+                            csprng.GetBytes(newSalt);
 
-                        var salt = Hash.GetString<SHA1CryptoServiceProvider>(bytes);
-                        password = Hash.GetString<SHA1CryptoServiceProvider>(message.Password + "+" + salt);
-                        account.Password = password;
-                        account.Salt = salt;
+                        var hash = new byte[24];
+                        using (var pbkdf2 = new Rfc2898DeriveBytes(message.Password, newSalt, 24000))
+                            hash = pbkdf2.GetBytes(24);
+
+                        account.Password = Convert.ToBase64String(hash);
+                        account.Salt = Convert.ToBase64String(newSalt);
 
                         await db.UpdateAsync(account);
                     }
@@ -105,7 +123,7 @@ namespace Netsphere.Network.Service
             }
 
             // ToDo proper session generation
-            var sessionId = Hash.GetUInt32<CRC32>($"<{account.Username}+{password}>");
+            var sessionId = Hash.GetUInt32<CRC32>($"<{account.Username}+{account.Password}>");
             session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
         }
 
