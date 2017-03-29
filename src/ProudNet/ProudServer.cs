@@ -171,6 +171,7 @@ namespace ProudNet
             _listenerChannel.CloseAsync().WaitEx();
             _listenerEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
             _workerEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
+            Rsa.Dispose();
             OnStopped();
         }
 
