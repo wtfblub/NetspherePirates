@@ -1,7 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using BlubLib.Serialization;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Security;
 using ProudNet.Serialization.Serializers;
 
 namespace ProudNet.Serialization.Messages.Core
@@ -10,37 +15,55 @@ namespace ProudNet.Serialization.Messages.Core
     internal class ConnectServerTimedoutMessage : ICoreMessage
     { }
 
-    [BlubContract]
+    [BlubContract(typeof(Serializer))]
     internal class NotifyServerConnectionHintMessage : ICoreMessage
     {
-        [BlubMember(0)]
         public NetConfigDto Config { get; set; }
+        public RSAParameters PublicKey { get; set; }
 
         public NotifyServerConnectionHintMessage()
         {
             Config = new NetConfigDto();
+            PublicKey = new RSAParameters();
         }
 
-        public NotifyServerConnectionHintMessage(NetConfigDto config)
+        public NotifyServerConnectionHintMessage(NetConfigDto config, RSAParameters publicKey)
         {
             Config = config;
+            PublicKey = publicKey;
+        }
+
+        internal class Serializer : ISerializer<NotifyServerConnectionHintMessage>
+        {
+            public bool CanHandle(Type type) => type == typeof(NotifyServerConnectionHintMessage);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Serialize(BinaryWriter writer, NotifyServerConnectionHintMessage value)
+            {
+                var pubKey = DotNetUtilities.GetRsaPublicKey(value.PublicKey);
+                var pubKeyStruct = new RsaPublicKeyStructure(pubKey.Modulus, pubKey.Exponent);
+                var encodedKey = pubKeyStruct.GetDerEncoded();
+                BlubLib.Serialization.Serializer.Serialize(writer, value.Config);
+                writer.WriteStruct(encodedKey);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public NotifyServerConnectionHintMessage Deserialize(BinaryReader reader)
+            {
+                var config = BlubLib.Serialization.Serializer.Deserialize<NetConfigDto>(reader);
+                var encodedKey = reader.ReadStruct();
+                var sequence = (DerSequence)Asn1Object.FromByteArray(encodedKey);
+                var modulus = ((DerInteger)sequence[0]).Value.ToByteArrayUnsigned();
+                var exponent = ((DerInteger)sequence[1]).Value.ToByteArrayUnsigned();
+                var publicKey = new RSAParameters { Exponent = exponent, Modulus = modulus };
+                return new NotifyServerConnectionHintMessage(config, publicKey);
+            }
         }
     }
 
     [BlubContract]
     internal class NotifyCSSessionKeySuccessMessage : ICoreMessage
-    {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
-        public byte[] Key { get; set; }
-
-        public NotifyCSSessionKeySuccessMessage()
-        { }
-
-        public NotifyCSSessionKeySuccessMessage(byte[] key)
-        {
-            Key = key;
-        }
-    }
+    { }
 
     [BlubContract]
     internal class NotifyProtocolVersionMismatchMessage : ICoreMessage

@@ -21,10 +21,12 @@ namespace ProudNet
         public uint OverSendSuspectingThresholdInBytes { get; set; }
         public bool EnableNagleAlgorithm { get; set; }
         public int EncryptedMessageKeyLength { get; set; }
+        public int FastEncryptedMessageKeyLength { get; set; }
         public bool AllowServerAsP2PGroupMember { get; set; }
         public bool EnableP2PEncryptedMessaging { get; set; }
         public bool UpnpDetectNatDevice { get; set; }
         public bool UpnpTcpAddrPortMapping { get; set; }
+        public bool EnableLookaheadP2PSend { get; set; }
         public bool EnablePingTest { get; set; }
         public uint EmergencyLogLineCount { get; set; }
 
@@ -43,10 +45,12 @@ namespace ProudNet
             OverSendSuspectingThresholdInBytes = 15360;
             EnableNagleAlgorithm = true;
             EncryptedMessageKeyLength = 128;
+            FastEncryptedMessageKeyLength = 0;
             AllowServerAsP2PGroupMember = false;
             EnableP2PEncryptedMessaging = false;
             UpnpDetectNatDevice = true;
             UpnpTcpAddrPortMapping = true;
+            EnableLookaheadP2PSend = false;
             EnablePingTest = false;
             EmergencyLogLineCount = 0;
         }

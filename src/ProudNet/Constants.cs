@@ -113,6 +113,13 @@ namespace ProudNet
         Server = 0
     }
 
+    public enum EncryptMode : byte
+    {
+        None = 0,
+        Secure = 1,
+        Fast = 2
+    }
+
     public enum FallbackMethod : byte
     {
         None = 0,
@@ -148,7 +155,7 @@ namespace ProudNet
 
     internal static class Constants
     {
-        public const uint NetVersion = 196713;
+        public const uint NetVersion = 196980;
         public const short NetMagic = 0x5713;
         public static readonly Encoding Encoding = Encoding.GetEncoding("Windows-1252");
     }
