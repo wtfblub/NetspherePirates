@@ -85,7 +85,7 @@ namespace Netsphere
             ChatListener = new IPEndPoint(IPAddress.Loopback, 28004);
             RelayListener = new IPEndPoint(IPAddress.Loopback, 28005);
             ListenerThreads = 1;
-            WorkerThreads = -1;
+            WorkerThreads = 1;
             IP = "127.0.0.1";
             PlayerLimit = 100;
             SecurityLevel = SecurityLevel.User;
