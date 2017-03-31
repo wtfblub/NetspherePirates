@@ -17,6 +17,7 @@ using NLog.Fluent;
 using ProudNet.Handlers;
 using CLoginReqMessage = Netsphere.Network.Message.Game.CLoginReqMessage;
 using SLoginAckMessage = Netsphere.Network.Message.Game.SLoginAckMessage;
+using Netsphere.Resource;
 
 namespace Netsphere.Network.Services
 {
@@ -166,9 +167,18 @@ namespace Netsphere.Network.Services
                         .Where($"{nameof(PlayerDto.Id):C} = @Id")
                         .WithParameters(new { Id = message.AccountId })))
                 .FirstOrDefault();
+
                 if (plrDto == null)
                 {
                     // first time connecting to this server
+                    var expTable = GameServer.Instance.ResourceCache.GetExperience();
+                    Experience expValue;
+                    if (!expTable.TryGetValue(Config.Instance.Game.StartLevel, out expValue))
+                    {
+                        expValue.TotalExperience = 0;
+                        Logger.Warn($"Given start level is not found in the experience table");                        
+                    }
+
                     plrDto = new PlayerDto
                     {
                         Id = (int)account.Id,
@@ -177,7 +187,7 @@ namespace Netsphere.Network.Services
                         AP = Config.Instance.Game.StartAP,
                         Coins1 = Config.Instance.Game.StartCoins1,
                         Coins2 = Config.Instance.Game.StartCoins2,
-                        TotalExperience = (int)GameServer.Instance.ResourceCache.GetExperience().ToList()[Config.Instance.Game.StartLevel].Value.TotalExperience
+                        TotalExperience = (int)expValue.TotalExperience
                     };
 
                     await db.InsertAsync(plrDto);
