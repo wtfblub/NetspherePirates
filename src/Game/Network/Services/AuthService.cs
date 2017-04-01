@@ -172,9 +172,10 @@ namespace Netsphere.Network.Services
                 {
                     // first time connecting to this server
                     var expTable = GameServer.Instance.ResourceCache.GetExperience();
-                    Experience expValue;
+                    Experience expValue ;
                     if (!expTable.TryGetValue(Config.Instance.Game.StartLevel, out expValue))
                     {
+                        expValue = new Experience();
                         expValue.TotalExperience = 0;
                         Logger.Warn($"Given start level is not found in the experience table");                        
                     }
