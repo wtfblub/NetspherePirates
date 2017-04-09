@@ -19,7 +19,9 @@ namespace Netsphere
         FirstHalf,
         EnteringHalfTime,
         HalfTime,
-        SecondHalf
+        SecondHalf,
+
+        FullGame
     }
 
     enum GameRuleStateTrigger
