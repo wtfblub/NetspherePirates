@@ -155,6 +155,7 @@ namespace Netsphere.Game.GameRules
             switch (transition.Destination)
             {
                 case GameRuleState.FirstHalf:
+                case GameRuleState.FullGame:
                     GameTime = TimeSpan.Zero;
                     foreach (var team in Room.TeamManager.Values)
                         team.Score = 0;
@@ -176,8 +177,9 @@ namespace Netsphere.Game.GameRules
 
                     Room.BroadcastBriefing();
                     Room.Broadcast(new SChangeStateAckMessage(GameState.Playing));
-                    Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
-                    break;
+                    if (transition.Destination == GameRuleState.FirstHalf)
+                        Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
+                        break;
 
                 case GameRuleState.HalfTime:
                     Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.HalfTime));
