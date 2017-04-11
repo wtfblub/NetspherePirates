@@ -69,12 +69,5 @@ namespace ProudNet.Handlers
             _server.Configuration.HostIdFactory.Free(session.HostId);
             base.ChannelInactive(context);
         }
-
-        public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
-        {
-            var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
-            _server.RaiseError(new ErrorEventArgs(session, exception));
-            session.CloseAsync();
-        }
     }
 }

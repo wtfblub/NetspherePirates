@@ -133,7 +133,8 @@ namespace ProudNet
                             .AddLast(new SimpleMessageHandler()
                                 .Add(new ServerHandler()))
 
-                            .AddLast(userMessageHandler);
+                            .AddLast(userMessageHandler)
+                            .AddLast(new ErrorHandler(this));
                     }))
                     .ChildOption(ChannelOption.TcpNodelay, !Configuration.EnableNagleAlgorithm)
                     .ChildAttribute(ChannelAttributes.Session, default(ProudSession))
