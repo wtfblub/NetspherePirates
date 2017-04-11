@@ -85,6 +85,7 @@
     <Compile Include="Codecs\ProudFrameEncoder.cs" />
     <Compile Include="Codecs\UdpFrameDecoder.cs" />
     <Compile Include="Codecs\UdpFrameEncoder.cs" />
+    <Compile Include="Handlers\ErrorHandler.cs" />
     <Compile Include="Handlers\UdpHandler.cs" />
     <Compile Include="Codecs\UdpMessage.cs" />
     <Compile Include="Crypt.cs" />
