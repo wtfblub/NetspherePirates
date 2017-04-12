@@ -2,13 +2,19 @@
 {
     public enum AuthOpCode : ushort
     {
-        CAuthInReq = 5001,
-        CAuthInEuReq = 5002,
-        CServerListReq = 5003,
+        LoginKRReq = 5001,
+        LoginEUReq = 5002,
+        LoginJPReq = 5003,
+        ServerListReq = 5004,
+        OptionVersionCheckReq = 5005,
+        AuthInTHReq = 5006,
 
-        SAuthInAck = 5101,
-        SAuthInEuAck = 5102,
-        SServerListAck = 5103
+        LoginKRAck = 5101,
+        LoginEUAck = 5102,
+        LoginJPAck = 5103,
+        ServerListAck = 5104,
+        OptionVersionCheckAck = 5105,
+        AuthInTHAck = 5106
     }
 
     public enum ChatOpCode : ushort

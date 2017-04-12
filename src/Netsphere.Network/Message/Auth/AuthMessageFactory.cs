@@ -10,12 +10,14 @@ namespace Netsphere.Network.Message.Auth
         public AuthMessageFactory()
         {
             // S2C
-            Register<SAuthInEuAckMessage>(AuthOpCode.SAuthInEuAck);
-            Register<SServerListAckMessage>(AuthOpCode.SServerListAck);
+            Register<LoginEUAckMessage>(AuthOpCode.LoginEUAck);
+            Register<ServerListAckMessage>(AuthOpCode.ServerListAck);
+            Register<OptionVersionCheckAckMessage>(AuthOpCode.OptionVersionCheckAck);
 
             // C2S
-            Register<CAuthInEUReqMessage>(AuthOpCode.CAuthInEuReq);
-            Register<CServerListReqMessage>(AuthOpCode.CServerListReq);
+            Register<LoginEUReqMessage>(AuthOpCode.LoginEUReq);
+            Register<ServerListReqMessage>(AuthOpCode.ServerListReq);
+            Register<OptionVersionCheckReqMessage>(AuthOpCode.OptionVersionCheckReq);
         }
     }
 }

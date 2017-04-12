@@ -7,7 +7,7 @@ using ProudNet.Serialization.Serializers;
 namespace Netsphere.Network.Message.Auth
 {
     [BlubContract]
-    public class SAuthInEuAckMessage : IAuthMessage
+    public class LoginEUAckMessage : IAuthMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -30,7 +30,7 @@ namespace Netsphere.Network.Message.Auth
         [BlubMember(6, typeof(StringSerializer))]
         public string BannedUntil { get; set; }
 
-        public SAuthInEuAckMessage()
+        public LoginEUAckMessage()
         {
             Unk1 = "";
             SessionId2 = "";
@@ -38,20 +38,20 @@ namespace Netsphere.Network.Message.Auth
             BannedUntil = "";
         }
 
-        public SAuthInEuAckMessage(DateTimeOffset bannedUntil)
+        public LoginEUAckMessage(DateTimeOffset bannedUntil)
             : this()
         {
             Result = AuthLoginResult.Banned;
             BannedUntil = bannedUntil.ToString("yyyyMMddHHmmss");
         }
 
-        public SAuthInEuAckMessage(AuthLoginResult result)
+        public LoginEUAckMessage(AuthLoginResult result)
             : this()
         {
             Result = result;
         }
 
-        public SAuthInEuAckMessage(AuthLoginResult result, ulong accountId, uint sessionId)
+        public LoginEUAckMessage(AuthLoginResult result, ulong accountId, uint sessionId)
             : this()
         {
             Result = result;
@@ -62,18 +62,35 @@ namespace Netsphere.Network.Message.Auth
     }
 
     [BlubContract]
-    public class SServerListAckMessage : IAuthMessage
+    public class ServerListAckMessage : IAuthMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ServerInfoDto[] ServerList { get; set; }
 
-        public SServerListAckMessage()
+        public ServerListAckMessage()
             : this(Array.Empty<ServerInfoDto>())
         { }
 
-        public SServerListAckMessage(ServerInfoDto[] serverList)
+        public ServerListAckMessage(ServerInfoDto[] serverList)
         {
             ServerList = serverList;
+        }
+    }
+
+    [BlubContract]
+    public class OptionVersionCheckAckMessage : IAuthMessage
+    {
+        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        public byte[] Data { get; set; }
+
+        public OptionVersionCheckAckMessage()
+        {
+            Data = Array.Empty<byte>();
+        }
+
+        public OptionVersionCheckAckMessage(byte[] data)
+        {
+            Data = data;
         }
     }
 }

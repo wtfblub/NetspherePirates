@@ -18,8 +18,8 @@ namespace Netsphere.Network.Service
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        [MessageHandler(typeof(CAuthInEUReqMessage))]
-        public async Task LoginHandler(ProudSession session, CAuthInEUReqMessage message)
+        [MessageHandler(typeof(LoginEUReqMessage))]
+        public async Task LoginHandler(ProudSession session, LoginEUReqMessage message)
         {
             var ip = session.RemoteEndPoint.Address.ToString();
             Logger.Debug($"Login from {ip} with username {message.Username}");
@@ -56,7 +56,7 @@ namespace Netsphere.Network.Service
                     else
                     {
                         Logger.Error($"Wrong login for {message.Username}");
-                        session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw));
+                        session.SendAsync(new LoginEUAckMessage(AuthLoginResult.WrongIdorPw));
                         return;
                     }
                 }
@@ -96,7 +96,7 @@ namespace Netsphere.Network.Service
                     else
                     {
                         Logger.Error($"Wrong login for {message.Username}");
-                        session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongIdorPw));
+                        session.SendAsync(new LoginEUAckMessage(AuthLoginResult.WrongIdorPw));
                         return;
                     }
                 }
@@ -107,7 +107,7 @@ namespace Netsphere.Network.Service
                 {
                     var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
                     Logger.Error($"{message.Username} is banned until {unbanDate}");
-                    session.SendAsync(new SAuthInEuAckMessage(unbanDate));
+                    session.SendAsync(new LoginEUAckMessage(unbanDate));
                     return;
                 }
 
@@ -124,13 +124,13 @@ namespace Netsphere.Network.Service
 
             // ToDo proper session generation
             var sessionId = Hash.GetUInt32<CRC32>($"<{account.Username}+{account.Password}>");
-            session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
+            session.SendAsync(new LoginEUAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
         }
 
-        [MessageHandler(typeof(CServerListReqMessage))]
+        [MessageHandler(typeof(ServerListReqMessage))]
         public void ServerListHandler(AuthServer server, ProudSession session)
         {
-            session.SendAsync(new SServerListAckMessage(server.ServerManager.ToArray()), SendOptions.Reliable);
+            session.SendAsync(new ServerListAckMessage(server.ServerManager.ToArray()));
         }
     }
 }

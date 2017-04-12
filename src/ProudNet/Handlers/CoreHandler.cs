@@ -30,7 +30,13 @@ namespace ProudNet.Handlers
         public void RmiMessage(IChannelHandlerContext context, RmiMessage message)
         {
             var buffer = Unpooled.WrappedBuffer(message.Data);
-            context.FireChannelRead(buffer);
+            try
+            {
+                context.FireChannelRead(buffer);
+            }
+            catch (Exception e)
+            {
+            }
         }
 
         [MessageHandler(typeof(CompressedMessage))]
