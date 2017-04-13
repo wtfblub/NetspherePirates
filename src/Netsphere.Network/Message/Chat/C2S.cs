@@ -6,7 +6,7 @@ using ProudNet.Serialization.Serializers;
 namespace Netsphere.Network.Message.Chat
 {
     [BlubContract]
-    public class CLoginReqMessage : IChatMessage
+    public class LoginReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -19,7 +19,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CDenyChatReqMessage : IChatMessage
+    public class DenyActionReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public DenyAction Action { get; set; }
@@ -29,7 +29,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CFriendReqMessage : IChatMessage
+    public class FriendActionReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Action { get; set; }
@@ -42,14 +42,14 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CCheckCombiNameReqMessage : IChatMessage
+    public class CombiCheckNameReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Name { get; set; }
     }
 
     [BlubContract]
-    public class CCombiReqMessage : IChatMessage
+    public class CombiActionReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -65,24 +65,27 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CGetUserDataReqMessage : IChatMessage
+    public class UserDataOneReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract]
-    public class CSetUserDataReqMessage : IChatMessage
+    public class UserDataThreeAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
         [BlubMember(1)]
+        public int Unk { get; set; }
+
+        [BlubMember(2)]
         public UserDataDto UserData { get; set; }
     }
 
     [BlubContract]
-    public class CChatMessageReqMessage : IChatMessage
+    public class MessageChatReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ChatType ChatType { get; set; }
@@ -92,7 +95,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CWhisperChatMessageReqMessage : IChatMessage
+    public class MessageWhisperChatReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string ToNickname { get; set; }
@@ -102,14 +105,14 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CInvitationPlayerReqMessage : IChatMessage
+    public class RoomInvitationPlayerReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract]
-    public class CNoteListReqMessage : IChatMessage
+    public class NoteListReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public byte Page { get; set; }
@@ -119,7 +122,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CSendNoteReqMessage : IChatMessage
+    public class NoteSendReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(StringSerializer))]
         public string Receiver { get; set; }
@@ -141,23 +144,73 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class CReadNoteReqMessage : IChatMessage
+    public class NoteReadReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Id { get; set; }
     }
 
     [BlubContract]
-    public class CDeleteNoteReqMessage : IChatMessage
+    public class NoteDeleteReqMessage : IChatMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Notes { get; set; }
     }
 
     [BlubContract]
-    public class CNoteReminderInfoReqMessage : IChatMessage
+    public class NoteCountReqMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class OptionSaveCommunityReqMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public int Unk3 { get; set; }
+
+        [BlubMember(3)]
+        public int Unk4 { get; set; }
+    }
+
+    [BlubContract]
+    public class OptionSaveBinaryReqMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class NoteRejectImportuneReqMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public long Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubNoteSendReqMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public ClubNoteDto Note { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubMemberListReqMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
     }
 }

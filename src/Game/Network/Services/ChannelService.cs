@@ -67,8 +67,8 @@ namespace Netsphere.Network.Services
             session.Player.Channel?.Leave(session.Player);
         }
 
-        [MessageHandler(typeof(CChatMessageReqMessage))]
-        public void CChatMessageReq(ChatSession session, CChatMessageReqMessage message)
+        [MessageHandler(typeof(MessageChatReqMessage))]
+        public void CChatMessageReq(ChatSession session, MessageChatReqMessage message)
         {
             switch (message.ChatType)
             {
@@ -78,7 +78,7 @@ namespace Netsphere.Network.Services
 
                 case ChatType.Club:
                     // ToDo Change this when clans are implemented
-                    session.SendAsync(new SChatMessageAckMessage(ChatType.Club, session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
+                    session.SendAsync(new MessageChatAckMessage(ChatType.Club, session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
                     break;
 
                 default:
@@ -90,26 +90,26 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(CWhisperChatMessageReqMessage))]
-        public void CWhisperChatMessageReq(ChatSession session, CWhisperChatMessageReqMessage message)
+        [MessageHandler(typeof(MessageWhisperChatReqMessage))]
+        public void CWhisperChatMessageReq(ChatSession session, MessageWhisperChatReqMessage message)
         {
             var toPlr = GameServer.Instance.PlayerManager.Get(message.ToNickname);
 
             // ToDo Is there an answer for this case?
             if (toPlr == null)
             {
-                session.Player.ChatSession.SendAsync(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is not online"));
+                session.Player.ChatSession.SendAsync(new MessageChatAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is not online"));
                 return;
             }
 
             // ToDo Is there an answer for this case?
             if (toPlr.DenyManager.Contains(session.Player.Account.Id))
             {
-                session.Player.ChatSession.SendAsync(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is ignoring you"));
+                session.Player.ChatSession.SendAsync(new MessageChatAckMessage(ChatType.Channel, session.Player.Account.Id, "SYSTEM", $"{message.ToNickname} is ignoring you"));
                 return;
             }
 
-            toPlr.ChatSession.SendAsync(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname,
+            toPlr.ChatSession.SendAsync(new MessageWhisperChatAckMessage(0, toPlr.Account.Nickname,
                 session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
         }
 

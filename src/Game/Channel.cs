@@ -63,7 +63,7 @@ namespace Netsphere
             if (Players.Count >= PlayerLimit)
                 throw new ChannelLimitReachedException();
 
-            Broadcast(new SChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
+            Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
 
             _players.Add(plr.Account.Id, plr);
             plr.SentPlayerList = false;
@@ -72,7 +72,7 @@ namespace Netsphere
             plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelEnter));
             OnPlayerJoined(new ChannelPlayerJoinedEventArgs(this, plr));
 
-            plr.ChatSession.SendAsync(new SNoteReminderInfoAckMessage((byte)plr.Mailbox.Count(mail => mail.IsNew), 0, 0));
+            plr.ChatSession.SendAsync(new NoteCountAckMessage((byte)plr.Mailbox.Count(mail => mail.IsNew), 0, 0));
         }
 
         public void Leave(Player plr)
@@ -83,7 +83,7 @@ namespace Netsphere
             _players.Remove(plr.Account.Id);
             plr.Channel = null;
 
-            Broadcast(new SChannelLeavePlayerAckMessage(plr.Account.Id));
+            Broadcast(new ChannelLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(new ChannelPlayerLeftEventArgs(this, plr));
             plr.Session?.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
@@ -94,7 +94,7 @@ namespace Netsphere
             OnMessage(new ChannelMessageEventArgs(this, plr, message));
 
             foreach (var p in Players.Values.Where(p => !p.DenyManager.Contains(plr.Account.Id) && p.Room == null))
-                p.ChatSession.SendAsync(new SChatMessageAckMessage(ChatType.Channel, plr.Account.Id, plr.Account.Nickname, message));
+                p.ChatSession.SendAsync(new MessageChatAckMessage(ChatType.Channel, plr.Account.Id, plr.Account.Nickname, message));
         }
 
         public void Broadcast(IGameMessage message, bool excludeRooms = false)

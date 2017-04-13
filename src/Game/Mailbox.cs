@@ -102,7 +102,7 @@ namespace Netsphere
 
         public Task UpdateReminderAsync()
         {
-            return Player.ChatSession.SendAsync(new SNoteReminderInfoAckMessage((byte)this.Count(m => m.IsNew), 0, 0));
+            return Player.ChatSession.SendAsync(new NoteCountAckMessage((byte)this.Count(m => m.IsNew), 0, 0));
         }
 
         internal void Save(IDbConnection db)

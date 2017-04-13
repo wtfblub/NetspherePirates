@@ -467,8 +467,8 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(Message.Chat.CLoginReqMessage))]
-        public async Task Chat_LoginHandler(ChatServer server, ChatSession session, Message.Chat.CLoginReqMessage message)
+        [MessageHandler(typeof(Message.Chat.LoginReqMessage))]
+        public async Task Chat_LoginHandler(ChatServer server, ChatSession session, Message.Chat.LoginReqMessage message)
         {
             Logger.Info()
                 .Account(message.AccountId, "")
@@ -482,7 +482,7 @@ namespace Netsphere.Network.Services
                     .Account(message.AccountId, "")
                     .Message("Invalid sessionId")
                     .Write();
-                session.SendAsync(new Message.Chat.SLoginAckMessage(2));
+                session.SendAsync(new Message.Chat.LoginAckMessage(2));
                 return;
             }
 
@@ -493,7 +493,7 @@ namespace Netsphere.Network.Services
                     .Account(message.AccountId, "")
                     .Message("Login failed")
                     .Write();
-                session.SendAsync(new Message.Chat.SLoginAckMessage(3));
+                session.SendAsync(new Message.Chat.LoginAckMessage(3));
                 return;
             }
 
@@ -503,7 +503,7 @@ namespace Netsphere.Network.Services
                     .Account(session)
                     .Message("Already online")
                     .Write();
-                session.SendAsync(new Message.Chat.SLoginAckMessage(4));
+                session.SendAsync(new Message.Chat.LoginAckMessage(4));
                 return;
             }
 
@@ -514,8 +514,8 @@ namespace Netsphere.Network.Services
                 .Account(session)
                 .Message("Login success")
                 .Write();
-            session.SendAsync(new Message.Chat.SLoginAckMessage(0));
-            session.SendAsync(new Message.Chat.SDenyChatListAckMessage(plr.DenyManager.Select(d => d.Map<Deny, DenyDto>()).ToArray()));
+            session.SendAsync(new Message.Chat.LoginAckMessage(0));
+            session.SendAsync(new Message.Chat.DenyListAckMessage(plr.DenyManager.Select(d => d.Map<Deny, DenyDto>()).ToArray()));
         }
 
         [MessageHandler(typeof(Message.Relay.CRequestLoginMessage))]

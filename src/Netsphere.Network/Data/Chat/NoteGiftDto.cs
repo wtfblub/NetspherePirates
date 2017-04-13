@@ -22,8 +22,5 @@ namespace Netsphere.Network.Data.Chat
 
         [BlubMember(5)]
         public int Unk6 { get; set; }
-
-        [BlubMember(6)]
-        public byte Unk7 { get; set; }
     }
 }

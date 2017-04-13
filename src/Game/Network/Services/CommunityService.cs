@@ -19,7 +19,7 @@ namespace Netsphere.Network.Services
                 // We can't send the channel player list in Channel.Join because the client only accepts it here :/
                 plr.SentPlayerList = true;
                 var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
-                session.SendAsync(new SChannelPlayerListAckMessage(data));
+                session.SendAsync(new ChannelPlayerListAckMessage(data));
             }
 
             // Save settings if any of them changed
@@ -41,8 +41,8 @@ namespace Netsphere.Network.Services
                 settings.AddOrUpdate(name, message.UserData.AllowInfoRequest);
         }
 
-        [MessageHandler(typeof(CGetUserDataReqMessage))]
-        public void GetUserDataHandler(ChatSession session, CGetUserDataReqMessage message)
+        [MessageHandler(typeof(UserDataOneReqMessage))]
+        public void GetUserDataHandler(ChatSession session, UserDataOneReqMessage message)
         {
             var plr = session.Player;
             if (plr.Account.Id == message.AccountId)
@@ -69,8 +69,8 @@ namespace Netsphere.Network.Services
             session.SendAsync(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
         }
 
-        [MessageHandler(typeof(CDenyChatReqMessage))]
-        public void DenyHandler(ChatServer service, ChatSession session, CDenyChatReqMessage message)
+        [MessageHandler(typeof(DenyActionReqMessage))]
+        public void DenyHandler(ChatServer service, ChatSession session, DenyActionReqMessage message)
         {
             var plr = session.Player;
 
@@ -89,7 +89,7 @@ namespace Netsphere.Network.Services
                         return;
 
                     deny = plr.DenyManager.Add(target);
-                    session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
+                    session.SendAsync(new DenyActionAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
                     break;
 
                 case DenyAction.Remove:
@@ -98,7 +98,7 @@ namespace Netsphere.Network.Services
                         return;
 
                     plr.DenyManager.Remove(message.Deny.AccountId);
-                    session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
+                    session.SendAsync(new DenyActionAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
                     break;
             }
         }

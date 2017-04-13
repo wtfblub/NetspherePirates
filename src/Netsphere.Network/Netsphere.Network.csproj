@@ -75,6 +75,8 @@
   <ItemGroup>
     <Compile Include="Data\Chat\BRUserDataDto.cs" />
     <Compile Include="Data\Chat\ChaserUserDataDto.cs" />
+    <Compile Include="Data\Chat\ClubMemberDto.cs" />
+    <Compile Include="Data\Chat\ClubNoteDto.cs" />
     <Compile Include="Data\Chat\CombiDto.cs" />
     <Compile Include="Data\Chat\CPTUserDataDto.cs" />
     <Compile Include="Data\Chat\DeleteNoteDto.cs" />
@@ -84,8 +86,13 @@
     <Compile Include="Data\Chat\NoteContentDto.cs" />
     <Compile Include="Data\Chat\NoteDto.cs" />
     <Compile Include="Data\Chat\NoteGiftDto.cs" />
+    <Compile Include="Data\Chat\PlayerInfoDto.cs" />
+    <Compile Include="Data\Chat\PlayerInfoShortDto.cs" />
+    <Compile Include="Data\Chat\PlayerLocationDto.cs" />
+    <Compile Include="Data\Chat\SiegeUserDataDto.cs" />
     <Compile Include="Data\Chat\TDUserDataDto.cs" />
     <Compile Include="Data\Chat\UserDataDto.cs" />
+    <Compile Include="Data\Chat\UserDataItemDto.cs" />
     <Compile Include="Data\GameRule\ArcadeScoreSyncDto.cs" />
     <Compile Include="Data\GameRule\CaptainLifeDto.cs" />
     <Compile Include="Data\GameRule\ChangeAvatarUnk1Dto.cs" />
@@ -163,6 +170,7 @@
     <Compile Include="Serializers\MatchKeySerializer.cs" />
     <Compile Include="Serializers\ItemNumberSerializer.cs" />
     <Compile Include="Serializers\TimeSpanSerializer.cs" />
+    <Compile Include="Serializers\UserDataTimeSpanSerializer.cs" />
     <Compile Include="Serializers\VersionSerializer.cs" />
   </ItemGroup>
   <ItemGroup>

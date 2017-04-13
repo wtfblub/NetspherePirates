@@ -39,16 +39,16 @@ namespace Netsphere.Network
                     .AddHandler(new ChannelService())
                     .AddHandler(new PrivateMessageService())
 
-                    .RegisterRule<CLoginReqMessage>(MustNotBeLoggedIn)
+                    .RegisterRule<LoginReqMessage>(MustNotBeLoggedIn)
                     .RegisterRule<CSetUserDataReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CGetUserDataReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CDenyChatReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CWhisperChatMessageReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CNoteListReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CReadNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CDeleteNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CSendNoteReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<UserDataOneReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<DenyActionReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<MessageChatReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<MessageWhisperChatReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<NoteListReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<NoteReadReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<NoteDeleteReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<NoteSendReqMessage>(MustBeLoggedIn, MustBeInChannel)
             };
             Instance = new ChatServer(config);
         }
