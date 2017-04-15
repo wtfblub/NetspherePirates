@@ -538,7 +538,7 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            if (plr.RelaySession != null)
+            if (plr.RelaySession != null && plr.RelaySession.IsConnected)
             {
                 Logger.Error()
                     .Account(session)

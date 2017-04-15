@@ -51,7 +51,7 @@ namespace Netsphere.Network
             if (relaySession.GameSession != null && relaySession.Player != null)
             {
                 if (relaySession.Player.Room != null)
-                    relaySession.GameSession?.Dispose();
+                    relaySession.GameSession.Dispose();
             }
 
             relaySession.GameSession = null;
