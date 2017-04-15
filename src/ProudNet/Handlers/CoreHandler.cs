@@ -205,7 +205,7 @@ namespace ProudNet.Handlers
             if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
                 return;
 
-            var target = session.P2PGroup.Members.GetValueOrDefault(message.HostId).Session;
+            var target = session.P2PGroup?.Members.GetValueOrDefault(message.HostId)?.Session;
             if (target == null || !target.UdpEnabled)
                 return;
 

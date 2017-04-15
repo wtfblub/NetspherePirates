@@ -23,10 +23,10 @@ namespace ProudNet.Handlers
             if (session.P2PGroup == null || session.HostId == message.AddedMemberHostId)
                 return;
 
-            var remotePeer = session.P2PGroup.Members[session.HostId];
-            var connectionState = remotePeer.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
+            var remotePeer = session.P2PGroup?.Members[session.HostId];
+            var connectionState = remotePeer?.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
 
-            if (connectionState.EventId != message.EventId)
+            if (connectionState?.EventId != message.EventId)
                 return;
 
             connectionState.IsJoined = true;
