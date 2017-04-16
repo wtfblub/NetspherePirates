@@ -40,7 +40,6 @@ namespace Netsphere.Network
                     .AddHandler(new PrivateMessageService())
 
                     .RegisterRule<LoginReqMessage>(MustNotBeLoggedIn)
-                    .RegisterRule<CSetUserDataReqMessage>(MustBeLoggedIn)
                     .RegisterRule<UserDataOneReqMessage>(MustBeLoggedIn, MustBeInChannel)
                     .RegisterRule<DenyActionReqMessage>(MustBeLoggedIn)
                     .RegisterRule<MessageChatReqMessage>(MustBeLoggedIn, MustBeInChannel)

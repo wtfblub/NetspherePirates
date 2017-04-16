@@ -64,20 +64,20 @@ namespace Netsphere
         {
             PlayerJoining?.Invoke(this, e);
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
-            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            //RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         internal virtual void OnPlayerJoined(RoomPlayerEventArgs e)
         {
             PlayerJoined?.Invoke(this, e);
-            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            //RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         protected virtual void OnPlayerLeft(RoomPlayerEventArgs e)
         {
             PlayerLeft?.Invoke(this, e);
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
-            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            //RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         protected virtual void OnStateChanged()
@@ -319,7 +319,7 @@ namespace Netsphere
 
         private void TeamManager_TeamChanged(object sender, TeamChangedEventArgs e)
         {
-            RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            //RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         private void GameRuleManager_OnGameRuleChanged(object sender, EventArgs e)

@@ -524,6 +524,15 @@ namespace Netsphere.Network.Message.Chat
 
         [BlubMember(1)]
         public UserDataDto UserData { get; set; }
+
+        public UserDataFourAckMessage()
+        { }
+
+        public UserDataFourAckMessage(int unk, UserDataDto userData)
+        {
+            Unk = unk;
+            UserData = userData;
+        }
     }
 
     [BlubContract]

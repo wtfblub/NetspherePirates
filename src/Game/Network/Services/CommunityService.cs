@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using BlubLib.DotNetty.Handlers.MessageHandling;
+﻿using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
@@ -10,52 +8,49 @@ namespace Netsphere.Network.Services
 {
     internal class CommunityService : ProudMessageHandler
     {
-        [MessageHandler(typeof(CSetUserDataReqMessage))]
-        public void SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)
-        {
-            var plr = session.Player;
-            if (message.UserData.ChannelId > 0 && !plr.SentPlayerList && plr.Channel != null)
-            {
-                // We can't send the channel player list in Channel.Join because the client only accepts it here :/
-                plr.SentPlayerList = true;
-                var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
-                session.SendAsync(new ChannelPlayerListAckMessage(data));
-            }
+        //[MessageHandler(typeof(CSetUserDataReqMessage))]
+        //public void SetUserDataHandler(ChatSession session, CSetUserDataReqMessage message)
+        //{
+        //    var plr = session.Player;
+        //    if (message.UserData.ChannelId > 0 && !plr.SentPlayerList && plr.Channel != null)
+        //    {
+        //        // We can't send the channel player list in Channel.Join because the client only accepts it here :/
+        //        plr.SentPlayerList = true;
+        //        var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
+        //        session.SendAsync(new ChannelPlayerListAckMessage(data));
+        //    }
 
-            // Save settings if any of them changed
-            var settings = plr.Settings;
-            var name = nameof(UserDataDto.AllowCombiInvite);
-            if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowCombiInvite)
-                settings.AddOrUpdate(name, message.UserData.AllowCombiInvite);
+        //    // Save settings if any of them changed
+        //    var settings = plr.Settings;
+        //    var name = nameof(UserDataDto.AllowCombiInvite);
+        //    if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowCombiInvite)
+        //        settings.AddOrUpdate(name, message.UserData.AllowCombiInvite);
 
-            name = nameof(UserDataDto.AllowFriendRequest);
-            if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowFriendRequest)
-                settings.AddOrUpdate(name, message.UserData.AllowFriendRequest);
+        //    name = nameof(UserDataDto.AllowFriendRequest);
+        //    if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowFriendRequest)
+        //        settings.AddOrUpdate(name, message.UserData.AllowFriendRequest);
 
-            name = nameof(UserDataDto.AllowRoomInvite);
-            if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowRoomInvite)
-                settings.AddOrUpdate(name, message.UserData.AllowRoomInvite);
+        //    name = nameof(UserDataDto.AllowRoomInvite);
+        //    if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowRoomInvite)
+        //        settings.AddOrUpdate(name, message.UserData.AllowRoomInvite);
 
-            name = nameof(UserDataDto.AllowInfoRequest);
-            if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowInfoRequest)
-                settings.AddOrUpdate(name, message.UserData.AllowInfoRequest);
-        }
+        //    name = nameof(UserDataDto.AllowInfoRequest);
+        //    if (!settings.Contains(name) || settings.Get<CommunitySetting>(name) != message.UserData.AllowInfoRequest)
+        //        settings.AddOrUpdate(name, message.UserData.AllowInfoRequest);
+        //}
 
         [MessageHandler(typeof(UserDataOneReqMessage))]
         public void GetUserDataHandler(ChatSession session, UserDataOneReqMessage message)
         {
             var plr = session.Player;
             if (plr.Account.Id == message.AccountId)
-            {
-                session.SendAsync(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()));
                 return;
-            }
 
             Player target;
             if (!plr.Channel.Players.TryGetValue(message.AccountId, out target))
                 return;
 
-            switch (target.Settings.Get<CommunitySetting>(nameof(UserDataDto.AllowInfoRequest)))
+            switch (target.Settings.Get<CommunitySetting>("AllowInfoRequest"))
             {
                 case CommunitySetting.Deny:
                     // Not sure if there is an answer to this
@@ -66,7 +61,7 @@ namespace Netsphere.Network.Services
                     return;
             }
 
-            session.SendAsync(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
+            session.SendAsync(new UserDataFourAckMessage(0, target.Map<Player, UserDataDto>()));
         }
 
         [MessageHandler(typeof(DenyActionReqMessage))]

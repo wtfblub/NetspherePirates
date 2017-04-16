@@ -63,7 +63,7 @@ namespace Netsphere
             if (Players.Count >= PlayerLimit)
                 throw new ChannelLimitReachedException();
 
-            Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
+            Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
 
             _players.Add(plr.Account.Id, plr);
             plr.SentPlayerList = false;
@@ -73,6 +73,9 @@ namespace Netsphere
             OnPlayerJoined(new ChannelPlayerJoinedEventArgs(this, plr));
 
             plr.ChatSession.SendAsync(new NoteCountAckMessage((byte)plr.Mailbox.Count(mail => mail.IsNew), 0, 0));
+
+            var data = plr.Channel.Players.Values.Select(p => p.Map<Player, PlayerInfoShortDto>()).ToArray();
+            plr.ChatSession.SendAsync(new ChannelPlayerListAckMessage(data));
         }
 
         public void Leave(Player plr)

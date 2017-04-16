@@ -13,7 +13,6 @@ using Netsphere.Resource;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
-using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Services;
 using Netsphere.Network.Message.GameRule;
@@ -404,19 +403,21 @@ namespace Netsphere.Network
             Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
                 .Member(dest => dest.ItemId, src => src.Id);
 
-
-            Mapper.Register<Player, UserDataDto>()
-                .Member(dest => dest.AccountId, src => src.Account.Id)
-                .Member(dest => dest.ServerId, src => Config.Instance.Id)
-                .Function(dest => dest.ChannelId, src => src.Channel != null ? (short)src.Channel.Id : (short)-1)
-                .Function(dest => dest.RoomId, src => src.Room?.Id ?? 0xFFFFFFFF) // ToDo: Tutorial, License
-                .Function(dest => dest.Team, src => src.RoomInfo?.Team?.Team ?? Team.Neutral)
-                .Function(dest => dest.TotalExp, src => src.TotalExperience);
-
-            Mapper.Register<Player, UserDataWithNickDto>()
+            Mapper.Register<Player, PlayerInfoShortDto>()
                 .Member(dest => dest.AccountId, src => src.Account.Id)
                 .Member(dest => dest.Nickname, src => src.Account.Nickname)
-                .Function(dest => dest.Data, src => src.Map<Player, UserDataDto>());
+                .Function(dest => dest.TotalExp, src => src.TotalExperience);
+
+            Mapper.Register<Player, PlayerLocationDto>()
+                .Function(dest => dest.ServerGroupId, src => Config.Instance.Id)
+                .Function(dest => dest.ChannelId, src => src.Channel != null ? (short)src.Channel.Id : (short)-1)
+                .Function(dest => dest.RoomId, src => src.Room?.Id ?? 0xFFFFFFFF) // ToDo: Tutorial, License
+                .Function(dest => dest.GameServerId, src => 0) // TODO Server ids
+                .Function(dest => dest.ChatServerId, src => 0);
+
+            Mapper.Register<Player, PlayerInfoDto>()
+                .Function(dest => dest.Info, src => src.Map<Player, PlayerInfoShortDto>())
+                .Function(dest => dest.Location, src => src.Map<Player, PlayerLocationDto>());
 
             Mapper.Compile(CompilationTypes.Source);
         }
