@@ -93,6 +93,14 @@
     <Compile Include="Data\Chat\TDUserDataDto.cs" />
     <Compile Include="Data\Chat\UserDataDto.cs" />
     <Compile Include="Data\Chat\UserDataItemDto.cs" />
+    <Compile Include="Data\Club\BoardMessageDto.cs" />
+    <Compile Include="Data\Club\ClubInfoDto.cs" />
+    <Compile Include="Data\Club\ClubMemberInfoDto.cs" />
+    <Compile Include="Data\Club\ClubSearchInfoDto.cs" />
+    <Compile Include="Data\Club\JoinWaiterInfoDto.cs" />
+    <Compile Include="Data\Club\MyInfoDto.cs" />
+    <Compile Include="Data\Club\UnjoinerDto.cs" />
+    <Compile Include="Data\Club\UnjoinSettingMemberDto.cs" />
     <Compile Include="Data\GameRule\ArcadeScoreSyncDto.cs" />
     <Compile Include="Data\GameRule\CaptainLifeDto.cs" />
     <Compile Include="Data\GameRule\ChangeAvatarUnk1Dto.cs" />
@@ -134,6 +142,9 @@
     <Compile Include="Message\Chat\C2S.cs" />
     <Compile Include="Message\Chat\ChatMessageFactory.cs" />
     <Compile Include="Message\Chat\S2C.cs" />
+    <Compile Include="Message\Club\C2S.cs" />
+    <Compile Include="Message\Club\ClubMessageFactory.cs" />
+    <Compile Include="Message\Club\S2C.cs" />
     <Compile Include="Message\Event\C2C.cs" />
     <Compile Include="Message\Event\EventMessageFactory.cs" />
     <Compile Include="Message\GameRule\C2S.cs" />

@@ -17,6 +17,7 @@ using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Services;
 using Netsphere.Network.Message.GameRule;
 using ExpressMapper.Extensions;
+using Netsphere.Network.Message.Club;
 using ProudNet.Serialization;
 
 namespace Netsphere.Network
@@ -45,7 +46,7 @@ namespace Netsphere.Network
                 throw new InvalidOperationException("Server is already initialized");
 
             config.Version = new Guid("{beb92241-8333-4117-ab92-9b4af78c688f}");
-            config.MessageFactories = new MessageFactory[] { new GameMessageFactory(), new GameRuleMessageFactory() };
+            config.MessageFactories = new MessageFactory[] { new GameMessageFactory(), new GameRuleMessageFactory(), new ClubMessageFactory() };
             config.SessionFactory = new GameSessionFactory();
 
             // ReSharper disable InconsistentNaming
