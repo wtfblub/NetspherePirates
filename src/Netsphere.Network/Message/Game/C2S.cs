@@ -437,7 +437,7 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class ShoppingBasketDeleteReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public long[] Unk { get; set; }
     }
 

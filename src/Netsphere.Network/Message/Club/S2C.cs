@@ -1,6 +1,7 @@
 ﻿using BlubLib.Serialization;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Data.Club;
+using Netsphere.Network.Serializers;
 using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Club
@@ -60,7 +61,7 @@ namespace Netsphere.Network.Message.Club
         [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Unk2 { get; set; }
     }
 
@@ -70,7 +71,7 @@ namespace Netsphere.Network.Message.Club
         [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Unk2 { get; set; }
     }
 
@@ -129,7 +130,7 @@ namespace Netsphere.Network.Message.Club
         [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ClubSearchInfoDto[] Clubs { get; set; }
     }
 
@@ -143,14 +144,14 @@ namespace Netsphere.Network.Message.Club
     [BlubContract]
     public class ClubJoinWaiterInfoAckMessage : IClubMessage
     {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public JoinWaiterInfoDto[] Unk { get; set; }
     }
 
     [BlubContract]
     public class ClubNewJoinMemberInfoAckMessage : IClubMessage
     {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ClubMemberInfoDto[] Unk { get; set; }
     }
 
@@ -182,14 +183,14 @@ namespace Netsphere.Network.Message.Club
     [BlubContract]
     public class ClubUnjoinerListAckMessage : IClubMessage
     {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public UnjoinerDto[] Unk { get; set; }
     }
 
     [BlubContract]
     public class ClubUnjoinSettingMemberListAckMessage : IClubMessage
     {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public UnjoinSettingMemberDto[] Unk { get; set; }
     }
 
@@ -212,7 +213,7 @@ namespace Netsphere.Network.Message.Club
     [BlubContract]
     public class ClubStuffListAckMessage : IClubMessage
     {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ClubMemberDto[] Unk { get; set; }
     }
 
@@ -246,7 +247,7 @@ namespace Netsphere.Network.Message.Club
     [BlubContract]
     public class ClubBoardReadAckMessage : IClubMessage
     {
-        [BlubMember(0, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public BoardMessageDto[] Unk { get; set; }
     }
 
