@@ -10,77 +10,40 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(0)]
         public uint RoomId { get; set; }
 
-        [BlubMember(1)]
-        public byte ConnectingCount { get; set; }
-
-        [BlubMember(2)]
-        public byte PlayerCount { get; set; } // ToDo: Did it move or devs retarded?
-
-        [BlubMember(3, typeof(EnumSerializer), typeof(byte))]
+        [BlubMember(1, typeof(EnumSerializer), typeof(byte))]
         public GameState State { get; set; }
 
+        [BlubMember(2)]
+        public Netsphere.GameRule GameRule { get; set; }
+
+        [BlubMember(3)]
+        public byte Map { get; set; }
+
         [BlubMember(4)]
-        public byte Latency { get; set; }
+        public byte PlayerCount { get; set; }
 
         [BlubMember(5)]
-        public MatchKey MatchKey { get; set; }
+        public byte PlayerLimit { get; set; }
 
-        [BlubMember(6, typeof(StringSerializer))]
+        [BlubMember(6)]
+        public uint WeaponLimit { get; set; }
+
+        [BlubMember(7, typeof(StringSerializer))]
+        public string Password { get; set; }
+
+        [BlubMember(8, typeof(StringSerializer))]
         public string Name { get; set; }
 
-        [BlubMember(7)]
-        public bool HasPassword { get; set; }
-
-        [BlubMember(8)]
-        public uint TimeLimit { get; set; }
-
         [BlubMember(9)]
-        public uint Unk4 { get; set; } // EnterRoomInfoDto->Unk1
+        public byte Unk1 { get; set; }
 
         [BlubMember(10)]
-        public uint ScoreLimit { get; set; }
-
-        [BlubMember(11)]
-        public bool IsFriendly { get; set; }
-
-        [BlubMember(12)]
-        public bool IsBalanced { get; set; }
-
-        [BlubMember(13)]
-        public byte MinLevel { get; set; }
-
-        [BlubMember(14)]
-        public byte MaxLevel { get; set; }
-
-        [BlubMember(15)]
-        public byte EquipLimit { get; set; }
-
-        [BlubMember(16)]
-        public bool IsNoIntrusion { get; set; }
-
-        [BlubMember(17)]
-        public byte Unk5 { get; set; } // EnterRoomInfoDto->Value
-
-        [BlubMember(18, typeof(StringSerializer))]
-        public string Unk6 { get; set; }
-
-        [BlubMember(19, typeof(StringSerializer))]
-        public string Unk7 { get; set; }
-
-        [BlubMember(20, typeof(StringSerializer))]
-        public string Unk8 { get; set; }
-
-        [BlubMember(21, typeof(StringSerializer))]
-        public string Unk9 { get; set; }
+        public byte Unk2 { get; set; }
 
         public RoomDto()
         {
-            MatchKey = 0;
             Name = "";
-            Unk6 = "";
-            Unk7 = "";
-            Unk8 = "";
-            Unk9 = "";
+            Password = "";
         }
     }
 }

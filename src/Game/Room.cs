@@ -63,7 +63,7 @@ namespace Netsphere
         protected virtual void OnPlayerJoining(RoomPlayerEventArgs e)
         {
             PlayerJoining?.Invoke(this, e);
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
             //RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
@@ -76,14 +76,14 @@ namespace Netsphere
         protected virtual void OnPlayerLeft(RoomPlayerEventArgs e)
         {
             PlayerLeft?.Invoke(this, e);
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
             //RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
         }
 
         protected virtual void OnStateChanged()
         {
             StateChanged?.Invoke(this, EventArgs.Empty);
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
         }
 
         #endregion
@@ -179,10 +179,10 @@ namespace Netsphere
                 Creator = plr;
             }
 
-            Broadcast(new SEnteredPlayerAckMessage(plr.Map<Player, RoomPlayerDto>()));
-            plr.Session.SendAsync(new SSuccessEnterRoomAckMessage(this.Map<Room, EnterRoomInfoDto>()));
-            plr.Session.SendAsync(new SIdsInfoAckMessage(0, plr.RoomInfo.Slot));
-            plr.Session.SendAsync(new SEnteredPlayerListAckMessage(_players.Values.Select(p => p.Map<Player, RoomPlayerDto>()).ToArray()));
+            Broadcast(new RoomEnterPlayerInfoAckMessage(plr.Map<Player, RoomPlayerDto>()));
+            plr.Session.SendAsync(new RoomEnterRoomInfoAckMessage(this.Map<Room, EnterRoomInfoDto>()));
+            plr.Session.SendAsync(new RoomCurrentCharacterSlotAckMessage(0, plr.RoomInfo.Slot));
+            plr.Session.SendAsync(new RoomPlayerInfoListForEnterPlayerAckMessage(_players.Values.Select(p => p.Map<Player, RoomPlayerDto>()).ToArray()));
             OnPlayerJoining(new RoomPlayerEventArgs(plr));
         }
 
@@ -203,7 +203,7 @@ namespace Netsphere
             plr.RoomInfo.Team.Leave(plr);
             _players.Remove(plr.Account.Id);
             plr.Room = null;
-            plr.Session.SendAsync(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id));
+            plr.Session.SendAsync(new Network.Message.Game.RoomLeavePlayerInfoAckMessage(plr.Account.Id));
 
             OnPlayerLeft(new RoomPlayerEventArgs(plr));
 
@@ -270,7 +270,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Game rule {options.MatchKey.GameRule} does not exist")
                     .Write();
-                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -281,7 +281,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Map {options.MatchKey.Map} does not exist")
                     .Write();
-                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 
@@ -291,7 +291,7 @@ namespace Netsphere
                     .Account(Master)
                     .Message($"Map {map.Id}({map.Name}) is not available for game rule {options.MatchKey.GameRule}")
                     .Write();
-                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
 

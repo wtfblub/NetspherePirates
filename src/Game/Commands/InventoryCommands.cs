@@ -153,7 +153,7 @@ namespace Netsphere.Commands
                         if (!int.TryParse(args[2], out newDurability))
                             return false;
 
-                        plr.Session.SendAsync(new SItemDurabilityInfoAckMessage(new[]{new ItemDurabilityInfoDto
+                        plr.Session.SendAsync(new ItemDurabilityItemAckMessage(new[]{new ItemDurabilityInfoDto
                         {
                             ItemId = item.Id,
                             Durability = newDurability,

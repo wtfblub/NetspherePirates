@@ -12,24 +12,19 @@ namespace Netsphere.Network.Data.Game
         public int Durability { get; set; }
 
         [BlubMember(2)]
-        public int Unk2 { get; set; }
-
-        [BlubMember(3)]
-        public int Unk3 { get; set; }
+        public int Unk1 { get; set; }
 
         public ItemDurabilityInfoDto()
         {
             Durability = -1;
-            Unk2 = -1;
-            Unk3 = -1;
+            Unk1 = -1;
         }
 
-        public ItemDurabilityInfoDto(ulong itemId, int durability, int unk2, int unk3)
+        public ItemDurabilityInfoDto(ulong itemId, int durability, int unk1)
         {
             ItemId = itemId;
             Durability = durability;
-            Unk2 = unk2;
-            Unk3 = unk3;
+            Unk1 = unk1;
         }
     }
 }

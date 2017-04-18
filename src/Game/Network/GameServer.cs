@@ -19,6 +19,7 @@ using Netsphere.Network.Message.GameRule;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Message.Club;
 using ProudNet.Serialization;
+using ClubInfoReqMessage = Netsphere.Network.Message.Game.ClubInfoReqMessage;
 
 namespace Netsphere.Network
 {
@@ -73,29 +74,29 @@ namespace Netsphere.Network
                     .AddHandler(new RoomService())
                     .AddHandler(new ClubService())
 
-                    .RegisterRule<CLoginReqMessage>(MustNotBeLoggedIn)
-                    .RegisterRule<CCreateCharacterReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CSelectCharacterReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CDeleteCharacterReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CAdminShowWindowReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CAdminActionReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CGetChannelInfoReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CChannelEnterReqMessage>(MustBeLoggedIn, MustNotBeInChannel)
-                    .RegisterRule<CChannelLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CLicensedReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CExerciseLicenceReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CBuyItemReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CRandomShopRollingStartReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<LoginRequestReqMessage>(MustNotBeLoggedIn)
+                    .RegisterRule<CharacterCreateReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CharacterSelectReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<CharacterDeleteReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<AdminShowWindowReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<AdminActionReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<ChannelInfoReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<ChannelEnterReqMessage>(MustBeLoggedIn, MustNotBeInChannel)
+                    .RegisterRule<ChannelLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<LicenseGainReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<LicenseExerciseReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<ItemBuyItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<RandomShopRollingStartReqMessage>(MustBeLoggedIn)
                     .RegisterRule<CRandomShopItemSaleReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CUseItemReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CRepairItemReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CRefundItemReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CDiscardItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<ItemUseItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<ItemRepairItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<ItemRefundItemReqMessage>(MustBeLoggedIn)
+                    .RegisterRule<ItemDiscardItemReqMessage>(MustBeLoggedIn)
                     .RegisterRule<CEnterPlayerReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
                         session => session.Player.RoomInfo.IsConnecting)
-                    .RegisterRule<CMakeRoomReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
-                    .RegisterRule<CGameRoomEnterReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
-                    .RegisterRule<CJoinTunnelInfoReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<RoomMakeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
+                    .RegisterRule<RoomEnterReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
+                    .RegisterRule<RoomLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
                     .RegisterRule<CChangeTeamReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
                     .RegisterRule<CPlayerGameModeChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
                     .RegisterRule<CScoreKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
@@ -127,8 +128,8 @@ namespace Netsphere.Network
                         MustBeRoomMaster,
                         session =>
                             session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
-                    .RegisterRule<CClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<ClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
+                    .RegisterRule<ClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel)
                     .RegisterRule<CLeavePlayerRequestReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
 
             };
@@ -233,7 +234,7 @@ namespace Netsphere.Network
 
         public void BroadcastNotice(string message)
         {
-            Broadcast(new SNoticeMessageAckMessage(message));
+            Broadcast(new NoticeAdminMessageAckMessage(message));
         }
 
         private void Worker(TimeSpan delta)

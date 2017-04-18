@@ -7,10 +7,10 @@ namespace Netsphere.Network.Services
 {
     internal class GeneralService : ProudMessageHandler
     {
-        [MessageHandler(typeof(CTimeSyncReqMessage))]
-        public void TimeSyncHandler(GameSession session, CTimeSyncReqMessage message)
+        [MessageHandler(typeof(TimeSyncReqMessage))]
+        public void TimeSyncHandler(GameSession session, TimeSyncReqMessage message)
         {
-            session.SendAsync(new STimeSyncAckMessage
+            session.SendAsync(new TimeSyncAckMessage
             {
                 ClientTime = message.Time,
                 ServerTime = (uint)Program.AppTime.ElapsedMilliseconds

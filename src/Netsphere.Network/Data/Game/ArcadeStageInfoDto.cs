@@ -3,7 +3,7 @@
 namespace Netsphere.Network.Data.Game
 {
     [BlubContract]
-    public class ArcadeMapScoreDto
+    public class ArcadeStageInfoDto
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -27,6 +27,21 @@ namespace Netsphere.Network.Data.Game
         public uint Unk7 { get; set; }
 
         [BlubMember(7)]
-        public byte Unk8 { get; set; }
+        public uint Unk8 { get; set; }
+
+        [BlubMember(8)]
+        public uint Unk9 { get; set; }
+
+        [BlubMember(9)]
+        public uint Unk10 { get; set; }
+
+        [BlubMember(10)]
+        public uint Unk11 { get; set; }
+
+        [BlubMember(11)]
+        public uint Unk12 { get; set; }
+
+        [BlubMember(12)]
+        public byte Unk13 { get; set; }
     }
 }

@@ -12,21 +12,21 @@ namespace Netsphere.Network.Services
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        [MessageHandler(typeof(CClubAddressReqMessage))]
-        public void CClubAddressReq(GameSession session, CClubAddressReqMessage message)
+        [MessageHandler(typeof(ClubAddressReqMessage))]
+        public void CClubAddressReq(GameSession session, ClubAddressReqMessage message)
         {
             Logger.Debug()
                 .Account(session)
                 .Message($"RequestId:{message.RequestId} LanguageId:{message.LanguageId} Command:{message.Command}")
                 .Write();
 
-            session.SendAsync(new SClubAddressAckMessage("Kappa", 123));
+            session.SendAsync(new ClubAddressAckMessage("Kappa", 123));
         }
 
-        [MessageHandler(typeof(CClubInfoReqMessage))]
+        [MessageHandler(typeof(ClubInfoReqMessage))]
         public void CClubInfoReq()
         {
-            //session.Send(new SClubInfoAckMessage(new PlayerClubInfoDto
+            //session.Send(new ClubInfoAckMessage(new PlayerClubInfoDto
             //{
             //    Unk1 = 0,
             //    Unk2 = 0,

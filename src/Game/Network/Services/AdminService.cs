@@ -8,14 +8,14 @@ namespace Netsphere.Network.Services
 {
     internal class AdminService : ProudMessageHandler
     {
-        [MessageHandler(typeof(CAdminShowWindowReqMessage))]
+        [MessageHandler(typeof(AdminShowWindowReqMessage))]
         public Task ShowWindowHandler(GameSession session)
         {
-            return session.SendAsync(new SAdminShowWindowAckMessage(session.Player.Account.SecurityLevel <= SecurityLevel.User));
+            return session.SendAsync(new AdminShowWindowAckMessage(session.Player.Account.SecurityLevel <= SecurityLevel.User));
         }
 
-        [MessageHandler(typeof(CAdminActionReqMessage))]
-        public void AdminActionHandler(GameServer server, GameSession session, CAdminActionReqMessage message)
+        [MessageHandler(typeof(AdminActionReqMessage))]
+        public void AdminActionHandler(GameServer server, GameSession session, AdminActionReqMessage message)
         {
             var args = message.Command.GetArgs();
             if (!server.CommandManager.Execute(session.Player, args))

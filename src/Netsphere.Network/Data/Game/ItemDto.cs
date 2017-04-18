@@ -1,4 +1,6 @@
-﻿using BlubLib.Serialization;
+﻿using System;
+using BlubLib.Serialization;
+using Netsphere.Network.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
@@ -23,44 +25,19 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(5)]
         public uint Color { get; set; }
 
-        [BlubMember(6)]
-        public uint Effect { get; set; }
+        [BlubMember(6, typeof(UnixTimeSerializer))]
+        public DateTimeOffset ExpireTime { get; set; }
 
         [BlubMember(7)]
-        public uint Refund { get; set; }
-
-        [BlubMember(8)]
-        public long PurchaseTime { get; set; }
-
-        [BlubMember(9)]
-        public long ExpireTime { get; set; }
-
-        [BlubMember(10)]
         public int Durability { get; set; }
 
-        [BlubMember(11)]
-        public int TimeLeft { get; set; } // ToDo time in seconds or units?
+        [BlubMember(8, typeof(ArrayWithIntPrefixSerializer))]
+        public ItemEffectDto[] Effects { get; set; }
 
-        [BlubMember(12)]
-        public uint Quantity { get; set; }
+        [BlubMember(9)]
+        public uint EnchantMP { get; set; }
 
-        // ToDo: esper chip shit
-        [BlubMember(13)]
-        public uint Unk1 { get; set; } // chip
-
-        [BlubMember(14)]
-        public long Unk2 { get; set; }
-
-        [BlubMember(15)]
-        public long Unk3 { get; set; }
-
-        [BlubMember(16)]
-        public int Unk4 { get; set; } // TimeLeft?
-
-        [BlubMember(17)]
-        public uint Unk5 { get; set; } // PeriodType?
-
-        [BlubMember(18)]
-        public uint Unk6 { get; set; } // Effect?
+        [BlubMember(10)]
+        public uint EnchantLevel { get; set; }
     }
 }

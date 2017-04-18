@@ -67,6 +67,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
@@ -109,9 +110,22 @@
     <Compile Include="Data\GameRule\ChangeRuleDto.cs" />
     <Compile Include="Data\GameRule\ScoreAssistDto.cs" />
     <Compile Include="Data\GameRule\ScoreDto.cs" />
-    <Compile Include="Data\Game\ArcadeMapScoreDto.cs" />
+    <Compile Include="Data\Game\ArcadeMapInfoDto.cs" />
     <Compile Include="Data\Game\ArcadeRewardDto.cs" />
-    <Compile Include="Data\Game\ArcadeStageScoreDto.cs" />
+    <Compile Include="Data\Game\ArcadeStageInfoDto.cs" />
+    <Compile Include="Data\Game\ChallengeMyInfoDto.cs" />
+    <Compile Include="Data\Game\ClearEsperChipDto.cs" />
+    <Compile Include="Data\Game\EnchantGaugeDto.cs" />
+    <Compile Include="Data\Game\ItemEffectDto.cs" />
+    <Compile Include="Data\Game\MapOpenInfoDto.cs" />
+    <Compile Include="Data\Game\NoticeEnchantDto.cs" />
+    <Compile Include="Data\Game\PromotionActiveDto.cs" />
+    <Compile Include="Data\Game\PromotionPunkinRankerDto.cs" />
+    <Compile Include="Data\Game\RequitalGiveItemResultDto.cs" />
+    <Compile Include="Data\Game\RequitalLevelDto.cs" />
+    <Compile Include="Data\Game\RoomInfoRequestDto.cs" />
+    <Compile Include="Data\Game\ShoppingBasketDto.cs" />
+    <Compile Include="Data\Game\SiegeStatsDto.cs" />
     <Compile Include="Data\Game\BRStatsDto.cs" />
     <Compile Include="Data\Game\CapsuleRewardDto.cs" />
     <Compile Include="Data\Game\ChannelInfoDto.cs" />
@@ -121,12 +135,12 @@
     <Compile Include="Data\Game\CPTStatsDto.cs" />
     <Compile Include="Data\Game\DMStatsDto.cs" />
     <Compile Include="Data\Game\EnterRoomInfoDto.cs" />
-    <Compile Include="Data\Game\EsperChipItemInfoDto.cs" />
     <Compile Include="Data\Game\InvalidateItemInfoDto.cs" />
     <Compile Include="Data\Game\ItemDto.cs" />
     <Compile Include="Data\Game\ItemDurabilityInfoDto.cs" />
     <Compile Include="Data\Game\MakeRoomDto.cs" />
     <Compile Include="Data\Game\MixedTeamBriefingDto.cs" />
+    <Compile Include="Data\Game\PlayerAccountInfoDto.cs" />
     <Compile Include="Data\Game\PlayerClubInfoDto.cs" />
     <Compile Include="Data\Game\RandomShopDto.cs" />
     <Compile Include="Data\Game\RandomShopItemDto.cs" />
@@ -169,6 +183,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serializers\ArrayWithIntPrefixAndIndexSerializer.cs" />
     <Compile Include="Serializers\ArrayWithShortPrefixSerializer.cs" />
+    <Compile Include="Serializers\ColorSerializer.cs" />
     <Compile Include="Serializers\RotationVectorSerializer.cs" />
     <Compile Include="Serializers\CompressedVectorSerializer.cs" />
     <Compile Include="Serializers\CompressedFloatSerializer.cs" />
@@ -180,8 +195,9 @@
     <Compile Include="Serializers\LongPeerIdSerializer.cs" />
     <Compile Include="Serializers\MatchKeySerializer.cs" />
     <Compile Include="Serializers\ItemNumberSerializer.cs" />
+    <Compile Include="Serializers\UnixTimeSerializer.cs" />
     <Compile Include="Serializers\TimeSpanSerializer.cs" />
-    <Compile Include="Serializers\UserDataTimeSpanSerializer.cs" />
+    <Compile Include="Serializers\TimeSpanSecondsSerializer.cs" />
     <Compile Include="Serializers\VersionSerializer.cs" />
   </ItemGroup>
   <ItemGroup>

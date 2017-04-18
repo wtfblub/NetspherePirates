@@ -15,8 +15,6 @@ using Netsphere.Network.Message.Game;
 using NLog;
 using NLog.Fluent;
 using ProudNet.Handlers;
-using CLoginReqMessage = Netsphere.Network.Message.Game.CLoginReqMessage;
-using SLoginAckMessage = Netsphere.Network.Message.Game.SLoginAckMessage;
 using Netsphere.Resource;
 
 namespace Netsphere.Network.Services
@@ -27,8 +25,8 @@ namespace Netsphere.Network.Services
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        [MessageHandler(typeof(CLoginReqMessage))]
-        public async Task LoginHandler(GameSession session, CLoginReqMessage message)
+        [MessageHandler(typeof(LoginRequestReqMessage))]
+        public async Task LoginHandler(GameSession session, LoginRequestReqMessage message)
         {
             Logger.Info()
                 .Account(message.AccountId, message.Username)
@@ -42,7 +40,7 @@ namespace Netsphere.Network.Services
                     .Message($"Invalid client version {message.Version}")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.WrongVersion));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.WrongVersion));
                 return;
             }
 
@@ -53,7 +51,7 @@ namespace Netsphere.Network.Services
                     .Message("Server is full")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.ServerFull));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.ServerFull));
                 return;
             }
 
@@ -76,7 +74,7 @@ namespace Netsphere.Network.Services
                     .Message("Wrong login")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
             }
 
@@ -88,7 +86,7 @@ namespace Netsphere.Network.Services
                     .Message("Wrong login")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
             }
 
@@ -100,7 +98,7 @@ namespace Netsphere.Network.Services
                     .Message("Wrong login")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
             }
 
@@ -114,7 +112,7 @@ namespace Netsphere.Network.Services
                     .Message($"Banned until {unbanDate}")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
             }
 
@@ -129,7 +127,7 @@ namespace Netsphere.Network.Services
                     .Message($"No permission to enter this server({Config.Instance.SecurityLevel} or above required)")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage((GameLoginResult)9));
+                session.SendAsync(new LoginReguestAckMessage((GameLoginResult)9));
                 return;
             }
 
@@ -151,7 +149,7 @@ namespace Netsphere.Network.Services
                     .Message("Already online")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.TerminateOtherConnection));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.TerminateOtherConnection));
                 return;
             }
 
@@ -205,7 +203,7 @@ namespace Netsphere.Network.Services
                     .Message("Already online")
                     .Write();
 
-                session.SendAsync(new SLoginAckMessage(GameLoginResult.TerminateOtherConnection));
+                session.SendAsync(new LoginReguestAckMessage(GameLoginResult.TerminateOtherConnection));
                 return;
             }
 
@@ -219,14 +217,14 @@ namespace Netsphere.Network.Services
             var result = string.IsNullOrWhiteSpace(account.Nickname)
                 ? GameLoginResult.ChooseNickname
                 : GameLoginResult.OK;
-            await session.SendAsync(new SLoginAckMessage(result, session.Player.Account.Id));
+            await session.SendAsync(new LoginReguestAckMessage(result, session.Player.Account.Id));
 
             if (!string.IsNullOrWhiteSpace(account.Nickname))
                 await LoginAsync(session);
         }
 
-        [MessageHandler(typeof(CCheckNickReqMessage))]
-        public async Task CheckNickHandler(GameSession session, CCheckNickReqMessage message)
+        [MessageHandler(typeof(NickCheckReqMessage))]
+        public async Task CheckNickHandler(GameSession session, NickCheckReqMessage message)
         {
             if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
             {
@@ -245,7 +243,7 @@ namespace Netsphere.Network.Services
                 .Message($"Nickname not available: {message.Nickname}")
                 .WriteIf(!available);
 
-            session.SendAsync(new SCheckNickAckMessage(!available));
+            session.SendAsync(new NickCheckAckMessage(!available));
         }
 
         [MessageHandler(typeof(CCreateNickReqMessage))]
@@ -269,7 +267,7 @@ namespace Netsphere.Network.Services
                     .Message($"Nickname not available: {message.Nickname}")
                     .Write();
 
-                session.SendAsync(new SCheckNickAckMessage(false));
+                session.SendAsync(new NickCheckAckMessage(false));
                 return;
             }
 
@@ -286,7 +284,7 @@ namespace Netsphere.Network.Services
 
             }
             //session.Send(new SCreateNickAckMessage { Nickname = msg.Nickname });
-            await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateNicknameSuccess));
+            await session.SendAsync(new ServerResultAckMessage(ServerResult.CreateNicknameSuccess));
 
             Logger.Info()
                 .Account(session)
@@ -312,15 +310,15 @@ namespace Netsphere.Network.Services
                     licenses[i] = i;
             }
 
-            await session.SendAsync(new SMyLicenseInfoAckMessage(licenses));
-            await session.SendAsync(new SInventoryInfoAckMessage
+            await session.SendAsync(new LicenseMyInfoAckMessage(licenses));
+            await session.SendAsync(new ItemInventoryInfoAckMessage
             {
                 Items = plr.Inventory.Select(i => i.Map<PlayerItem, ItemDto>()).ToArray()
             });
 
             // Todo random shop
             await session.SendAsync(new SRandomShopChanceInfoAckMessage { Progress = 10000 });
-            await session.SendAsync(new SCharacterSlotInfoAckMessage
+            await session.SendAsync(new CharacterCurrentSlotInfoAckMessage
             {
                 ActiveCharacter = plr.CharacterManager.CurrentSlot,
                 CharacterCount = (byte)plr.CharacterManager.Count,
@@ -329,14 +327,14 @@ namespace Netsphere.Network.Services
 
             foreach (var @char in plr.CharacterManager)
             {
-                await session.SendAsync(new SOpenCharacterInfoAckMessage
+                await session.SendAsync(new CharacterCurrentInfoAckMessage
                 {
                     Slot = @char.Slot,
                     Style = new CharacterStyle(@char.Gender, @char.Hair.Variation, @char.Face.Variation, @char.Shirt.Variation, @char.Pants.Variation, @char.Slot)
                 });
 
 
-                var message = new SCharacterEquipInfoAckMessage
+                var message = new CharacterCurrentItemInfoAckMessage
                 {
                     Slot = @char.Slot,
                     Weapons = @char.Weapons.GetItems().Select(i => i?.Id ?? 0).ToArray(),
@@ -349,10 +347,10 @@ namespace Netsphere.Network.Services
                 await session.SendAsync(message);
             }
 
-            await session.SendAsync(new SRefreshCashInfoAckMessage { PEN = plr.PEN, AP = plr.AP });
-            await session.SendAsync(new SSetCoinAckMessage { ArcadeCoins = plr.Coins1, BuffCoins = plr.Coins2 });
-            await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World));
-            await session.SendAsync(new SBeginAccountInfoAckMessage
+            await session.SendAsync(new MoneyRefreshCashInfoAckMessage { PEN = plr.PEN, AP = plr.AP });
+            await session.SendAsync(new MoenyRefreshCoinInfoAckMessage { ArcadeCoins = plr.Coins1, BuffCoins = plr.Coins2 });
+            await session.SendAsync(new ServerResultAckMessage(ServerResult.WelcomeToS4World));
+            await session.SendAsync(new PlayerAccountInfoAckMessage
             {
                 Level = plr.Level,
                 TotalExp = plr.TotalExperience,
@@ -362,7 +360,7 @@ namespace Netsphere.Network.Services
                 Nickname = plr.Account.Nickname
             });
 
-            await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World2));
+            await session.SendAsync(new ServerResultAckMessage(ServerResult.WelcomeToS4World2));
 
             if (plr.Inventory.Count == 0)
             {
@@ -415,8 +413,8 @@ namespace Netsphere.Network.Services
                 }
             }
 
-            //session.Send(new SEquipedBoostItemAckMessage());
-            //session.Send(new SClearInvalidateItemAckMessage());
+            //session.Send(new ItemEquipBoostItemInfoAckMessage());
+            //session.Send(new ItemClearInvalidEquipItemAckMessage());
         }
 
         private static async Task<bool> IsNickAvailableAsync(string nickname)

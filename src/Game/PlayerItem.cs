@@ -134,7 +134,7 @@ namespace Netsphere
             if (Durability < 0)
                 Durability = 0;
 
-            return Inventory.Player.Session.SendAsync(new SItemDurabilityInfoAckMessage(new[] { this.Map<PlayerItem, ItemDurabilityInfoDto>() }));
+            return Inventory.Player.Session.SendAsync(new ItemDurabilityItemAckMessage(new[] { this.Map<PlayerItem, ItemDurabilityInfoDto>() }));
         }
 
         public uint CalculateRefund()

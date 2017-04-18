@@ -52,7 +52,7 @@ namespace Netsphere
             }
 
             var plr = _character.CharacterManager.Player;
-            plr.Session.SendAsync(new SUseItemAckMessage
+            plr.Session.SendAsync(new ItemUseItemAckMessage
             {
                 CharacterSlot = _character.Slot,
                 ItemId = item.Id,
@@ -85,7 +85,7 @@ namespace Netsphere
                     throw new CharacterException("Invalid slot: " + slot);
             }
 
-            plr.Session.SendAsync(new SUseItemAckMessage
+            plr.Session.SendAsync(new ItemUseItemAckMessage
             {
                 CharacterSlot = _character.Slot,
                 ItemId = item?.Id ?? 0,

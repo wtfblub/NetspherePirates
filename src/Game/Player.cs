@@ -220,7 +220,7 @@ namespace Netsphere
             // ToDo Do we need to update inside rooms too?
 
             // ToDo Do we need this?
-            //await Session.SendAsync(new SBeginAccountInfoAckMessage())
+            //await Session.SendAsync(new PlayerAccountInfoAckMessage())
             //    .ConfigureAwait(false);
 
             return true;
@@ -277,7 +277,7 @@ namespace Netsphere
         /// <param name="message">The message to send</param>
         public void SendConsoleMessage(string message)
         {
-            Session.SendAsync(new SAdminActionAckMessage { Result = 1, Message = message });
+            Session.SendAsync(new AdminActionAckMessage { Result = 1, Message = message });
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace Netsphere
         /// <param name="message">The message to send</param>
         public void SendNotice(string message)
         {
-            Session.SendAsync(new SNoticeMessageAckMessage(message));
+            Session.SendAsync(new NoticeAdminMessageAckMessage(message));
         }
 
         /// <summary>

@@ -16,20 +16,20 @@ namespace Netsphere.Network.Services
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        [MessageHandler(typeof(CGetChannelInfoReqMessage))]
-        public void CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)
+        [MessageHandler(typeof(ChannelInfoReqMessage))]
+        public void CGetChannelInfoReq(GameSession session, ChannelInfoReqMessage message)
         {
             switch (message.Request)
             {
                 case ChannelInfoRequest.ChannelList:
-                    session.SendAsync(new SChannelListInfoAckMessage(GameServer.Instance.ChannelManager.Select(c => c.Map<Channel, ChannelInfoDto>()).ToArray()));
+                    session.SendAsync(new ChannelListInfoAckMessage(GameServer.Instance.ChannelManager.Select(c => c.Map<Channel, ChannelInfoDto>()).ToArray()));
                     break;
 
                 case ChannelInfoRequest.RoomList:
                 case ChannelInfoRequest.RoomList2:
                     if (session.Player.Channel == null)
                         return;
-                    session.SendAsync(new SGameRoomListAckMessage(session.Player.Channel.RoomManager.Select(r => r.Map<Room, RoomDto>()).ToArray()));
+                    session.SendAsync(new RoomListInfoAckMessage(session.Player.Channel.RoomManager.Select(r => r.Map<Room, RoomDto>()).ToArray()));
                     break;
 
                 default:
@@ -41,13 +41,13 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(CChannelEnterReqMessage))]
-        public void CChannelEnterReq(GameSession session, CChannelEnterReqMessage message)
+        [MessageHandler(typeof(ChannelEnterReqMessage))]
+        public void CChannelEnterReq(GameSession session, ChannelEnterReqMessage message)
         {
             var channel = GameServer.Instance.ChannelManager[message.Channel];
             if (channel == null)
             {
-                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.NonExistingChannel));
+                session.SendAsync(new ServerResultAckMessage(ServerResult.NonExistingChannel));
                 return;
             }
 
@@ -57,11 +57,11 @@ namespace Netsphere.Network.Services
             }
             catch (ChannelLimitReachedException)
             {
-                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLimitReached));
+                session.SendAsync(new ServerResultAckMessage(ServerResult.ChannelLimitReached));
             }
         }
 
-        [MessageHandler(typeof(CChannelLeaveReqMessage))]
+        [MessageHandler(typeof(ChannelLeaveReqMessage))]
         public void CChannelLeaveReq(GameSession session)
         {
             session.Player.Channel?.Leave(session.Player);
@@ -113,18 +113,18 @@ namespace Netsphere.Network.Services
                 session.Player.Account.Id, session.Player.Account.Nickname, message.Message));
         }
 
-        [MessageHandler(typeof(CQuickStartReqMessage))]
-        public Task CQuickStartReq(GameSession session, CQuickStartReqMessage message)
+        [MessageHandler(typeof(RoomQuickStartReqMessage))]
+        public Task CQuickStartReq(GameSession session, RoomQuickStartReqMessage message)
         {
             //ToDo - Logic
-            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+            return session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
         }
 
-        [MessageHandler(typeof(CTaskRequestReqMessage))]
-        public Task TaskRequestReq(GameSession session, CTaskRequestReqMessage message)
+        [MessageHandler(typeof(TaskReguestReqMessage))]
+        public Task TaskRequestReq(GameSession session, TaskReguestReqMessage message)
         {
             //ToDo - Logic
-            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+            return session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
         }
     }
 }

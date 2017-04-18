@@ -59,7 +59,7 @@ namespace Netsphere
                 var room = new Room(this, id, options, p2pGroup);
                 _rooms.TryAdd(id, room);
 
-                Channel.Broadcast(new SDeployGameRoomAckMessage(room.Map<Room, RoomDto>()));
+                Channel.Broadcast(new RoomDeployAckMessage(room.Map<Room, RoomDto>()));
 
                 return room;
             }
@@ -71,7 +71,7 @@ namespace Netsphere
                 throw new RoomException("Players are still in this room");
 
             _rooms.Remove(room.Id);
-            Channel.Broadcast(new SDisposeGameRoomAckMessage(room.Id));
+            Channel.Broadcast(new RoomDisposeAckMessage(room.Id));
         }
 
         #region IReadOnlyCollection

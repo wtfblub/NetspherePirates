@@ -69,7 +69,7 @@ namespace Netsphere
             plr.SentPlayerList = false;
             plr.Channel = this;
 
-            plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelEnter));
+            plr.Session.SendAsync(new ServerResultAckMessage(ServerResult.ChannelEnter));
             OnPlayerJoined(new ChannelPlayerJoinedEventArgs(this, plr));
 
             plr.ChatSession.SendAsync(new NoteCountAckMessage((byte)plr.Mailbox.Count(mail => mail.IsNew), 0, 0));
@@ -89,7 +89,7 @@ namespace Netsphere
             Broadcast(new ChannelLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(new ChannelPlayerLeftEventArgs(this, plr));
-            plr.Session?.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
+            plr.Session?.SendAsync(new ServerResultAckMessage(ServerResult.ChannelLeave));
         }
 
         public void SendChatMessage(Player plr, string message)

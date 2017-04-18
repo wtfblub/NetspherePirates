@@ -29,7 +29,7 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(6)]
         public uint Level { get; set; }
 
-        [BlubMember(7, typeof(UserDataTimeSpanSerializer))]
+        [BlubMember(7, typeof(TimeSpanSecondsSerializer))]
         public TimeSpan PlayTime { get; set; }
 
         [BlubMember(8)]
