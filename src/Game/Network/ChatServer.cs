@@ -61,6 +61,7 @@ namespace Netsphere.Network
         protected override void OnDisconnected(ProudSession session)
         {
             ((ChatSession)session).GameSession?.Dispose();
+            ((ChatSession)session).GameSession = null;
             base.OnDisconnected(session);
         }
 

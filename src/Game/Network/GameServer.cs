@@ -393,14 +393,25 @@ namespace Netsphere.Network
             Mapper.Register<PlayerItem, Data.P2P.ItemDto>()
                 .Function(dest => dest.ItemNumber, src => src?.ItemNumber ?? 0);
 
-            Mapper.Register<RoomCreationOptions, ChangeRuleDto>();
+            Mapper.Register<RoomCreationOptions, ChangeRuleDto>()
+                .Member(dest => dest.Name, src => src.Name)
+                .Member(dest => dest.Password, src => src.Password)
+                .Function(dest => dest.MatchKey, src => src.MatchKey)
+                .Member(dest => dest.TimeLimit, src => src.TimeLimit)
+                .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
+                .Member(dest => dest.IsFriendly, src => src.IsFriendly)
+                .Member(dest => dest.IsBalanced, src => src.IsBalanced)
+                .Member(dest => dest.ItemLimit, src => src.ItemLimit)
+                .Member(dest => dest.IsNoIntrusion, src => src.IsNoIntrusion);
 
             Mapper.Register<Mail, NoteDto>()
                 .Function(dest => dest.ReadCount, src => src.IsNew ? 0 : 1)
                 .Function(dest => dest.DaysLeft,
                     src => DateTimeOffset.Now < src.Expires ? (src.Expires - DateTimeOffset.Now).TotalDays : 0);
 
-            Mapper.Register<Mail, NoteContentDto>();
+            Mapper.Register<Mail, NoteContentDto>()
+                .Member(dest => dest.Id, src => src.Id)
+                .Member(dest => dest.Message, src => src.Message);
 
             Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
                 .Member(dest => dest.ItemId, src => src.Id);
