@@ -74,8 +74,8 @@ namespace ProudNet
 
             foreach (var member in _members.Values.Where(entry => entry.HostId != hostId))
             {
-                var memberSession = _server.Sessions[member.HostId];
-                memberSession.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
+                var memberSession = _server.Sessions.GetValueOrDefault(member.HostId);
+                memberSession?.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
                 session.SendAsync(new P2PGroup_MemberLeaveMessage(member.HostId, HostId));
                 member.ConnectionStates.Remove(hostId);
             }
