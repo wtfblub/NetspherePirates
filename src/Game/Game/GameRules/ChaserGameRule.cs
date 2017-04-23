@@ -34,7 +34,7 @@ namespace Netsphere.Game.GameRules
                     return;
                 _bonus = value;
                 if (StateMachine.IsInState(GameRuleState.Playing))
-                    Room.Broadcast(new SChangeBonusTargetAckMessage(_bonus?.Account.Id ?? 0));
+                    Room.Broadcast(new SlaughterChangeBonusTargetAckMessage(_bonus?.Account.Id ?? 0));
             }
         }
 
@@ -164,7 +164,7 @@ namespace Netsphere.Game.GameRules
             {
                 _waitingNextChaser = true;
                 _nextChaserTimer = TimeSpan.Zero;
-                Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.ChaserIn, (ulong)s_nextChaserWaitTime.TotalMilliseconds, 0, 0, ""));
+                Room.Broadcast(new GameEventMessageAckMessage(GameEventMessage.ChaserIn, (ulong)s_nextChaserWaitTime.TotalMilliseconds, 0, 0, ""));
                 return;
             }
 
@@ -179,14 +179,14 @@ namespace Netsphere.Game.GameRules
             var index = _random.Next(0, Room.Players.Count);
             Chaser = Room.Players.Values.ElementAt(index);
             GetRecord(Chaser).ChaserCount++;
-            Room.Broadcast(new SChangeSlaughtererAckMessage(Chaser.Account.Id));
+            Room.Broadcast(new SlaughterChangeSlaughterAckMessage(Chaser.Account.Id));
             Bonus = GetBonus();
         }
 
         public void ChaserWin()
         {
             GetRecord(Chaser).Wins++;
-            Room.Broadcast(new SScoreSLRoundWinAckMessage());
+            Room.Broadcast(new SlaughterSLRoundWinAckMessage());
             NextChaser();
         }
 
@@ -194,7 +194,7 @@ namespace Netsphere.Game.GameRules
         {
             foreach (var plr in GetPlayersAlive())
                 GetRecord(plr).Survived++;
-            Room.Broadcast(new SScoreRoundWinAckMessage());
+            Room.Broadcast(new SlaughterRoundWinAckMessage());
             NextChaser();
         }
 

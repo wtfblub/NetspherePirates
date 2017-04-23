@@ -24,7 +24,7 @@ namespace Netsphere.Game.GameRules
                     return;
                 _first = value;
                 if (StateMachine.IsInState(GameRuleState.Playing))
-                    Room.Broadcast(new SGameRuleChangeTheFirstAckMessage(_first?.Account.Id ?? 0));
+                    Room.Broadcast(new FreeAllForChangeTheFirstAckMessage(_first?.Account.Id ?? 0));
             }
         }
 

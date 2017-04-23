@@ -16,7 +16,6 @@ using Netsphere.Network.Message.GameRule;
 using NLog;
 using NLog.Fluent;
 using ProudNet;
-using SLeavePlayerAckMessage = Netsphere.Network.Message.GameRule.SLeavePlayerAckMessage;
 
 namespace Netsphere
 {
@@ -134,7 +133,7 @@ namespace Netsphere
                 {
                     GameRuleManager.MapInfo = GameServer.Instance.ResourceCache.GetMaps()[Options.MatchKey.Map];
                     GameRuleManager.GameRule = RoomManager.GameRuleFactory.Get(Options.MatchKey.GameRule, this);
-                    Broadcast(new SChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
+                    Broadcast(new RoomChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
                     IsChangingRules = false;
                 }
             }
@@ -192,7 +191,7 @@ namespace Netsphere
                 return;
 
             Group.Leave(plr.RelaySession.HostId);
-            Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
+            Broadcast(new RoomLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
 
             if (roomLeaveReason == RoomLeaveReason.Kicked ||
                 roomLeaveReason == RoomLeaveReason.ModeratorKick ||
@@ -245,7 +244,7 @@ namespace Netsphere
                 return;
 
             Master = plr;
-            Broadcast(new SChangeMasterAckMessage(Master.Account.Id));
+            Broadcast(new RoomChangeMasterAckMessage(Master.Account.Id));
         }
 
         public void ChangeHost(Player plr)
@@ -256,7 +255,7 @@ namespace Netsphere
             // TODO Add Room extension?
             Logger.Debug($"<Room {Id}> Changing host to {plr.Account.Nickname} - Ping:{plr.Session.UnreliablePing} ms");
             Host = plr;
-            Broadcast(new SChangeRefeReeAckMessage(Host.Account.Id));
+            Broadcast(new RoomChangeRefereeAckMessage(Host.Account.Id));
         }
 
         public void ChangeRules(ChangeRuleDto options)
@@ -309,7 +308,7 @@ namespace Netsphere
             Options.ItemLimit = options.ItemLimit;
             Options.IsNoIntrusion = options.IsNoIntrusion;
 
-            Broadcast(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
+            Broadcast(new RoomChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
         }
 
         private Player GetPlayerWithLowestPing()
@@ -358,7 +357,7 @@ namespace Netsphere
         {
             var gameRule = GameRuleManager.GameRule;
             //var isResult = gameRule.StateMachine.IsInState(GameRuleState.Result);
-            Broadcast(new SBriefingAckMessage(isResult, false, gameRule.Briefing.ToArray(isResult)));
+            Broadcast(new GameBriefingInfoAckMessage(isResult, false, gameRule.Briefing.ToArray(isResult)));
         }
 
         #endregion

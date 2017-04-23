@@ -3,12 +3,12 @@
 namespace Netsphere.Network.Data.GameRule
 {
     [BlubContract]
-    public class ChangeAvatarUnk2Dto
+    public class MixedTeamBriefingDto
     {
         [BlubMember(0)]
-        public float Unk1 { get; set; }
+        public ulong AccountId { get; set; }
 
         [BlubMember(1)]
-        public float Unk2 { get; set; }
+        public byte Unk { get; set; }
     }
 }

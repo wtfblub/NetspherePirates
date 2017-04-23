@@ -92,45 +92,45 @@ namespace Netsphere.Network
                     .RegisterRule<ItemRepairItemReqMessage>(MustBeLoggedIn)
                     .RegisterRule<ItemRefundItemReqMessage>(MustBeLoggedIn)
                     .RegisterRule<ItemDiscardItemReqMessage>(MustBeLoggedIn)
-                    .RegisterRule<CEnterPlayerReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                    .RegisterRule<RoomEnterPlayerReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
                         session => session.Player.RoomInfo.IsConnecting)
                     .RegisterRule<RoomMakeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
                     .RegisterRule<RoomEnterReqMessage>(MustBeLoggedIn, MustBeInChannel, MustNotBeInRoom)
                     .RegisterRule<RoomLeaveReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CChangeTeamReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CPlayerGameModeChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreKillAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreOffenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreOffenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreDefenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreDefenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreTeamKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreHealAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreSuicideReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CScoreReboundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
+                    .RegisterRule<RoomTeamChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<RoomPlayModeChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreKillAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreOffenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreOffenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreDefenseReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreDefenseAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreTeamKillReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreHealAssistReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreSuicideReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<ScoreReboundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
                         session => session.Player.RoomInfo.State != PlayerState.Lobby &&
                                    session.Player.RoomInfo.State != PlayerState.Spectating)
-                    .RegisterRule<CScoreGoalReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
+                    .RegisterRule<ScoreGoalReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomHost,
                         session => session.Player.RoomInfo.State != PlayerState.Lobby &&
                                    session.Player.RoomInfo.State != PlayerState.Spectating)
-                    .RegisterRule<CBeginRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster)
-                    .RegisterRule<CReadyRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                    .RegisterRule<RoomBeginRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster)
+                    .RegisterRule<RoomReadyRoundReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
                         session => session.Player.RoomInfo.State == PlayerState.Lobby)
-                    .RegisterRule<CEventMessageReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-                    .RegisterRule<CItemsChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                    .RegisterRule<GameEventMessageReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<RoomItemChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
                         session => session.Player.RoomInfo.State == PlayerState.Lobby)
-                    .RegisterRule<CAvatarChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                    .RegisterRule<GameAvatarChangeReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
                         session => session.Player.RoomInfo.State == PlayerState.Lobby ||
                                    session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(
                                        GameRuleState.HalfTime))
-                    .RegisterRule<CChangeRuleNotifyReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
+                    .RegisterRule<RoomChangeRuleNotifyReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom,
                         MustBeRoomMaster,
                         session =>
                             session.Player.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting))
                     .RegisterRule<ClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
                     .RegisterRule<ClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel)
-                    .RegisterRule<CLeavePlayerRequestReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
+                    .RegisterRule<RoomLeaveReguestReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
 
             };
 

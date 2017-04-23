@@ -19,9 +19,6 @@ namespace Netsphere.Network.Data.GameRule
 
         [BlubMember(4)]
         public int Unk4 { get; set; }
-
-        [BlubMember(5)]
-        public int Unk5 { get; set; }
     }
 
     [BlubContract]

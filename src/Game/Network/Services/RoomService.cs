@@ -20,14 +20,14 @@ namespace Netsphere.Network.Services
         // ReSharper disable once InconsistentNaming
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        [MessageHandler(typeof(CEnterPlayerReqMessage))]
+        [MessageHandler(typeof(RoomEnterPlayerReqMessage))]
         public void CEnterPlayerReq(GameSession session)
         {
             var plr = session.Player;
 
-            plr.Room.Broadcast(new SEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.RoomInfo.Mode, 0));
-            session.SendAsync(new SChangeMasterAckMessage(plr.Room.Master.Account.Id));
-            session.SendAsync(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id));
+            plr.Room.Broadcast(new RoomEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.RoomInfo.Mode, 0));
+            session.SendAsync(new RoomChangeMasterAckMessage(plr.Room.Master.Account.Id));
+            session.SendAsync(new RoomChangeRefereeAckMessage(plr.Room.Host.Account.Id));
             plr.Room.BroadcastBriefing();
         }
 
@@ -138,8 +138,8 @@ namespace Netsphere.Network.Services
             plr.Room.Leave(plr);
         }
 
-        [MessageHandler(typeof(CChangeTeamReqMessage))]
-        public void CChangeTeamReq(GameSession session, CChangeTeamReqMessage message)
+        [MessageHandler(typeof(RoomTeamChangeReqMessage))]
+        public void CChangeTeamReq(GameSession session, RoomTeamChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -156,8 +156,8 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(CPlayerGameModeChangeReqMessage))]
-        public void CPlayerGameModeChangeReq(GameSession session, CPlayerGameModeChangeReqMessage message)
+        [MessageHandler(typeof(RoomPlayModeChangeReqMessage))]
+        public void CPlayerGameModeChangeReq(GameSession session, RoomPlayModeChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -175,7 +175,7 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(CBeginRoundReqMessage))]
+        [MessageHandler(typeof(RoomBeginRoundReqMessage))]
         public void CBeginRoundReq(GameSession session)
         {
             var plr = session.Player;
@@ -184,27 +184,27 @@ namespace Netsphere.Network.Services
             if (stateMachine.CanFire(GameRuleStateTrigger.StartGame))
                 stateMachine.Fire(GameRuleStateTrigger.StartGame);
             else
-                session.SendAsync(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
+                session.SendAsync(new GameEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
         }
 
-        [MessageHandler(typeof(CReadyRoundReqMessage))]
+        [MessageHandler(typeof(RoomReadyRoundReqMessage))]
         public void CReadyRoundReq(GameSession session)
         {
             var plr = session.Player;
 
             plr.RoomInfo.IsReady = !plr.RoomInfo.IsReady;
-            plr.Room.Broadcast(new SReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
+            plr.Room.Broadcast(new RoomReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
         }
 
-        [MessageHandler(typeof(CEventMessageReqMessage))]
-        public void CEventMessageReq(GameSession session, CEventMessageReqMessage message)
+        [MessageHandler(typeof(GameEventMessageReqMessage))]
+        public void CEventMessageReq(GameSession session, GameEventMessageReqMessage message)
         {
             var plr = session.Player;
 
-            plr.Room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""));
+            plr.Room.Broadcast(new GameEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""));
             //if (message.Event == GameEventMessage.BallReset && plr == plr.Room.Host)
             //{
-            //    plr.Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.BallReset, 0, 0, 0, ""));
+            //    plr.Room.Broadcast(new GameEventMessageAckMessage(GameEventMessage.BallReset, 0, 0, 0, ""));
             //    return;
             //}
 
@@ -221,8 +221,8 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(CItemsChangeReqMessage))]
-        public void CItemsChangeReq(GameSession session, CItemsChangeReqMessage message)
+        [MessageHandler(typeof(RoomItemChangeReqMessage))]
+        public void CItemsChangeReq(GameSession session, RoomItemChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -252,11 +252,11 @@ namespace Netsphere.Network.Services
                 Unk8 = message.Unk1.Unk8
             };
 
-            plr.Room.Broadcast(new SItemsChangeAckMessage(unk1, message.Unk2));
+            plr.Room.Broadcast(new RoomChangeItemAckMessage(unk1, message.Unk2));
         }
 
-        [MessageHandler(typeof(CAvatarChangeReqMessage))]
-        public void CAvatarChangeReq(GameSession session, CAvatarChangeReqMessage message)
+        [MessageHandler(typeof(GameAvatarChangeReqMessage))]
+        public void CAvatarChangeReq(GameSession session, GameAvatarChangeReqMessage message)
         {
             var plr = session.Player;
 
@@ -328,17 +328,17 @@ namespace Netsphere.Network.Services
                 unk1.Costumes[(int)slot] = item;
             }
 
-            plr.Room.Broadcast(new SAvatarChangeAckMessage(unk1, message.Unk2));
+            plr.Room.Broadcast(new GameAvatarChangeAckMessage(unk1, message.Unk2));
         }
 
-        [MessageHandler(typeof(CChangeRuleNotifyReqMessage))]
-        public void CChangeRuleNotifyReq(GameSession session, CChangeRuleNotifyReqMessage message)
+        [MessageHandler(typeof(RoomChangeRuleNotifyReqMessage))]
+        public void CChangeRuleNotifyReq(GameSession session, RoomChangeRuleNotifyReqMessage message)
         {
             session.Player.Room.ChangeRules(message.Settings);
         }
 
-        [MessageHandler(typeof(CLeavePlayerRequestReqMessage))]
-        public void CLeavePlayerRequestReq(GameSession session, CLeavePlayerRequestReqMessage message)
+        [MessageHandler(typeof(RoomLeaveReguestReqMessage))]
+        public void CLeavePlayerRequestReq(GameSession session, RoomLeaveReguestReqMessage message)
         {
             var plr = session.Player;
             var room = plr.Room;
@@ -372,8 +372,8 @@ namespace Netsphere.Network.Services
 
         #region Scores
 
-        [MessageHandler(typeof(CScoreKillReqMessage))]
-        public void CScoreKillReq(GameSession session, CScoreKillReqMessage message)
+        [MessageHandler(typeof(ScoreKillReqMessage))]
+        public void CScoreKillReq(GameSession session, ScoreKillReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Score.Target;
@@ -387,8 +387,8 @@ namespace Netsphere.Network.Services
             room.GameRuleManager.GameRule.OnScoreKill(killer, null, plr, message.Score.Weapon);
         }
 
-        [MessageHandler(typeof(CScoreKillAssistReqMessage))]
-        public void CScoreKillAssistReq(GameSession session, CScoreKillAssistReqMessage message)
+        [MessageHandler(typeof(ScoreKillAssistReqMessage))]
+        public void CScoreKillAssistReq(GameSession session, ScoreKillAssistReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Score.Target;
@@ -407,8 +407,8 @@ namespace Netsphere.Network.Services
             room.GameRuleManager.GameRule.OnScoreKill(killer, assist, plr, message.Score.Weapon);
         }
 
-        [MessageHandler(typeof(CScoreOffenseReqMessage))]
-        public void CScoreOffenseReq(GameSession session, CScoreOffenseReqMessage message)
+        [MessageHandler(typeof(ScoreOffenseReqMessage))]
+        public void CScoreOffenseReq(GameSession session, ScoreOffenseReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Score.Target;
@@ -423,8 +423,8 @@ namespace Netsphere.Network.Services
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreOffense(killer, null, plr, message.Score.Weapon);
         }
 
-        [MessageHandler(typeof(CScoreOffenseAssistReqMessage))]
-        public void CScoreOffenseAssistReq(GameSession session, CScoreOffenseAssistReqMessage message)
+        [MessageHandler(typeof(ScoreOffenseAssistReqMessage))]
+        public void CScoreOffenseAssistReq(GameSession session, ScoreOffenseAssistReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Score.Target;
@@ -444,8 +444,8 @@ namespace Netsphere.Network.Services
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreOffense(killer, assist, plr, message.Score.Weapon);
         }
 
-        [MessageHandler(typeof(CScoreDefenseReqMessage))]
-        public void CScoreDefenseReq(GameSession session, CScoreDefenseReqMessage message)
+        [MessageHandler(typeof(ScoreDefenseReqMessage))]
+        public void CScoreDefenseReq(GameSession session, ScoreDefenseReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Score.Target;
@@ -460,8 +460,8 @@ namespace Netsphere.Network.Services
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreDefense(killer, null, plr, message.Score.Weapon);
         }
 
-        [MessageHandler(typeof(CScoreDefenseAssistReqMessage))]
-        public void CScoreDefenseAssistReq(GameSession session, CScoreDefenseAssistReqMessage message)
+        [MessageHandler(typeof(ScoreDefenseAssistReqMessage))]
+        public void CScoreDefenseAssistReq(GameSession session, ScoreDefenseAssistReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Score.Target;
@@ -481,8 +481,8 @@ namespace Netsphere.Network.Services
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreDefense(killer, assist, plr, message.Score.Weapon);
         }
 
-        [MessageHandler(typeof(CScoreTeamKillReqMessage))]
-        public void CScoreTeamKillReq(GameSession session, CScoreTeamKillReqMessage message)
+        [MessageHandler(typeof(ScoreTeamKillReqMessage))]
+        public void CScoreTeamKillReq(GameSession session, ScoreTeamKillReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Score.Target;
@@ -496,8 +496,8 @@ namespace Netsphere.Network.Services
             room.GameRuleManager.GameRule.OnScoreKill(killer, null, plr, message.Score.Weapon);
         }
 
-        [MessageHandler(typeof(CScoreHealAssistReqMessage))]
-        public void CScoreHealAssistReq(GameSession session, CScoreHealAssistReqMessage message)
+        [MessageHandler(typeof(ScoreHealAssistReqMessage))]
+        public void CScoreHealAssistReq(GameSession session, ScoreHealAssistReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Id;
@@ -506,8 +506,8 @@ namespace Netsphere.Network.Services
             room.GameRuleManager.GameRule.OnScoreHeal(plr);
         }
 
-        [MessageHandler(typeof(CScoreSuicideReqMessage))]
-        public void CScoreSuicideReq(GameSession session, CScoreSuicideReqMessage message)
+        [MessageHandler(typeof(ScoreSuicideReqMessage))]
+        public void CScoreSuicideReq(GameSession session, ScoreSuicideReqMessage message)
         {
             var plr = session.Player;
             plr.RoomInfo.PeerId = message.Id;
@@ -516,8 +516,8 @@ namespace Netsphere.Network.Services
             room.GameRuleManager.GameRule.OnScoreSuicide(plr);
         }
 
-        [MessageHandler(typeof(CScoreReboundReqMessage))]
-        public void CScoreReboundReq(GameSession session, CScoreReboundReqMessage message)
+        [MessageHandler(typeof(ScoreReboundReqMessage))]
+        public void CScoreReboundReq(GameSession session, ScoreReboundReqMessage message)
         {
             var plr = session.Player;
             var room = plr.Room;
@@ -541,8 +541,8 @@ namespace Netsphere.Network.Services
                 ((TouchdownGameRule)room.GameRuleManager.GameRule).OnScoreRebound(newPlr, oldPlr);
         }
 
-        [MessageHandler(typeof(CScoreGoalReqMessage))]
-        public void CScoreGoalReq(GameSession session, CScoreGoalReqMessage message)
+        [MessageHandler(typeof(ScoreGoalReqMessage))]
+        public void CScoreGoalReq(GameSession session, ScoreGoalReqMessage message)
         {
             var plr = session.Player;
             var room = plr.Room;

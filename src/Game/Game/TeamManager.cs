@@ -78,7 +78,7 @@ namespace Netsphere.Game.Systems
 
             if (plr.RoomInfo.IsReady)
             {
-                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                plr.Session.SendAsync(new RoomChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                 throw new RoomException("Player is already ready");
             }
 
@@ -94,7 +94,7 @@ namespace Netsphere.Game.Systems
             }
             catch (TeamLimitReachedException)
             {
-                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                plr.Session.SendAsync(new RoomChangeTeamFailAckMessage(ChangeTeamResult.Full));
             }
         }
 
@@ -114,7 +114,7 @@ namespace Netsphere.Game.Systems
 
             if (plr.RoomInfo.IsReady)
             {
-                plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                plr.Session.SendAsync(new RoomChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                 throw new RoomException("Player is already ready");
             }
 
@@ -124,7 +124,7 @@ namespace Netsphere.Game.Systems
                 case PlayerGameMode.Normal:
                     if (team.Players.Count() >= team.PlayerLimit)
                     {
-                        plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                        plr.Session.SendAsync(new RoomChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
                     }
                     break;
@@ -132,7 +132,7 @@ namespace Netsphere.Game.Systems
                 case PlayerGameMode.Spectate:
                     if (team.Spectators.Count() >= team.SpectatorLimit)
                     {
-                        plr.Session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                        plr.Session.SendAsync(new RoomChangeTeamFailAckMessage(ChangeTeamResult.Full));
                         throw new TeamLimitReachedException();
                     }
                     break;
@@ -142,7 +142,7 @@ namespace Netsphere.Game.Systems
             }
 
             plr.RoomInfo.Mode = mode;
-            Broadcast(new SPlayerGameModeChangeAckMessage(plr.Account.Id, mode));
+            Broadcast(new RoomPlayModeChangeAckMessage(plr.Account.Id, mode));
         }
 
         #region Broadcast
@@ -268,7 +268,7 @@ namespace Netsphere.Game.Systems
             _players.TryAdd(plr.RoomInfo.Slot, plr);
 
             if (isChange)
-                TeamManager.Broadcast(new SChangeTeamAckMessage(plr.Account.Id, Team, plr.RoomInfo.Mode));
+                TeamManager.Broadcast(new RoomChangeTeamAckMessage(plr.Account.Id, Team, plr.RoomInfo.Mode));
 
             OnPlayerJoined(plr);
         }

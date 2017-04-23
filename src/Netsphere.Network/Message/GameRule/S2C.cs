@@ -8,7 +8,7 @@ using ProudNet.Serialization.Serializers;
 namespace Netsphere.Network.Message.GameRule
 {
     [BlubContract]
-    public class SEnterPlayerAckMessage: IGameRuleMessage
+    public class RoomEnterPlayerAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -25,12 +25,15 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(4, typeof(StringSerializer))]
         public string Nickname { get; set; }
 
-        public SEnterPlayerAckMessage()
+        [BlubMember(5)]
+        public byte Unk2 { get; set; }
+
+        public RoomEnterPlayerAckMessage()
         {
             Nickname = "";
         }
 
-        public SEnterPlayerAckMessage(ulong accountId, string nickname, byte unk1, PlayerGameMode mode, int unk3)
+        public RoomEnterPlayerAckMessage(ulong accountId, string nickname, byte unk1, PlayerGameMode mode, int unk3)
         {
             AccountId = accountId;
             Unk1 = unk1;
@@ -41,7 +44,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SLeavePlayerAckMessage: IGameRuleMessage
+    public class RoomLeavePlayerAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -52,12 +55,12 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(2)]
         public RoomLeaveReason Reason { get; set; }
 
-        public SLeavePlayerAckMessage()
+        public RoomLeavePlayerAckMessage()
         {
             Nickname = "";
         }
 
-        public SLeavePlayerAckMessage(ulong accountId, string nickname, RoomLeaveReason reason)
+        public RoomLeavePlayerAckMessage(ulong accountId, string nickname, RoomLeaveReason reason)
         {
             AccountId = accountId;
             Nickname = nickname;
@@ -66,14 +69,14 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SLeavePlayerRequestAckMessage: IGameRuleMessage
+    public class RoomLeaveReqeustAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; } // result?
     }
 
     [BlubContract]
-    public class SChangeTeamAckMessage: IGameRuleMessage
+    public class RoomChangeTeamAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -84,10 +87,10 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(2)]
         public PlayerGameMode Mode { get; set; }
 
-        public SChangeTeamAckMessage()
+        public RoomChangeTeamAckMessage()
         { }
 
-        public SChangeTeamAckMessage(ulong accountId, Team team, PlayerGameMode mode)
+        public RoomChangeTeamAckMessage(ulong accountId, Team team, PlayerGameMode mode)
         {
             AccountId = accountId;
             Team = team;
@@ -96,22 +99,22 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SChangeTeamFailAckMessage: IGameRuleMessage
+    public class RoomChangeTeamFailAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeTeamResult Result { get; set; }
 
-        public SChangeTeamFailAckMessage()
+        public RoomChangeTeamFailAckMessage()
         { }
 
-        public SChangeTeamFailAckMessage(ChangeTeamResult result)
+        public RoomChangeTeamFailAckMessage(ChangeTeamResult result)
         {
             Result = result;
         }
     }
 
     [BlubContract]
-    public class SMixChangeTeamAckMessage: IGameRuleMessage
+    public class RoomChoiceTeamChangeAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -127,24 +130,14 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SMixChangeTeamFailAckMessage: IGameRuleMessage
+    public class RoomChoiceTeamChangeFailAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Result { get; set; }
     }
 
     [BlubContract]
-    public class SAutoAssignTeamAckMessage: IGameRuleMessage
-    {
-        [BlubMember(0)]
-        public byte Unk1 { get; set; }
-
-        [BlubMember(1)]
-        public byte Unk2 { get; set; }
-    }
-
-    [BlubContract]
-    public class SEventMessageAckMessage: IGameRuleMessage
+    public class GameEventMessageAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public GameEventMessage Event { get; set; }
@@ -161,12 +154,12 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(4, typeof(StringSerializer))]
         public string String { get; set; }
 
-        public SEventMessageAckMessage()
+        public GameEventMessageAckMessage()
         {
             String = "";
         }
 
-        public SEventMessageAckMessage(GameEventMessage @event, ulong accountId, uint unk, ushort value, string @string)
+        public GameEventMessageAckMessage(GameEventMessage @event, ulong accountId, uint unk, ushort value, string @string)
         {
             Event = @event;
             AccountId = accountId;
@@ -177,7 +170,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SBriefingAckMessage: IGameRuleMessage
+    public class GameBriefingInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public bool IsResult { get; set; }
@@ -188,12 +181,12 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
 
-        public SBriefingAckMessage()
+        public GameBriefingInfoAckMessage()
         {
             Data = Array.Empty<byte>();
         }
 
-        public SBriefingAckMessage(bool isResult, bool isEvent, byte[] data)
+        public GameBriefingInfoAckMessage(bool isResult, bool isEvent, byte[] data)
         {
             IsResult = isResult;
             IsEvent = isEvent;
@@ -202,86 +195,71 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SChangeStateAckMessage: IGameRuleMessage
+    public class GameChangeStateAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public GameState State { get; set; }
 
-        public SChangeStateAckMessage()
+        public GameChangeStateAckMessage()
         { }
 
-        public SChangeStateAckMessage(GameState state)
+        public GameChangeStateAckMessage(GameState state)
         {
             State = state;
         }
     }
 
     [BlubContract]
-    public class SChangeSubStateAckMessage: IGameRuleMessage
+    public class GameChangeSubStateAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public GameTimeState State { get; set; }
 
-        public SChangeSubStateAckMessage()
+        public GameChangeSubStateAckMessage()
         { }
 
-        public SChangeSubStateAckMessage(GameTimeState state)
+        public GameChangeSubStateAckMessage(GameTimeState state)
         {
             State = state;
         }
     }
 
     [BlubContract]
-    public class SDestroyGameRuleAckMessage: IGameRuleMessage
+    public class GameDestroyGameRuleAckMessage : IGameRuleMessage
     { }
 
     [BlubContract]
-    public class SChangeMasterAckMessage: IGameRuleMessage
+    public class RoomChangeMasterAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        public SChangeMasterAckMessage()
+        public RoomChangeMasterAckMessage()
         { }
 
-        public SChangeMasterAckMessage(ulong accountId)
+        public RoomChangeMasterAckMessage(ulong accountId)
         {
             AccountId = accountId;
         }
     }
 
     [BlubContract]
-    public class SChangeRefeReeAckMessage: IGameRuleMessage
+    public class RoomChangeRefereeAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        public SChangeRefeReeAckMessage()
+        public RoomChangeRefereeAckMessage()
         { }
 
-        public SChangeRefeReeAckMessage(ulong accountId)
+        public RoomChangeRefereeAckMessage(ulong accountId)
         {
             AccountId = accountId;
         }
     }
 
     [BlubContract]
-    public class SChangeTheFirstAckMessage: IGameRuleMessage
-    {
-        [BlubMember(0)]
-        public ulong AccountId { get; set; }
-
-        public SChangeTheFirstAckMessage()
-        { }
-
-        public SChangeTheFirstAckMessage(ulong accountId)
-        {
-            AccountId = accountId;
-        }
-    }
-
-    [BlubContract]
-    public class SChangeSlaughtererAckMessage: IGameRuleMessage
+    public class SlaughterChangeSlaughterAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -289,18 +267,18 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Unk { get; set; }
 
-        public SChangeSlaughtererAckMessage()
+        public SlaughterChangeSlaughterAckMessage()
         {
             Unk = Array.Empty<ulong>();
         }
 
-        public SChangeSlaughtererAckMessage(ulong accountId)
+        public SlaughterChangeSlaughterAckMessage(ulong accountId)
         {
             AccountId = accountId;
             Unk = Array.Empty<ulong>();
         }
 
-        public SChangeSlaughtererAckMessage(ulong accountId, ulong[] unk)
+        public SlaughterChangeSlaughterAckMessage(ulong accountId, ulong[] unk)
         {
             AccountId = accountId;
             Unk = unk;
@@ -308,7 +286,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SReadyRoundAckMessage: IGameRuleMessage
+    public class RoomReadyRoundAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -319,10 +297,10 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(2)]
         public byte Result { get; set; }
 
-        public SReadyRoundAckMessage()
+        public RoomReadyRoundAckMessage()
         { }
 
-        public SReadyRoundAckMessage(ulong accountId, bool isReady)
+        public RoomReadyRoundAckMessage(ulong accountId, bool isReady)
         {
             AccountId = accountId;
             IsReady = isReady;
@@ -330,11 +308,11 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SBeginRoundAckMessage: IGameRuleMessage
+    public class RoomBeginRoundAckMessage : IGameRuleMessage
     { }
 
     [BlubContract]
-    public class SAvatarChangeAckMessage: IGameRuleMessage
+    public class GameAvatarChangeAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeAvatarUnk1Dto Unk1 { get; set; }
@@ -342,13 +320,13 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
-        public SAvatarChangeAckMessage()
+        public GameAvatarChangeAckMessage()
         {
             Unk1 = new ChangeAvatarUnk1Dto();
             Unk2 = Array.Empty<ChangeAvatarUnk2Dto>();
         }
 
-        public SAvatarChangeAckMessage(ChangeAvatarUnk1Dto unk1, ChangeAvatarUnk2Dto[] unk2)
+        public GameAvatarChangeAckMessage(ChangeAvatarUnk1Dto unk1, ChangeAvatarUnk2Dto[] unk2)
         {
             Unk1 = unk1;
             Unk2 = unk2;
@@ -356,55 +334,48 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SChangeRuleNotifyAckMessage: IGameRuleMessage
+    public class RoomChangeRuleNotifyAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeRuleDto Settings { get; set; }
 
-        public SChangeRuleNotifyAckMessage()
+        public RoomChangeRuleNotifyAckMessage()
         {
             Settings = new ChangeRuleDto();
         }
 
-        public SChangeRuleNotifyAckMessage(ChangeRuleDto settings)
+        public RoomChangeRuleNotifyAckMessage(ChangeRuleDto settings)
         {
             Settings = settings;
         }
     }
 
     [BlubContract]
-    public class SChangeRuleAckMessage: IGameRuleMessage
+    public class RoomChangeRuleAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeRuleDto Settings { get; set; }
 
-        public SChangeRuleAckMessage()
+        public RoomChangeRuleAckMessage()
         {
             Settings = new ChangeRuleDto();
         }
 
-        public SChangeRuleAckMessage(ChangeRuleDto settings)
+        public RoomChangeRuleAckMessage(ChangeRuleDto settings)
         {
             Settings = settings;
         }
     }
 
     [BlubContract]
-    public class SChangeRuleResultMsgAckMessage: IGameRuleMessage
+    public class RoomChangeRuleFailAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Result { get; set; }
     }
 
     [BlubContract]
-    public class SMissionNotifyAckMessage: IGameRuleMessage
-    {
-        [BlubMember(0)]
-        public int Unk { get; set; }
-    }
-
-    [BlubContract]
-    public class SMissionScoreAckMessage: IGameRuleMessage
+    public class ScoreMissionScoreAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -414,143 +385,143 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SScoreKillAckMessage: IGameRuleMessage
+    public class ScoreKillAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreDto Score { get; set; }
 
-        public SScoreKillAckMessage()
+        public ScoreKillAckMessage()
         {
             Score = new ScoreDto();
         }
 
-        public SScoreKillAckMessage(ScoreDto score)
+        public ScoreKillAckMessage(ScoreDto score)
         {
             Score = score;
         }
     }
 
     [BlubContract]
-    public class SScoreKillAssistAckMessage: IGameRuleMessage
+    public class ScoreKillAssistAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreAssistDto Score { get; set; }
 
-        public SScoreKillAssistAckMessage()
+        public ScoreKillAssistAckMessage()
         {
             Score = new ScoreAssistDto();
         }
 
-        public SScoreKillAssistAckMessage(ScoreAssistDto score)
+        public ScoreKillAssistAckMessage(ScoreAssistDto score)
         {
             Score = score;
         }
     }
 
     [BlubContract]
-    public class SScoreOffenseAckMessage: IGameRuleMessage
+    public class ScoreOffenseAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreDto Score { get; set; }
 
-        public SScoreOffenseAckMessage()
+        public ScoreOffenseAckMessage()
         {
             Score = new ScoreDto();
         }
 
-        public SScoreOffenseAckMessage(ScoreDto score)
+        public ScoreOffenseAckMessage(ScoreDto score)
         {
             Score = score;
         }
     }
 
     [BlubContract]
-    public class SScoreOffenseAssistAckMessage: IGameRuleMessage
+    public class ScoreOffenseAssistAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreAssistDto Score { get; set; }
 
-        public SScoreOffenseAssistAckMessage()
+        public ScoreOffenseAssistAckMessage()
         {
             Score = new ScoreAssistDto();
         }
 
-        public SScoreOffenseAssistAckMessage(ScoreAssistDto score)
+        public ScoreOffenseAssistAckMessage(ScoreAssistDto score)
         {
             Score = score;
         }
     }
 
     [BlubContract]
-    public class SScoreDefenseAckMessage: IGameRuleMessage
+    public class ScoreDefenseAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreDto Score { get; set; }
 
-        public SScoreDefenseAckMessage()
+        public ScoreDefenseAckMessage()
         {
             Score = new ScoreDto();
         }
 
-        public SScoreDefenseAckMessage(ScoreDto score)
+        public ScoreDefenseAckMessage(ScoreDto score)
         {
             Score = score;
         }
     }
 
     [BlubContract]
-    public class SScoreDefenseAssistAckMessage: IGameRuleMessage
+    public class ScoreDefenseAssistAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ScoreAssistDto Score { get; set; }
 
-        public SScoreDefenseAssistAckMessage()
+        public ScoreDefenseAssistAckMessage()
         {
             Score = new ScoreAssistDto();
         }
 
-        public SScoreDefenseAssistAckMessage(ScoreAssistDto score)
+        public ScoreDefenseAssistAckMessage(ScoreAssistDto score)
         {
             Score = score;
         }
     }
 
     [BlubContract]
-    public class SScoreHealAssistAckMessage: IGameRuleMessage
+    public class ScoreHealAssistAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
-        public SScoreHealAssistAckMessage()
+        public ScoreHealAssistAckMessage()
         {
             Id = 0;
         }
 
-        public SScoreHealAssistAckMessage(LongPeerId id)
+        public ScoreHealAssistAckMessage(LongPeerId id)
         {
             Id = id;
         }
     }
 
     [BlubContract]
-    public class SScoreGoalAckMessage: IGameRuleMessage
+    public class ScoreGoalAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
-        public SScoreGoalAckMessage()
+        public ScoreGoalAckMessage()
         {
             Id = 0;
         }
 
-        public SScoreGoalAckMessage(LongPeerId id)
+        public ScoreGoalAckMessage(LongPeerId id)
         {
             Id = id;
         }
     }
 
     [BlubContract]
-    public class SScoreGoalAssistAckMessage: IGameRuleMessage
+    public class ScoreGoalAssistAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
@@ -558,13 +529,13 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1)]
         public LongPeerId Assist { get; set; }
 
-        public SScoreGoalAssistAckMessage()
+        public ScoreGoalAssistAckMessage()
         {
             Id = 0;
             Assist = 0;
         }
 
-        public SScoreGoalAssistAckMessage(LongPeerId id, LongPeerId assist)
+        public ScoreGoalAssistAckMessage(LongPeerId id, LongPeerId assist)
         {
             Id = id;
             Assist = assist;
@@ -572,7 +543,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SScoreReboundAckMessage: IGameRuleMessage
+    public class ScoreReboundAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId NewId { get; set; }
@@ -580,13 +551,13 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1)]
         public LongPeerId OldId { get; set; }
 
-        public SScoreReboundAckMessage()
+        public ScoreReboundAckMessage()
         {
             NewId = 0;
             OldId = 0;
         }
 
-        public SScoreReboundAckMessage(LongPeerId newId, LongPeerId oldId)
+        public ScoreReboundAckMessage(LongPeerId newId, LongPeerId oldId)
         {
             NewId = newId;
             OldId = oldId;
@@ -594,7 +565,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SScoreSuicideAckMessage: IGameRuleMessage
+    public class ScoreSuicideAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
@@ -602,12 +573,12 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1, typeof(EnumSerializer), typeof(uint))]
         public AttackAttribute Icon { get; set; }
 
-        public SScoreSuicideAckMessage()
+        public ScoreSuicideAckMessage()
         {
             Id = 0;
         }
 
-        public SScoreSuicideAckMessage(LongPeerId id, AttackAttribute icon)
+        public ScoreSuicideAckMessage(LongPeerId id, AttackAttribute icon)
         {
             Id = id;
             Icon = icon;
@@ -615,43 +586,43 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SScoreTeamKillAckMessage: IGameRuleMessage
+    public class ScoreTeamKillAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public Score2Dto Score { get; set; }
 
-        public SScoreTeamKillAckMessage()
+        public ScoreTeamKillAckMessage()
         {
             Score = new Score2Dto();
         }
 
-        public SScoreTeamKillAckMessage(Score2Dto score)
+        public ScoreTeamKillAckMessage(Score2Dto score)
         {
             Score = score;
         }
     }
 
     [BlubContract]
-    public class SScoreRoundWinAckMessage: IGameRuleMessage
+    public class SlaughterRoundWinAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
 
-        public SScoreRoundWinAckMessage()
+        public SlaughterRoundWinAckMessage()
         { }
 
-        public SScoreRoundWinAckMessage(byte unk)
+        public SlaughterRoundWinAckMessage(byte unk)
         {
             Unk = unk;
         }
     }
 
     [BlubContract]
-    public class SScoreSLRoundWinAckMessage: IGameRuleMessage
+    public class SlaughterSLRoundWinAckMessage : IGameRuleMessage
     { }
 
     [BlubContract]
-    public class SItemsChangeAckMessage: IGameRuleMessage
+    public class RoomChangeItemAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ChangeItemsUnkDto Unk1 { get; set; }
@@ -659,13 +630,13 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
-        public SItemsChangeAckMessage()
+        public RoomChangeItemAckMessage()
         {
             Unk1 = new ChangeItemsUnkDto();
             Unk2 = Array.Empty<ChangeAvatarUnk2Dto>();
         }
 
-        public SItemsChangeAckMessage(ChangeItemsUnkDto unk1, ChangeAvatarUnk2Dto[] unk2)
+        public RoomChangeItemAckMessage(ChangeItemsUnkDto unk1, ChangeAvatarUnk2Dto[] unk2)
         {
             Unk1 = unk1;
             Unk2 = unk2;
@@ -673,7 +644,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SPlayerGameModeChangeAckMessage: IGameRuleMessage
+    public class RoomPlayModeChangeAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -681,10 +652,10 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1)]
         public PlayerGameMode Mode { get; set; }
 
-        public SPlayerGameModeChangeAckMessage()
+        public RoomPlayModeChangeAckMessage()
         { }
 
-        public SPlayerGameModeChangeAckMessage(ulong accountId, PlayerGameMode mode)
+        public RoomPlayModeChangeAckMessage(ulong accountId, PlayerGameMode mode)
         {
             AccountId = accountId;
             Mode = mode;
@@ -692,7 +663,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SRefreshGameRuleInfoAckMessage: IGameRuleMessage
+    public class GameRefreshGameRuleInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk1 { get; set; }
@@ -705,29 +676,32 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SArcadeScoreSyncAckMessage: IGameRuleMessage
+    public class ArcadeScoreSyncAckMessage : IGameRuleMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncDto[] Scores { get; set; }
 
-        public SArcadeScoreSyncAckMessage()
+        public ArcadeScoreSyncAckMessage()
         {
             Scores = Array.Empty<ArcadeScoreSyncDto>();
         }
     }
 
     [BlubContract]
-    public class SArcadeBeginRoundAckMessage: IGameRuleMessage
+    public class ArcadeBeginRoundAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
 
         [BlubMember(1)]
         public byte Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public byte Unk3 { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeStageBriefingAckMessage: IGameRuleMessage
+    public class ArcadeStageBriefingAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -738,21 +712,21 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(2, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; } // ToDo
 
-        public SArcadeStageBriefingAckMessage()
+        public ArcadeStageBriefingAckMessage()
         {
             Data = Array.Empty<byte>();
         }
     }
 
     [BlubContract]
-    public class SArcadeEnablePlayeTimeAckMessage: IGameRuleMessage
+    public class ArcadeEnablePlayTimeAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeStageInfoAckMessage: IGameRuleMessage
+    public class ArcadeStageInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -762,14 +736,14 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SArcadeRespawnAckMessage: IGameRuleMessage
+    public class ArcadeRespawnAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeDeathPlayerInfoAckMessage: IGameRuleMessage
+    public class ArcadeDeathPlayerInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
@@ -777,49 +751,49 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Players { get; set; }
 
-        public SArcadeDeathPlayerInfoAckMessage()
+        public ArcadeDeathPlayerInfoAckMessage()
         {
             Players = Array.Empty<ulong>();
         }
     }
 
     [BlubContract]
-    public class SArcadeStageReadyAckMessage: IGameRuleMessage
+    public class ArcadeStageReadyAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeRespawnFailAckMessage: IGameRuleMessage
+    public class ArcadeRespawnFailAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public uint Result { get; set; }
     }
 
     [BlubContract]
-    public class SChangeHPAckMessage: IGameRuleMessage
+    public class AdminChangeHPAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public float Value { get; set; }
     }
 
     [BlubContract]
-    public class SChangeMPAckMessage: IGameRuleMessage
+    public class AdminChangeMPAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public float Value { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeChangeStageAckMessage: IGameRuleMessage
+    public class ArcadeChangeStageAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Stage { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeStageSelectAckMessage: IGameRuleMessage
+    public class ArcadeStageSelectAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -829,14 +803,14 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SArcadeSaveDataInfAckMessage: IGameRuleMessage
+    public class ArcadeSaveDateInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class SSlaughterAttackPointAckMessage: IGameRuleMessage
+    public class SlaughterAttackPointAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -849,7 +823,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SSlaughterHealPointAckMessage: IGameRuleMessage
+    public class SlaughterHealPointAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -859,33 +833,29 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SChangeBonusTargetAckMessage: IGameRuleMessage
+    public class SlaughterChangeBonusTargetAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        public SChangeBonusTargetAckMessage()
+        public SlaughterChangeBonusTargetAckMessage()
         { }
 
-        public SChangeBonusTargetAckMessage(ulong accountId)
+        public SlaughterChangeBonusTargetAckMessage(ulong accountId)
         {
             AccountId = accountId;
         }
     }
 
     [BlubContract]
-    public class SArcadeLoadingSucceedAckMessage: IGameRuleMessage
+    public class ArcadeSucceedLoadingAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
     }
 
     [BlubContract]
-    public class SArcadeAllLoadingSucceedAckMessage: IGameRuleMessage
-    { }
-
-    [BlubContract]
-    public class SUseCoinAckMessage: IGameRuleMessage
+    public class MoneyUseCoinAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk1 { get; set; }
@@ -895,93 +865,96 @@ namespace Netsphere.Network.Message.GameRule
 
         [BlubMember(2)]
         public int Unk3 { get; set; }
-
-        [BlubMember(3)]
-        public int Unk4 { get; set; }
-    }
-
-    [BlubContract]
-    public class SLuckyShotAckMessage: IGameRuleMessage
-    {
-        [BlubMember(0)]
-        public int Unk1 { get; set; }
-
-        [BlubMember(1)]
-        public int Unk2 { get; set; }
-
-        [BlubMember(2)]
-        public int Unk3 { get; set; }
-    }
-
-    [BlubContract]
-    public class SGameRuleChangeTheFirstAckMessage: IGameRuleMessage
-    {
-        [BlubMember(0)]
-        public ulong AccountId { get; set; }
-
-        public SGameRuleChangeTheFirstAckMessage()
-        { }
-
-        public SGameRuleChangeTheFirstAckMessage(ulong accountId)
-        {
-            AccountId = accountId;
-        }
-    }
-
-    [BlubContract]
-    public class SDevLogStartAckMessage: IGameRuleMessage
-    { }
-
-    [BlubContract]
-    public class SCompulsionLeaveRequestAckMessage: IGameRuleMessage
-    {
-        [BlubMember(0)]
-        public int Unk { get; set; }
-    }
-
-    [BlubContract]
-    public class SCompulsionLeaveResultAckMessage: IGameRuleMessage
-    {
-        [BlubMember(0)]
-        public int Unk1 { get; set; }
-
-        [BlubMember(1)]
-        public ulong Unk2 { get; set; }
-
-        [BlubMember(2)]
-        public ulong Unk3 { get; set; }
 
         [BlubMember(3)]
         public int Unk4 { get; set; }
 
         [BlubMember(4)]
-        public int Unk5 { get; set; }
-
-        [BlubMember(5)]
-        public int Unk6 { get; set; }
+        public byte Unk5 { get; set; }
     }
 
     [BlubContract]
-    public class SCompulsionLeaveActionAckMessage: IGameRuleMessage
+    public class GameLuckyShotAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public int Unk3 { get; set; }
+    }
+
+    [BlubContract]
+    public class FreeAllForChangeTheFirstAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public ulong AccountId { get; set; }
+
+        public FreeAllForChangeTheFirstAckMessage()
+        { }
+
+        public FreeAllForChangeTheFirstAckMessage(ulong accountId)
+        {
+            AccountId = accountId;
+        }
+    }
+
+    [BlubContract]
+    public class LogDevLogStartAckMessage : IGameRuleMessage
+    { }
+
+    [BlubContract]
+    public class GameKickOutRequestAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk { get; set; }
     }
 
     [BlubContract]
-    public class SCaptainLifeRoundSetUpAckMessage: IGameRuleMessage
+    public class GameKickOutVoteResultAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class GameKickOutStateAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public uint NoCount { get; set; }
+
+        [BlubMember(1)]
+        public uint YesCount { get; set; }
+
+        [BlubMember(2)]
+        public uint NeededCount { get; set; }
+
+        [BlubMember(3)]
+        public VoteKickReason Reason { get; set; }
+
+        [BlubMember(4)]
+        public ulong Sender { get; set; }
+
+        [BlubMember(5)]
+        public ulong Target { get; set; }
+    }
+
+    [BlubContract]
+    public class CaptainRoundCaptainLifeInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
         public CaptainLifeDto[] Players { get; set; }
 
-        public SCaptainLifeRoundSetUpAckMessage()
+        public CaptainRoundCaptainLifeInfoAckMessage()
         {
             Players = Array.Empty<CaptainLifeDto>();
         }
     }
 
     [BlubContract]
-    public class SCaptainSubRoundEndReasonAckMessage: IGameRuleMessage
+    public class CaptainSubRoundWinAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk1 { get; set; }
@@ -991,12 +964,168 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class SCurrentRoundInformationAckMessage: IGameRuleMessage
+    public class CaptainCurrentRoundInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public int Unk1 { get; set; }
 
         [BlubMember(1)]
         public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class SeizeUpdateInfoAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        public SeizeUpdateInfoDto[] Infos { get; set; }
+    }
+
+    [BlubContract]
+    public class SeizeUpdateInfoByIntrudeAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public SeizeIntrudeInfoDto[] Infos { get; set; }
+    }
+
+    [BlubContract]
+    public class SeizeFeverTimeAckMessage : IGameRuleMessage
+    { }
+
+    [BlubContract]
+    public class SeizeBuffItemGainAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public ulong Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class SeizeDropBuffItemAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        public ulong[] Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class SeizeUpKeepScoreUpdateAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class SeizeUpKeepScoreGetAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class RoomChangeMasterReqeustAckMessage : IGameRuleMessage
+    { }
+
+    [BlubContract]
+    public class RoomMixedTeamBriefingInfoAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public byte Unk1 { get; set; }
+
+        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
+        public MixedTeamBriefingDto[] Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class GameEquipCheckAckMessage : IGameRuleMessage
+    { }
+
+    [BlubContract]
+    public class RoomGameStartAckMessage : IGameRuleMessage
+    { }
+
+    [BlubContract]
+    public class RoomGameLoadingAckMessage : IGameRuleMessage
+    { }
+
+    [BlubContract]
+    public class GameTackUpdateAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public short Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class RoomGameEndLoadingAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public long Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class RoomGamePlayCountDownAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class InGameItemDropAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public ItemDropAckDto Item { get; set; }
+    }
+
+    [BlubContract]
+    public class InGameItemGetAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public long Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public int Unk3 { get; set; }
+    }
+
+    [BlubContract]
+    public class InGamePlayerResponseOfDeathAckMessage : IGameRuleMessage
+    { }
+
+    [BlubContract]
+    public class ChallengeRankersAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+
+        [BlubMember(1)]
+        public ChallengeRankerDto[] Rankers { get; set; }
+    }
+
+    [BlubContract]
+    public class ChallengeRankingListAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+
+        [BlubMember(1)]
+        public ChallengeRankerDto[] Rankers { get; set; }
+    }
+
+    [BlubContract]
+    public class PromotionCouponEventIngameGetAckMessage : IGameRuleMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
     }
 }
