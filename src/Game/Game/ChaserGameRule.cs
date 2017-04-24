@@ -185,7 +185,7 @@ namespace Netsphere.Game.GameRules
             base.OnScoreSuicide(plr);
         }
 
-        //Triggered when attacking a friend, it's value should fill the SCORE BAR
+        //Triggered when attacking the chaser, it's value should fill the SCORE BAR
         public virtual void OnChaserHit(Player chaser, Player attacker, float gunPoints, float meleePoints)
         {
             Logger.Info("[CSlaughterAttackPointReqMessage]-> Chaser " + chaser.Account.Nickname + " has been hit, attacked by " + attacker.Account.Nickname);

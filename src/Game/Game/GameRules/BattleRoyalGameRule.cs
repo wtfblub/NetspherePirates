@@ -34,9 +34,9 @@ namespace Netsphere.Game.GameRules
             Briefing = new Briefing(this);
 
             StateMachine.Configure(GameRuleState.Waiting)
-                .PermitIf(GameRuleStateTrigger.StartGame, GameRuleState.FirstHalf, CanStartGame);
+                .PermitIf(GameRuleStateTrigger.StartGame, GameRuleState.FullGame, CanStartGame);
 
-            StateMachine.Configure(GameRuleState.FirstHalf)
+            StateMachine.Configure(GameRuleState.FullGame)
                 .SubstateOf(GameRuleState.Playing)
                 .Permit(GameRuleStateTrigger.StartResult, GameRuleState.EnteringResult);
 
@@ -52,7 +52,7 @@ namespace Netsphere.Game.GameRules
 
         public override void Initialize()
         {
-            Room.TeamManager.Add(Team.Alpha, (uint)(Room.Options.MatchKey.PlayerLimit / 2), (uint)(Room.Options.MatchKey.SpectatorLimit / 2));
+            Room.TeamManager.Add(Team.Alpha, (uint)(Room.Options.MatchKey.PlayerLimit), (uint)(Room.Options.MatchKey.SpectatorLimit));
 
             base.Initialize();
         }
@@ -74,10 +74,11 @@ namespace Netsphere.Game.GameRules
                 !StateMachine.IsInState(GameRuleState.EnteringResult) &&
                 !StateMachine.IsInState(GameRuleState.Result))
             {
-                if (StateMachine.IsInState(GameRuleState.FirstHalf))
+                //If we are in-game
+                if (StateMachine.IsInState(GameRuleState.FullGame))
                 {
                     // Still have enough players?
-                    if (teamMgr.PlayersPlaying.Count() < PlayersNeededToStart)
+                    if (!Room.Options.IsFriendly && (teamMgr.PlayersPlaying.Count() < PlayersNeededToStart))
                         StateMachine.Fire(GameRuleStateTrigger.StartResult);
 
                     // Did we reach ScoreLimit?
@@ -126,7 +127,8 @@ namespace Netsphere.Game.GameRules
         {
             if (!StateMachine.IsInState(GameRuleState.Waiting))
                 return false;
-
+            if (Room.Options.IsFriendly)
+                return true;
             var countReady = Room.TeamManager.Values.Sum(team => team.Values.Count(plr => plr.RoomInfo.IsReady));
             if (countReady < (PlayersNeededToStart - 1)) // Sum doesn't include master so decrease players needed by 1
                 return false;
