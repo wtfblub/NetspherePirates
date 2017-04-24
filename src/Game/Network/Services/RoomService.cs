@@ -113,6 +113,13 @@ namespace Netsphere.Network.Services
                 return;
             }
 
+            if (!room.Options.Password.Equals(message.Password))
+            {
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.PasswordError))
+                    .ConfigureAwait(false);
+                return;
+            }
+
             try
             {
                 room.Join(plr);
