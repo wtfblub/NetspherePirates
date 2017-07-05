@@ -1,3 +1,5 @@
+# THIS BRANCH IS FOR TESTING ONLY. DO NOT OPEN ISSUES FOR THIS BRANCH!
+
 # NetspherePirates [![Build status](https://ci.appveyor.com/api/projects/status/xih9n36ar655rayl/branch/patch_1184?svg=true)](https://ci.appveyor.com/project/wtfblub/netspherepirates/branch/patch_1184)
 Experimental S4 League server emulator for eu version 1184(Season 4).
 
