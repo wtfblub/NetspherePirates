@@ -10,6 +10,8 @@ namespace ProudNet
         internal Crypt Crypt { get; }
         internal ConcurrentDictionary<uint, P2PConnectionState> ConnectionStates { get; }
         internal ProudSession Session { get; }
+        public IPEndPoint EndPoint { get; internal set; }      
+        public IPEndPoint LocalEndPoint { get; internal set; }
 
         internal RemotePeer(P2PGroup group, ProudSession session, Crypt crypt)
         {
