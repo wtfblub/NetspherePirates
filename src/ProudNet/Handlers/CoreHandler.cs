@@ -217,18 +217,20 @@ namespace ProudNet.Handlers
         {
             if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
                 return;
+            
+            var A = session.P2PGroup?.Members[session.HostId];
+            var B = session.P2PGroup?.Members[message.HostId];
+            var connectionStateA = A.ConnectionStates.GetValueOrDefault(message.HostId);
+            var connectionStateB = connectionStateA.RemotePeer.ConnectionStates[session.HostId];
 
-            //Logger<>.Debug($"Client:{session.HostId} - Peer server holepunch success(EndPoint:{message.EndPoint} LocalEndPoint:{message.LocalEndPoint})");
+            connectionStateA.RemotePeer.EndPoint = message.EndPoint;              
+            connectionStateA.RemotePeer.LocalEndPoint = message.LocalEndPoint;    
+            connectionStateA.PeerUdpHolepunchSuccess = true;                            
 
-            var remotePeer = session.P2PGroup.Members[session.HostId];
-            var connectionState = remotePeer.ConnectionStates.GetValueOrDefault(message.HostId);
-
-            connectionState.PeerUdpHolepunchSuccess = true;
-            var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
             if (connectionStateB.PeerUdpHolepunchSuccess)
             {
-                remotePeer.SendAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, message.EndPoint));
-                connectionState.RemotePeer.SendAsync(new RequestP2PHolepunchMessage(session.HostId, session.UdpLocalEndPoint, session.UdpEndPoint));
+                A.SendAsync(new RequestP2PHolepunchMessage(message.HostId, B.Session.UdpLocalEndPoint, new IPEndPoint(connectionStateA.RemotePeer.EndPoint.Address, connectionStateB.RemotePeer.LocalEndPoint.Port)));
+                B.Session.SendAsync(new RequestP2PHolepunchMessage(session.HostId, A.Session.UdpLocalEndPoint, new IPEndPoint(connectionStateB.RemotePeer.EndPoint.Address, connectionStateA.RemotePeer.LocalEndPoint.Port)));
             }
         }
     }
