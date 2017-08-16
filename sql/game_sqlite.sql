@@ -1,6 +1,21 @@
 PRAGMA foreign_keys = OFF;
 
 -- ----------------------------
+-- Table structure for channels
+-- ----------------------------
+DROP TABLE IF EXISTS "main"."channels";
+CREATE TABLE "channels" (
+"Id"  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+"Name"  TEXT NOT NULL,
+"Description"  TEXT NOT NULL,
+"PlayerLimit"  INTEGER NOT NULL,
+"MinLevel"  INTEGER NOT NULL,
+"MaxLevel"  INTEGER NOT NULL,
+"Color"  INTEGER NOT NULL,
+"TooltipColor"  INTEGER NOT NULL
+);
+
+-- ----------------------------
 -- Table structure for license_rewards
 -- ----------------------------
 DROP TABLE IF EXISTS "main"."license_rewards";

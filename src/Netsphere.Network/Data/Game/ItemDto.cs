@@ -39,5 +39,10 @@ namespace Netsphere.Network.Data.Game
 
         [BlubMember(10)]
         public uint EnchantLevel { get; set; }
+
+        public ItemDto()
+        {
+            Effects = Array.Empty<ItemEffectDto>();
+        }
     }
 }

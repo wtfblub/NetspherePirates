@@ -1,6 +1,22 @@
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
+-- Table structure for channels
+-- ----------------------------
+DROP TABLE IF EXISTS `channels`;
+CREATE TABLE `channels` (
+  `Id`  int NOT NULL AUTO_INCREMENT ,
+  `Name`  varchar(255) NOT NULL DEFAULT '' ,
+  `Description`  varchar(255) NOT NULL DEFAULT '' ,
+  `PlayerLimit`  tinyint NOT NULL DEFAULT 0 ,
+  `MinLevel`  tinyint NOT NULL DEFAULT 0 ,
+  `MaxLevel`  tinyint NOT NULL DEFAULT 0 ,
+  `Color`  int NOT NULL DEFAULT 0 ,
+  `TooltipColor`  int NOT NULL DEFAULT 0 ,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
 -- Table structure for license_rewards
 -- ----------------------------
 DROP TABLE IF EXISTS `license_rewards`;

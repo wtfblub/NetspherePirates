@@ -262,52 +262,52 @@ namespace Netsphere
             if (IsChangingRules)
                 return;
 
-            if (!RoomManager.GameRuleFactory.Contains(options.MatchKey.GameRule))
-            {
-                Logger.Error()
-                    .Account(Master)
-                    .Message($"Game rule {options.MatchKey.GameRule} does not exist")
-                    .Write();
-                Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
-                return;
-            }
+            //if (!RoomManager.GameRuleFactory.Contains(options.MatchKey.GameRule))
+            //{
+            //    Logger.Error()
+            //        .Account(Master)
+            //        .Message($"Game rule {options.MatchKey.GameRule} does not exist")
+            //        .Write();
+            //    Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
+            //    return;
+            //}
 
-            var map = GameServer.Instance.ResourceCache.GetMaps().GetValueOrDefault(options.MatchKey.Map);
-            if (map == null)
-            {
-                Logger.Error()
-                    .Account(Master)
-                    .Message($"Map {options.MatchKey.Map} does not exist")
-                    .Write();
-                Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
-                return;
-            }
+            //var map = GameServer.Instance.ResourceCache.GetMaps().GetValueOrDefault(options.MatchKey.Map);
+            //if (map == null)
+            //{
+            //    Logger.Error()
+            //        .Account(Master)
+            //        .Message($"Map {options.MatchKey.Map} does not exist")
+            //        .Write();
+            //    Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
+            //    return;
+            //}
 
-            if (!map.GameRules.Contains(options.MatchKey.GameRule))
-            {
-                Logger.Error()
-                    .Account(Master)
-                    .Message($"Map {map.Id}({map.Name}) is not available for game rule {options.MatchKey.GameRule}")
-                    .Write();
-                Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
-                return;
-            }
+            //if (!map.GameRules.Contains(options.MatchKey.GameRule))
+            //{
+            //    Logger.Error()
+            //        .Account(Master)
+            //        .Message($"Map {map.Id}({map.Name}) is not available for game rule {options.MatchKey.GameRule}")
+            //        .Write();
+            //    Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
+            //    return;
+            //}
 
-            // ToDo check if current player count is not above the new player limit
+            //// ToDo check if current player count is not above the new player limit
 
-            _changingRulesTimer = TimeSpan.Zero;
-            IsChangingRules = true;
-            Options.Name = options.Name;
-            Options.MatchKey = options.MatchKey;
-            Options.TimeLimit = options.TimeLimit;
-            Options.ScoreLimit = options.ScoreLimit;
-            Options.Password = options.Password;
-            Options.IsFriendly = options.IsFriendly;
-            Options.IsBalanced = options.IsBalanced;
-            Options.ItemLimit = options.ItemLimit;
-            Options.IsNoIntrusion = options.IsNoIntrusion;
+            //_changingRulesTimer = TimeSpan.Zero;
+            //IsChangingRules = true;
+            //Options.Name = options.Name;
+            //Options.MatchKey = options.MatchKey;
+            //Options.TimeLimit = options.TimeLimit;
+            //Options.ScoreLimit = options.ScoreLimit;
+            //Options.Password = options.Password;
+            //Options.IsFriendly = options.IsFriendly;
+            //Options.IsBalanced = options.IsBalanced;
+            //Options.ItemLimit = options.ItemLimit;
+            //Options.IsNoIntrusion = options.IsNoIntrusion;
 
-            Broadcast(new RoomChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
+            //Broadcast(new RoomChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
         }
 
         private Player GetPlayerWithLowestPing()

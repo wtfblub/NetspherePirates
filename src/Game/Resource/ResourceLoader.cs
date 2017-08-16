@@ -7,7 +7,6 @@ using System.Xml.Serialization;
 using BlubLib.Configuration;
 using Netsphere.Resource.xml;
 using NLog;
-using NLog.Fluent;
 
 namespace Netsphere.Resource
 {
@@ -39,30 +38,6 @@ namespace Netsphere.Resource
                 ExperienceToNextLevel = expDto.require,
                 TotalExperience = expDto.accumulate
             });
-        }
-
-        public IEnumerable<ChannelInfo> LoadChannels()
-        {
-            var dto = Deserialize<ChannelSettingDto>("xml/_eu_channel_setting.x7");
-            var stringTable = Deserialize<StringTableDto>("language/xml/channel_setting_string_table.xml");
-
-            foreach (var channelDto in dto.channel_info)
-            {
-                var channel = new ChannelInfo
-                {
-                    Id = channelDto.id,
-                    Category = (ChannelCategory)channelDto.category,
-                    PlayerLimit = dto.setting.limit_player,
-                    Type = channelDto.type
-                };
-
-                var name = stringTable.@string.First(s => s.key.Equals(channelDto.name_key, StringComparison.InvariantCultureIgnoreCase));
-                if (string.IsNullOrWhiteSpace(name.eng))
-                    throw new Exception("Missing english translation for " + channelDto.name_key);
-
-                channel.Name = name.eng;
-                yield return channel;
-            }
         }
 
         public IEnumerable<MapInfo> LoadMaps()

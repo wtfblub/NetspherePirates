@@ -4,16 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
-    [Table("license_rewards")]
-    public class LicenseRewardDto
-    {
-        [Key]
-        public byte Id { get; set; }
-        public int ShopItemInfoId { get; set; }
-        public int ShopPriceId { get; set; }
-        public byte Color { get; set; }
-    }
-
     [Table("players")]
     public class PlayerDto
     {
@@ -31,7 +21,6 @@ namespace Netsphere.Database.Game
         public IList<PlayerCharacterDto> Characters { get; set; } = new List<PlayerCharacterDto>();
         public IList<PlayerDenyDto> Ignores { get; set; } = new List<PlayerDenyDto>();
         public IList<PlayerItemDto> Items { get; set; } = new List<PlayerItemDto>();
-        public IList<PlayerLicenseDto> Licenses { get; set; } = new List<PlayerLicenseDto>();
         public IList<PlayerMailDto> Inbox { get; set; } = new List<PlayerMailDto>();
         public IList<PlayerSettingDto> Settings { get; set; } = new List<PlayerSettingDto>();
     }
@@ -87,7 +76,7 @@ namespace Netsphere.Database.Game
         [ForeignKey(nameof(Player))]
         public int PlayerId { get; set; }
         public PlayerDto Player { get; set; }
-        
+
         public int ShopItemInfoId { get; set; }
         public int ShopPriceId { get; set; }
         public uint Effect { get; set; }
@@ -95,21 +84,6 @@ namespace Netsphere.Database.Game
         public long PurchaseDate { get; set; }
         public int Durability { get; set; }
         public int Count { get; set; }
-    }
-
-    [Table("player_licenses")]
-    public class PlayerLicenseDto
-    {
-        [Key]
-        public int Id { get; set; }
-
-        [ForeignKey(nameof(Player))]
-        public int PlayerId { get; set; }
-        public PlayerDto Player { get; set; }
-
-        public byte License { get; set; }
-        public long FirstCompletedDate { get; set; }
-        public int CompletedCount { get; set; }
     }
 
     [Table("player_mails")]
@@ -258,5 +232,20 @@ namespace Netsphere.Database.Game
         public byte Color { get; set; }
         public int Count { get; set; }
         public byte RequiredSecurityLevel { get; set; }
+    }
+
+    [Table("channels")]
+    public class ChannelDto
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int PlayerLimit { get; set; }
+        public byte MinLevel { get; set; }
+        public byte MaxLevel { get; set; }
+        public int Color { get; set; }
+        public int TooltipColor { get; set; }
     }
 }

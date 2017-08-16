@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using ExpressMapper.Extensions;
 using Netsphere.Network;
@@ -13,11 +14,15 @@ namespace Netsphere
     internal class Channel
     {
         private readonly IDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
-        public uint Id { get; set; }
-        public ChannelCategory Category { get; set; }
+
+        public int Id { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public int PlayerLimit { get; set; }
-        public byte Type { get; set; }
+        public byte MinLevel { get; set; }
+        public byte MaxLevel { get; set; }
+        public Color Color { get; set; }
+        public Color TooltipColor { get; set; }
 
         #region Events
 

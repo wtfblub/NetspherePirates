@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
@@ -17,7 +18,7 @@ namespace Netsphere.Network.Services
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(typeof(ChannelInfoReqMessage))]
-        public void CGetChannelInfoReq(GameSession session, ChannelInfoReqMessage message)
+        public void ChannelInfoReq(GameSession session, ChannelInfoReqMessage message)
         {
             switch (message.Request)
             {
@@ -29,6 +30,7 @@ namespace Netsphere.Network.Services
                 case ChannelInfoRequest.RoomList2:
                     if (session.Player.Channel == null)
                         return;
+
                     session.SendAsync(new RoomListInfoAckMessage(session.Player.Channel.RoomManager.Select(r => r.Map<Room, RoomDto>()).ToArray()));
                     break;
 

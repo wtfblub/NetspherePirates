@@ -51,7 +51,7 @@ namespace Netsphere.Network.Data.Game
         public uint PEN { get; set; }
 
         [BlubMember(14)]
-        public uint TutorialCompleted { get; set; }
+        public uint TutorialState { get; set; }
 
         [BlubMember(15, typeof(StringSerializer))]
         public string Nickname { get; set; }

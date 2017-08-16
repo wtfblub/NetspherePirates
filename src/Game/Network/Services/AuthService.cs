@@ -159,7 +159,6 @@ namespace Netsphere.Network.Services
                         .Include<PlayerCharacterDto>(join => join.LeftOuterJoin())
                         .Include<PlayerDenyDto>(join => join.LeftOuterJoin())
                         .Include<PlayerItemDto>(join => join.LeftOuterJoin())
-                        .Include<PlayerLicenseDto>(join => join.LeftOuterJoin())
                         .Include<PlayerMailDto>(join => join.LeftOuterJoin())
                         .Include<PlayerSettingDto>(join => join.LeftOuterJoin())
                         .Where($"{nameof(PlayerDto.Id):C} = @Id")
@@ -246,78 +245,65 @@ namespace Netsphere.Network.Services
             session.SendAsync(new NickCheckAckMessage(!available));
         }
 
-        [MessageHandler(typeof(CCreateNickReqMessage))]
-        public async Task CreateNickHandler(GameSession session, CCreateNickReqMessage message)
-        {
-            if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
-            {
-                session.CloseAsync();
-                return;
-            }
+        //[MessageHandler(typeof(CCreateNickReqMessage))]
+        //public async Task CreateNickHandler(GameSession session, CCreateNickReqMessage message)
+        //{
+        //    if (session.Player == null || !string.IsNullOrWhiteSpace(session.Player.Account.Nickname))
+        //    {
+        //        session.CloseAsync();
+        //        return;
+        //    }
 
-            Logger.Info()
-                .Account(session)
-                .Message($"Creating nickname {message.Nickname}")
-                .Write();
+        //    Logger.Info()
+        //        .Account(session)
+        //        .Message($"Creating nickname {message.Nickname}")
+        //        .Write();
 
-            if (!await IsNickAvailableAsync(message.Nickname))
-            {
-                Logger.Error()
-                    .Account(session)
-                    .Message($"Nickname not available: {message.Nickname}")
-                    .Write();
+        //    if (!await IsNickAvailableAsync(message.Nickname))
+        //    {
+        //        Logger.Error()
+        //            .Account(session)
+        //            .Message($"Nickname not available: {message.Nickname}")
+        //            .Write();
 
-                session.SendAsync(new NickCheckAckMessage(false));
-                return;
-            }
+        //        session.SendAsync(new NickCheckAckMessage(false));
+        //        return;
+        //    }
 
-            session.Player.Account.Nickname = message.Nickname;
-            using (var db = AuthDatabase.Open())
-            {
-                var mapping = OrmConfiguration
-                    .GetDefaultEntityMapping<AccountDto>()
-                    .Clone()
-                    .UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(AccountDto.Nickname));
+        //    session.Player.Account.Nickname = message.Nickname;
+        //    using (var db = AuthDatabase.Open())
+        //    {
+        //        var mapping = OrmConfiguration
+        //            .GetDefaultEntityMapping<AccountDto>()
+        //            .Clone()
+        //            .UpdatePropertiesExcluding(prop => prop.IsExcludedFromUpdates = true, nameof(AccountDto.Nickname));
 
-                await db.UpdateAsync(new AccountDto { Id = (int)session.Player.Account.Id, Nickname = message.Nickname },
-                            statement => statement.WithEntityMappingOverride(mapping));
+        //        await db.UpdateAsync(new AccountDto { Id = (int)session.Player.Account.Id, Nickname = message.Nickname },
+        //                    statement => statement.WithEntityMappingOverride(mapping));
 
-            }
-            //session.Send(new SCreateNickAckMessage { Nickname = msg.Nickname });
-            await session.SendAsync(new ServerResultAckMessage(ServerResult.CreateNicknameSuccess));
+        //    }
+        //    //session.Send(new SCreateNickAckMessage { Nickname = msg.Nickname });
+        //    await session.SendAsync(new ServerResultAckMessage(ServerResult.CreateNicknameSuccess));
 
-            Logger.Info()
-                .Account(session)
-                .Message($"Created nickname {message.Nickname}")
-                .Write();
+        //    Logger.Info()
+        //        .Account(session)
+        //        .Message($"Created nickname {message.Nickname}")
+        //        .Write();
 
-            await LoginAsync(session);
-        }
+        //    await LoginAsync(session);
+        //}
 
         private static async Task LoginAsync(GameSession session)
         {
             var plr = session.Player;
 
-            uint[] licenses;
-            if (Config.Instance.Game.EnableLicenseRequirement)
-            {
-                licenses = plr.LicenseManager.Select(l => (uint)l.ItemLicense).ToArray();
-            }
-            else
-            {
-                licenses = new uint[100];
-                for (uint i = 0; i < 100; ++i)
-                    licenses[i] = i;
-            }
-
-            await session.SendAsync(new LicenseMyInfoAckMessage(licenses));
             await session.SendAsync(new ItemInventoryInfoAckMessage
             {
                 Items = plr.Inventory.Select(i => i.Map<PlayerItem, ItemDto>()).ToArray()
             });
 
             // Todo random shop
-            await session.SendAsync(new SRandomShopChanceInfoAckMessage { Progress = 10000 });
+            //await session.SendAsync(new SRandomShopChanceInfoAckMessage { Progress = 10000 });
             await session.SendAsync(new CharacterCurrentSlotInfoAckMessage
             {
                 ActiveCharacter = plr.CharacterManager.CurrentSlot,
@@ -350,17 +336,9 @@ namespace Netsphere.Network.Services
             await session.SendAsync(new MoneyRefreshCashInfoAckMessage { PEN = plr.PEN, AP = plr.AP });
             await session.SendAsync(new MoenyRefreshCoinInfoAckMessage { ArcadeCoins = plr.Coins1, BuffCoins = plr.Coins2 });
             await session.SendAsync(new ServerResultAckMessage(ServerResult.WelcomeToS4World));
-            await session.SendAsync(new PlayerAccountInfoAckMessage
-            {
-                Level = plr.Level,
-                TotalExp = plr.TotalExperience,
-                AP = plr.AP,
-                PEN = plr.PEN,
-                TutorialState = (uint)(Config.Instance.Game.EnableTutorial ? plr.TutorialState : 2),
-                Nickname = plr.Account.Nickname
-            });
+            await session.SendAsync(new PlayerAccountInfoAckMessage(plr.Map<Player, PlayerAccountInfoDto>()));
 
-            await session.SendAsync(new ServerResultAckMessage(ServerResult.WelcomeToS4World2));
+            //await session.SendAsync(new ServerResultAckMessage(ServerResult.WelcomeToS4World2));
 
             if (plr.Inventory.Count == 0)
             {

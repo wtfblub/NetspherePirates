@@ -45,26 +45,6 @@ namespace Netsphere
         }
     }
 
-    internal static class LicenseIdGenerator
-    {
-        private static int s_counter;
-
-        public static void Initialize()
-        {
-            using (var db = GameDatabase.Open())
-            {
-                var result = db.Find<PlayerLicenseDto>();
-                if (result.Any())
-                    s_counter = result.Max(item => item.Id);
-            }
-        }
-
-        public static int GetNextId()
-        {
-            return Interlocked.Add(ref s_counter, 1);
-        }
-    }
-
     internal static class DenyIdGenerator
     {
         private static int s_counter;

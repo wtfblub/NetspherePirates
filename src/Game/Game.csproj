@@ -101,6 +101,7 @@
       <HintPath>..\..\packages\System.Data.SQLite.Core.1.0.103\lib\net46\System.Data.SQLite.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
@@ -143,8 +144,6 @@
     <Compile Include="Inventory.cs" />
     <Compile Include="IdGenerators.cs" />
     <Compile Include="JsonConverters.cs" />
-    <Compile Include="License.cs" />
-    <Compile Include="LicenseManager.cs" />
     <Compile Include="Mailbox.cs" />
     <Compile Include="Network\ChatServer.cs" />
     <Compile Include="Network\ChatSession.cs" />
@@ -185,7 +184,6 @@
     <Compile Include="Resource\ResourceCacheType.cs" />
     <Compile Include="Resource\ResourceLoader.cs" />
     <Compile Include="Resource\ShopResources.cs" />
-    <Compile Include="Resource\xml\ChannelSettingDto.cs" />
     <Compile Include="Resource\xml\ConstantInfoDto.cs" />
     <Compile Include="Resource\xml\DefaultItemDto.cs" />
     <Compile Include="Resource\xml\ExperienceDto.cs" />
@@ -199,7 +197,6 @@
     <Compile Include="Shop\BuyItemInfo.cs" />
     <Compile Include="Shop\ShopEffect.cs" />
     <Compile Include="Shop\ShopItem.cs" />
-    <Compile Include="Shop\LicenseReward.cs" />
     <Compile Include="Shop\ShopPrice.cs" />
     <Compile Include="SkillManager.cs" />
     <Compile Include="WeaponManager.cs" />

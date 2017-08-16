@@ -179,9 +179,6 @@ namespace Netsphere
         [JsonProperty("enable_tutorial")]
         public bool EnableTutorial { get; set; }
 
-        [JsonProperty("enable_license_requirement")]
-        public bool EnableLicenseRequirement { get; set; }
-
         [JsonProperty("max_level")]
         public byte MaxLevel { get; set; }
 
@@ -227,7 +224,6 @@ namespace Netsphere
         public GameSettings()
         {
             EnableTutorial = true;
-            EnableLicenseRequirement = true;
             MaxLevel = 100;
             StartLevel = 0;
             StartPEN = 10000;

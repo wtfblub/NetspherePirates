@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BlubLib.Caching;
+using Dapper.FastCrud;
+using Netsphere.Database.Game;
 using NLog;
 
 namespace Netsphere.Resource
@@ -48,13 +50,15 @@ namespace Netsphere.Resource
             GetGameTempos();
         }
 
-        public IReadOnlyList<ChannelInfo> GetChannels()
+        public IReadOnlyList<ChannelDto> GetChannels()
         {
-            var value = _cache.Get<IReadOnlyList<ChannelInfo>>(ResourceCacheType.Channels);
+            var value = _cache.Get<IReadOnlyList<ChannelDto>>(ResourceCacheType.Channels);
             if (value == null)
             {
                 Logger.Debug("Caching...");
-                value = _loader.LoadChannels().ToList();
+                using (var db = GameDatabase.Open())
+                    value = db.Find<ChannelDto>().ToList();
+
                 _cache.Set(ResourceCacheType.Channels, value);
             }
             return value;

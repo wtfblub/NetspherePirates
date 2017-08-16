@@ -55,6 +55,11 @@ namespace Netsphere.Network.Message.Game
         {
             Info = new PlayerAccountInfoDto();
         }
+
+        public PlayerAccountInfoAckMessage(PlayerAccountInfoDto info)
+        {
+            Info = info;
+        }
     }
 
     [BlubContract]

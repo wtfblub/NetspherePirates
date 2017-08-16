@@ -39,7 +39,6 @@ namespace Netsphere
         public Mailbox Mailbox { get; }
 
         public Account Account { get; set; }
-        public LicenseManager LicenseManager { get; }
         public CharacterManager CharacterManager { get; }
         public Inventory Inventory { get; }
         public Channel Channel { get; internal set; }
@@ -145,7 +144,6 @@ namespace Netsphere
             DenyManager = new DenyManager(this, dto);
             Mailbox = new Mailbox(this, dto);
 
-            LicenseManager = new LicenseManager(this, dto);
             Inventory = new Inventory(this, dto);
             CharacterManager = new CharacterManager(this, dto);
 
@@ -316,7 +314,6 @@ namespace Netsphere
                 Settings.Save(db);
                 Inventory.Save(db);
                 CharacterManager.Save(db);
-                LicenseManager.Save(db);
                 DenyManager.Save(db);
                 Mailbox.Save(db);
             }

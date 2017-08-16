@@ -124,38 +124,6 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(LicenseGainReqMessage))]
-        public void LicensedHandler(GameSession session, LicenseGainReqMessage message)
-        {
-            try
-            {
-                session.Player.LicenseManager.Acquire(message.License);
-            }
-            catch (LicenseNotFoundException ex)
-            {
-                Logger.Error()
-                    .Account(session)
-                    .Exception(ex)
-                    .Write();
-            }
-        }
-
-        [MessageHandler(typeof(LicenseExerciseReqMessage))]
-        public void ExerciseLicenseHandler(GameSession session, LicenseExerciseReqMessage message)
-        {
-            try
-            {
-                session.Player.LicenseManager.Acquire(message.License);
-            }
-            catch (LicenseException ex)
-            {
-                Logger.Error()
-                    .Account(session)
-                    .Exception(ex)
-                    .Write();
-            }
-        }
-
         [MessageHandler(typeof(ItemBuyItemReqMessage))]
         public async Task BuyItemHandler(GameSession session, ItemBuyItemReqMessage message)
         {
@@ -235,19 +203,6 @@ namespace Netsphere.Network.Services
                     }
                 }
 
-                if (shopItemInfo.ShopItem.License != ItemLicense.None &&
-                    !plr.LicenseManager.Contains(shopItemInfo.ShopItem.License) &&
-                    Config.Instance.Game.EnableLicenseRequirement)
-                {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"Doesn't have license {shopItemInfo.ShopItem.License}")
-                        .Write();
-
-                    session.SendAsync(new ItemBuyItemAckMessage(ItemBuyResult.UnkownItem));
-                    return;
-                }
-
                 // ToDo missing price types
                 switch (shopItemInfo.PriceGroup.PriceType)
                 {
@@ -296,38 +251,38 @@ namespace Netsphere.Network.Services
             }
         }
 
-        [MessageHandler(typeof(RandomShopRollingStartReqMessage))]
-        public void RandomShopRollHandler(GameSession session, RandomShopRollingStartReqMessage message)
-        {
-            var shop = GameServer.Instance.ResourceCache.GetShop();
+        //[MessageHandler(typeof(RandomShopRollingStartReqMessage))]
+        //public void RandomShopRollHandler(GameSession session, RandomShopRollingStartReqMessage message)
+        //{
+        //    var shop = GameServer.Instance.ResourceCache.GetShop();
 
-            session.SendAsync(new SRandomShopItemInfoAckMessage
-            {
-                Item = new RandomShopItemDto()
-            });
-            //session.Send(new SRandomShopItemInfoAckMessage
-            //{
-            //    Item = new RandomShopItemDto
-            //    {
-            //        Unk1 = 2000001,
-            //        Value = 2000001,
-            //        CurrentWeapon = 2000001,
-            //        Unk4 = 2000001,
-            //        Unk5 = 2000001,
-            //        Unk6 = 0,
-            //    }
-            //});
-        }
+        //    session.SendAsync(new SRandomShopItemInfoAckMessage
+        //    {
+        //        Item = new RandomShopItemDto()
+        //    });
+        //    //session.Send(new SRandomShopItemInfoAckMessage
+        //    //{
+        //    //    Item = new RandomShopItemDto
+        //    //    {
+        //    //        Unk1 = 2000001,
+        //    //        Value = 2000001,
+        //    //        CurrentWeapon = 2000001,
+        //    //        Unk4 = 2000001,
+        //    //        Unk5 = 2000001,
+        //    //        Unk6 = 0,
+        //    //    }
+        //    //});
+        //}
 
-        [MessageHandler(typeof(CRandomShopItemSaleReqMessage))]
-        public void RandomShopItemSaleHandler(GameSession session, CRandomShopItemSaleReqMessage message)
-        {
-            var shop = GameServer.Instance.ResourceCache.GetShop();
+        //[MessageHandler(typeof(CRandomShopItemSaleReqMessage))]
+        //public void RandomShopItemSaleHandler(GameSession session, CRandomShopItemSaleReqMessage message)
+        //{
+        //    var shop = GameServer.Instance.ResourceCache.GetShop();
 
-            session.SendAsync(new SRandomShopItemInfoAckMessage
-            {
-                Item = new RandomShopItemDto()
-            });
-        }
+        //    session.SendAsync(new SRandomShopItemInfoAckMessage
+        //    {
+        //        Item = new RandomShopItemDto()
+        //    });
+        //}
     }
 }

@@ -17,8 +17,8 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(2)]
         public ushort PlayerLimit { get; set; }
 
-        [BlubMember(3)]
-        public int Unk1 { get; set; }
+        [BlubMember(3, typeof(IntBooleanSerializer))]
+        public bool IsClanChannel { get; set; }
 
         [BlubMember(4, typeof(StringSerializer))]
         public string Name { get; set; }
@@ -30,7 +30,7 @@ namespace Netsphere.Network.Data.Game
         public string Description { get; set; }
 
         [BlubMember(7, typeof(ColorSerializer))]
-        public Color TextColor { get; set; }
+        public Color Color { get; set; }
 
         [BlubMember(8)]
         public uint MinLevel { get; set; }
@@ -43,5 +43,14 @@ namespace Netsphere.Network.Data.Game
 
         [BlubMember(11, typeof(ColorSerializer))]
         public Color TooltipColor { get; set; }
+
+        public ChannelInfoDto()
+        {
+            Name = "";
+            Rank = "";
+            Description = "";
+            Color = Color.Black;
+            TooltipColor = Color.Black;
+        }
     }
 }

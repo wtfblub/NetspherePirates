@@ -11,15 +11,12 @@ namespace Netsphere.Resource
         private Dictionary<ItemNumber, ShopItem> _items;
         private Dictionary<int, ShopEffectGroup> _effects;
         private Dictionary<int, ShopPriceGroup> _prices;
-        private Dictionary<ItemLicense, LicenseReward> _licenses;
 
         public IReadOnlyDictionary<ItemNumber, ShopItem> Items => _items;
 
         public IReadOnlyDictionary<int, ShopEffectGroup> Effects => _effects;
 
         public IReadOnlyDictionary<int, ShopPriceGroup> Prices => _prices;
-
-        public IReadOnlyDictionary<ItemLicense, LicenseReward> Licenses => _licenses;
 
         public string Version { get; private set; }
 
@@ -45,11 +42,6 @@ namespace Netsphere.Resource
                     .Select(dto => new ShopItem(dto, this))
                     .ToDictionary(x => x.ItemNumber);
 
-                _licenses = db.Find<LicenseRewardDto>()
-                    .ToArray()
-                    .Select(dto => new LicenseReward(dto, this))
-                    .ToDictionary(x => x.ItemLicense);
-
                 Version = db.Find<ShopVersionDto>().First().Version;
             }
         }
@@ -59,7 +51,6 @@ namespace Netsphere.Resource
             _items.Clear();
             _effects.Clear();
             _prices.Clear();
-            _licenses.Clear();
             Version = "";
         }
 

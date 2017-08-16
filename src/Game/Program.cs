@@ -41,7 +41,6 @@ namespace Netsphere
 
             ItemIdGenerator.Initialize();
             CharacterIdGenerator.Initialize();
-            LicenseIdGenerator.Initialize();
             DenyIdGenerator.Initialize();
 
             ChatServer.Initialize(new Configuration());

@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Netsphere.Resource;
+using System.Drawing;
+using Netsphere.Database.Game;
 
 // ReSharper disable once CheckNamespace
 namespace Netsphere
@@ -31,21 +32,27 @@ namespace Netsphere
 
         #endregion
 
-        public ChannelManager(IEnumerable<ChannelInfo> channelInfos)
+        public ChannelManager(IEnumerable<ChannelDto> channelInfos)
         {
             foreach (var info in channelInfos)
             {
                 var channel = new Channel
                 {
                     Id = info.Id,
-                    Category = info.Category,
                     Name = info.Name,
+                    Description = info.Description,
                     PlayerLimit = info.PlayerLimit,
-                    Type = info.Type
+                    MinLevel = info.MinLevel,
+                    MaxLevel = info.MaxLevel,
+                    Color = Color.FromArgb(info.Color),
+                    TooltipColor = Color.FromArgb(info.TooltipColor)
                 };
+                channel.Color = Color.FromArgb(channel.Color.R, channel.Color.G, channel.Color.B);
+                channel.TooltipColor = Color.FromArgb(channel.TooltipColor.R, channel.TooltipColor.G, channel.TooltipColor.B);
+
                 channel.PlayerJoined += (s, e) => OnPlayerJoined(e);
                 channel.PlayerLeft += (s, e) => OnPlayerLeft(e);
-                _channels.TryAdd(info.Id, channel);
+                _channels.TryAdd((uint)info.Id, channel);
             }
         }
 
