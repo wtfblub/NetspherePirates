@@ -152,9 +152,9 @@ namespace Netsphere.Game.GameRules
             if (IsInTouchdown)
                 return;
 
-            GetRecord(killer).OffenseScore++;
+            GetRecord(killer).DefenseScore++;
             if (assist != null)
-                GetRecord(assist).OffenseAssistScore++;
+                GetRecord(assist).DefenseAssistScore++;
 
             if (assist != null)
                 Room.Broadcast(new SScoreDefenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
