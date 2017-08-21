@@ -166,12 +166,12 @@ namespace Netsphere.Game.GameRules
         {
             if (IsInTouchdown)
                 return;
+                
+            if(oldPlr != null)
+                _touchdownAssistHelper.Update(oldPlr);
 
             if (newPlr != null)
-            {
-                _touchdownAssistHelper.Update(oldPlr);
                 GetRecord(newPlr).OffenseReboundScore++;
-            }
 
             Room.Broadcast(new SScoreReboundAckMessage(newPlr?.RoomInfo.PeerId ?? 0, oldPlr?.RoomInfo.PeerId ?? 0));
         }
