@@ -266,8 +266,8 @@ namespace Netsphere.Resource.Scene.Chunks
                     w.WriteCString(texture.FileName, 1024);
                     if (Unk1 >= 0.2000000029802322f)
                     {
-                      byte[] _fileName2 = Encoding.ASCII.GetBytes(texture.FileName2);
-                      w.Write(_fileName2, 0, 1024);
+                      byte[] fileName2 = Encoding.ASCII.GetBytes(texture.FileName2);
+                      w.Write(fileName2, 0, 1024);
                       //w.WriteCString(texture.FileName2, 1024);
                     }
 
@@ -298,8 +298,8 @@ namespace Netsphere.Resource.Scene.Chunks
 
                     if (Unk1 >= 0.2000000029802322f)
                     {
-                      char[] _fileName = r.ReadChars(1024);
-                      textureData.FileName2 = new string(_fileName);
+                      char[] fileName2 = r.ReadChars(1024);
+                      textureData.FileName2 = new string(fileName2);
                       //textureData.FileName2 = r.ReadCString(1024);
                     }
 
