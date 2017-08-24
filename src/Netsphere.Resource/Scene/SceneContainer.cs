@@ -9,7 +9,7 @@ namespace Netsphere.Resource.Scene
 {
     public class SceneContainer : List<SceneChunk>
     {
-        public SceneHeader Header { get; set; }
+        public SceneHeader Header { get; }
 
         public SceneContainer()
         {
