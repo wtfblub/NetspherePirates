@@ -280,8 +280,8 @@ namespace Netsphere
             //    return;
             //}
 
-            if (!map.GameRules.Contains(options.MatchKey.GameRule))
-            {
+            //if (!map.GameRules.Contains(options.MatchKey.GameRule))
+            //{
             //    Logger.ForAccount(Master)
             //        .Error("Map {mapId}({mapName}) is not available for game rule {gameRule}",
             //            map.Id, map.Name, options.MatchKey.GameRule);
