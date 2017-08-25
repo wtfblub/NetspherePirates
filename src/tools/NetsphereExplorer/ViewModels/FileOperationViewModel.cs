@@ -209,8 +209,7 @@ namespace NetsphereExplorer.ViewModels
                     Status = OperationStatus.Discovery;
                 }
 
-                var file = item as IFile;
-                if (file != null)
+                if (item is IFile)
                     FileCount++;
                 else
                     await Discovery((IFolder)item);
@@ -284,8 +283,7 @@ namespace NetsphereExplorer.ViewModels
                     Status = OperationStatus.Work;
                 }
 
-                var file = item as IFile;
-                if (file != null)
+                if (item is IFile file)
                 {
                     File.WriteAllBytes(Path.Combine(path, file.Name), file.GetData());
                     ++Progress;
@@ -342,8 +340,7 @@ namespace NetsphereExplorer.ViewModels
                     Status = OperationStatus.Work;
                 }
 
-                var file = item as IFile;
-                if (file != null)
+                if (item is IFile file)
                 {
                     file.Delete();
                     ++Progress;

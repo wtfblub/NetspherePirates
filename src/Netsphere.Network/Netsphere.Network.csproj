@@ -1,201 +1,27 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{52F498F4-C72A-47D3-B7D8-7BA6D893FF2B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Netsphere.Network</RootNamespace>
-    <AssemblyName>Netsphere.Network</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BlubLib, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\libs\BlubLib.dll</HintPath>
-    </Reference>
-    <Reference Include="BlubLib.Serialization">
-      <HintPath>..\..\libs\BlubLib.Serialization.dll</HintPath>
-    </Reference>
-    <Reference Include="DotNetty.Buffers, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetty.Buffers.0.4.2\lib\net451\DotNetty.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="DotNetty.Common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DotNetty.Common.0.4.2\lib\net451\DotNetty.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Logging, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Extensions.Logging.1.1.0\lib\netstandard1.1\Microsoft.Extensions.Logging.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Extensions.Logging.Abstractions.1.1.0\lib\netstandard1.1\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpLzo, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\libs\SharpLzo.dll</HintPath>
-    </Reference>
-    <Reference Include="Sigil">
-      <HintPath>..\..\libs\Sigil.dll</HintPath>
-    </Reference>
-    <Reference Include="SlimMath, Version=1.0.0.0, Culture=neutral, PublicKeyToken=eb5b190254be1642, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\libs\SlimMath.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
+    <PackageReference Include="BlubLib" Version="0.1.4" />
+    <PackageReference Include="BlubLib.Serialization" Version="0.1.4" />
+    <Reference Include="..\..\libs\SlimMath.dll" />
+    <Reference Include="..\..\libs\SharpLzo.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Chat\BRUserDataDto.cs" />
-    <Compile Include="Data\Chat\ChaserUserDataDto.cs" />
-    <Compile Include="Data\Chat\CombiDto.cs" />
-    <Compile Include="Data\Chat\CPTUserDataDto.cs" />
-    <Compile Include="Data\Chat\DeleteNoteDto.cs" />
-    <Compile Include="Data\Chat\DenyDto.cs" />
-    <Compile Include="Data\Chat\DMUserDataDto.cs" />
-    <Compile Include="Data\Chat\FriendDto.cs" />
-    <Compile Include="Data\Chat\NoteContentDto.cs" />
-    <Compile Include="Data\Chat\NoteDto.cs" />
-    <Compile Include="Data\Chat\NoteGiftDto.cs" />
-    <Compile Include="Data\Chat\TDUserDataDto.cs" />
-    <Compile Include="Data\Chat\UserDataDto.cs" />
-    <Compile Include="Data\GameRule\ArcadeScoreSyncDto.cs" />
-    <Compile Include="Data\GameRule\CaptainLifeDto.cs" />
-    <Compile Include="Data\GameRule\ChangeAvatarUnk1Dto.cs" />
-    <Compile Include="Data\GameRule\ChangeAvatarUnk2Dto.cs" />
-    <Compile Include="Data\GameRule\ChangeItemsUnkDto.cs" />
-    <Compile Include="Data\GameRule\ChangeRuleDto.cs" />
-    <Compile Include="Data\GameRule\ScoreAssistDto.cs" />
-    <Compile Include="Data\GameRule\ScoreDto.cs" />
-    <Compile Include="Data\Game\ArcadeMapScoreDto.cs" />
-    <Compile Include="Data\Game\ArcadeRewardDto.cs" />
-    <Compile Include="Data\Game\ArcadeStageScoreDto.cs" />
-    <Compile Include="Data\Game\BRStatsDto.cs" />
-    <Compile Include="Data\Game\CapsuleRewardDto.cs" />
-    <Compile Include="Data\Game\ChannelInfoDto.cs" />
-    <Compile Include="Data\Game\ChaserStatsDto.cs" />
-    <Compile Include="Data\Game\ClubHistoryDto.cs" />
-    <Compile Include="Data\Game\ClubInfoDto.cs" />
-    <Compile Include="Data\Game\CPTStatsDto.cs" />
-    <Compile Include="Data\Game\DMStatsDto.cs" />
-    <Compile Include="Data\Game\EnterRoomInfoDto.cs" />
-    <Compile Include="Data\Game\EsperChipItemInfoDto.cs" />
-    <Compile Include="Data\Game\InvalidateItemInfoDto.cs" />
-    <Compile Include="Data\Game\ItemDto.cs" />
-    <Compile Include="Data\Game\ItemDurabilityInfoDto.cs" />
-    <Compile Include="Data\Game\MakeRoomDto.cs" />
-    <Compile Include="Data\Game\MixedTeamBriefingDto.cs" />
-    <Compile Include="Data\Game\PlayerClubInfoDto.cs" />
-    <Compile Include="Data\Game\RandomShopDto.cs" />
-    <Compile Include="Data\Game\RandomShopItemDto.cs" />
-    <Compile Include="Data\Game\RoomDto.cs" />
-    <Compile Include="Data\Game\RoomPlayerDto.cs" />
-    <Compile Include="Data\Game\ShopItemDto.cs" />
-    <Compile Include="Data\Game\TaskDto.cs" />
-    <Compile Include="Data\Game\TDStatsDto.cs" />
-    <Compile Include="Data\P2P\CharacterDto.cs" />
-    <Compile Include="Data\P2P\ItemDto.cs" />
-    <Compile Include="Data\P2P\ValueDto.cs" />
-    <Compile Include="Data\Relay\RoomLocation.cs" />
-    <Compile Include="Message\Chat\C2S.cs" />
-    <Compile Include="Message\Chat\ChatMessageFactory.cs" />
-    <Compile Include="Message\Chat\S2C.cs" />
-    <Compile Include="Message\Event\C2C.cs" />
-    <Compile Include="Message\Event\EventMessageFactory.cs" />
-    <Compile Include="Message\GameRule\C2S.cs" />
-    <Compile Include="Message\GameRule\GameRuleMessageFactory.cs" />
-    <Compile Include="Message\GameRule\S2C.cs" />
-    <Compile Include="Message\Game\C2S.cs" />
-    <Compile Include="Message\Game\GameMessageFactory.cs" />
-    <Compile Include="Message\Game\S2C.cs" />
-    <Compile Include="Message\P2P\C2C.cs" />
-    <Compile Include="Message\P2P\P2PMessageFactory.cs" />
-    <Compile Include="Message\Relay\C2S.cs" />
-    <Compile Include="Message\Relay\RelayMessageFactory.cs" />
-    <Compile Include="Message\Relay\S2C.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="OpCodes.cs" />
-    <Compile Include="Data\Auth\ServerInfoDto.cs" />
-    <Compile Include="Exceptions.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Message\Auth\AuthMessageFactory.cs" />
-    <Compile Include="Message\Auth\C2S.cs" />
-    <Compile Include="Message\Auth\S2C.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serializers\ArrayWithIntPrefixAndIndexSerializer.cs" />
-    <Compile Include="Serializers\ArrayWithShortPrefixSerializer.cs" />
-    <Compile Include="Serializers\RotationVectorSerializer.cs" />
-    <Compile Include="Serializers\CompressedVectorSerializer.cs" />
-    <Compile Include="Serializers\CompressedFloatSerializer.cs" />
-    <Compile Include="Serializers\PeerIdSerializer.cs" />
-    <Compile Include="Serializers\RoomLocationSerializer.cs" />
-    <Compile Include="Serializers\CharacterStyleSerializer.cs" />
-    <Compile Include="Serializers\ArrayWithIntPrefixSerializer.cs" />
-    <Compile Include="Serializers\IntBooleanSerializer.cs" />
-    <Compile Include="Serializers\LongPeerIdSerializer.cs" />
-    <Compile Include="Serializers\MatchKeySerializer.cs" />
-    <Compile Include="Serializers\ItemNumberSerializer.cs" />
-    <Compile Include="Serializers\TimeSpanSerializer.cs" />
-    <Compile Include="Serializers\VersionSerializer.cs" />
+    <ProjectReference Include="..\Netsphere\Netsphere.csproj" />
+    <ProjectReference Include="..\ProudNet\ProudNet.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="miniLzo_x64.dll">
+    <Content Include="..\..\libs\miniLzo_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="miniLzo_x86.dll">
+    <Content Include="..\..\libs\miniLzo_x86.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\libs\liblzo.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Netsphere\Netsphere.csproj">
-      <Project>{4004052c-e8e4-4b71-bc9c-ee8589304ab7}</Project>
-      <Name>Netsphere</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ProudNet\ProudNet.csproj">
-      <Project>{7ed60c00-2bd9-4426-a9a5-295547b8c970}</Project>
-      <Name>ProudNet</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="liblzo.so">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

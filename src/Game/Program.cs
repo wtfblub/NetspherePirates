@@ -13,15 +13,15 @@ using DotNetty.Transport.Channels;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Newtonsoft.Json;
-using NLog;
 using ProudNet;
+using Serilog;
+using Serilog.Core;
+using Serilog.Formatting.Json;
 
 namespace Netsphere
 {
     internal class Program
     {
-        // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public static Stopwatch AppTime { get; } = Stopwatch.StartNew();
 
         private static void Main()
@@ -30,11 +30,20 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
+            
+            var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
+            var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(new JsonFormatter(), jsonlog)
+                .WriteTo.File(logfile)
+                .WriteTo.Console(outputTemplate: "[{Level} {SourceContext}] {Message}{NewLine}{Exception}")
+                .MinimumLevel.Verbose()
+                .CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            Logger.Info("Initializing...");
+            Log.Information("Initializing...");
 
             AuthDatabase.Initialize();
             GameDatabase.Initialize();
@@ -50,7 +59,7 @@ namespace Netsphere
 
             FillShop();
 
-            Logger.Info("Starting server...");
+            Log.Information("Starting server...");
 
             var listenerThreads = new MultithreadEventLoopGroup(Config.Instance.ListenerThreads);
             var workerThreads = new MultithreadEventLoopGroup(Config.Instance.WorkerThreads);
@@ -58,10 +67,10 @@ namespace Netsphere
             RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts, listenerThreads, workerThreads);
             GameServer.Instance.Listen(Config.Instance.Listener, listenerEventLoopGroup: listenerThreads, workerEventLoopGroup: workerThreads);
 
-            Logger.Info("Ready for connections!");
+            Log.Information("Ready for connections!");
 
             if (Config.Instance.NoobMode)
-                Logger.Warn("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!");
+                Log.Warning("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!");
 
             Console.CancelKeyPress += OnCancelKeyPress;
             while (true)
@@ -93,22 +102,21 @@ namespace Netsphere
 
         private static void Exit()
         {
-            Logger.Info("Closing...");
+            Log.Information("Closing...");
 
             ChatServer.Instance.Dispose();
             RelayServer.Instance.Dispose();
             GameServer.Instance.Dispose();
-            LogManager.Shutdown();
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Logger.Error(e.Exception, "UnobservedTaskException");
+            Log.Error(e.Exception, "UnobservedTaskException");
         }
 
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
-            Logger.Error((Exception)e.ExceptionObject, "UnhandledException");
+            Log.Error((Exception)e.ExceptionObject, "UnhandledException");
         }
 
         private static void FillShop()
@@ -132,7 +140,7 @@ namespace Netsphere
                     db.Find<ShopItemDto>().Any() || db.Find<ShopItemInfoDto>().Any())
                     return;
 
-                Logger.Info("NoobMode: Filling the shop with items");
+                Log.Information("NoobMode: Filling the shop with items");
 
                 using (var transaction = db.BeginTransaction())
                 {
@@ -255,7 +263,7 @@ namespace Netsphere
                         };
                         db.Insert(shopItemInfo, statement => statement.AttachToTransaction(transaction));
 
-                        Logger.Info($"[{i}/{items.Length}] {item.ItemNumber}: {item.Name}");
+                        Log.Information($"[{i}/{items.Length}] {item.ItemNumber}: {item.Name}");
                     }
 
                     #endregion
@@ -278,20 +286,19 @@ namespace Netsphere
     internal static class AuthDatabase
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthDatabase));
         private static string s_connectionString;
 
         public static void Initialize()
         {
-            Logger.Info("Initializing...");
-
+            Logger.Information("Initializing...");
             var config = Config.Instance.Database;
 
             switch (config.Engine)
             {
                 case DatabaseEngine.MySQL:
                     s_connectionString =
-                        $"Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
+                        $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
                     OrmConfiguration.DefaultDialect = SqlDialect.MySql;
 
                     using (var con = Open())
@@ -305,12 +312,7 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    if (Utilities.IsMono)
-                    {
-                        Logger.Error("SQLite is not supported on mono");
-                        Environment.Exit(0);
-                    }
-                    s_connectionString = $"Data Source={config.Auth.Filename};Pooling=true;";
+                    s_connectionString = $"Data Source={config.Auth.Filename};";
                     OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
 
                     if (!File.Exists(config.Auth.Filename))
@@ -338,7 +340,7 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    connection = new System.Data.SQLite.SQLiteConnection(s_connectionString);
+                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
                     break;
 
                 default:
@@ -354,20 +356,19 @@ namespace Netsphere
     internal static class GameDatabase
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(GameDatabase));
         private static string s_connectionString;
 
         public static void Initialize()
         {
-            Logger.Info("Initializing...");
-
+            Logger.Information("Initializing...");
             var config = Config.Instance.Database;
 
             switch (config.Engine)
             {
                 case DatabaseEngine.MySQL:
                     s_connectionString =
-                        $"Server={config.Game.Host};Port={config.Game.Port};Database={config.Game.Database};Uid={config.Game.Username};Pwd={config.Game.Password};Pooling=true;";
+                        $"SslMode=none;Server={config.Game.Host};Port={config.Game.Port};Database={config.Game.Database};Uid={config.Game.Username};Pwd={config.Game.Password};Pooling=true;";
                     OrmConfiguration.DefaultDialect = SqlDialect.MySql;
 
                     using (var con = Open())
@@ -381,12 +382,7 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    if (Utilities.IsMono)
-                    {
-                        Logger.Error("SQLite is not supported on mono");
-                        Environment.Exit(0);
-                    }
-                    s_connectionString = $"Data Source={config.Game.Filename};Pooling=true;";
+                    s_connectionString = $"Data Source={config.Game.Filename};";
                     OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
 
                     if (!File.Exists(config.Game.Filename))
@@ -414,11 +410,11 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    connection = new System.Data.SQLite.SQLiteConnection(s_connectionString);
+                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
                     break;
 
                 default:
-                    Logger.Error($"Invalid database engine {engine}");
+                    Log.Error($"Invalid database engine {engine}");
                     Environment.Exit(0);
                     return null;
             }

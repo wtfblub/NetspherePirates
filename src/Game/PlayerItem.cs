@@ -32,7 +32,7 @@ namespace Netsphere
         public DateTimeOffset PurchaseDate { get; }
         public int Durability
         {
-            get { return _durability; }
+            get => _durability;
             set
             {
                 if (_durability == value)
@@ -43,7 +43,7 @@ namespace Netsphere
         }
         public uint Count
         {
-            get { return _count; }
+            get => _count;
             set
             {
                 if (_count == value)

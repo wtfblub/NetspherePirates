@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using BlubLib;
+using BlubLib.IO;
 using BlubLib.Security.Cryptography;
 using SharpLzo;
 

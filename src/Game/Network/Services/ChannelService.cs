@@ -5,16 +5,16 @@ using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Message.Game;
-using NLog;
-using NLog.Fluent;
 using ProudNet.Handlers;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network.Services
 {
     internal class ChannelService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ChannelService));
 
         [MessageHandler(typeof(CGetChannelInfoReqMessage))]
         public void CGetChannelInfoReq(GameSession session, CGetChannelInfoReqMessage message)
@@ -33,10 +33,8 @@ namespace Netsphere.Network.Services
                     break;
 
                 default:
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"Invalid request {message.Request}")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("Invalid request {request}", message.Request);
                     break;
             }
         }
@@ -82,10 +80,8 @@ namespace Netsphere.Network.Services
                     break;
 
                 default:
-                    Logger.Warn()
-                        .Account(session)
-                        .Message($"Invalid chat type {message.ChatType}")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Warning("Invalid chat type {chatType}", message.ChatType);
                     break;
             }
         }

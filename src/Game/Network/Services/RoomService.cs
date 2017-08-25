@@ -2,23 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Game.GameRules;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Newtonsoft.Json;
-using NLog;
-using NLog.Fluent;
 using ProudNet.Handlers;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network.Services
 {
     internal class RoomService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(RoomService));
 
         [MessageHandler(typeof(CEnterPlayerReqMessage))]
         public void CEnterPlayerReq(GameSession session)
@@ -37,10 +36,8 @@ namespace Netsphere.Network.Services
             var plr = session.Player;
             if (!plr.Channel.RoomManager.GameRuleFactory.Contains(message.Room.MatchKey.GameRule))
             {
-                Logger.Error()
-                    .Account(plr)
-                    .Message($"Game rule {message.Room.MatchKey.GameRule} does not exist")
-                    .Write();
+                Logger.ForAccount(plr)
+                    .Error("Game rule {gameRule} does not exist", message.Room.MatchKey.GameRule);
                 session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
@@ -48,18 +45,15 @@ namespace Netsphere.Network.Services
             var map = GameServer.Instance.ResourceCache.GetMaps().GetValueOrDefault(message.Room.MatchKey.Map);
             if (map == null)
             {
-                Logger.Error()
-                    .Account(plr).Message($"Map {message.Room.MatchKey.Map} does not exist")
-                    .Write();
+                Logger.ForAccount(plr)
+                    .Error("Map {map} does not exist", message.Room.MatchKey.Map);
                 session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
             if (!map.GameRules.Contains(message.Room.MatchKey.GameRule))
             {
-                Logger.Error()
-                    .Account(plr)
-                    .Message($"Map {map.Id}({map.Name}) is not available for game rule {message.Room.MatchKey.GameRule}")
-                    .Write();
+                Logger.ForAccount(plr)
+                    .Error("Map {mapId}({mapName}) is not available for game rule {gameRule}", map.Id, map.Name, message.Room.MatchKey.GameRule);
                 session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return;
             }
@@ -87,16 +81,12 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CGameRoomEnterReqMessage))]
         public void CGameRoomEnterReq(GameSession session, CGameRoomEnterReqMessage message)
         {
-            Logger.Debug(JsonConvert.SerializeObject(message, Formatting.Indented));
-
             var plr = session.Player;
             var room = plr.Channel.RoomManager[message.RoomId];
             if (room == null)
             {
-                Logger.Error()
-                    .Account(plr)
-                    .Message($"Room {message.RoomId} in channel {plr.Channel.Id} not found")
-                    .Write();
+                Logger.ForAccount(plr)
+                    .Error("Room {roomId} in channel {channelId} not found", message.RoomId, plr.Channel.Id);
                 session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
                 return;
             }
@@ -149,10 +139,8 @@ namespace Netsphere.Network.Services
             }
             catch (RoomException ex)
             {
-                Logger.Error()
-                    .Account(plr)
-                    .Exception(ex).Message("Failed to change team to {0}", message.Team)
-                    .Write();
+                Logger.ForAccount(plr)
+                    .Error(ex, "Failed to change team to {team}", message.Team);
             }
         }
 
@@ -167,11 +155,8 @@ namespace Netsphere.Network.Services
             }
             catch (RoomException ex)
             {
-                Logger.Error()
-                    .Account(plr)
-                    .Exception(ex)
-                    .Message($"Failed to change mode to {message.Mode}")
-                    .Write();
+                Logger.ForAccount(plr)
+                    .Error(ex, "Failed to change mode to {mode}", message.Mode);
             }
         }
 
@@ -226,17 +211,13 @@ namespace Netsphere.Network.Services
         {
             var plr = session.Player;
 
-            Logger.Debug()
-                .Account(session)
-                .Message($"Item sync - {JsonConvert.SerializeObject(message.Unk1, Formatting.Indented)}")
-                .Write();
+            Logger.ForAccount(session)
+                .Debug("Item sync - {unk1}", message.Unk1);
 
             if (message.Unk2.Length > 0)
             {
-                Logger.Warn()
-                    .Account(session)
-                    .Message($"Unk2: {JsonConvert.SerializeObject(message.Unk2, Formatting.Indented)}")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Warning("{unk2}", message.Unk2);
             }
 
             var @char = plr.CharacterManager.CurrentCharacter;
@@ -260,17 +241,13 @@ namespace Netsphere.Network.Services
         {
             var plr = session.Player;
 
-            Logger.Debug()
-                .Account(session)
-                .Message($"Avatar sync - {JsonConvert.SerializeObject(message.Unk1, Formatting.Indented)}")
-                .Write();
+            Logger.ForAccount(session)
+                .Debug("Avatar sync - {unk1}", message.Unk1);
 
             if (message.Unk2.Length > 0)
             {
-                Logger.Warn()
-                    .Account(session)
-                    .Message($"Unk2: {JsonConvert.SerializeObject(message.Unk2, Formatting.Indented)}")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Warning("{unk2}", message.Unk2);
             }
 
             var @char = plr.CharacterManager.CurrentCharacter;

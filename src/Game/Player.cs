@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Dapper.FastCrud;
 using ExpressMapper.Extensions;
 using Netsphere.Database.Game;
@@ -8,15 +7,15 @@ using Netsphere.Network;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Message.Game;
-using NLog;
-using NLog.Fluent;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere
 {
     internal class Player
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(Player));
         private byte _tutorialState;
         private byte _level;
         private uint _totalExperience;
@@ -159,19 +158,15 @@ namespace Netsphere
         /// <returns>true if the player leveled up</returns>
         public bool GainExp(uint amount)
         {
-            Logger.Debug()
-                .Account(this)
-                .Message($"Gained {amount} exp")
-                .Write();
+            Logger.ForAccount(this)
+                .Debug("Gained {amount} exp", amount);
 
             var expTable = GameServer.Instance.ResourceCache.GetExperience();
             var expInfo = expTable.GetValueOrDefault(Level);
             if (expInfo == null)
             {
-                Logger.Warn()
-                    .Account(this)
-                    .Message($"Level {Level} not found")
-                    .Write();
+                Logger.ForAccount(this)
+                    .Warning("Level {level} not found", Level);
 
                 return false;
             }
@@ -193,18 +188,13 @@ namespace Netsphere
 
                 if (expInfo == null)
                 {
-                    Logger.Warn()
-                        .Account(this)
-                        .Message($"Can't level up because level {newLevel} not found")
-                        .Write();
-
+                    Logger.ForAccount(this)
+                        .Warning("Can't level up because level {level} not found", newLevel);
                     break;
                 }
 
-                Logger.Debug()
-                    .Account(this)
-                    .Message($"Leveled up to {newLevel}")
-                    .Write();
+                Logger.ForAccount(this)
+                    .Debug("Leveled up to {level}", newLevel);
 
                 // ToDo level rewards
 

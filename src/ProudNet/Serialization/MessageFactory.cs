@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using BlubLib;
+using BlubLib.IO;
 using BlubLib.Serialization;
 
 namespace ProudNet.Serialization

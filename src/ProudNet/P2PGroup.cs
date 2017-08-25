@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using BlubLib.Collections.Concurrent;
+using BlubLib.Collections.Generic;
 using ProudNet.Serialization.Messages;
 
 namespace ProudNet

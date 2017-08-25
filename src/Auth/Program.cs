@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Threading.Tasks;
 using BlubLib;
+using BlubLib.Threading.Tasks;
 using Dapper;
 using Dapper.FastCrud;
 using DotNetty.Transport.Bootstrapping;
@@ -12,15 +13,15 @@ using DotNetty.Transport.Channels.Sockets;
 using Netsphere.API;
 using Netsphere.Network;
 using Newtonsoft.Json;
-using NLog;
 using ProudNet;
+using Serilog;
+using Serilog.Core;
+using Serilog.Formatting.Json;
 
 namespace Netsphere
 {
     internal class Program
     {
-        // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static IEventLoopGroup s_apiEventLoopGroup;
         private static IChannel s_apiHost;
 
@@ -30,13 +31,22 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
+            
+            var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
+            var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(new JsonFormatter(), jsonlog)
+                .WriteTo.File(logfile)
+                .WriteTo.Console(outputTemplate: "[{Level} {SourceContext}] {Message}{NewLine}{Exception}")
+                .MinimumLevel.Verbose()
+                .CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
             AuthDatabase.Initialize();
 
-            Logger.Info("Starting server...");
+            Log.Information("Starting server...");
 
             AuthServer.Initialize(new Configuration());
             AuthServer.Instance.Listen(Config.Instance.Listener);
@@ -52,10 +62,10 @@ namespace Netsphere
                 }))
                 .BindAsync(Config.Instance.API.Listener).WaitEx();
 
-            Logger.Info("Ready for connections!");
+            Log.Information("Ready for connections!");
 
             if (Config.Instance.NoobMode)
-                Logger.Warn("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!");
+                Log.Warning("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS AND OVERRIDES ACCOUNT LOGIN DETAILS !!!");
 
             Console.CancelKeyPress += OnCancelKeyPress;
             while (true)
@@ -80,40 +90,39 @@ namespace Netsphere
 
         private static void Exit()
         {
-            Logger.Info("Closing...");
+            Log.Information("Closing...");
             s_apiHost.CloseAsync().WaitEx();
             s_apiEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
             AuthServer.Instance.Dispose();
-            LogManager.Shutdown();
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            Logger.Error(e.Exception, "UnobservedTaskException");
+            Log.Error(e.Exception, "UnobservedTaskException");
         }
 
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
-            Logger.Error((Exception)e.ExceptionObject, "UnhandledException");
+            Log.Error((Exception)e.ExceptionObject, "UnhandledException");
         }
     }
 
     internal static class AuthDatabase
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthDatabase));
         private static string s_connectionString;
 
         public static void Initialize()
         {
-            Logger.Info("Initializing...");
+            Logger.Information("Initializing...");
 
             var config = Config.Instance.Database;
 
             switch (config.Engine)
             {
                 case DatabaseEngine.MySQL:
-                    s_connectionString = $"Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
+                    s_connectionString = $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
                     OrmConfiguration.DefaultDialect = SqlDialect.MySql;
 
                     using (var con = Open())
@@ -127,11 +136,6 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    if (Utilities.IsMono)
-                    {
-                        Logger.Error("SQLite is not supported on mono");
-                        Environment.Exit(0);
-                    }
                     s_connectionString = $"Data Source={config.Auth.Filename};Pooling=true;";
                     OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
 
@@ -160,7 +164,7 @@ namespace Netsphere
                     break;
 
                 case DatabaseEngine.SQLite:
-                    connection = new System.Data.SQLite.SQLiteConnection(s_connectionString);
+                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
                     break;
 
                 default:

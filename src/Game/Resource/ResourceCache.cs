@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BlubLib.Caching;
-using NLog;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Resource
 {
     internal class ResourceCache
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ResourceCache));
         private readonly ResourceLoader _loader;
         private readonly ICache _cache = new MemoryCache();
 
@@ -23,28 +24,28 @@ namespace Netsphere.Resource
 
         public void PreCache()
         {
-            Logger.Info("Caching: Channels");
+            Logger.Information("Caching: Channels");
             GetChannels();
 
-            Logger.Info("Caching: Effects");
+            Logger.Information("Caching: Effects");
             GetEffects();
 
-            Logger.Info("Caching: Items");
+            Logger.Information("Caching: Items");
             GetItems();
 
-            Logger.Info("Caching: DefaultItems");
+            Logger.Information("Caching: DefaultItems");
             GetDefaultItems();
 
-            Logger.Info("Caching: Shop");
+            Logger.Information("Caching: Shop");
             GetShop();
 
-            Logger.Info("Caching: Experience");
+            Logger.Information("Caching: Experience");
             GetExperience();
 
-            Logger.Info("Caching: Maps");
+            Logger.Information("Caching: Maps");
             GetMaps();
 
-            Logger.Info("Caching: GameTempos");
+            Logger.Information("Caching: GameTempos");
             GetGameTempos();
         }
 

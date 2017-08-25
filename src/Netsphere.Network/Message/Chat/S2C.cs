@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using BlubLib;
+using BlubLib.IO;
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Serializers;

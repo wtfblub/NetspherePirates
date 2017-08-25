@@ -5,20 +5,20 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using BlubLib.Collections.Concurrent;
 using Dapper.FastCrud;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Netsphere.Network.Message.Game;
-using NLog;
-using NLog.Fluent;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere
 {
     internal class LicenseManager : IReadOnlyCollection<License>
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(LicenseManager));
         private readonly Player _player;
         private readonly ConcurrentDictionary<ItemLicense, License> _licenses = new ConcurrentDictionary<ItemLicense, License>();
         private readonly ConcurrentStack<License> _licensesToRemove = new ConcurrentStack<License>();
@@ -42,15 +42,13 @@ namespace Netsphere
         /// </summary>
         public License GetLicense(ItemLicense license)
         {
-            return _licenses.GetValueOrDefault(license);
+            return CollectionExtensions.GetValueOrDefault(_licenses, license);
         }
 
         public License Acquire(ItemLicense itemLicense)
         {
-            Logger.Debug()
-                .Account(_player)
-                .Message($"Acquiring license {itemLicense}")
-                .Write();
+            Logger.ForAccount(_player)
+                .Debug("Acquiring {license}", itemLicense);
 
             var shop = GameServer.Instance.ResourceCache.GetShop();
             var licenseReward = shop.Licenses.GetValueOrDefault(itemLicense);
@@ -77,10 +75,8 @@ namespace Netsphere
                 _licenses.TryAdd(itemLicense, license);
                 _player.Session.SendAsync(new SLicensedAckMessage(itemLicense, licenseReward?.ItemNumber ?? 0));
 
-                Logger.Info()
-                    .Account(_player)
-                    .Message($"Acquired license {itemLicense}")
-                    .Write();
+                Logger.ForAccount(_player)
+                    .Information("Acquired {license}", itemLicense);
             }
 
             return license;

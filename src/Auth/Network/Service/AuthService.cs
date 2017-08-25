@@ -7,16 +7,17 @@ using BlubLib.Security.Cryptography;
 using Dapper.FastCrud;
 using Netsphere.Database.Auth;
 using Netsphere.Network.Message.Auth;
-using NLog;
 using ProudNet;
 using ProudNet.Handlers;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network.Service
 {
     internal class AuthService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthService));
 
         [MessageHandler(typeof(CAuthInEUReqMessage))]
         public async Task LoginHandler(ProudSession session, CAuthInEUReqMessage message)
@@ -111,7 +112,7 @@ namespace Netsphere.Network.Service
                     return;
                 }
 
-                Logger.Info($"Login success for {message.Username}");
+                Logger.Information($"Login success for {message.Username}");
 
                 var entry = new LoginHistoryDto
                 {

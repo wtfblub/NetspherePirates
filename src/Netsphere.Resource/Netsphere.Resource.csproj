@@ -1,87 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{662E4FB4-5053-49B4-970C-369296C27E7D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Netsphere.Resource</RootNamespace>
-    <AssemblyName>Netsphere.Resource</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BlubLib">
-      <HintPath>..\..\libs\BlubLib.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpLzo">
-      <HintPath>..\..\libs\SharpLzo.dll</HintPath>
-    </Reference>
-    <Reference Include="SlimMath">
-      <HintPath>..\..\libs\SlimMath.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <Reference Include="..\..\libs\SlimMath.dll" />
+    <Reference Include="..\..\libs\SharpLzo.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="S4Zip.cs" />
-    <Compile Include="Scene\Chunks\Animations.cs" />
-    <Compile Include="Scene\Chunks\BoneChunk.cs" />
-    <Compile Include="Scene\Chunks\BoneSystemChunk.cs" />
-    <Compile Include="Scene\Chunks\BoxChunk.cs" />
-    <Compile Include="Scene\Chunks\ModelChunk.cs" />
-    <Compile Include="Scene\Chunks\SceneChunk.cs" />
-    <Compile Include="Scene\Chunks\ShapeChunk.cs" />
-    <Compile Include="Scene\Chunks\SkyDirect1Chunk.cs" />
-    <Compile Include="Scene\Constants.cs" />
-    <Compile Include="Scene\SceneContainer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="miniLzo_x64.dll">
+    <Content Include="..\..\libs\miniLzo_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="miniLzo_x86.dll">
+    <Content Include="..\..\libs\miniLzo_x86.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\libs\liblzo.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="liblzo.so">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="BlubLib" Version="0.1.4" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

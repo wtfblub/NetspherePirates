@@ -10,15 +10,14 @@ using Netsphere.Network.Data.Game;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
 using Netsphere.Resource;
-using NLog;
-using NLog.Fluent;
 using ProudNet;
-using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Services;
 using Netsphere.Network.Message.GameRule;
 using ExpressMapper.Extensions;
 using ProudNet.Serialization;
+using Serilog;
+using Constants = Serilog.Core.Constants;
 
 namespace Netsphere.Network
 {
@@ -27,7 +26,7 @@ namespace Netsphere.Network
         public static GameServer Instance { get; private set; }
 
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(GameServer));
 
         private readonly ILoop _worker;
         private readonly ServerlistManager _serverlistManager;
@@ -184,10 +183,8 @@ namespace Netsphere.Network
 
                 PlayerManager.Remove(gameSession.Player);
 
-                Logger.Debug()
-                    .Account(gameSession)
-                    .Message("Disconnected")
-                    .Write();
+                Logger.ForAccount(gameSession)
+                    .Debug("Disconnected");
 
                 if (gameSession.Player.ChatSession != null)
                 {
@@ -212,18 +209,17 @@ namespace Netsphere.Network
 
         protected override void OnError(ErrorEventArgs e)
         {
-            var log = Logger.Error();
+            var log = Logger;
             if (e.Session != null)
-                log = log.Account((GameSession)e.Session);
-            log.Exception(e.Exception)
-                .Write();
+                log = log.ForAccount((GameSession)e.Session);
+            log.Error(e.Exception, "Unhandled server error");
             base.OnError(e);
         }
 
         //private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
         //{
         //    var session = (GameSession)e.Session;
-        //    Logger.Warn()
+        //    Log.Warning()
         //        .Account(session)
         //        .Message($"Unhandled message {e.Message.GetType().Name}")
         //        .Write();
@@ -246,7 +242,7 @@ namespace Netsphere.Network
             {
                 _saveTimer = TimeSpan.Zero;
 
-                Logger.Info("Saving players...");
+                Logger.Information("Saving players...");
 
                 foreach (var plr in PlayerManager.Where(plr => plr.IsLoggedIn()))
                 {
@@ -256,15 +252,12 @@ namespace Netsphere.Network
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error()
-                            .Account(plr)
-                            .Exception(ex)
-                            .Message("Failed to save player")
-                            .Write();
+                        Logger.ForAccount(plr)
+                            .Error(ex, "Failed to save player");
                     }
                 }
 
-                Logger.Info("Saving players completed");
+                Logger.Information("Saving players completed");
             }
 
             _mailBoxCheckTimer = _mailBoxCheckTimer.Add(delta);

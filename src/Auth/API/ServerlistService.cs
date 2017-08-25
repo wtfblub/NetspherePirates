@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Auth.ServiceModel;
 using BlubLib.DotNetty.SimpleRmi;
-using DotNetty.Common.Utilities;
 using Netsphere.Network;
 
 namespace Netsphere.API

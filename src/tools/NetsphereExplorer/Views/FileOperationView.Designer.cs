@@ -110,7 +110,7 @@
             this.pbProgress.Location = new System.Drawing.Point(9, 70);
             this.pbProgress.Name = "pbProgress";
             this.pbProgress.Size = new System.Drawing.Size(333, 17);
-            this.pbProgress.State = BlubLib.Native.ProgressBarState.Normal;
+            this.pbProgress.State = BlubLib.WinAPI.ProgressBarState.Normal;
             this.pbProgress.TabIndex = 2;
             // 
             // btnPause

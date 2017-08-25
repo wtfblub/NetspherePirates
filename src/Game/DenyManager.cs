@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using BlubLib.Collections.Concurrent;
 using Dapper.FastCrud;
 using Netsphere.Database.Auth;
 using Netsphere.Database.Game;
@@ -19,7 +20,7 @@ namespace Netsphere
 
         public Player Player { get; }
         public int Count => _denies.Count;
-        public Deny this[ulong accountId] => _denies.GetValueOrDefault(accountId);
+        public Deny this[ulong accountId] => CollectionExtensions.GetValueOrDefault(_denies, accountId);
 
         public DenyManager(Player plr, PlayerDto dto)
         {

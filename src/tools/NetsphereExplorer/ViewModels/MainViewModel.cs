@@ -7,6 +7,8 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsAPICodePack.Core.Dialogs.TaskDialogs;
+using BlubLib;
+using BlubLib.IO;
 using NetsphereExplorer.Controls;
 using NetsphereExplorer.Filesystem;
 using NetsphereExplorer.Native;
@@ -204,8 +206,7 @@ namespace NetsphereExplorer.ViewModels
             }
             else
             {
-                var folder = item.Tag as IFolder;
-                if (folder != null)
+                if (item.Tag is IFolder folder)
                 {
                     var newNode = SelectedFolderNode.Nodes
                         .Cast<TreeNode>()
@@ -318,7 +319,7 @@ namespace NetsphereExplorer.ViewModels
             }
             catch (Exception ex)
             {
-                TaskDialog.Show(_window, $"Failed to delete some items", ex);
+                TaskDialog.Show(_window, "Failed to delete some items", ex);
             }
             _overlay.Hide();
         }
@@ -407,8 +408,7 @@ namespace NetsphereExplorer.ViewModels
             if (node != null)
             {
                 control = node.TreeView;
-                var folder = node.Tag as IFolder;
-                items = folder == null
+                items = !(node.Tag is IFolder folder)
                     ? _filesystem.Folders.Cast<object>().Concat(_filesystem.Files)
                     : Enumerable.Repeat(folder, 1);
             }
@@ -430,16 +430,17 @@ namespace NetsphereExplorer.ViewModels
         {
             foreach (var item in items)
             {
-                var file = item as IFile;
-                if (file != null)
-                    yield return new DragFileInfo(Path.Combine(path, file.Name), new DragStream(file));
-
-                var folder = item as IFolder;
-                if (folder != null)
+                switch (item)
                 {
-                    var nestedItems = ProcessDrag(folder.Files.Concat<object>(folder.Folders), Path.Combine(path, folder.Name));
-                    foreach (var nestedItem in nestedItems)
-                        yield return nestedItem;
+                    case IFile file:
+                        yield return new DragFileInfo(Path.Combine(path, file.Name), new DragStream(file));
+                        break;
+
+                    case IFolder folder:
+                        var nestedItems = ProcessDrag(folder.Files.Concat<object>(folder.Folders), Path.Combine(path, folder.Name));
+                        foreach (var nestedItem in nestedItems)
+                            yield return nestedItem;
+                        break;
                 }
             }
         }

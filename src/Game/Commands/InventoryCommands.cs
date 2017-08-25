@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using Netsphere.Network;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;

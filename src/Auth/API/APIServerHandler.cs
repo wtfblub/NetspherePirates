@@ -6,14 +6,15 @@ using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Groups;
 using Netsphere.Network;
-using NLog;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.API
 {
     internal class APIServerHandler : ChannelHandlerAdapter
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(APIServerHandler));
         private readonly object _mutex = new object();
         private readonly ILoop _worker;
         private IChannelGroup _channels;

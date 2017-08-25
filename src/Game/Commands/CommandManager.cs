@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using Netsphere.Network;
-using NLog;
-using NLog.Fluent;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Commands
 {
     internal class CommandManager
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(CommandManager));
         private readonly IList<ICommand> _commands = new List<ICommand>();
 
         public GameServer Server { get; }
@@ -24,6 +24,7 @@ namespace Netsphere.Commands
         {
             if (_commands.Any(c => c.Name.Equals(cmd.Name, StringComparison.InvariantCultureIgnoreCase)))
                 throw new Exception("Command " + cmd.Name + " already exists");
+
             _commands.Add(cmd);
             return this;
         }
@@ -51,10 +52,8 @@ namespace Netsphere.Commands
 
             if (!isConsole && plr.Account.SecurityLevel < cmd.Permission)
             {
-                Logger.Error()
-                    .Account(plr)
-                    .Message($"Access denied for command {cmd.Name} - args: {string.Join(",", args)}")
-                    .Write();
+                Logger.ForAccount(plr)
+                    .Error("Access denied for command {cmdName} - args: {args}", cmd.Name, string.Join(",", args));
                 plr.SendConsoleMessage(S4Color.Red + "Unknown command");
                 return true;
             }

@@ -2,10 +2,10 @@
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Services;
-using NLog;
-using NLog.Fluent;
 using ProudNet;
 using ProudNet.Serialization;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network
 {
@@ -14,7 +14,7 @@ namespace Netsphere.Network
         public static ChatServer Instance { get; private set; }
 
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ChatServer));
 
         public static void Initialize(Configuration config)
         {
@@ -68,18 +68,17 @@ namespace Netsphere.Network
 
         protected override void OnError(ErrorEventArgs e)
         {
-            var log = Logger.Error();
+            var log = Logger;
             if (e.Session != null)
-                log = log.Account((ChatSession)e.Session);
-            log.Exception(e.Exception)
-                .Write();
+                log = log.ForAccount((ChatSession)e.Session);
+            log.Error(e.Exception, "Unhandled server error");
             base.OnError(e);
         }
 
         //private void OnUnhandledMessage(object sender, MessageReceivedEventArgs e)
         //{
         //    var session = (ChatSession)e.Session;
-        //    Logger.Warn()
+        //    Log.Warning()
         //        .Account(session)
         //        .Message($"Unhandled message {e.Message.GetType().Name}")
         //        .Write();

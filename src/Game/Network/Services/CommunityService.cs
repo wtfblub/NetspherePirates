@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;

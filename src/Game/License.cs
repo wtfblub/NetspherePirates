@@ -14,7 +14,7 @@ namespace Netsphere
         public DateTimeOffset FirstCompletedDate { get; }
         public int TimesCompleted
         {
-            get { return _timesCompleted; }
+            get => _timesCompleted;
             set
             {
                 if (_timesCompleted == value)

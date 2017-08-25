@@ -1,16 +1,16 @@
 ﻿using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
-using NLog;
-using NLog.Fluent;
 using ProudNet.Handlers;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network.Services
 {
     internal class InventoryService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(InventoryService));
 
         [MessageHandler(typeof(CUseItemReqMessage))]
         public void UseItemHandler(GameSession session, CUseItemReqMessage message)
@@ -40,10 +40,8 @@ namespace Netsphere.Network.Services
             }
             catch (CharacterException ex)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Exception(ex)
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error(ex, "Unable to use item");
                 session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
             }
         }
@@ -58,19 +56,15 @@ namespace Netsphere.Network.Services
                 var item = session.Player.Inventory[id];
                 if (item == null)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"Item {id} not found")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("Item {id} not found", id);
                     session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error0 });
                     return;
                 }
                 if (item.Durability == -1)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"Item {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period} can not be repaired")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("Item {item} can not be repaired", new { item.ItemNumber, item.PriceType, item.PeriodType, item.Period });
                     session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error1 });
                     return;
                 }
@@ -85,10 +79,8 @@ namespace Netsphere.Network.Services
                 var price = shop.GetPrice(item);
                 if (price == null)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("No shop entry found for {item}", new { item.ItemNumber, item.PriceType, item.PeriodType, item.Period });
                     session.SendAsync(new SRepairItemAckMessage { Result = ItemRepairResult.Error4 });
                     return;
                 }
@@ -114,10 +106,8 @@ namespace Netsphere.Network.Services
             var item = session.Player.Inventory[message.ItemId];
             if (item == null)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message($"Item {message.ItemId} not found")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("Item {itemId} not found", message.ItemId);
                 session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed });
                 return;
             }
@@ -125,19 +115,15 @@ namespace Netsphere.Network.Services
             var price = shop.GetPrice(item);
             if (price == null)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("No shop entry found for {item}", new { item.ItemNumber, item.PriceType, item.PeriodType, item.Period });
                 session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed });
                 return;
             }
             if (!price.CanRefund)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message($"Cannot refund {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("Cannot refund {item}", new { item.ItemNumber, item.PriceType, item.PeriodType, item.Period });
                 session.SendAsync(new SRefundItemAckMessage { Result = ItemRefundResult.Failed });
                 return;
             }
@@ -157,10 +143,8 @@ namespace Netsphere.Network.Services
             var item = session.Player.Inventory[message.ItemId];
             if (item == null)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message($"Item {message.ItemId} not found")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("Item {itemId} not found", message.ItemId);
                 session.SendAsync(new SDiscardItemAckMessage { Result = 2 });
                 return;
             }
@@ -168,20 +152,16 @@ namespace Netsphere.Network.Services
             var shopItem = shop.GetItem(item.ItemNumber);
             if (shopItem == null)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("No shop entry found for item {item}", new { item.ItemNumber, item.PriceType, item.PeriodType, item.Period });
                 session.SendAsync(new SDiscardItemAckMessage { Result = 2 });
                 return;
             }
 
             if (shopItem.IsDestroyable)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message($"Cannot discard {item.ItemNumber} {item.PriceType} {item.PeriodType} {item.Period}")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("Cannot discord {item}", new { item.ItemNumber, item.PriceType, item.PeriodType, item.Period });
                 session.SendAsync(new SDiscardItemAckMessage { Result = 2 });
                 return;
             }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using BlubLib.DotNetty;
+using BlubLib.IO;
 using BlubLib.Serialization;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;

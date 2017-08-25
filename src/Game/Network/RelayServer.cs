@@ -2,10 +2,10 @@
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Relay;
 using Netsphere.Network.Services;
-using NLog;
-using NLog.Fluent;
 using ProudNet;
 using ProudNet.Serialization;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network
 {
@@ -14,7 +14,7 @@ namespace Netsphere.Network
         public static RelayServer Instance { get; private set; }
 
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(RelayServer));
 
         public static void Initialize(Configuration config)
         {
@@ -60,11 +60,10 @@ namespace Netsphere.Network
 
         protected override void OnError(ErrorEventArgs e)
         {
-            var log = Logger.Error();
+            var log = Logger;
             if (e.Session != null)
-                log = log.Account((RelaySession)e.Session);
-            log.Exception(e.Exception)
-                .Write();
+                log = log.ForAccount((RelaySession)e.Session);
+            log.Error(e.Exception, "Unhandled server error");
             base.OnError(e);
         }
 
@@ -78,9 +77,9 @@ namespace Netsphere.Network
         //        return;
 
         //    //if (unk != null)
-        //    //_logger.Warn().Account(session).Message("Unk message {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
+        //    //_Log.Warning().Account(session).Message("Unk message {0}: {1}", unk.OpCode, unk.Data.ToHexString()).Write();
         //    //else
-        //    Logger.Warn()
+        //    Log.Warning()
         //        .Account(session)
         //        .Message($"Unhandled message {e.Message.GetType().Name}")
         //        .Write();

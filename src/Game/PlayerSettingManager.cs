@@ -148,7 +148,7 @@ namespace Netsphere
             public bool NeedsToSave { get; set; }
             public object Data
             {
-                get { return _data; }
+                get => _data;
                 set
                 {
                     if (_data == value)

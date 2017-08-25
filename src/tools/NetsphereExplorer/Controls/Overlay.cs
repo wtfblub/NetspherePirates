@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+using BlubLib;
 using BlubLib.GUI.Controls;
 using View = BlubLib.GUI.Controls.View;
 
@@ -19,7 +19,7 @@ namespace NetsphereExplorer.Controls
 
         public View View
         {
-            get { return _view; }
+            get => _view;
             set
             {
                 _view = value;
@@ -33,7 +33,7 @@ namespace NetsphereExplorer.Controls
         public Form Owner { get; set; }
         public override ISite Site
         {
-            get { return base.Site; }
+            get => base.Site;
             set
             {
                 base.Site = value;
