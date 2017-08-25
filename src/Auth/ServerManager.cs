@@ -4,14 +4,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Netsphere.Network.Data.Auth;
-using NLog;
+using Serilog;
 
 namespace Netsphere
 {
     internal class ServerManager : IEnumerable<ServerInfoDto>
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext<ServerManager>();
 
         private readonly ConcurrentDictionary<ushort, ServerEntry> _serverList = new ConcurrentDictionary<ushort, ServerEntry>();
 
@@ -42,7 +42,7 @@ namespace Netsphere
 
             if (_serverList.TryAdd(serverInfo.Id, new ServerEntry(game, chat)))
             {
-                Logger.Info($"Added server {serverInfo.Name}({serverInfo.Id})");
+                Logger.Information($"Added server {serverInfo.Name}({serverInfo.Id})");
                 return true;
             }
             return false;
@@ -80,7 +80,7 @@ namespace Netsphere
             ServerEntry entry;
             if (_serverList.TryRemove(id, out entry))
             {
-                Logger.Info($"Removed server {entry.Game.Name}({entry.Game.GroupId})");
+                Logger.Information($"Removed server {entry.Game.Name}({entry.Game.GroupId})");
                 return true;
             }
             return false;

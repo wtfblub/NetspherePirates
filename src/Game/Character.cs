@@ -7,7 +7,7 @@ namespace Netsphere
 {
     internal class Character
     {
-        public CharacterManager CharacterManager { get; private set; }
+        public CharacterManager CharacterManager { get; }
 
         internal bool ExistsInDatabase { get; set; }
         internal bool NeedsToSave { get; set; }

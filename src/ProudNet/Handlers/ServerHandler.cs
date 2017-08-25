@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using BlubLib.Collections.Concurrent;
+using BlubLib.Collections.Generic;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;

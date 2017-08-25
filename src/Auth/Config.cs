@@ -8,7 +8,7 @@ namespace Netsphere
 {
     public class Config
     {
-        private static readonly string s_path = Path.Combine(Environment.CurrentDirectory, "auth.hjson");
+        private static readonly string s_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.hjson");
 
         public static Config Instance { get; }
 

@@ -55,7 +55,7 @@ namespace Netsphere.Shop
         public bool IsEnabled { get; set; }
         public int Discount { get; set; }
 
-        public ShopItem ShopItem { get; private set; }
+        public ShopItem ShopItem { get; }
 
         public ShopItemInfo(ShopItem shopItem, ShopItemInfoDto dto, ShopResources shopResources)
         {

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlubLib.Collections.Generic;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using NLog;
 using ProudNet;
 using ProudNet.Handlers;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network
 {
@@ -15,7 +17,7 @@ namespace Netsphere.Network
         where TSession : ProudSession
     {
         // ReSharper disable once StaticMemberInGenericType
-        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(FilteredMessageHandler<TSession>));
         private readonly IDictionary<Type, List<Predicate<TSession>>> _filter = new Dictionary<Type, List<Predicate<TSession>>>();
         private readonly IList<IMessageHandler> _messageHandlers = new List<IMessageHandler>();
 
@@ -30,7 +32,7 @@ namespace Netsphere.Network
 
             if (predicates != null && predicates.Any(predicate => !predicate(session)))
             {
-                Logger.Debug($"Dropping message {message.GetType().Name} from client {((ISocketChannel)context.Channel).RemoteAddress}");
+                Logger.Debug("Dropping message {messageName} from client {remoteAddress}", message.GetType().Name, ((ISocketChannel)context.Channel).RemoteAddress);
                 return false;
             }
 

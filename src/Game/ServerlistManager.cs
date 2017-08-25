@@ -9,14 +9,15 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using ExpressMapper.Extensions;
 using Netsphere.Network;
-using NLog;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere
 {
     internal class ServerlistManager : IDisposable
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ServerlistManager));
 
         private readonly IEventLoopGroup _eventLoopGroup;
         private readonly Bootstrap _bootstrap;
@@ -99,7 +100,7 @@ namespace Netsphere
 
         private void Client_Connected(object sender, EventArgs e)
         {
-            Logger.Info($"Connected to authserver on endpoint {Config.Instance.AuthAPI.EndPoint}");
+            Logger.Information("Connected to authserver on endpoint {endpoint}", Config.Instance.AuthAPI.EndPoint);
         }
 
         private void Client_Disconnected(object sender, EventArgs e)
@@ -108,7 +109,7 @@ namespace Netsphere
             if (_userDisconnect)
                 return;
 
-            Logger.Warn("Lost connection to authserver. Trying to reconnect on next update.");
+            Logger.Warning("Lost connection to authserver. Trying to reconnect on next update.");
         }
 
         private async Task<bool> Connect()
@@ -124,15 +125,15 @@ namespace Netsphere
                 var baseException = ex.GetBaseException();
                 if (baseException is ConnectException)
                 {
-                    Logger.Error($"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
+                    Logger.Error("Failed to connect authserver on endpoint {endpoint}. Retrying on next update.", endPoint);
                     return false;
                 }
-                Logger.Error(baseException, $"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
+                Logger.Error(baseException, "Failed to connect authserver on endpoint {endpoint}. Retrying on next update.", endPoint);
                 return false;
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, $"Failed to connect authserver on endpoint {endPoint}. Retrying on next update.");
+                Logger.Error(ex, "Failed to connect authserver on endpoint {endpoint}. Retrying on next update.", endPoint);
                 return false;
             }
 
@@ -152,7 +153,7 @@ namespace Netsphere
                     return true;
 
                 case RegisterResult.AlreadyExists:
-                    Logger.Warn($"Unable to register server - Id:{Config.Instance.Id} is already registered(Invalid config?).");
+                    Logger.Warning("Unable to register server - Id:{id} is already registered(Invalid config?).", Config.Instance.Id);
                     break;
             }
             return false;

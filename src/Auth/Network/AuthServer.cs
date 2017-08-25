@@ -5,17 +5,17 @@ using BlubLib.Threading;
 using BlubLib.Threading.Tasks;
 using Netsphere.Network.Message.Auth;
 using Netsphere.Network.Service;
-using NLog;
-using NLog.Fluent;
 using ProudNet;
 using ProudNet.Serialization;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network
 {
     internal class AuthServer : ProudServer
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthServer));
 
         public static AuthServer Instance { get; private set; }
 
@@ -55,9 +55,7 @@ namespace Netsphere.Network
 
         protected override void OnError(ErrorEventArgs e)
         {
-            Logger.Error()
-                .Exception(e.Exception)
-                .Write();
+            Logger.Error(e.Exception, "Unhandled server exception");
             base.OnError(e);
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using BlubLib.DotNetty;
+using BlubLib.IO;
 using BlubLib.Serialization;
 using DotNetty.Buffers;
 using DotNetty.Codecs;

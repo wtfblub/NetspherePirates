@@ -1,26 +1,23 @@
-﻿using System.Threading.Tasks;
-using BlubLib.DotNetty.Handlers.MessageHandling;
+﻿using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using NLog;
-using NLog.Fluent;
 using ProudNet.Handlers;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network.Services
 {
     internal class CharacterService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(CharacterService));
 
         [MessageHandler(typeof(CharacterCreateReqMessage))]
         public void CreateCharacterHandler(GameSession session, CharacterCreateReqMessage message)
         {
-            Logger.Info()
-                .Account(session)
-                .Message($"Creating character: {JsonConvert.SerializeObject(message, new StringEnumConverter())}")
-                .Write();
+            Logger.ForAccount(session)
+                .Information("Creating character: {message}", JsonConvert.SerializeObject(message, new StringEnumConverter()));
 
             try
             {
@@ -28,10 +25,8 @@ namespace Netsphere.Network.Services
             }
             catch (CharacterException ex)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message(ex.Message)
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error(ex.Message);
                 session.SendAsync(new ServerResultAckMessage(ServerResult.CreateCharacterFailed));
             }
         }
@@ -49,10 +44,8 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            Logger.Info()
-                .Account(session)
-                .Message($"Selecting character {message.Slot}")
-                .Write();
+            Logger.ForAccount(session)
+                .Information("Selecting character {slot}", message.Slot);
 
             try
             {
@@ -60,10 +53,8 @@ namespace Netsphere.Network.Services
             }
             catch (CharacterException ex)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message(ex.Message)
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error(ex.Message);
                 session.SendAsync(new ServerResultAckMessage(ServerResult.SelectCharacterFailed));
             }
         }
@@ -71,10 +62,8 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CharacterDeleteReqMessage))]
         public void DeleteCharacterHandler(GameSession session, CharacterDeleteReqMessage message)
         {
-            Logger.Info()
-                .Account(session)
-                .Message($"Removing character {message.Slot}")
-                .Write();
+            Logger.ForAccount(session)
+                .Information("Removing character {slot}", message.Slot);
 
             try
             {
@@ -82,10 +71,8 @@ namespace Netsphere.Network.Services
             }
             catch (CharacterException ex)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message(ex.Message)
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error(ex.Message);
                 session.SendAsync(new ServerResultAckMessage(ServerResult.DeleteCharacterFailed));
             }
         }

@@ -4,7 +4,7 @@ namespace Netsphere
 {
     internal class Account
     {
-        public ulong Id { get; private set; }
+        public ulong Id { get; }
         public string Username { get; set; }
         public string Nickname { get; set; }
         public SecurityLevel SecurityLevel { get; set; }

@@ -5,21 +5,20 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Dapper.FastCrud;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Netsphere.Network.Message.Game;
 using Netsphere.Resource;
-using NLog;
-using NLog.Fluent;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere
 {
     internal class CharacterManager : IReadOnlyCollection<Character>
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(CharacterManager));
         private readonly Dictionary<byte, Character> _characters = new Dictionary<byte, Character>();
 
         private readonly ConcurrentStack<Character> _charactersToDelete = new ConcurrentStack<Character>();
@@ -44,10 +43,9 @@ namespace Netsphere
             {
                 if (!_characters.TryAdd(@char.Slot, @char))
                 {
-                    Logger.Warn()
-                        .Account(Player)
-                        .Message("Multiple characters on slot {0}", @char.Slot)
-                        .Write();
+                    Logger
+                        .ForAccount(Player)
+                        .Warning("Multiple characters on slot {slot}", @char.Slot);
                 }
             }
         }

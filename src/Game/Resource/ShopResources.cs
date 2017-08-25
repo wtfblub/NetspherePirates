@@ -6,7 +6,7 @@ using Netsphere.Shop;
 
 namespace Netsphere.Resource
 {
-    internal class ShopResources
+    internal class     ShopResources
     {
         private Dictionary<ItemNumber, ShopItem> _items;
         private Dictionary<int, ShopEffectGroup> _effects;

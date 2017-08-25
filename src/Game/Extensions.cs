@@ -1,45 +1,46 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using BlubLib.IO;
 using Netsphere.Network;
 using Netsphere.Shop;
-using NLog.Fluent;
 using ProudNet;
+using Serilog;
 
 namespace Netsphere
 {
     internal static class Extensions
     {
-        public static LogBuilder Account(this LogBuilder builder, ulong id, string user, SecurityLevel securityLevel = SecurityLevel.User)
+        public static ILogger ForAccount(this ILogger logger, ulong id, string user, SecurityLevel securityLevel = SecurityLevel.User)
         {
-            builder.LogEventInfo.Properties["account_id"] = id;
-            builder.LogEventInfo.Properties["account_user"] = user;
-            builder.LogEventInfo.Properties["account_level"] = securityLevel;
-            return builder;
+            return logger
+                .ForContext("account_id", id)
+                .ForContext("account_user", user)
+                .ForContext("account_level", securityLevel);
         }
 
-        public static LogBuilder Account(this LogBuilder builder, Account account)
+        public static ILogger ForAccount(this ILogger logger, Account account)
         {
-            return builder.Account(account.Id, account.Username, account.SecurityLevel);
+            return logger.ForAccount(account.Id, account.Username, account.SecurityLevel);
         }
 
-        public static LogBuilder Account(this LogBuilder builder, Player player)
+        public static ILogger ForAccount(this ILogger logger, Player player)
         {
-            return builder.Account(player.Account);
+            return logger.ForAccount(player.Account);
         }
 
-        public static LogBuilder Account(this LogBuilder builder, GameSession session)
+        public static ILogger ForAccount(this ILogger logger, GameSession session)
         {
-            return session.IsLoggedIn() ? builder.Account(session.Player) : builder;
+            return session.IsLoggedIn() ? logger.ForAccount(session.Player) : logger;
         }
 
-        public static LogBuilder Account(this LogBuilder builder, ChatSession session)
+        public static ILogger ForAccount(this ILogger logger, ChatSession session)
         {
-            return session.IsLoggedIn() ? builder.Account(session.GameSession.Player) : builder;
+            return session.IsLoggedIn() ? logger.ForAccount(session.GameSession.Player) : logger;
         }
 
-        public static LogBuilder Account(this LogBuilder builder, RelaySession session)
+        public static ILogger ForAccount(this ILogger logger, RelaySession session)
         {
-            return session.IsLoggedIn() ? builder.Account(session.GameSession.Player) : builder;
+            return session.IsLoggedIn() ? logger.ForAccount(session.GameSession.Player) : logger;
         }
 
         public static bool IsLoggedIn(this GameSession session)

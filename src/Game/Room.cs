@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using BlubLib.Collections.Concurrent;
 using BlubLib.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Game.Systems;
@@ -12,16 +13,16 @@ using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
-using NLog;
-using NLog.Fluent;
 using ProudNet;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere
 {
     internal class Room
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(Room));
         private readonly AsyncLock _slotIdSync = new AsyncLock();
 
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
@@ -252,7 +253,7 @@ namespace Netsphere
                 return;
 
             // TODO Add Room extension?
-            Logger.Debug($"<Room {Id}> Changing host to {plr.Account.Nickname} - Ping:{plr.Session.UnreliablePing} ms");
+            Logger.Debug("<Room {roomId}> Changing host to {nickname} - Ping:{ping} ms", Id, plr.Account.Nickname, plr.Session.UnreliablePing);
             Host = plr;
             Broadcast(new RoomChangeRefereeAckMessage(Host.Account.Id));
         }
@@ -264,10 +265,8 @@ namespace Netsphere
 
             //if (!RoomManager.GameRuleFactory.Contains(options.MatchKey.GameRule))
             //{
-            //    Logger.Error()
-            //        .Account(Master)
-            //        .Message($"Game rule {options.MatchKey.GameRule} does not exist")
-            //        .Write();
+            //    Logger.ForAccount(Master)
+            //        .Error("Game rule {gameRule} does not exist", options.MatchKey.GameRule);
             //    Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
             //    return;
             //}
@@ -275,25 +274,22 @@ namespace Netsphere
             //var map = GameServer.Instance.ResourceCache.GetMaps().GetValueOrDefault(options.MatchKey.Map);
             //if (map == null)
             //{
-            //    Logger.Error()
-            //        .Account(Master)
-            //        .Message($"Map {options.MatchKey.Map} does not exist")
-            //        .Write();
+            //    Logger.ForAccount(Master)
+            //        .Error("Map {map} does not exist", options.MatchKey.Map);
             //    Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
             //    return;
             //}
 
-            //if (!map.GameRules.Contains(options.MatchKey.GameRule))
-            //{
-            //    Logger.Error()
-            //        .Account(Master)
-            //        .Message($"Map {map.Id}({map.Name}) is not available for game rule {options.MatchKey.GameRule}")
-            //        .Write();
+            if (!map.GameRules.Contains(options.MatchKey.GameRule))
+            {
+            //    Logger.ForAccount(Master)
+            //        .Error("Map {mapId}({mapName}) is not available for game rule {gameRule}",
+            //            map.Id, map.Name, options.MatchKey.GameRule);
             //    Master.Session.SendAsync(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
             //    return;
             //}
 
-            //// ToDo check if current player count is not above the new player limit
+            // ToDo check if current player count is not above the new player limit
 
             //_changingRulesTimer = TimeSpan.Zero;
             //IsChangingRules = true;

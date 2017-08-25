@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlubLib.Collections.Concurrent;
 using Netsphere.Network;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Network.Message.Game;

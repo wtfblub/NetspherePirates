@@ -6,14 +6,15 @@ using System.Linq;
 using System.Xml.Serialization;
 using BlubLib.Configuration;
 using Netsphere.Resource.xml;
-using NLog;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Resource
 {
     internal class ResourceLoader
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ResourceLoader));
         public string ResourcePath { get; }
 
         public ResourceLoader(string resourcePath)
@@ -60,7 +61,7 @@ namespace Netsphere.Resource
                 var data = GetBytes(mapDto.bginfo_path);
                 if (data == null)
                 {
-                    Logger.Warn($"bginfo_path:{mapDto.bginfo_path} not found");
+                    Logger.Warning("bginfo_path:{biginfo} not found", mapDto.bginfo_path);
                     continue;
                 }
 
@@ -147,7 +148,7 @@ namespace Netsphere.Resource
                 var name = stringTable.@string.First(s => s.key.Equals(itemEffectDto.text_key, StringComparison.InvariantCultureIgnoreCase));
                 if (string.IsNullOrWhiteSpace(name.eng))
                 {
-                    Logger.Warn($"Missing english translation for item effect {itemEffectDto.text_key}");
+                    Logger.Warning("Missing english translation for item effect {textKey}", itemEffectDto.text_key);
                     name.eng = itemEffectDto.NAME;
                 }
 
@@ -276,7 +277,7 @@ namespace Netsphere.Resource
                         var name = stringTable.@string.FirstOrDefault(s => s.key.Equals(itemDto.@base.base_info.name_key, StringComparison.InvariantCultureIgnoreCase));
                         if (string.IsNullOrWhiteSpace(name?.eng))
                         {
-                            Logger.Warn($"Missing english translation for {(name != null ? itemDto.@base.base_info.name_key : id.ToString())}");
+                            Logger.Warning("Missing english translation for {id}", name != null ? itemDto.@base.base_info.name_key : id.ToString());
                             item.Name = name != null ? name.key : itemDto.NAME;
                         }
                         else
@@ -407,7 +408,7 @@ namespace Netsphere.Resource
         {
             if (itemDto.action == null)
             {
-                Logger.Warn($"Missing action for item {id}");
+                Logger.Warning("Missing action for item {id}", id);
                 return new ItemInfoAction();
             }
 
@@ -431,7 +432,7 @@ namespace Netsphere.Resource
         {
             if (itemDto.weapon == null)
             {
-                Logger.Warn($"Missing weapon for item {id}");
+                Logger.Warning("Missing weapon for item {id}", id);
                 return new ItemInfoWeapon();
             }
 

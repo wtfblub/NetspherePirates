@@ -56,7 +56,7 @@
             this.ProgressBar.Location = new System.Drawing.Point(6, 32);
             this.ProgressBar.Name = "ProgressBar";
             this.ProgressBar.Size = new System.Drawing.Size(337, 16);
-            this.ProgressBar.State = BlubLib.Native.ProgressBarState.Normal;
+            this.ProgressBar.State = BlubLib.WinAPI.ProgressBarState.Normal;
             this.ProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.ProgressBar.TabIndex = 2;
             // 

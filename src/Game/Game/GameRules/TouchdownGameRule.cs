@@ -152,9 +152,9 @@ namespace Netsphere.Game.GameRules
             if (IsInTouchdown)
                 return;
 
-            GetRecord(killer).OffenseScore++;
+            GetRecord(killer).DefenseScore++;
             if (assist != null)
-                GetRecord(assist).OffenseAssistScore++;
+                GetRecord(assist).DefenseAssistScore++;
 
             if (assist != null)
                 Room.Broadcast(new ScoreDefenseAssistAckMessage(new ScoreAssistDto(killer.RoomInfo.PeerId, assist.RoomInfo.PeerId, target.RoomInfo.PeerId, attackAttribute)));
@@ -166,12 +166,12 @@ namespace Netsphere.Game.GameRules
         {
             if (IsInTouchdown)
                 return;
+                
+            if(oldPlr != null)
+                _touchdownAssistHelper.Update(oldPlr);
 
             if (newPlr != null)
-            {
-                _touchdownAssistHelper.Update(oldPlr);
                 GetRecord(newPlr).OffenseReboundScore++;
-            }
 
             Room.Broadcast(new ScoreReboundAckMessage(newPlr?.RoomInfo.PeerId ?? 0, oldPlr?.RoomInfo.PeerId ?? 0));
         }

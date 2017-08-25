@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsAPICodePack.Core.Dialogs.TaskDialogs;
-using BlubLib.Native;
+using BlubLib.WinAPI;
 using NetsphereExplorer.Controls;
 using NetsphereExplorer.Filesystem;
 using NetsphereExplorer.ViewModels;
@@ -23,8 +23,8 @@ namespace NetsphereExplorer.Views
         public FileOperationViewModel ViewModel { get; set; }
         object IViewFor.ViewModel
         {
-            get { return ViewModel; }
-            set { ViewModel = (FileOperationViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (FileOperationViewModel)value;
         }
 
         public FileOperationView(IFilesystem filesystem)

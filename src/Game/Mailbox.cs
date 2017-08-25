@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BlubLib.Collections.Concurrent;
 using Dapper.FastCrud;
 using Netsphere.Database.Auth;
 using Netsphere.Database.Game;
@@ -22,7 +23,7 @@ namespace Netsphere
 
         public Player Player { get; }
         public int Count => _mails.Count;
-        public Mail this[ulong id] => _mails.GetValueOrDefault(id);
+        public Mail this[ulong id] => CollectionExtensions.GetValueOrDefault(_mails, id);
 
         public Mailbox(Player player, PlayerDto dto)
         {

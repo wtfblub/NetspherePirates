@@ -2,18 +2,19 @@
 using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
+using BlubLib.IO;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
-using NLog;
-using NLog.Fluent;
 using ProudNet.Handlers;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network.Services
 {
     internal class ShopService : ProudMessageHandler
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ShopService));
 
         [MessageHandler(typeof(NewShopUpdateCheckReqMessage))]
         public void ShopUpdateCheckHandler(GameSession session, NewShopUpdateCheckReqMessage message)
@@ -135,20 +136,18 @@ namespace Netsphere.Network.Services
                 var shopItemInfo = shop.GetItemInfo(item.ItemNumber, item.PriceType);
                 if (shopItemInfo == null)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"No shop entry found for {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType}")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("No shop entry found for {item}",
+                            new { item.ItemNumber, item.PriceType, item.Period, item.PeriodType });
 
                     session.SendAsync(new ItemBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
                 }
                 if (!shopItemInfo.IsEnabled)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"No shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} is not enabled")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("Shop entry is not enabled {item}",
+                            new { item.ItemNumber, item.PriceType, item.Period, item.PeriodType });
 
                     session.SendAsync(new ItemBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
@@ -158,10 +157,9 @@ namespace Netsphere.Network.Services
                 var price = priceGroup.GetPrice(item.PeriodType, item.Period);
                 if (price == null)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"Invalid price group for shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType}")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("Invalid price group for shop entry {item}",
+                            new { item.ItemNumber, item.PriceType, item.Period, item.PeriodType });
 
                     session.SendAsync(new ItemBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
@@ -169,10 +167,9 @@ namespace Netsphere.Network.Services
 
                 if (!price.IsEnabled)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} is not enabled")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("Shop entry is not enabled {item}",
+                            new { item.ItemNumber, item.PriceType, item.Period, item.PeriodType });
 
                     session.SendAsync(new ItemBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
@@ -180,10 +177,9 @@ namespace Netsphere.Network.Services
 
                 if (item.Color > shopItemInfo.ShopItem.ColorGroup)
                 {
-                    Logger.Error()
-                        .Account(session)
-                        .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} has no color {item.Color}")
-                        .Write();
+                    Logger.ForAccount(session)
+                        .Error("Shop entry has no color {color} {item}",
+                            item.Color, new { item.ItemNumber, item.PriceType, item.Period, item.PeriodType });
 
                     session.SendAsync(new ItemBuyItemAckMessage(ItemBuyResult.UnkownItem));
                     return;
@@ -193,10 +189,9 @@ namespace Netsphere.Network.Services
                 {
                     if (shopItemInfo.EffectGroup.Effects.All(effect => effect.Effect != item.Effect))
                     {
-                        Logger.Error()
-                            .Account(session)
-                            .Message($"Shop entry {item.ItemNumber} {item.PriceType} {item.Period}{item.PeriodType} has no effect {item.Effect}")
-                            .Write();
+                        Logger.ForAccount(session)
+                            .Error("Shop entry has no effect {effect} {item}",
+                                item.Effect, new { item.ItemNumber, item.PriceType, item.Period, item.PeriodType });
 
                         session.SendAsync(new ItemBuyItemAckMessage(ItemBuyResult.UnkownItem));
                         return;
@@ -226,10 +221,8 @@ namespace Netsphere.Network.Services
                         break;
 
                     default:
-                        Logger.Error()
-                            .Account(session)
-                            .Message($"Unknown PriceType {shopItemInfo.PriceGroup.PriceType}")
-                            .Write();
+                        Logger.ForAccount(session)
+                            .Error("Unknown PriceType {priceType}", shopItemInfo.PriceGroup.PriceType);
                         return;
                 }
 

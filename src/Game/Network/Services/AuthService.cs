@@ -12,10 +12,10 @@ using Netsphere.Database.Game;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
-using NLog;
-using NLog.Fluent;
 using ProudNet.Handlers;
 using Netsphere.Resource;
+using Serilog;
+using Serilog.Core;
 
 namespace Netsphere.Network.Services
 {
@@ -23,22 +23,18 @@ namespace Netsphere.Network.Services
     {
         private static readonly Version s_version = new Version(0, 8, 32, 63353);
         // ReSharper disable once InconsistentNaming
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthService));
 
         [MessageHandler(typeof(LoginRequestReqMessage))]
         public async Task LoginHandler(GameSession session, LoginRequestReqMessage message)
         {
-            Logger.Info()
-                .Account(message.AccountId, message.Username)
-                .Message($"Login from {session.RemoteEndPoint}")
-                .Write();
+            Logger.ForAccount(message.AccountId, message.Username)
+                .Information("Login from {remoteEndPoint}", session.RemoteEndPoint);
 
             if (message.Version != s_version)
             {
-                Logger.Error()
-                    .Account(message.AccountId, message.Username)
-                    .Message($"Invalid client version {message.Version}")
-                    .Write();
+                Logger.ForAccount(message.AccountId, message.Username)
+                    .Error("Invalid client version {version}", message.Version);
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.WrongVersion));
                 return;
@@ -46,10 +42,8 @@ namespace Netsphere.Network.Services
 
             if (GameServer.Instance.PlayerManager.Count >= Config.Instance.PlayerLimit)
             {
-                Logger.Error()
-                    .Account(message.AccountId, message.Username)
-                    .Message("Server is full")
-                    .Write();
+                Logger.ForAccount(message.AccountId, message.Username)
+                    .Error("Server is full");
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.ServerFull));
                 return;
@@ -69,10 +63,8 @@ namespace Netsphere.Network.Services
 
             if (accountDto == null)
             {
-                Logger.Error()
-                    .Account(message.AccountId, message.Username)
-                    .Message("Wrong login")
-                    .Write();
+                Logger.ForAccount(message.AccountId, message.Username)
+                    .Error("Wrong login");
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
@@ -81,10 +73,8 @@ namespace Netsphere.Network.Services
             uint inputSessionId;
             if (!uint.TryParse(message.SessionId, out inputSessionId))
             {
-                Logger.Error()
-                    .Account(message.AccountId, message.Username)
-                    .Message("Wrong login")
-                    .Write();
+                Logger.ForAccount(message.AccountId, message.Username)
+                    .Error("Wrong login");
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
@@ -93,10 +83,8 @@ namespace Netsphere.Network.Services
             var sessionId = Hash.GetUInt32<CRC32>($"<{accountDto.Username}+{accountDto.Password}>");
             if (sessionId != inputSessionId)
             {
-                Logger.Error()
-                    .Account(message.AccountId, message.Username)
-                    .Message("Wrong login")
-                    .Write();
+                Logger.ForAccount(message.AccountId, message.Username)
+                    .Error("Wrong login");
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
@@ -107,10 +95,8 @@ namespace Netsphere.Network.Services
             if (ban != null)
             {
                 var unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
-                Logger.Error()
-                    .Account(message.AccountId, message.Username)
-                    .Message($"Banned until {unbanDate}")
-                    .Write();
+                Logger.ForAccount(message.AccountId, message.Username)
+                    .Error("Banned until {unbanDate}", unbanDate);
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.SessionTimeout));
                 return;
@@ -122,10 +108,8 @@ namespace Netsphere.Network.Services
 
             if (account.SecurityLevel < Config.Instance.SecurityLevel)
             {
-                Logger.Error()
-                    .Account(account)
-                    .Message($"No permission to enter this server({Config.Instance.SecurityLevel} or above required)")
-                    .Write();
+                Logger.ForAccount(account)
+                    .Error("No permission to enter this server({securityLevel} or above required)", Config.Instance.SecurityLevel);
 
                 session.SendAsync(new LoginReguestAckMessage((GameLoginResult)9));
                 return;
@@ -133,10 +117,8 @@ namespace Netsphere.Network.Services
 
             if (message.KickConnection)
             {
-                Logger.Info()
-                    .Account(account)
-                    .Message("Kicking old connection")
-                    .Write();
+                Logger.ForAccount(account)
+                    .Information("Kicking old connection");
 
                 var oldPlr = GameServer.Instance.PlayerManager.Get(account.Id);
                 oldPlr?.Disconnect();
@@ -144,10 +126,8 @@ namespace Netsphere.Network.Services
 
             if (GameServer.Instance.PlayerManager.Contains(account.Id))
             {
-                Logger.Error()
-                    .Account(account)
-                    .Message("Already online")
-                    .Write();
+                Logger.ForAccount(account)
+                    .Error("Already online");
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.TerminateOtherConnection));
                 return;
@@ -169,12 +149,12 @@ namespace Netsphere.Network.Services
                 {
                     // first time connecting to this server
                     var expTable = GameServer.Instance.ResourceCache.GetExperience();
-                    Experience expValue ;
+                    Experience expValue;
                     if (!expTable.TryGetValue(Config.Instance.Game.StartLevel, out expValue))
                     {
                         expValue = new Experience();
                         expValue.TotalExperience = 0;
-                        Logger.Warn($"Given start level is not found in the experience table");                        
+                        Logger.Warning("Given start level is not found in the experience table");
                     }
 
                     plrDto = new PlayerDto
@@ -197,10 +177,8 @@ namespace Netsphere.Network.Services
             if (GameServer.Instance.PlayerManager.Contains(session.Player))
             {
                 session.Player = null;
-                Logger.Error()
-                    .Account(account)
-                    .Message("Already online")
-                    .Write();
+                Logger.ForAccount(account)
+                    .Error("Already online");
 
                 session.SendAsync(new LoginReguestAckMessage(GameLoginResult.TerminateOtherConnection));
                 return;
@@ -208,10 +186,8 @@ namespace Netsphere.Network.Services
 
             GameServer.Instance.PlayerManager.Add(session.Player);
 
-            Logger.Info()
-                .Account(account)
-                .Message("Login success")
-                .Write();
+            Logger.ForAccount(account)
+                .Information("Login success");
 
             var result = string.IsNullOrWhiteSpace(account.Nickname)
                 ? GameLoginResult.ChooseNickname
@@ -231,16 +207,15 @@ namespace Netsphere.Network.Services
                 return;
             }
 
-            Logger.Info()
-                .Account(session)
-                .Message($"Checking nickname {message.Nickname}")
-                .Write();
+            Logger.ForAccount(session)
+                .Information("Checking nickname {nickname}", message.Nickname);
 
             var available = await IsNickAvailableAsync(message.Nickname);
-            Logger.Error()
-                .Account(session)
-                .Message($"Nickname not available: {message.Nickname}")
-                .WriteIf(!available);
+            if (!available)
+            {
+                Logger.ForAccount(session)
+                    .Information("Nickname not available: {nickname}", message.Nickname);
+            }
 
             session.SendAsync(new NickCheckAckMessage(!available));
         }
@@ -254,17 +229,13 @@ namespace Netsphere.Network.Services
         //        return;
         //    }
 
-        //    Logger.Info()
-        //        .Account(session)
-        //        .Message($"Creating nickname {message.Nickname}")
-        //        .Write();
+        //    Logger.ForAccount(session)
+        //        .Information("Creating nickname {nickname}", message.Nickname);
 
         //    if (!await IsNickAvailableAsync(message.Nickname))
         //    {
-        //        Logger.Error()
-        //            .Account(session)
-        //            .Message($"Nickname not available: {message.Nickname}")
-        //            .Write();
+        //        Logger.ForAccount(session)
+        //            .Error("Nickname not available: {nickname}", message.Nickname);
 
         //        session.SendAsync(new NickCheckAckMessage(false));
         //        return;
@@ -285,10 +256,8 @@ namespace Netsphere.Network.Services
         //    //session.Send(new SCreateNickAckMessage { Nickname = msg.Nickname });
         //    await session.SendAsync(new ServerResultAckMessage(ServerResult.CreateNicknameSuccess));
 
-        //    Logger.Info()
-        //        .Account(session)
-        //        .Message($"Created nickname {message.Nickname}")
-        //        .Write();
+        //    Logger.ForAccount(session)
+        //        .Information("Created nickname {nickname}", message.Nickname);
 
         //    await LoginAsync(session);
         //}
@@ -359,28 +328,28 @@ namespace Netsphere.Network.Services
 
                     if (itemInfo == null)
                     {
-                        Logger.Warn($"Cant find ShopItemInfo for Start item {startItem.Id} - Forgot to reload the cache?");
+                        Logger.Warning("Cant find ShopItemInfo for Start item {startItemId} - Forgot to reload the cache?", startItem.Id);
                         continue;
                     }
 
                     var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPriceId);
                     if (price == null)
                     {
-                        Logger.Warn($"Cant find ShopPrice for Start item {startItem.Id} - Forgot to reload the cache?");
+                        Logger.Warning("Cant find ShopPrice for Start item {startItemId} - Forgot to reload the cache?", startItem.Id);
                         continue;
                     }
 
                     var color = startItem.Color;
                     if (color > item.ColorGroup)
                     {
-                        Logger.Warn($"Start item {startItem.Id} has an invalid color {color}");
+                        Logger.Warning("Start item {startItemId} has an invalid color {color}", startItem.Id, color);
                         color = 0;
                     }
 
                     var count = startItem.Count;
                     if (count > 0 && item.ItemNumber.Category <= ItemCategory.Skill)
                     {
-                        Logger.Warn($"Start item {startItem.Id} cant have stacks(quantity={count})");
+                        Logger.Warning("Start item {startItemId} cant have stacks(quantity={count})", startItem.Id, count);
                         count = 0;
                     }
 
@@ -446,18 +415,14 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(Message.Chat.LoginReqMessage))]
         public async Task Chat_LoginHandler(ChatServer server, ChatSession session, Message.Chat.LoginReqMessage message)
         {
-            Logger.Info()
-                .Account(message.AccountId, "")
-                .Message($"Login from {session.RemoteEndPoint}")
-                .Write();
+            Logger.ForAccount(message.AccountId, "")
+                .Information("Login from {remoteEndPoint}", session.RemoteEndPoint);
 
             uint sessionId;
             if (!uint.TryParse(message.SessionId, out sessionId))
             {
-                Logger.Error()
-                    .Account(message.AccountId, "")
-                    .Message("Invalid sessionId")
-                    .Write();
+                Logger.ForAccount(message.AccountId, "")
+                    .Error("Invalid sessionId");
                 session.SendAsync(new Message.Chat.LoginAckMessage(2));
                 return;
             }
@@ -465,20 +430,16 @@ namespace Netsphere.Network.Services
             var plr = GameServer.Instance.PlayerManager[message.AccountId];
             if (plr == null)
             {
-                Logger.Error()
-                    .Account(message.AccountId, "")
-                    .Message("Login failed")
-                    .Write();
+                Logger.ForAccount(message.AccountId, "")
+                    .Error("Login failed");
                 session.SendAsync(new Message.Chat.LoginAckMessage(3));
                 return;
             }
 
             if (plr.ChatSession != null)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message("Already online")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("Already online");
                 session.SendAsync(new Message.Chat.LoginAckMessage(4));
                 return;
             }
@@ -486,10 +447,8 @@ namespace Netsphere.Network.Services
             session.GameSession = plr.Session;
             plr.ChatSession = session;
 
-            Logger.Info()
-                .Account(session)
-                .Message("Login success")
-                .Write();
+            Logger.ForAccount(session)
+                .Information("Login success");
             session.SendAsync(new Message.Chat.LoginAckMessage(0));
             session.SendAsync(new Message.Chat.DenyListAckMessage(plr.DenyManager.Select(d => d.Map<Deny, DenyDto>()).ToArray()));
         }
@@ -498,28 +457,22 @@ namespace Netsphere.Network.Services
         public async Task Relay_LoginHandler(RelayServer server, RelaySession session, Message.Relay.CRequestLoginMessage message)
         {
             var ip = session.RemoteEndPoint;
-            Logger.Info()
-                .Account(message.AccountId, "")
-                .Message($"Login from {ip}")
-                .Write();
+            Logger.ForAccount(message.AccountId, "")
+                .Information("Login from {remoteAddress}", ip);
 
             var plr = GameServer.Instance.PlayerManager[message.AccountId];
             if (plr == null)
             {
-                Logger.Error()
-                    .Account(message.AccountId, "")
-                    .Message("Login failed")
-                    .Write();
+                Logger.ForAccount(message.AccountId, "")
+                    .Error("Login failed");
                 session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(1));
                 return;
             }
 
             if (plr.RelaySession != null && plr.RelaySession.IsConnected)
             {
-                Logger.Error()
-                    .Account(session)
-                    .Message("Already online")
-                    .Write();
+                Logger.ForAccount(session)
+                    .Error("Already online");
                 session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(2));
                 return;
             }
@@ -527,20 +480,16 @@ namespace Netsphere.Network.Services
             var gameIp = plr.Session.RemoteEndPoint;
             if (!gameIp.Address.Equals(ip.Address))
             {
-                Logger.Error()
-                    .Account(message.AccountId, "")
-                    .Message("Suspicious login")
-                    .Write();
+                Logger.ForAccount(message.AccountId, "")
+                    .Error("Suspicious login");
                 session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(3));
                 return;
             }
 
             if (plr.Room == null || plr.Room?.Id != message.RoomLocation.RoomId)
             {
-                Logger.Error()
-                    .Account(message.AccountId, "")
-                    .Message("Suspicious login(Not in a room/Invalid room id)")
-                    .Write();
+                Logger.ForAccount(message.AccountId, "")
+                    .Error("Suspicious login(Not in a room/Invalid room id)");
                 session.SendAsync(new Message.Relay.SNotifyLoginResultMessage(4));
                 return;
             }
@@ -548,10 +497,8 @@ namespace Netsphere.Network.Services
             session.GameSession = plr.Session;
             plr.RelaySession = session;
 
-            Logger.Info()
-                .Account(session)
-                .Message("Login success")
-                .Write();
+            Logger.ForAccount(session)
+                .Information("Login success");
 
             await session.SendAsync(new Message.Relay.SEnterLoginPlayerMessage(plr.RoomInfo.Slot, plr.Account.Id, plr.Account.Nickname));
             foreach (var p in plr.Room.Players.Values.Where(p => p.RelaySession?.P2PGroup != null && p.Account.Id != plr.Account.Id))
