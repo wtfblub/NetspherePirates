@@ -9,7 +9,10 @@ namespace ProudNet.Serialization.Messages.Core
     internal class NotifyCSEncryptedSessionKeyMessage : ICoreMessage
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
-        public byte[] Key { get; set; }
+        public byte[] SecureKey { get; set; }
+
+        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        public byte[] FastKey { get; set; }
     }
 
     [BlubContract]

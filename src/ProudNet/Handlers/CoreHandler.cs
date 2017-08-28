@@ -2,12 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using BlubLib.Collections.Generic;
 using BlubLib.Collections.Concurrent;
 using BlubLib.DotNetty;
 using BlubLib.DotNetty.Handlers.MessageHandling;
-using BlubLib.IO;
+using BlubLib.Security.Cryptography;
 using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
 using ProudNet.Codecs;
@@ -31,7 +30,13 @@ namespace ProudNet.Handlers
         public void RmiMessage(IChannelHandlerContext context, RmiMessage message)
         {
             var buffer = Unpooled.WrappedBuffer(message.Data);
-            context.FireChannelRead(buffer);
+            try
+            {
+                context.FireChannelRead(buffer);
+            }
+            catch (Exception e)
+            {
+            }
         }
 
         [MessageHandler(typeof(CompressedMessage))]
@@ -65,36 +70,20 @@ namespace ProudNet.Handlers
             var buffer = context.Allocator.Buffer(message.Data.Length);
             using (var src = new MemoryStream(message.Data))
             using (var dst = new WriteOnlyByteBufferStream(buffer, false))
-                crypt.Decrypt(src, dst, true);
+                crypt.Decrypt(context.Allocator, message.EncryptMode, src, dst, true);
 
             context.Channel.Pipeline.Context<ProudFrameDecoder>().FireChannelRead(buffer);
         }
 
         [MessageHandler(typeof(NotifyCSEncryptedSessionKeyMessage))]
-        public void NotifyCSEncryptedSessionKeyMessage(IChannelHandlerContext context, ProudSession session, NotifyCSEncryptedSessionKeyMessage message)
+        public void NotifyCSEncryptedSessionKeyMessage(ProudServer server, ProudSession session, NotifyCSEncryptedSessionKeyMessage message)
         {
-            using (var rsa = new RSACryptoServiceProvider(1024))
-            {
-                rsa.ImportCspBlob(message.Key);
-                session.Crypt = new Crypt(_server.Configuration.EncryptedMessageKeyLength);
+            var secureKey = server.Rsa.Decrypt(message.SecureKey, true);
+            session.Crypt = new Crypt(secureKey);
 
-                byte[] blob;
-                using (var w = new MemoryStream().ToBinaryWriter(false))
-                {
-                    w.Write((byte)1);
-                    w.Write((byte)2);
-                    w.Write((byte)0);
-                    w.Write((byte)0);
-                    w.Write(26625);
-                    w.Write(41984);
-
-                    var encrypted = rsa.Encrypt(session.Crypt.RC4.Key, false);
-                    w.Write(encrypted.Reverse());
-                    blob = w.ToArray();
-                }
-
-                session.SendAsync(new NotifyCSSessionKeySuccessMessage(blob));
-            }
+            var fastKey = session.Crypt.AES.Decrypt(message.FastKey);
+            session.Crypt.InitializeFastEncryption(fastKey);
+            session.SendAsync(new NotifyCSSessionKeySuccessMessage());
         }
 
         [MessageHandler(typeof(NotifyServerConnectionRequestDataMessage))]
