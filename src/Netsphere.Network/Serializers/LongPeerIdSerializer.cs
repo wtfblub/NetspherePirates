@@ -7,7 +7,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class LongPeerIdSerializer : ISerializerCompiler
+    public class LongPeerIdSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type) => type == typeof(LongPeerId);
 

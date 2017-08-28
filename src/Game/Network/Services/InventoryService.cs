@@ -15,6 +15,15 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(ItemUseItemReqMessage))]
         public void UseItemHandler(GameSession session, ItemUseItemReqMessage message)
         {
+            // This is a weird thing since newer seasons
+            // The client sends a request with itemid 0 on login
+            // and requires an answer to it for equipment to work properly
+            if (message.Action == UseItemAction.UnEquip && message.ItemId == 0)
+            {
+                session.SendAsync(new ItemUseItemAckMessage(message.Action, message.CharacterSlot, message.EquipSlot, message.ItemId));
+                return;
+            }
+
             var plr = session.Player;
             var @char = plr.CharacterManager[message.CharacterSlot];
             var item = plr.Inventory[message.ItemId];
@@ -185,3 +194,4 @@ namespace Netsphere.Network.Services
         }
     }
 }
+

@@ -82,8 +82,7 @@
         Gloves = 4,
         Shoes = 5,
         Accessory = 6,
-        Max = 7
-        //Pet = 7,
+        Pet = 7
     }
 
     public enum WeaponSlot : byte
@@ -587,5 +586,16 @@
     {
         Channel = 0,
         Club = 1
+    }
+
+    public enum WeaponCategory
+    {
+        Melee = 0,
+        RifleGun = 1,
+        HeavyGun = 2,
+        Sniper = 3,
+        Sentry = 4,
+        Bomb = 5,
+        Mind = 6
     }
 }

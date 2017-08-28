@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class TimeSpanSerializer : ISerializerCompiler
+    public class TimeSpanSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {

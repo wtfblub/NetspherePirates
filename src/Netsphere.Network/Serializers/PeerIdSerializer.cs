@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class PeerIdSerializer : ISerializerCompiler
+    public class PeerIdSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type) => type == typeof(PeerId);
 

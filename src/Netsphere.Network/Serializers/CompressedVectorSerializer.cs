@@ -7,7 +7,7 @@ using SlimMath;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class CompressedVectorSerializer : ISerializerCompiler
+    public class CompressedVectorSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {

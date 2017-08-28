@@ -4,7 +4,7 @@ using BlubLib.Serialization;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class UnixTimeSerializer : ISerializer<DateTimeOffset>
+    public class UnixTimeSerializer : ISerializer<DateTimeOffset>
     {
         public bool CanHandle(Type type)
         {

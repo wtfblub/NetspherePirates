@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class ArrayWithShortPrefixSerializer : ISerializerCompiler
+    public class ArrayWithShortPrefixSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {

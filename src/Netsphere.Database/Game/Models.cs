@@ -190,6 +190,8 @@ namespace Netsphere.Database.Game
         public byte RequiredMasterLevel { get; set; }
         public bool IsOneTimeUse { get; set; }
         public bool IsDestroyable { get; set; }
+        public byte MainTab { get; set; }
+        public byte SubTab { get; set; }
 
         public IList<ShopItemInfoDto> ItemInfos { get; set; } = new List<ShopItemInfoDto>();
     }

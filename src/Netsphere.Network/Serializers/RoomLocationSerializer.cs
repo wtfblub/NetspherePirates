@@ -7,7 +7,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class RoomLocationSerializer : ISerializerCompiler
+    public class RoomLocationSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {

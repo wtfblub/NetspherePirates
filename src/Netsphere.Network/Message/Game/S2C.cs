@@ -226,6 +226,17 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(3)]
         public UseItemAction Action { get; set; }
+
+        public ItemUseItemAckMessage()
+        { }
+
+        public ItemUseItemAckMessage(UseItemAction action, byte characterSlot, byte equipSlot, ulong itemId)
+        {
+            CharacterSlot = characterSlot;
+            EquipSlot = equipSlot;
+            ItemId = itemId;
+            Action = action;
+        }
     }
 
     [BlubContract]

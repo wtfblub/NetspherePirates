@@ -5,7 +5,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class RotationVectorSerializer : ISerializerCompiler
+    public class RotationVectorSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {

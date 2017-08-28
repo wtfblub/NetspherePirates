@@ -89,7 +89,7 @@ namespace Netsphere
             w.Write(value.Count);
             foreach (var group in value)
             {
-                w.WriteProudString(@group.Id.ToString());
+                w.Write(@group.Id);
 
                 w.Write(group.Effects.Count);
                 foreach (var effect in group.Effects)
@@ -128,6 +128,9 @@ namespace Netsphere
                 w.Write(0); // RepairCost
                 w.Write(item.IsOneTimeUse);
                 w.Write(item.IsDestroyable);
+                w.Write((ushort)item.MainTab);
+                w.Write((ushort)item.SubTab);
+                w.Write((ushort)0); // shop_order
 
                 w.Write(item.ItemInfos.Count);
                 foreach (var info in item.ItemInfos)
@@ -136,7 +139,7 @@ namespace Netsphere
                     w.WriteEnum(info.PriceGroup.PriceType);
                     w.Write((ushort)info.Discount);
                     w.WriteProudString(info.PriceGroup.Id.ToString());
-                    w.WriteProudString(info.EffectGroup.Effects.Count > 0 ? info.EffectGroup.Id.ToString() : "");
+                    w.Write(info.EffectGroup.Effects.Count > 0 ? info.EffectGroup.Id : 0);
                 }
             }
         }
@@ -152,10 +155,10 @@ namespace Netsphere
         //        w.Write((ushort)item.discount);
         //        w.Write((uint)item.period_type);
         //        w.Write((ushort)item.period);
-        //        w.Write(item.color);
+        //        w.Write((byte)item.color);
         //        w.WriteProudString(item.is_enabled > 0 ? "on" : "off");
         //        w.Write(item.can_refund);
-        //        w.Write(item.reward);
+        //        w.Write((int)item.reward);
         //        w.WriteProudString(""); // ToDo StartDate
         //        w.WriteProudString(""); // ToDo EndDate
         //    }

@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class ArrayWithIntPrefixSerializer : ISerializerCompiler
+    public class ArrayWithIntPrefixSerializer : ISerializerCompiler
     {
         private readonly ISerializer _serializer;
         private readonly ISerializerCompiler _compiler;

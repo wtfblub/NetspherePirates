@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class ItemNumberSerializer : ISerializerCompiler
+    public class ItemNumberSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type) => type == typeof(ItemNumber);
 

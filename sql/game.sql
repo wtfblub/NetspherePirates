@@ -245,6 +245,8 @@ CREATE TABLE `shop_items` (
   `RequiredMasterLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `IsOneTimeUse` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `IsDestroyable` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `MainTab` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `SubTab` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

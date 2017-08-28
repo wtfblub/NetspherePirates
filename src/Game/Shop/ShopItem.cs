@@ -18,6 +18,8 @@ namespace Netsphere.Shop
         //public int RepairCost { get; set; }
         public bool IsOneTimeUse { get; set; }
         public bool IsDestroyable { get; set; }
+        public byte MainTab { get; set; }
+        public byte SubTab { get; set; }
         public IList<ShopItemInfo> ItemInfos { get; set; }
 
         public ShopItem(ShopItemDto dto, ShopResources shopResources)
@@ -33,6 +35,8 @@ namespace Netsphere.Shop
             //RepairCost = dto.repair_cost;
             IsOneTimeUse = dto.IsOneTimeUse;
             IsDestroyable = dto.IsDestroyable;
+            MainTab = dto.MainTab;
+            SubTab = dto.SubTab;
             ItemInfos = dto.ItemInfos.Select(i => new ShopItemInfo(this, i, shopResources)).ToList();
         }
 

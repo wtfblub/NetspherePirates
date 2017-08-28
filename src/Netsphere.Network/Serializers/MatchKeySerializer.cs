@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class MatchKeySerializer : ISerializerCompiler
+    public class MatchKeySerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type) => type == typeof(MatchKey);
 

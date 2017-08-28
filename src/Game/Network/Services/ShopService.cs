@@ -1,9 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.IO;
-using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using ProudNet.Handlers;
 using Serilog;
@@ -107,18 +107,6 @@ namespace Netsphere.Network.Services
                 session.SendAsync(new NewShopUpdataInfoAckMessage
                 {
                     Type = ShopResourceType.NewShopUniqueItem,
-                    Data = w.ToArray(),
-                    Date = version
-                });
-            }
-
-            using (var w = new BinaryWriter(new MemoryStream()))
-            {
-                w.Write(new byte[200]);
-
-                session.SendAsync(new NewShopUpdataInfoAckMessage
-                {
-                    Type = (ShopResourceType)16,
                     Data = w.ToArray(),
                     Date = version
                 });

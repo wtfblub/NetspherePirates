@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class CompressedFloatSerializer : ISerializerCompiler
+    public class CompressedFloatSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {

@@ -30,7 +30,7 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
-            
+
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
             var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
             Log.Logger = new LoggerConfiguration()
@@ -146,13 +146,16 @@ namespace Netsphere
                     var effects = new Dictionary<string, Tuple<uint[], int>>
                     {
                         {"None", Tuple.Create(Array.Empty<uint>(), 0)},
-                        {"HP+30", Tuple.Create(new uint[] {1030}, 0)},
-                        {"HP+15", Tuple.Create(new uint[] {1015}, 0)},
-                        {"SP+40", Tuple.Create(new uint[] {2040}, 0)},
-                        {"HP+20 & SP+20", Tuple.Create(new uint[] {4001}, 0)},
-                        {"SP+3", Tuple.Create(new uint[] {2003}, 0)},
-                        {"Defense+7", Tuple.Create(new uint[] {19907}, 0)},
-                        {"HP+3", Tuple.Create(new uint[] {1003}, 0)}
+                        {"Shooting Weapon Defense (Head) +5%", Tuple.Create(new uint[]{1100313003,1100315003,1100317003}, 0) },
+                        {"SP+6", Tuple.Create(new uint[] {1101301006}, 0)},
+                        {"Attack+1%", Tuple.Create(new uint[] {1102303001}, 0)},
+                        {"Attack+5%", Tuple.Create(new uint[] {1102303003}, 0)},
+                        {"Defense+5%", Tuple.Create(new uint[] {1103302004}, 0)},
+                        {"HP+4", Tuple.Create(new uint[] {1105300004}, 0)},
+                        {"HP+30", Tuple.Create(new uint[] {1999300011}, 0)},
+                        {"HP+15", Tuple.Create(new uint[] {1999300009}, 0)},
+                        {"SP+40", Tuple.Create(new uint[] {1300301012}, 0)},
+                        {"HP+20 & SP+20", Tuple.Create(new uint[] {1999300010, 1999301011}, 0)}
                     };
 
                     #region Effects
@@ -199,13 +202,50 @@ namespace Netsphere
                     {
                         var item = items[i];
                         var effectToUse = effects["None"];
+                        byte mainTab = 4;
+                        byte subTab = 1;
 
                         switch (item.ItemNumber.Category)
                         {
                             case ItemCategory.Weapon:
+                                effectToUse = effects["Attack+1%"];
+                                mainTab = 2;
+
+                                switch ((WeaponCategory)item.ItemNumber.SubCategory)
+                                {
+                                    case WeaponCategory.Melee:
+                                        subTab = 1;
+                                        break;
+
+                                    case WeaponCategory.RifleGun:
+                                        subTab = 2;
+                                        break;
+
+                                    case WeaponCategory.HeavyGun:
+                                        subTab = 4;
+                                        break;
+
+                                    case WeaponCategory.Sniper:
+                                        subTab = 5;
+                                        break;
+
+                                    case WeaponCategory.Sentry:
+                                        subTab = 6;
+                                        break;
+
+                                    case WeaponCategory.Bomb:
+                                        subTab = 7;
+                                        break;
+
+                                    case WeaponCategory.Mind:
+                                        subTab = 6;
+                                        break;
+                                }
                                 break;
 
                             case ItemCategory.Skill:
+                                mainTab = 2;
+                                subTab = 8;
                                 if (item.ItemNumber.SubCategory == 0 && item.ItemNumber.Number == 0) // half hp mastery
                                     effectToUse = effects["HP+15"];
 
@@ -221,23 +261,43 @@ namespace Netsphere
                                 break;
 
                             case ItemCategory.Costume:
-                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Hair)
-                                    effectToUse = effects["Defense+7"];
+                                mainTab = 3;
+                                subTab = (byte)(item.ItemNumber.SubCategory + 2);
+                                switch ((CostumeSlot)item.ItemNumber.SubCategory)
+                                {
+                                    case CostumeSlot.Hair:
+                                        effectToUse = effects["Shooting Weapon Defense (Head) +5%"];
+                                        break;
 
-                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Face)
-                                    effectToUse = effects["SP+3"];
+                                    case CostumeSlot.Face:
+                                        effectToUse = effects["SP+6"];
+                                        break;
 
-                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Pants)
-                                    effectToUse = effects["Defense+7"];
+                                    case CostumeSlot.Shirt:
+                                        effectToUse = effects["Attack+5%"];
+                                        break;
 
-                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Gloves)
-                                    effectToUse = effects["HP+3"];
+                                    case CostumeSlot.Pants:
+                                        effectToUse = effects["Defense+5%"];
+                                        break;
 
-                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Shoes)
-                                    effectToUse = effects["HP+3"];
+                                    case CostumeSlot.Gloves:
+                                        effectToUse = effects["HP+4"];
+                                        break;
 
-                                if (item.ItemNumber.SubCategory == (int)CostumeSlot.Accessory)
-                                    effectToUse = effects["SP+3"];
+                                    case CostumeSlot.Shoes:
+                                        effectToUse = effects["HP+4"];
+                                        break;
+
+                                    case CostumeSlot.Accessory:
+                                        effectToUse = effects["SP+6"];
+                                        break;
+
+                                    case CostumeSlot.Pet:
+                                        effectToUse = effects["SP+6"];
+                                        break;
+                                }
+
                                 break;
 
                             default:
@@ -249,7 +309,9 @@ namespace Netsphere
                             Id = item.ItemNumber,
                             RequiredGender = (byte)item.Gender,
                             RequiredLicense = (byte)item.License,
-                            IsDestroyable = true
+                            IsDestroyable = true,
+                            MainTab = mainTab,
+                            SubTab = subTab
                         };
                         db.Insert(shopItem, statement => statement.AttachToTransaction(transaction));
 

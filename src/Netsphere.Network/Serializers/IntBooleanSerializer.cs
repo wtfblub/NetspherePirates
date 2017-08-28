@@ -6,7 +6,7 @@ using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class IntBooleanSerializer : ISerializerCompiler
+    public class IntBooleanSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {
