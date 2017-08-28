@@ -86,6 +86,15 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(14)]
         public CPTStatsDto CPTStats { get; set; }
 
+        [BlubMember(15)]
+        public uint Unk5 { get; set; }
+
+        [BlubMember(16)]
+        public uint Unk6 { get; set; }
+
+        [BlubMember(17)]
+        public uint Unk7 { get; set; }
+
         public SBeginAccountInfoAckMessage()
         {
             DMStats = new DMStatsDto();
@@ -233,19 +242,15 @@ namespace Netsphere.Network.Message.Game
         public CharacterStyle Style { get; set; }
 
         [BlubMember(2)]
-        public byte MaxSkills { get; set; }
+        public byte Unk1 { get; set; }
 
         [BlubMember(3)]
-        public byte MaxWeapons { get; set; }
+        public byte Unk2 { get; set; }
 
         public SSuccessCreateCharacterAckMessage()
-        {
-            MaxSkills = 1;
-            MaxWeapons = 3;
-        }
+        { }
 
         public SSuccessCreateCharacterAckMessage(byte slot, CharacterStyle style)
-            : this()
         {
             Slot = slot;
             Style = style;
@@ -723,10 +728,10 @@ namespace Netsphere.Network.Message.Game
     public class SRefundItemAckMessage : IGameMessage
     {
         [BlubMember(0)]
-        public ItemRefundResult Result { get; set; }
+        public ulong ItemId { get; set; }
 
         [BlubMember(1)]
-        public ulong ItemId { get; set; }
+        public ItemRefundResult Result { get; set; }
     }
 
     [BlubContract]
@@ -842,14 +847,6 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(2)]
         public ulong Unk3 { get; set; }
-    }
-
-    [BlubContract]
-    [Obsolete("This handler is empty inside the client")]
-    public class SEnableAccountStatusAckMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        public uint Unk { get; set; }
     }
 
     [BlubContract]

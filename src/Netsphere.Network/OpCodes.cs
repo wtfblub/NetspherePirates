@@ -83,8 +83,8 @@
         CRepairItemReq = 50023,
         CRefundItemReq = 50024,
         CAdminActionReq = 50025,
-        //CGameGuardAuthReq = 50026,
-        //CHShieldMakeResponseReq = 50027,
+        CGameGuardAuthReq = 50026,
+        CHShieldMakeResponseReq = 50027,
         CActiveEquipPresetReq = 50028,
         CLicensedReq = 50029,
         CClubNoticeChangeReq = 50030,
@@ -97,7 +97,7 @@
         CRandomShopItemGetReq = 50037,
         CRandomShopItemSaleReq = 50038,
         CExerciseLicenceReq = 50039,
-        CUseCoinReqGS = 50040,
+        CUseCoinReq = 50040,
         CApplyEsperChipItemReq = 50041,
         CBadUserReq = 50042,
         CClubJoinReq = 50043,
@@ -168,12 +168,11 @@
         SAdminShowWindowAck = 60045,
         SNoticeMessageAck = 60046,
         SCharacterSlotInfoAck = 60047,
-        //SGameGuardAuthAck = 60048,
-        //SHShieldMakeResponseAck = 60049,
+        SGameGuardAuthAck = 60048,
+        SHShieldMakeResponseAck = 60049,
         SRefreshInvalidEquipItemAck = 60050,
         SClearInvalidateItemAck = 60051,
         SRefreshItemTimeInfoAck = 60052,
-        SEnableAccountStatusAck = 60053,
         SActiveEquipPresetAck = 60054,
         SMyLicenseInfoAck = 60055,
         SLicensedAck = 60056,
@@ -216,7 +215,7 @@
         SIngameEquipCheckAck = 60093,
         SUseCoinRandomShopChanceAck = 60094,
         SChangeNickCancelAck = 60095,
-        SEventRewardAck = 60096,
+        SEventRewardAck = 60096
 
         #endregion
     }
@@ -344,7 +343,7 @@
         SCompulsionLeaveActionAck = 21068,
         SCaptainLifeRoundSetUpAck = 21069,
         SCaptainSubRoundEndReasonAck = 21070,
-        SCurrentRoundInformationAck = 21071,
+        SCurrentRoundInformationAck = 21071
 
         #endregion
     }
@@ -355,17 +354,17 @@
         CNotifyP2PLog = 10002,
 
         SNotifyLoginResult = 11001,
-        SEnterLoginPlayer = 11002,
+        SEnterLoginPlayer = 11002
     }
 
     public enum EventOpCode : ushort
     {
-        Chat = 20001,
+        Chat = 12001,
         EventMessage = 20002,
         ChangeTarget = 20003,
         ArcadeSync = 20004,
         ArcadeSyncReq = 20005,
-        Packet = 20006,
+        Packet = 20006
     }
 
     public enum P2POpCode : byte
@@ -410,6 +409,6 @@
         ReflectRate = 40,
         ConditionInfo = 41,
         AbilityChangeSync = 42,
-        HealHP = 43,
+        HealHP = 43
     }
 }
