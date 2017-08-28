@@ -1,3 +1,5 @@
+# THIS BRANCH IS FOR TESTING ONLY. DO NOT OPEN ISSUES FOR THIS BRANCH!
+
 # NetspherePirates
 Experimental S4 League server emulator for eu version 1184(Season 4).
 
