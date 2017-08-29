@@ -29,8 +29,8 @@ namespace ProudNet.Serialization
         [BlubMember(7)]
         public int EncryptedMessageKeyLength { get; set; }
 
-        [BlubMember(8)]
-        public uint FastEncryptedMessageKeyLength { get; set; }
+        //[BlubMember(8)]
+        //public uint FastEncryptedMessageKeyLength { get; set; }
 
         [BlubMember(9)]
         public bool AllowServerAsP2PGroupMember { get; set; }
@@ -43,14 +43,14 @@ namespace ProudNet.Serialization
 
         [BlubMember(12)]
         public bool UpnpTcpAddrPortMapping { get; set; }
-        
+
         [BlubMember(13)]
+        public uint EmergencyLogLineCount { get; set; }
+        
+        [BlubMember(14)]
         public bool EnableLookaheadP2PSend { get; set; }
 
-        [BlubMember(14)]
-        public bool EnablePingTest { get; set; }
-
         [BlubMember(15)]
-        public uint EmergencyLogLineCount { get; set; }
+        public bool EnablePingTest { get; set; }
     }
 }

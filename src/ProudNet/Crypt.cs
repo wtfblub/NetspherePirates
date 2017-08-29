@@ -18,9 +18,8 @@ namespace ProudNet
         private int _decryptCounter;
 
         public SymmetricAlgorithm AES { get; private set; }
-        public SymmetricAlgorithm RC4 { get; private set; }
         
-        public Crypt(int keySize, int fastKeySize)
+        public Crypt(int keySize)
         {
             if (keySize == 0)
             {
@@ -44,20 +43,6 @@ namespace ProudNet
                 };
                 AES.GenerateKey();
             }
-
-            if (fastKeySize == 0)
-            {
-                RC4 = new RC4
-                {
-                    KeySize = s_defaultKey.Length * 8,
-                    Key = s_defaultKey
-                };
-            }
-            else
-            {
-                RC4 = new RC4 { KeySize = fastKeySize };
-                RC4.GenerateKey();
-            }
         }
 
         public Crypt(byte[] secureKey)
@@ -72,20 +57,8 @@ namespace ProudNet
             };
         }
 
-        internal void InitializeFastEncryption(byte[] key)
-        {
-            RC4 = new RC4
-            {
-                KeySize = key.Length * 8,
-                Key = key
-            };
-        }
-
         public void Encrypt(IByteBufferAllocator allocator, EncryptMode mode, Stream src, Stream dst, bool reliable)
         {
-            if (RC4 == null)
-                throw new ObjectDisposedException(GetType().FullName);
-
             using (var data = new BufferWrapper(allocator.Buffer().WithOrder(ByteOrder.LittleEndian)))
             using (var encryptor = GetAlgorithm(mode).CreateEncryptor())
             using (var cs = new CryptoStream(new NonClosingStream(dst), encryptor, CryptoStreamMode.Write))
@@ -118,9 +91,6 @@ namespace ProudNet
 
         public void Decrypt(IByteBufferAllocator allocator, EncryptMode mode, Stream src, Stream dst, bool reliable)
         {
-            if (RC4 == null)
-                throw new ObjectDisposedException(GetType().FullName);
-
             using (var data = new BufferWrapper(allocator.Buffer().WithOrder(ByteOrder.LittleEndian)))
             using (var decryptor = GetAlgorithm(mode).CreateDecryptor())
             using (var cs = new CryptoStream(src, decryptor, CryptoStreamMode.Read))
@@ -159,21 +129,12 @@ namespace ProudNet
                 AES.Dispose();
                 AES = null;
             }
-
-            if (RC4 != null)
-            {
-                RC4.Dispose();
-                RC4 = null;
-            }
         }
 
         private SymmetricAlgorithm GetAlgorithm(EncryptMode mode)
         {
             switch (mode)
             {
-                case EncryptMode.Fast:
-                    return RC4;
-
                 case EncryptMode.Secure:
                     return AES;
 

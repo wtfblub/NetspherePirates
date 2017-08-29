@@ -80,9 +80,6 @@ namespace ProudNet.Handlers
         {
             var secureKey = server.Rsa.Decrypt(message.SecureKey, true);
             session.Crypt = new Crypt(secureKey);
-
-            var fastKey = session.Crypt.AES.Decrypt(message.FastKey);
-            session.Crypt.InitializeFastEncryption(fastKey);
             session.SendAsync(new NotifyCSSessionKeySuccessMessage());
         }
 

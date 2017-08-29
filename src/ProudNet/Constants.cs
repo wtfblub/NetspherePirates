@@ -155,7 +155,7 @@ namespace ProudNet
 
     internal static class Constants
     {
-        public const uint NetVersion = 196980;
+        public const uint NetVersion = 196977;
         public const short NetMagic = 0x5713;
         public static readonly Encoding Encoding = Encoding.GetEncoding("Windows-1252");
     }

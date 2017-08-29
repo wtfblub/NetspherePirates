@@ -10,9 +10,6 @@ namespace ProudNet.Serialization.Messages.Core
     {
         [BlubMember(0, typeof(ArrayWithScalarSerializer))]
         public byte[] SecureKey { get; set; }
-
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
-        public byte[] FastKey { get; set; }
     }
 
     [BlubContract]
