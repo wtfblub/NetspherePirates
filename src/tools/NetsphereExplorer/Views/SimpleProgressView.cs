@@ -9,7 +9,7 @@ namespace NetsphereExplorer.Views
     {
         public string Message
         {
-            get { return InfoLabel.Text; }
+            get => InfoLabel.Text;
             set
             {
                 InfoLabel.InvokeIfRequired(() =>
@@ -21,7 +21,7 @@ namespace NetsphereExplorer.Views
         }
         public int Progress
         {
-            get { return ProgressBar.Value; }
+            get => ProgressBar.Value;
             set
             {
                 ProgressBar.InvokeIfRequired(() =>

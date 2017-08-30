@@ -49,6 +49,8 @@
             this.cmExplorerSelection = new System.Windows.Forms.ContextMenu();
             this.cmExplorer = new System.Windows.Forms.ContextMenu();
             this.overlay = new NetsphereExplorer.Controls.Overlay();
+            this.menuItem2 = new System.Windows.Forms.MenuItem();
+            this.miCleaner = new System.Windows.Forms.MenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -59,7 +61,8 @@
             // mainMenu
             // 
             this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItem1});
+            this.menuItem1,
+            this.menuItem2});
             // 
             // menuItem1
             // 
@@ -205,6 +208,18 @@
             this.overlay.Owner = this;
             this.overlay.View = null;
             // 
+            // menuItem2
+            // 
+            this.menuItem2.Index = 1;
+            this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.miCleaner});
+            this.menuItem2.Text = "Tools";
+            // 
+            // miCleaner
+            // 
+            this.miCleaner.Index = 0;
+            this.miCleaner.Text = "Cleaner";
+            // 
             // MainView
             // 
             this.AllowDrop = true;
@@ -249,6 +264,8 @@
         private System.Windows.Forms.MenuItem miRemoveItems;
         private System.Windows.Forms.ContextMenu cmExplorer;
         private System.Windows.Forms.MenuItem miAddFiles;
+        private System.Windows.Forms.MenuItem menuItem2;
+        private System.Windows.Forms.MenuItem miCleaner;
     }
 }
 

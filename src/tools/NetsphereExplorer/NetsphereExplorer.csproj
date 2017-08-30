@@ -16,6 +16,7 @@
         <PackageReference Include="reactiveui-winforms" Version="6.5.0" />
         <PackageReference Include="Splat" Version="1.6.2" />
         <Reference Include="..\..\..\libs\WindowsAPICodePack.dll" />
+        <Reference Include="System.Windows.Forms" />
         <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" />
     </ItemGroup>
     <ItemGroup>
@@ -30,6 +31,8 @@
     <ItemGroup>
         <Compile Update="Controls\*.cs" SubType="UserControl" />
         <Compile Update="Views\*View.cs" SubType="Form" />
+        <Compile Update="Views\CleanerView.Designer.cs" DependentUpon="CleanerView.cs" />
+        <EmbeddedResource Include="Views\CleanerView.resx" DependentUpon="CleanerView.cs" />
         <Compile Update="Views\FileOperationView.Designer.cs" DependentUpon="FileOperationView.cs" />
         <EmbeddedResource Include="Views\FileOperationView.resx" DependentUpon="FileOperationView.cs" />
         <Compile Update="Views\MainView.Designer.cs" DependentUpon="MainView.cs" />

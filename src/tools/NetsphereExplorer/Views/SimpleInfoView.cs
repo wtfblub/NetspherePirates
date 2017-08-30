@@ -10,7 +10,7 @@ namespace NetsphereExplorer.Views
 
         public string Message
         {
-            get { return _message; }
+            get => _message;
             set
             {
                 _message = value;
