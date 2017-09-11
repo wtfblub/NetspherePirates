@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <LanguageTargets>$(MSBuildExtensionsPath)\$(VisualStudioVersion)\Bin\Microsoft.CSharp.targets</LanguageTargets>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net461</TargetFramework>
         <GenerateAssemblyInfo>True</GenerateAssemblyInfo>

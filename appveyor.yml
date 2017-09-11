@@ -1,0 +1,43 @@
+version: 0.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+skip_tags: true
+image: Visual Studio 2017
+build_script:
+- cmd: >-
+    dotnet restore
+
+    dotnet build -c DebugNoTools
+
+    dotnet build -c ReleaseNoTools
+
+    msbuild /p:Configuration=DebugOnlyTools
+
+    msbuild /p:Configuration=ReleaseOnlyTools
+
+    xcopy /S src\Auth\bin\Debug\netcoreapp2.0\* build_debug\auth\
+
+    xcopy /S src\Game\bin\Debug\netcoreapp2.0\* build_debug\game\
+
+    xcopy /S src\Auth\bin\Release\netcoreapp2.0\* build_release\auth\
+
+    xcopy /S src\Game\bin\Release\netcoreapp2.0\* build_release\game\
+
+    xcopy /S src\tools\DataExtractor\bin\Debug\net461\*.exe build_debug\tools\extractor\
+
+    xcopy /S src\tools\NetsphereExplorer\bin\Debug\net461\*.exe build_debug\tools\NetsphereExplorer\
+
+    xcopy /S src\tools\DataExtractor\bin\Release\net461\*.exe build_release\tools\extractor\
+
+    xcopy /S src\tools\NetsphereExplorer\bin\Release\net461\*.exe build_release\tools\NetsphereExplorer\
+
+    7z a binaries_debug.zip %APPVEYOR_BUILD_FOLDER%\build_debug\*
+
+    7z a binaries_release.zip %APPVEYOR_BUILD_FOLDER%\build_release\*
+test: off
+artifacts:
+- path: binaries_debug.zip
+  name: netspherepirates
+- path: binaries_release.zip
+  name: netspherepirates
+deploy: off
