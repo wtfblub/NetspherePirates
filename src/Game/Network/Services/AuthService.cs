@@ -23,7 +23,7 @@ namespace Netsphere.Network.Services
 {
     internal class AuthService : ProudMessageHandler
     {
-        private static readonly Version s_version = new Version(0, 8, 31, 18574);
+        private static readonly Version s_version = new Version(2, 8, 3, 26956);
         // ReSharper disable once InconsistentNaming
         private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthService));
 

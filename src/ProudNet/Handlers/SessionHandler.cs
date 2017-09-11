@@ -38,7 +38,7 @@ namespace ProudNet.Handlers
                 EnablePingTest = _server.Configuration.EnablePingTest,
                 EmergencyLogLineCount = _server.Configuration.EmergencyLogLineCount
             };
-            await session.SendAsync(new NotifyServerConnectionHintMessage(config));
+            await session.SendAsync(new NotifyServerConnectionHintMessage(config, _server.Rsa.ExportParameters(false)));
 
             using (var cts = new CancellationTokenSource(_server.Configuration.ConnectTimeout))
             {

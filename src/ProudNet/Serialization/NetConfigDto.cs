@@ -29,22 +29,28 @@ namespace ProudNet.Serialization
         [BlubMember(7)]
         public int EncryptedMessageKeyLength { get; set; }
 
-        [BlubMember(8)]
-        public bool AllowServerAsP2PGroupMember { get; set; }
+        //[BlubMember(8)]
+        //public uint FastEncryptedMessageKeyLength { get; set; }
 
         [BlubMember(9)]
-        public bool EnableP2PEncryptedMessaging { get; set; }
+        public bool AllowServerAsP2PGroupMember { get; set; }
 
         [BlubMember(10)]
-        public bool UpnpDetectNatDevice { get; set; }
+        public bool EnableP2PEncryptedMessaging { get; set; }
 
         [BlubMember(11)]
-        public bool UpnpTcpAddrPortMapping { get; set; }
+        public bool UpnpDetectNatDevice { get; set; }
 
         [BlubMember(12)]
-        public bool EnablePingTest { get; set; }
+        public bool UpnpTcpAddrPortMapping { get; set; }
 
         [BlubMember(13)]
         public uint EmergencyLogLineCount { get; set; }
+        
+        [BlubMember(14)]
+        public bool EnableLookaheadP2PSend { get; set; }
+
+        [BlubMember(15)]
+        public bool EnablePingTest { get; set; }
     }
 }

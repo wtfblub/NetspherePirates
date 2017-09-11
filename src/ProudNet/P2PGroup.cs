@@ -28,7 +28,9 @@ namespace ProudNet
             var encrypted = _server.Configuration.EnableP2PEncryptedMessaging;
             Crypt crypt = null;
             if (encrypted)
+            {
                 crypt = new Crypt(_server.Configuration.EncryptedMessageKeyLength);
+            }
 
             var session = _server.Sessions[hostId];
             var remotePeer = new RemotePeer(this, session, crypt);
@@ -38,7 +40,7 @@ namespace ProudNet
             session.P2PGroup = this;
 
             if (encrypted)
-                session.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, crypt.RC4.Key, AllowDirectP2P));
+                session.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, crypt.AES.Key, AllowDirectP2P));
             else
                 session.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, AllowDirectP2P));
 
@@ -53,8 +55,8 @@ namespace ProudNet
                 member.ConnectionStates[remotePeer.HostId] = stateB;
                 if (encrypted)
                 {
-                    memberSession.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.RC4.Key, AllowDirectP2P));
-                    session.SendAsync(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId, member.Crypt.RC4.Key, AllowDirectP2P));
+                    memberSession.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.AES.Key, AllowDirectP2P));
+                    session.SendAsync(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId, crypt.AES.Key, AllowDirectP2P));
                 }
                 else
                 {

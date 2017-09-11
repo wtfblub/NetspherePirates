@@ -25,6 +25,7 @@ namespace ProudNet
         public bool EnableP2PEncryptedMessaging { get; set; }
         public bool UpnpDetectNatDevice { get; set; }
         public bool UpnpTcpAddrPortMapping { get; set; }
+        public bool EnableLookaheadP2PSend { get; set; }
         public bool EnablePingTest { get; set; }
         public uint EmergencyLogLineCount { get; set; }
 
@@ -47,6 +48,7 @@ namespace ProudNet
             EnableP2PEncryptedMessaging = false;
             UpnpDetectNatDevice = true;
             UpnpTcpAddrPortMapping = true;
+            EnableLookaheadP2PSend = false;
             EnablePingTest = false;
             EmergencyLogLineCount = 0;
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
@@ -35,10 +34,10 @@ namespace ProudNet.Handlers
                     using (var src = new MemoryStream(data))
                     using (var dst = new MemoryStream())
                     {
-                        session.Crypt.Encrypt(src, dst, true);
+                        session.Crypt.Encrypt(context.Allocator, EncryptMode.Secure, src, dst, true);
                         data = dst.ToArray();
                     }
-                    coreMessage = new EncryptedReliableMessage(data);
+                    coreMessage = new EncryptedReliableMessage(data, EncryptMode.Secure);
                 }
 
                 output.Add(coreMessage);

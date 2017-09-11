@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.Collections.Concurrent;
@@ -29,6 +30,7 @@ namespace ProudNet
         public P2PGroupManager P2PGroupManager { get; }
 
         internal Configuration Configuration { get; }
+        internal RSACryptoServiceProvider Rsa { get; }
         internal ConcurrentDictionary<uint, ProudSession> SessionsByUdpId => _sessionsByUdpId;
         internal UdpSocketManager UdpSocketManager { get; }
 
@@ -93,6 +95,7 @@ namespace ProudNet
                 throw new ArgumentNullException(nameof(configuration.MessageFactories));
 
             Configuration = configuration;
+            Rsa = new RSACryptoServiceProvider(1024);
             P2PGroupManager = new P2PGroupManager(this);
             UdpSocketManager = new UdpSocketManager(this);
         }
@@ -172,6 +175,7 @@ namespace ProudNet
             _listenerChannel.CloseAsync().WaitEx();
             _listenerEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
             _workerEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
+            Rsa.Dispose();
             OnStopped();
         }
 

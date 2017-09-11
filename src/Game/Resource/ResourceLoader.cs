@@ -44,7 +44,7 @@ namespace Netsphere.Resource
         public IEnumerable<ChannelInfo> LoadChannels()
         {
             var dto = Deserialize<ChannelSettingDto>("xml/_eu_channel_setting.x7");
-            var stringTable = Deserialize<StringTableDto>("language/xml/channel_setting_string_table.xml");
+            var stringTable = Deserialize<StringTableDto>("language/xml/channel_setting_string_table.x7");
 
             foreach (var channelDto in dto.channel_info)
             {
@@ -68,7 +68,7 @@ namespace Netsphere.Resource
         public IEnumerable<MapInfo> LoadMaps()
         {
             var dto = Deserialize<GameInfoDto>("xml/_eu_gameinfo.x7");
-            var stringTable = Deserialize<StringTableDto>("language/xml/gameinfo_string_table.xml");
+            var stringTable = Deserialize<StringTableDto>("language/xml/gameinfo_string_table.x7");
 
             foreach (var mapDto in dto.map.Where(map => map.id != -1 && !map.dev_mode))
             {
@@ -150,7 +150,7 @@ namespace Netsphere.Resource
         public IEnumerable<ItemEffect> LoadEffects()
         {
             var dto = Deserialize<ItemEffectDto>("xml/item_effect.x7");
-            var stringTable = Deserialize<StringTableDto>("language/xml/item_effect_string_table.xml");
+            var stringTable = Deserialize<StringTableDto>("language/xml/item_effect_string_table.x7");
 
             foreach (var itemEffectDto in dto.item.Where(itemEffect => itemEffect.id != 0))
             {
@@ -263,7 +263,7 @@ namespace Netsphere.Resource
         public IEnumerable<ItemInfo> LoadItems()
         {
             var dto = Deserialize<ItemInfoDto>("xml/iteminfo.x7");
-            var stringTable = Deserialize<StringTableDto>("language/xml/iteminfo_string_table.xml");
+            var stringTable = Deserialize<StringTableDto>("language/xml/iteminfo_string_table.x7");
 
             foreach (var categoryDto in dto.category)
             {

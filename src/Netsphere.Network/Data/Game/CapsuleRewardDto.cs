@@ -12,44 +12,21 @@ namespace Netsphere.Network.Data.Game
         public uint PEN { get; set; }
 
         [BlubMember(2)]
-        public ulong ItemUID { get; set; }
+        public ItemNumber ItemNumber { get; set; }
 
         [BlubMember(3)]
-        public uint Quantity { get; set; }
+        public ItemPriceType PriceType { get; set; }
 
-        public CapsuleRewardDto()
-        { }
+        [BlubMember(4)]
+        public ItemPeriodType PeriodType { get; set; }
 
-        public CapsuleRewardDto(CapsuleRewardType rewardType, uint pen, ulong itemUID, uint quantity)
-        {
-            RewardType = rewardType;
-            PEN = pen;
-            ItemUID = itemUID;
-            Quantity = quantity;
-        }
+        [BlubMember(5)]
+        public uint Period { get; set; }
 
-        public CapsuleRewardDto(uint pen)
-        {
-            RewardType = CapsuleRewardType.PEN;
-            PEN = pen;
-            ItemUID = 0;
-            Quantity = 0;
-        }
+        [BlubMember(6)]
+        public byte Unk { get; set; }
 
-        public CapsuleRewardDto(ulong itemUID)
-        {
-            RewardType = CapsuleRewardType.Item;
-            PEN = 0;
-            ItemUID = itemUID;
-            Quantity = 0;
-        }
-
-        public CapsuleRewardDto(ulong itemUID, uint quantity)
-        {
-            RewardType = CapsuleRewardType.Item;
-            PEN = 0;
-            ItemUID = itemUID;
-            Quantity = quantity;
-        }
+        [BlubMember(7)]
+        public uint Effect{ get; set; }
     }
 }

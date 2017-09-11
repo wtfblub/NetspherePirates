@@ -4,10 +4,11 @@
         <TargetFramework>net461</TargetFramework>
         <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
         <RootNamespace>Netsphere</RootNamespace>
+        <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Costura.Fody" Version="1.6.2" />
-      <PackageReference Include="Fody" Version="2.1.2" />
+        <PackageReference Include="Costura.Fody" Version="1.6.2" />
+        <PackageReference Include="Fody" Version="2.1.2" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" />
@@ -26,7 +27,4 @@
     <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
         <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
     </Target>
-    <PropertyGroup>
-        <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
-    </PropertyGroup>
 </Project>

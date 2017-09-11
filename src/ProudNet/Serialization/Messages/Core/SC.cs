@@ -25,7 +25,7 @@ namespace ProudNet.Serialization.Messages.Core
     internal class EncryptedReliableMessage : ICoreMessage
     {
         [BlubMember(0)]
-        public byte Unk { get; set; }
+        public EncryptMode EncryptMode { get; set; }
 
         [BlubMember(1, typeof(ArrayWithScalarSerializer))]
         public byte[] Data { get; set; }
@@ -33,9 +33,10 @@ namespace ProudNet.Serialization.Messages.Core
         public EncryptedReliableMessage()
         { }
 
-        public EncryptedReliableMessage(byte[] data)
+        public EncryptedReliableMessage(byte[] data, EncryptMode encryptMode)
         {
             Data = data;
+            EncryptMode = encryptMode;
         }
     }
 

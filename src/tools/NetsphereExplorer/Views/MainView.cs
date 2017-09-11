@@ -13,8 +13,8 @@ namespace NetsphereExplorer.Views
         public MainViewModel ViewModel { get; set; }
         object IViewFor.ViewModel
         {
-            get { return ViewModel; }
-            set { ViewModel = (MainViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (MainViewModel)value;
         }
 
         public MainView()
@@ -34,6 +34,7 @@ namespace NetsphereExplorer.Views
                 d(this.BindCommand(ViewModel, vm => vm.ExtractItems, v => v.miExtractItems));
                 d(this.BindCommand(ViewModel, vm => vm.RemoveItems, v => v.miRemoveItems));
                 d(this.BindCommand(ViewModel, vm => vm.AddFiles, v => v.miAddFiles));
+                d(this.BindCommand(ViewModel, vm => vm.Cleaner, v => v.miCleaner));
 
                 d(this.WhenAnyValue(x => x.ViewModel.RootFolderNode)
                     .Subscribe(node => { tvFolders.ContextMenu = node != null ? cmFolders : null; }));
