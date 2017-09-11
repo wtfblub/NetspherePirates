@@ -12,10 +12,10 @@ namespace DataExtractor
         {
             var filesToExtract = new []
             {
-                "language/xml/channel_setting_string_table.xml",
-                "language/xml/gameinfo_string_table.xml",
-                "language/xml/item_effect_string_table.xml",
-                "language/xml/iteminfo_string_table.xml",
+                "language/xml/channel_setting_string_table.x7",
+                "language/xml/gameinfo_string_table.x7",
+                "language/xml/item_effect_string_table.x7",
+                "language/xml/iteminfo_string_table.x7",
 
                 "resources/mapinfo/(.*).ini$",
 
