@@ -293,61 +293,23 @@ namespace Netsphere
         {
             Logger.Information("Initializing...");
             var config = Config.Instance.Database;
+            s_connectionString =
+                $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
+            OrmConfiguration.DefaultDialect = SqlDialect.MySql;
 
-            switch (config.Engine)
+            using (var con = Open())
             {
-                case DatabaseEngine.MySQL:
-                    s_connectionString =
-                        $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
-                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-                    using (var con = Open())
-                    {
-                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
-                        {
-                            Logger.Error($"Database '{config.Auth.Database}' not found");
-                            Environment.Exit(0);
-                        }
-                    }
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    s_connectionString = $"Data Source={config.Auth.Filename};";
-                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
-
-                    if (!File.Exists(config.Auth.Filename))
-                    {
-                        Logger.Error($"Database '{config.Auth.Filename}' not found");
-                        Environment.Exit(0);
-                    }
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {config.Engine}");
+                if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
+                {
+                    Logger.Error($"Database '{config.Auth.Database}' not found");
                     Environment.Exit(0);
-                    return;
+                }
             }
         }
 
         public static IDbConnection Open()
         {
-            var engine = Config.Instance.Database.Engine;
-            IDbConnection connection;
-            switch (engine)
-            {
-                case DatabaseEngine.MySQL:
-                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {engine}");
-                    Environment.Exit(0);
-                    return null;
-            }
+            var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
             connection.Open();
             return connection;
         }
@@ -363,61 +325,23 @@ namespace Netsphere
         {
             Logger.Information("Initializing...");
             var config = Config.Instance.Database;
+            s_connectionString =
+                $"SslMode=none;Server={config.Game.Host};Port={config.Game.Port};Database={config.Game.Database};Uid={config.Game.Username};Pwd={config.Game.Password};Pooling=true;";
+            OrmConfiguration.DefaultDialect = SqlDialect.MySql;
 
-            switch (config.Engine)
+            using (var con = Open())
             {
-                case DatabaseEngine.MySQL:
-                    s_connectionString =
-                        $"SslMode=none;Server={config.Game.Host};Port={config.Game.Port};Database={config.Game.Database};Uid={config.Game.Username};Pwd={config.Game.Password};Pooling=true;";
-                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-                    using (var con = Open())
-                    {
-                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Game.Database}\"") == null)
-                        {
-                            Logger.Error($"Database '{config.Game.Database}' not found");
-                            Environment.Exit(0);
-                        }
-                    }
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    s_connectionString = $"Data Source={config.Game.Filename};";
-                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
-
-                    if (!File.Exists(config.Game.Filename))
-                    {
-                        Logger.Error($"Database '{config.Game.Filename}' not found");
-                        Environment.Exit(0);
-                    }
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {config.Engine}");
+                if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Game.Database}\"") == null)
+                {
+                    Logger.Error($"Database '{config.Game.Database}' not found");
                     Environment.Exit(0);
-                    return;
+                }
             }
         }
 
         public static IDbConnection Open()
         {
-            var engine = Config.Instance.Database.Engine;
-            IDbConnection connection;
-            switch (engine)
-            {
-                case DatabaseEngine.MySQL:
-                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
-                    break;
-
-                default:
-                    Log.Error($"Invalid database engine {engine}");
-                    Environment.Exit(0);
-                    return null;
-            }
+            var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
             connection.Open();
             return connection;
         }

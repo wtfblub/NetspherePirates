@@ -80,24 +80,23 @@ namespace Netsphere
 
     public class DatabasesConfig
     {
-        [JsonProperty("engine")]
-        [JsonConverter(typeof(StringEnumConverter))]
-        public DatabaseEngine Engine { get; set; }
-
         [JsonProperty("auth")]
         public DatabaseConfig Auth { get; set; }
 
         public DatabasesConfig()
         {
-            Engine = DatabaseEngine.SQLite;
-            Auth = new DatabaseConfig { Filename = "..\\db\\auth.db" };
+            Auth = new DatabaseConfig
+            { 
+                Host = "localhost",
+                Port = 3306,
+                Username = "root",
+                Password = "root",
+                Database = "auth"
+            };
         }
 
         public class DatabaseConfig
         {
-            [JsonProperty("filename")]
-            public string Filename { get; set; }
-
             [JsonProperty("host")]
             public string Host { get; set; }
 
@@ -119,12 +118,5 @@ namespace Netsphere
                 Port = 3306;
             }
         }
-    }
-
-    public enum DatabaseEngine
-    {
-        SQLite,
-        MySQL,
-        PostgreSQL
     }
 }
