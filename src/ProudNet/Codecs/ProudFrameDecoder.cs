@@ -17,13 +17,13 @@ namespace ProudNet.Codecs
             switch (scalarPrefix)
             {
                 case 1:
-                    return buffer.ReadableBytes < 1 ? 1 : buffer.GetByte(offset) + 1;
+                    return buffer.ReadableBytes - offset < 1 ? 1 : buffer.GetByte(offset) + 1;
 
                 case 2:
-                    return buffer.ReadableBytes < 2 ? 2 : buffer.GetShort(offset) + 2;
+                    return buffer.ReadableBytes - offset < 2 ? 2 : buffer.GetShort(offset) + 2;
 
                 case 4:
-                    return buffer.ReadableBytes < 4 ? 4 : buffer.GetInt(offset) + 4;
+                    return buffer.ReadableBytes - offset < 4 ? 4 : buffer.GetInt(offset) + 4;
 
                 default:
                     throw new ProudException("Invalid scalar prefix " + scalarPrefix);
