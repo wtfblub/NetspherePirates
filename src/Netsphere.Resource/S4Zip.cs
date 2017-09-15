@@ -604,7 +604,7 @@ namespace Netsphere.Resource
 
         public void Encrypt(byte[] data, int lengthForKeySearch = 0, int blockIndex = -1)
         {
-            var key = _version == 1 ? s_keyTable : GetKey(data.Length);
+            var key = _version == 1 ? s_keyTable : GetKey(data.Length, blockIndex);
             var length = data.Length;
             if (_lengthLimit > 0 && length > _lengthLimit)
                 length = _lengthLimit;
@@ -630,7 +630,7 @@ namespace Netsphere.Resource
 
         public void Decrypt(byte[] data, int lengthForKeySearch = 0, int blockIndex = -1)
         {
-            var key = _version == 1 ? s_keyTable : GetKey(data.Length);
+            var key = _version == 1 ? s_keyTable : GetKey(data.Length, blockIndex);
             var length = data.Length;
             if (_lengthLimit > 0 && length > _lengthLimit)
                 length = _lengthLimit;
@@ -654,13 +654,15 @@ namespace Netsphere.Resource
             }
         }
 
-        private static byte[] GetKey(int length)
+        private static byte[] GetKey(int length, int blockIndex = -1)
         {
             const uint xorKey = 0xCD4802EF;
 
             var num = (uint)((length - 8) >> 2);
             var keyIndex = (num ^ xorKey) % 10;
-            var blockIndex = (num ^ xorKey) % 2;
+            if (blockIndex == -1)
+                blockIndex = (int)((num ^ xorKey) % 2);
+
             return s_keyTable2[blockIndex][keyIndex];
         }
     }
@@ -671,8 +673,10 @@ namespace Netsphere.Resource
 
         private static byte[] BuildX7(byte[] data, uint crc, int realSize)
         {
-            var encrypted = data.FastClone();
-            S4Crypt.Default.Encrypt(encrypted);
+            var encrypted1 = data.FastClone();
+            var encrypted2 = data.FastClone();
+            S4Crypt.Default.Encrypt(encrypted1, blockIndex: 0);
+            S4Crypt.Default.Encrypt(encrypted2, blockIndex: 1);
 
             using (var w = new BinaryWriter(new MemoryStream()))
             {
@@ -682,9 +686,9 @@ namespace Netsphere.Resource
                 for (var i = 0; i < data.Length; i++)
                 {
                     w.Write(data[i]);
-                    w.Write(encrypted[i]);
-                    w.Write((byte)0);
-                    w.Write(encrypted[i]);
+                    w.Write(encrypted1[i]);
+                    w.Write(data[i]);
+                    w.Write(encrypted2[i]);
                 }
 
                 return w.ToArray();
