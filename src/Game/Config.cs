@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Netsphere
 {
@@ -85,7 +84,7 @@ namespace Netsphere
             ChatListener = new IPEndPoint(IPAddress.Loopback, 28004);
             RelayListener = new IPEndPoint(IPAddress.Loopback, 28005);
             ListenerThreads = 1;
-            WorkerThreads = -1;
+            WorkerThreads = 2;
             IP = "127.0.0.1";
             PlayerLimit = 100;
             SecurityLevel = SecurityLevel.User;
