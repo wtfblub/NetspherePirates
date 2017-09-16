@@ -1,4 +1,5 @@
-﻿using BlubLib.DotNetty.Codecs;
+﻿using System;
+using BlubLib.DotNetty.Codecs;
 using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
 
@@ -14,16 +15,19 @@ namespace ProudNet.Codecs
         {
             buffer = buffer.WithOrder(ByteOrder.LittleEndian);
             var scalarPrefix = buffer.GetByte(offset++);
+
+            // lengthFieldOffset from constructor + scalarPrefix from above
+            var bytesLeft = buffer.ReadableBytes - Math.Abs(buffer.ReaderIndex - offset) + 1;
             switch (scalarPrefix)
             {
                 case 1:
-                    return buffer.ReadableBytes - offset < 1 ? 1 : buffer.GetByte(offset) + 1;
+                    return bytesLeft < 1 ? 1 : buffer.GetByte(offset) + 1;
 
                 case 2:
-                    return buffer.ReadableBytes - offset < 2 ? 2 : buffer.GetShort(offset) + 2;
+                    return bytesLeft < 2 ? 2 : buffer.GetShort(offset) + 2;
 
                 case 4:
-                    return buffer.ReadableBytes - offset < 4 ? 4 : buffer.GetInt(offset) + 4;
+                    return bytesLeft < 4 ? 4 : buffer.GetInt(offset) + 4;
 
                 default:
                     throw new ProudException("Invalid scalar prefix " + scalarPrefix);
