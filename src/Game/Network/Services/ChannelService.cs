@@ -117,7 +117,7 @@ namespace Netsphere.Network.Services
             {
                 if (room.Options.Password == "")
                 {
-                    if (room.Options.MatchKey.GameRule.Equals(message.Rule))
+                    if (room.Options.MatchKey.GameRule.Equals(message.GameRule))
                     {
                         if (room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting) || (room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Playing) && !room.Options.IsNoIntrusion)){
                             var priority = 0;
