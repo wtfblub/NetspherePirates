@@ -46,32 +46,31 @@ namespace ProudNet.Handlers
             var group = session.P2PGroup;
             if (group == null || (session.HostId != message.A && session.HostId != message.B))
                 return;
-
+            
             var remotePeerA = group.Members.GetValueOrDefault(message.A);
             var remotePeerB = group.Members.GetValueOrDefault(message.B);
-
+            
             if (remotePeerA == null || remotePeerB == null)
                 return;
-
+            
             var stateA = remotePeerA.ConnectionStates.GetValueOrDefault(remotePeerB.HostId);
             var stateB = remotePeerB.ConnectionStates.GetValueOrDefault(remotePeerA.HostId);
-
+            
             if (stateA == null || stateB == null)
                 return;
-
+            
             if (session.HostId == remotePeerA.HostId)
                 stateA.HolepunchSuccess = true;
-            else if (session.HostId == remotePeerB.HostId)
+            if (session.HostId == remotePeerB.HostId)
                 stateB.HolepunchSuccess = true;
-
-            if (stateA.HolepunchSuccess && stateB.HolepunchSuccess)
-            {
-                var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr, message.ABRecvAddr,
-                    message.BASendAddr, message.BARecvAddr);
-
-                remotePeerA.SendAsync(notify);
-                remotePeerB.SendAsync(notify);
-            }
+            
+            //if (stateA.HolepunchSuccess && stateB.HolepunchSuccess) //prevents from working correctly
+            //{
+            //}
+            
+            var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr, message.ABRecvAddr,message.BASendAddr, message.BARecvAddr);  
+            remotePeerA.SendAsync(notify);
+            remotePeerB.SendAsync(notify);
         }
 
         [MessageHandler(typeof(ShutdownTcpMessage))]
@@ -86,7 +85,7 @@ namespace ProudNet.Handlers
             //Logger<>.Debug($"{message.TraceId} - {message.Message}");
         }
 
-        [MessageHandler(typeof(NotifyJitDirectP2PTriggeredMessage))]
+           [MessageHandler(typeof(NotifyJitDirectP2PTriggeredMessage))]
         public void NotifyJitDirectP2PTriggered(ProudSession session, NotifyJitDirectP2PTriggeredMessage message)
         {
             var group = session.P2PGroup;
@@ -108,14 +107,15 @@ namespace ProudNet.Handlers
 
             if (session.HostId == remotePeerA.HostId)
                 stateA.JitTriggered = true;
-            else if (session.HostId == remotePeerB.HostId)
+            if (session.HostId == remotePeerB.HostId)
                 stateB.JitTriggered = true;
 
-            if (stateA.JitTriggered && stateB.JitTriggered)
-            {
-                remotePeerA.SendAsync(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
-                remotePeerB.SendAsync(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
-            }
+            //if (stateA.JitTriggered && stateB.JitTriggered) //prevents from working correctly
+            //{
+            //}
+			
+            remotePeerA.SendAsync(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
+            remotePeerB.SendAsync(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
         }
 
         [MessageHandler(typeof(NotifyNatDeviceNameDetectedMessage))]
