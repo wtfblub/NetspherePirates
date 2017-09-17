@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
@@ -49,13 +47,11 @@ namespace ProudNet.Handlers
 
             var remotePeerA = group.Members.GetValueOrDefault(message.A);
             var remotePeerB = group.Members.GetValueOrDefault(message.B);
-
             if (remotePeerA == null || remotePeerB == null)
                 return;
 
             var stateA = remotePeerA.ConnectionStates.GetValueOrDefault(remotePeerB.HostId);
             var stateB = remotePeerB.ConnectionStates.GetValueOrDefault(remotePeerA.HostId);
-
             if (stateA == null || stateB == null)
                 return;
 
@@ -96,13 +92,11 @@ namespace ProudNet.Handlers
 
             var remotePeerA = group.Members.GetValueOrDefault(session.HostId);
             var remotePeerB = group.Members.GetValueOrDefault(message.HostId);
-
             if (remotePeerA == null || remotePeerB == null)
                 return;
 
             var stateA = remotePeerA.ConnectionStates.GetValueOrDefault(remotePeerB.HostId);
             var stateB = remotePeerB.ConnectionStates.GetValueOrDefault(remotePeerA.HostId);
-
             if (stateA == null || stateB == null)
                 return;
 
@@ -128,6 +122,7 @@ namespace ProudNet.Handlers
             if (session.P2PGroup == null || !server.UdpSocketManager.IsRunning)
                 return;
 
+            // TODO: Don't assign a new socket when the client already has a active socket
             //Logger<>.Debug($"Client:{session.HostId} - Requesting UdpSocket");
             var socket = server.UdpSocketManager.NextSocket();
             session.UdpSocket = socket;
@@ -138,7 +133,7 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(C2S_CreateUdpSocketAckMessage))]
         public void C2S_CreateUdpSocketAck(ProudServer server, ProudSession session, C2S_CreateUdpSocketAckMessage message)
         {
-            if (session.P2PGroup == null || !server.UdpSocketManager.IsRunning)
+            if (session.P2PGroup == null || session.UdpSocket == null || !server.UdpSocketManager.IsRunning)
                 return;
 
             //Logger<>.Debug($"Client:{session.HostId} - Starting server holepunch");

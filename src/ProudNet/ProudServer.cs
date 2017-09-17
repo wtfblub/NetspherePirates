@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.Collections.Concurrent;
 using BlubLib.DotNetty.Handlers.MessageHandling;
