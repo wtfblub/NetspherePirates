@@ -4,6 +4,7 @@
         <TargetFramework>netcoreapp2.0</TargetFramework>
         <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
         <RootNamespace>Netsphere</RootNamespace>
+        <RuntimeIdentifiers>win-x86;win-x64;linux-x64</RuntimeIdentifiers>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Expressmapper" Version="1.9.1" />
