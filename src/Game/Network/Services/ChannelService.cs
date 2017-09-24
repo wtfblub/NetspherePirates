@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using ExpressMapper.Extensions;
@@ -112,8 +112,42 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CQuickStartReqMessage))]
         public Task CQuickStartReq(GameSession session, CQuickStartReqMessage message)
         {
-            //ToDo - Logic
-            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+            System.Collections.Generic.Dictionary<Room, int> rooms = new System.Collections.Generic.Dictionary<Room, int>();
+            foreach(Room room in session.Player.Channel.RoomManager)
+            {
+                if (room.Options.Password == "")
+                {
+                    if (room.Options.MatchKey.GameRule.Equals(message.GameRule))
+                    {
+                        if (room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Waiting) || (room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Playing) && !room.Options.IsNoIntrusion)){
+                            var priority = 0;
+                            priority += System.Math.Abs(room.TeamManager[Team.Alpha].Players.Count() - room.TeamManager[Team.Beta].Players.Count()); // Calculating team balance
+
+                            if (room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.SecondHalf))
+                            {
+                                if (room.Options.TimeLimit.TotalSeconds / 2 - room.GameRuleManager.GameRule.RoundTime.TotalSeconds <= 15) // If only 15 seconds are left...
+                                {
+                                    priority -= 3; // ...lower the room priority
+                                }
+                            }
+
+                            rooms.Add(room, priority);
+                        }
+                    }
+                }
+            }
+
+            var roomList = rooms.ToList();
+
+            if (roomList.Count() > 0)
+            {
+                roomList.Sort((room1, room2) => room2.Value.CompareTo(room1.Value));
+                roomList.First().Key.Join(session.Player);
+
+                return Task.FromResult(0); // We don't message the Client here, because "Room.Join(...)" already does it.
+            }
+
+            return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.QuickJoinFailed));
         }
 
         [MessageHandler(typeof(CTaskRequestReqMessage))]

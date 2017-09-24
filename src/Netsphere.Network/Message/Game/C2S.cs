@@ -62,7 +62,7 @@ namespace Netsphere.Network.Message.Game
     public class CQuickStartReqMessage : IGameMessage
     {
         [BlubMember(0)]
-        public byte Unk { get; set; }
+        public byte GameRule { get; set; }
     }
 
     [BlubContract]
