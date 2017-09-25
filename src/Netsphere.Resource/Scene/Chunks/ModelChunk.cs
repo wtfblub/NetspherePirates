@@ -3,11 +3,14 @@ using System.IO;
 using System.Linq;
 using BlubLib.IO;
 using SlimMath;
+using System;
+using System.Text;
 
 namespace Netsphere.Resource.Scene.Chunks
 {
     public class ModelChunk : SceneChunk
     {
+
         public override ChunkType ChunkType => ChunkType.ModelData;
 
         public float Unk2 { get; set; }
@@ -262,10 +265,15 @@ namespace Netsphere.Resource.Scene.Chunks
                 {
                     w.WriteCString(texture.FileName, 1024);
                     if (Unk1 >= 0.2000000029802322f)
-                        w.WriteCString(texture.FileName2, 1024);
+                    {
+                      byte[] fileName2 = Encoding.ASCII.GetBytes(texture.FileName2);
+                      w.Write(fileName2, 0, 1024);
+                      //w.WriteCString(texture.FileName2, 1024);
+                    }
 
                     w.Write(texture.FaceCounter);
                     w.Write(texture.FaceCount);
+
                 }
             }
         }
@@ -289,7 +297,11 @@ namespace Netsphere.Resource.Scene.Chunks
                     };
 
                     if (Unk1 >= 0.2000000029802322f)
-                        textureData.FileName2 = r.ReadCString(1024);
+                    {
+                      char[] fileName2 = r.ReadChars(1024);
+                      textureData.FileName2 = new string(fileName2);
+                      //textureData.FileName2 = r.ReadCString(1024);
+                    }
 
                     textureData.FaceCounter = r.ReadInt32();
                     textureData.FaceCount = r.ReadInt32();
