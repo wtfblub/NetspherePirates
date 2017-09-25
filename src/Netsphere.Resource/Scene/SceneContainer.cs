@@ -161,7 +161,7 @@ namespace Netsphere.Resource.Scene
 
     public class SceneHeader : IManualSerializer
     {
-        //public const uint Version = 1;
+        public const uint Version = 1;
         public const uint Magic = 0x6278d57a;
 
         public string Name { get; set; }
@@ -183,7 +183,7 @@ namespace Netsphere.Resource.Scene
         {
             using (var w = stream.ToBinaryWriter(true))
             {
-                //w.Write(Version);
+                w.Write(Version);
                 w.Write(Magic);
 
                 w.WriteCString(Name);
