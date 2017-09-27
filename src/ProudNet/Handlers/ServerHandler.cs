@@ -17,6 +17,36 @@ namespace ProudNet.Handlers
             return session.SendAsync(new ReliablePongMessage());
         }
 
+        [MessageHandler(typeof(P2P_NotifyDirectP2PDisconnectedMessage))]
+        public void P2P_NotifyDirectP2PDisconnected(ProudSession session, P2P_NotifyDirectP2PDisconnectedMessage message)
+        {
+            if (session.P2PGroup == null)
+                return;
+
+            session.Logger?.Debug("P2P_NotifyDirectP2PDisconnected {@Message}", message);
+            var remotePeer = session.P2PGroup.Members.GetValueOrDefault(session.HostId);
+            var stateA = remotePeer?.ConnectionStates.GetValueOrDefault(message.RemotePeerHostId);
+            var stateB = stateA?.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
+            if (stateA?.HolepunchSuccess == true)
+            {
+                session.Logger?.Information("P2P to {TargetHostId} disconnected with {Reason}", message.RemotePeerHostId, message.Reason);
+                stateA.HolepunchSuccess = false;
+                stateA.RemotePeer.SendAsync(
+                    new P2P_NotifyDirectP2PDisconnected2Message(session.HostId, message.Reason));
+            }
+
+            if (stateB?.HolepunchSuccess == true)
+                stateB.HolepunchSuccess = false;
+        }
+
+        [MessageHandler(typeof(NotifyUdpToTcpFallbackByClientMessage))]
+        public void NotifyUdpToTcpFallbackByClient(ProudServer server, ProudSession session)
+        {
+            session.Logger?.Information("Fallback to tcp relay by client");
+            session.UdpEnabled = false;
+            server.SessionsByUdpId.Remove(session.UdpSessionId);
+        }
+
         [MessageHandler(typeof(P2PGroup_MemberJoin_AckMessage))]
         public void P2PGroupMemberJoinAck(ProudSession session, P2PGroup_MemberJoin_AckMessage message)
         {
@@ -30,11 +60,17 @@ namespace ProudNet.Handlers
                 return;
 
             stateA.IsJoined = true;
-            var stateB = stateA.RemotePeer.ConnectionStates[session.HostId];
-            if (stateB.IsJoined)
+            var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
+            if (stateB?.IsJoined == true)
             {
-                session.Logger?.Debug("Initiate P2P with {TargetHostId}", stateA.RemotePeer.HostId);
-                stateA.RemotePeer.Session.Logger?.Debug("Initiate P2P with {TargetHostId}", session.HostId);
+                // Do not try p2p when the udp relay is not used by one of the clients
+                if (!stateA.RemotePeer.Session.UdpEnabled || !stateB.RemotePeer.Session.UdpEnabled)
+                    return;
+
+                session.Logger?.Debug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                stateA.RemotePeer.Session.Logger?.Debug("Initialize P2P with {TargetHostId}", session.HostId);
+                stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
+                stateA.IsInitialized = stateB.IsInitialized = true;
                 remotePeer.SendAsync(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
                 stateA.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(session.HostId));
             }
@@ -123,11 +159,9 @@ namespace ProudNet.Handlers
         public void C2S_RequestCreateUdpSocket(ProudServer server, ProudSession session)
         {
             session.Logger?.Debug("C2S_RequestCreateUdpSocket");
-            if (session.P2PGroup == null || !server.UdpSocketManager.IsRunning)
+            if (session.P2PGroup == null || session.UdpEnabled || !server.UdpSocketManager.IsRunning)
                 return;
 
-            // TODO: Don't assign a new socket when the client already has a active socket
-            //Logger<>.Debug($"Client:{session.HostId} - Requesting UdpSocket");
             var socket = server.UdpSocketManager.NextSocket();
             session.UdpSocket = socket;
             session.HolepunchMagicNumber = Guid.NewGuid();
@@ -138,10 +172,10 @@ namespace ProudNet.Handlers
         public void C2S_CreateUdpSocketAck(ProudServer server, ProudSession session, C2S_CreateUdpSocketAckMessage message)
         {
             session.Logger?.Debug("{@Message}", message);
-            if (session.P2PGroup == null || session.UdpSocket == null || !server.UdpSocketManager.IsRunning)
+            if (session.P2PGroup == null || session.UdpSocket == null || session.UdpEnabled ||
+                !server.UdpSocketManager.IsRunning)
                 return;
 
-            //Logger<>.Debug($"Client:{session.HostId} - Starting server holepunch");
             session.SendAsync(new RequestStartServerHolepunchMessage(session.HolepunchMagicNumber));
         }
 

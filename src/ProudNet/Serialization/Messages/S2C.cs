@@ -10,6 +10,10 @@ namespace ProudNet.Serialization.Messages
     { }
 
     [BlubContract]
+    internal class NotifyUdpToTcpFallbackByServerMessage : IMessage
+    { }
+
+    [BlubContract]
     internal class ShutdownTcpAckMessage : IMessage
     { }
 
@@ -167,6 +171,25 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
+    internal class P2P_NotifyDirectP2PDisconnected2Message : IMessage
+    {
+        [BlubMember(0)]
+        public uint RemotePeerHostId { get; set; }
+
+        [BlubMember(1)]
+        public uint Reason { get; set; }
+
+        public P2P_NotifyDirectP2PDisconnected2Message()
+        { }
+
+        public P2P_NotifyDirectP2PDisconnected2Message(uint remotePeerHostId, uint reason)
+        {
+            RemotePeerHostId = remotePeerHostId;
+            Reason = reason;
+        }
+    }
+
+    [BlubContract]
     internal class P2PGroup_MemberLeaveMessage : IMessage
     {
         [BlubMember(0)]
@@ -222,6 +245,21 @@ namespace ProudNet.Serialization.Messages
             ABRecvAddr = abRecvAddr;
             BASendAddr = baSendAddr;
             BARecvAddr = baRecvAddr;
+        }
+    }
+
+    [BlubContract]
+    internal class RenewP2PConnectionStateMessage : IMessage
+    {
+        [BlubMember(0)]
+        public uint HostId { get; set; }
+
+        public RenewP2PConnectionStateMessage()
+        { }
+
+        public RenewP2PConnectionStateMessage(uint hostId)
+        {
+            HostId = hostId;
         }
     }
 

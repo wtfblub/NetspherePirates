@@ -17,7 +17,6 @@ using ProudNet;
 using Serilog;
 using Serilog.Core;
 using Serilog.Formatting.Json;
-using Serilog.Sinks.SystemConsole.Themes;
 
 namespace Netsphere
 {
@@ -25,6 +24,8 @@ namespace Netsphere
     {
         private static IEventLoopGroup s_apiEventLoopGroup;
         private static IChannel s_apiHost;
+        private static readonly object s_exitMutex = new object();
+        private static bool s_isExiting;
 
         private static void Main()
         {
@@ -51,7 +52,12 @@ namespace Netsphere
 
             Log.Information("Starting server...");
 
-            AuthServer.Initialize(new Configuration());
+            AuthServer.Initialize(new Configuration
+            {
+                SocketListenerThreads = new MultithreadEventLoopGroup(1),
+                SocketWorkerThreads = new MultithreadEventLoopGroup(1),
+                WorkerThread = new SingleThreadEventLoop()
+            });
             AuthServer.Instance.Listen(Config.Instance.Listener);
 
             s_apiEventLoopGroup = new MultithreadEventLoopGroup(1);
@@ -93,6 +99,14 @@ namespace Netsphere
 
         private static void Exit()
         {
+            lock (s_exitMutex)
+            {
+                if (s_isExiting)
+                    return;
+
+                s_isExiting = true;
+            }
+
             Log.Information("Closing...");
             s_apiHost.CloseAsync().WaitEx();
             s_apiEventLoopGroup.ShutdownGracefullyAsync().WaitEx();

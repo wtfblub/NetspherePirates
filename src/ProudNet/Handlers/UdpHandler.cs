@@ -72,7 +72,12 @@ namespace ProudNet.Handlers
                     return;
                 }
 
-                session.Channel.Pipeline.Context<ProudFrameDecoder>().FireChannelRead(message.Content.Retain());
+                var recvContext = new RecvContext
+                {
+                    Message = message.Content.Retain(),
+                    UdpEndPoint = message.EndPoint
+                };
+                session.Channel.Pipeline.Context<RecvContextDecoder>().FireChannelRead(recvContext);
             }
             finally
             {
