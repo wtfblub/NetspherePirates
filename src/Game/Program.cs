@@ -31,8 +31,8 @@ namespace Netsphere
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
             
-            var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
-            var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
+            var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.json");
+            var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.log");
             Log.Logger = new LoggerConfiguration()
                 .Destructure.ByTransforming<IPEndPoint>(endPoint => endPoint.ToString())
                 .Destructure.ByTransforming<EndPoint>(endPoint => endPoint.ToString())
