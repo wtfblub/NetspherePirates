@@ -14,6 +14,7 @@ namespace ProudNet.Handlers
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
         {
+            _server.Configuration.Logger?.Error(exception, "Unhandled exception");
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
             _server.RaiseError(new ErrorEventArgs(session, exception));
             session.CloseAsync();

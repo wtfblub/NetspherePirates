@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using BlubLib.Collections.Generic;
 using BlubLib.Collections.Concurrent;
 using BlubLib.DotNetty;
@@ -30,13 +29,7 @@ namespace ProudNet.Handlers
         public void RmiMessage(IChannelHandlerContext context, RmiMessage message)
         {
             var buffer = Unpooled.WrappedBuffer(message.Data);
-            try
-            {
-                context.FireChannelRead(buffer);
-            }
-            catch (Exception e) // TODO: What is this try/catch?
-            {
-            }
+            context.FireChannelRead(buffer);
         }
 
         [MessageHandler(typeof(CompressedMessage))]
@@ -78,6 +71,7 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(NotifyCSEncryptedSessionKeyMessage))]
         public void NotifyCSEncryptedSessionKeyMessage(ProudServer server, ProudSession session, NotifyCSEncryptedSessionKeyMessage message)
         {
+            session.Logger?.Verbose("Handshake:NotifyCSEncryptedSessionKey");
             var secureKey = server.Rsa.Decrypt(message.SecureKey, true);
             session.Crypt = new Crypt(secureKey);
             session.SendAsync(new NotifyCSSessionKeySuccessMessage());
@@ -86,9 +80,15 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(NotifyServerConnectionRequestDataMessage))]
         public void NotifyServerConnectionRequestDataMessage(IChannelHandlerContext context, ProudSession session, NotifyServerConnectionRequestDataMessage message)
         {
+            session.Logger?.Verbose("Handshake:NotifyServerConnectionRequestData");
             if (message.InternalNetVersion != Constants.NetVersion ||
                     message.Version != _server.Configuration.Version)
             {
+
+                session.Logger?.Warning(
+                    "Protocol version mismatch - Client={@ClientVersion} Server={@ServerVersion}",
+                    new { NetVersion = message.InternalNetVersion, Version = message.Version },
+                    new { NetVersion = Constants.NetVersion, Version = _server.Configuration.Version });
                 session.SendAsync(new NotifyProtocolVersionMismatchMessage());
                 session.CloseAsync();
                 return;
@@ -161,8 +161,9 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(ServerHolepunchMessage))]
-        public void NotifyHolepunchSuccess(ProudServer server, ProudSession session, ServerHolepunchMessage message)
+        public void ServerHolepunch(ProudServer server, ProudSession session, ServerHolepunchMessage message)
         {
+            session.Logger?.Debug("ServerHolepunch={@Message}", message);
             if (session.P2PGroup == null || !_server.UdpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return;
 
@@ -174,6 +175,7 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(NotifyHolepunchSuccessMessage))]
         public void NotifyHolepunchSuccess(ProudServer server, ProudSession session, NotifyHolepunchSuccessMessage message)
         {
+            session.Logger?.Debug("NotifyHolepunchSuccess={@Message}", message);
             if (session.P2PGroup == null || !_server.UdpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return;
 
@@ -187,6 +189,7 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(PeerUdp_ServerHolepunchMessage))]
         public void PeerUdp_ServerHolepunch(IChannel channel, ProudSession session, PeerUdp_ServerHolepunchMessage message)
         {
+            session.Logger?.Debug("PeerUdp_ServerHolepunch={@Message}", message);
             if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
                 return;
 
@@ -200,6 +203,7 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
         public void PeerUdp_NotifyHolepunchSuccess(IChannel channel, ProudSession session, PeerUdp_NotifyHolepunchSuccessMessage message)
         {
+            session.Logger?.Debug("PeerUdp_NotifyHolepunchSuccess={@Message}", message);
             if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
                 return;
 

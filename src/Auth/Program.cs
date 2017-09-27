@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
 using Dapper;
@@ -16,6 +17,7 @@ using ProudNet;
 using Serilog;
 using Serilog.Core;
 using Serilog.Formatting.Json;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace Netsphere
 {
@@ -34,10 +36,12 @@ namespace Netsphere
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
             var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
             Log.Logger = new LoggerConfiguration()
+                .Destructure.ByTransforming<IPEndPoint>(endPoint => endPoint.ToString())
+                .Destructure.ByTransforming<EndPoint>(endPoint => endPoint.ToString())
                 .WriteTo.File(new JsonFormatter(), jsonlog)
                 .WriteTo.File(logfile)
                 .WriteTo.Console(outputTemplate: "[{Level} {SourceContext}] {Message}{NewLine}{Exception}")
-                .MinimumLevel.Verbose()
+                .MinimumLevel.Debug()
                 .CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;

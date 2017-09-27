@@ -102,7 +102,13 @@ namespace ProudNet
         public void Listen(IPEndPoint tcpListener, IPAddress udpAddress = null, int[] udpListenerPorts = null, IEventLoopGroup listenerEventLoopGroup = null, IEventLoopGroup workerEventLoopGroup = null)
         {
             ThrowIfDisposed();
-            
+
+            var log = Configuration.Logger?
+                .ForContext("TcpEndPoint", tcpListener)
+                .ForContext("UdpAddress", udpAddress)
+                .ForContext("UdpPorts", udpListenerPorts);
+            log?.Information("Starting - tcp={TcpEndPoint} udp={UdpAddress} udp-port={UdpPorts}");
+
             _listenerEventLoopGroup = listenerEventLoopGroup ?? new MultithreadEventLoopGroup(1);
             _workerEventLoopGroup = workerEventLoopGroup ?? new MultithreadEventLoopGroup();
             try
@@ -151,6 +157,7 @@ namespace ProudNet
             }
             catch (Exception ex)
             {
+                log?.Error(ex, "Unable to start server - tcp={tcpEndPoint} udp={udpAddress} udp-port={udpPorts}");
                 _listenerEventLoopGroup.ShutdownGracefullyAsync();
                 _listenerEventLoopGroup = null;
                 _workerEventLoopGroup.ShutdownGracefullyAsync();
@@ -167,6 +174,7 @@ namespace ProudNet
             if (_disposed)
                 return;
 
+            Configuration.Logger?.Information("Shutting down...");
             _disposed = true;
 
             OnStopping();
@@ -186,12 +194,14 @@ namespace ProudNet
 
         internal void AddSession(ProudSession session)
         {
+            Configuration.Logger?.Debug("Adding new session {HostId}", session.HostId);
             _sessions[session.HostId] = session;
             OnConnected(session);
         }
 
         internal void RemoveSession(ProudSession session)
         {
+            Configuration.Logger?.Debug("Removing session {HostId}", session.HostId);
             _sessions.Remove(session.HostId);
             SessionsByUdpId.Remove(session.UdpSessionId);
             OnDisconnected(session);

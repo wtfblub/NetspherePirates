@@ -24,6 +24,7 @@ namespace Netsphere.Network
             config.Version = new Guid("{97d36acf-8cc0-4dfb-bcc9-97cab255e2bc}");
             config.MessageFactories = new MessageFactory[] { new ChatMessageFactory() };
             config.SessionFactory = new ChatSessionFactory();
+            config.Logger = Logger.ForContext(Constants.SourceContextPropertyName, "ChatServer-ProudNet");
 
             // ReSharper disable InconsistentNaming
             Predicate<ChatSession> MustBeLoggedIn = session => session.IsLoggedIn();

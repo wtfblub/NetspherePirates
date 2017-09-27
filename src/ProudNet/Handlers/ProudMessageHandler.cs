@@ -14,12 +14,14 @@ namespace ProudNet.Handlers
                 value = DynamicCast<T>.From(session);
                 return true;
             }
+
             if (typeof(ProudServer).IsAssignableFrom(typeof(T)))
             {
                 var server = context.Channel.GetAttribute(ChannelAttributes.Server).Get();
                 value = DynamicCast<T>.From(server);
                 return true;
             }
+
             return base.GetParameter(context, message, out value);
         }
     }

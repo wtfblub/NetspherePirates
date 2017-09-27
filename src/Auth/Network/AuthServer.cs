@@ -31,6 +31,7 @@ namespace Netsphere.Network
             config.Version = new Guid("{9be73c0b-3b10-403e-be7d-9f222702a38c}");
             config.MessageFactories = new MessageFactory[] { new AuthMessageFactory() };
             config.MessageHandlers = new IMessageHandler[] { new AuthService() };
+            config.Logger = Logger.ForContext(Constants.SourceContextPropertyName, "ProudNet");
             Instance = new AuthServer(config);
         }
 

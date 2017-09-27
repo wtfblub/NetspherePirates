@@ -60,6 +60,7 @@ namespace ProudNet
         {
             foreach (var socket in _sockets)
                 socket.Dispose();
+
             _sockets.Clear();
         }
     }

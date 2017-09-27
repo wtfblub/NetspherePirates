@@ -18,8 +18,13 @@ namespace ProudNet.Handlers
         public override async void ChannelActive(IChannelHandlerContext context)
         {
             var hostId = _server.Configuration.HostIdFactory.New();
-            var session = _server.Configuration.SessionFactory.Create(hostId, context.Channel);
+            var session = _server.Configuration.SessionFactory.Create(hostId, context.Channel, _server);
             context.Channel.GetAttribute(ChannelAttributes.Session).Set(session);
+
+            var log = _server.Configuration.Logger?
+                .ForContext("HostId", hostId)
+                .ForContext("EndPoint", context.Channel.RemoteAddress.ToString());
+            log?.Debug("New incoming client({HostId}) on {EndPoint}");
 
             var config = new NetConfigDto
             {
@@ -51,8 +56,7 @@ namespace ProudNet.Handlers
                     if (!session.IsConnected)
                         return;
 
-                    //Logger<>.Error($"Handshake timeout for {remoteEndPoint}");
-
+                    log?.Debug("Client({HostId}) handshake timeout");
                     await session.SendAsync(new ConnectServerTimedoutMessage());
                     await session.CloseAsync();
                     return;
@@ -64,6 +68,11 @@ namespace ProudNet.Handlers
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
+            _server.Configuration.Logger?
+                .ForContext("HostId", session.HostId)
+                .ForContext("EndPoint", context.Channel.RemoteAddress.ToString())
+                .Debug("Client({HostId}) disconnected");
+
             session.Dispose();
             _server.RemoveSession(session);
             _server.Configuration.HostIdFactory.Free(session.HostId);

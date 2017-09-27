@@ -1,6 +1,7 @@
 ﻿using System;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using ProudNet.Serialization;
+using Serilog;
 
 namespace ProudNet
 {
@@ -12,6 +13,7 @@ namespace ProudNet
         public TimeSpan ConnectTimeout { get; set; }
         public MessageFactory[] MessageFactories { get; set; }
         public IMessageHandler[] MessageHandlers { get; set; }
+        public ILogger Logger { get; set; }
 
         public bool EnableServerLog { get; set; }
         public FallbackMethod FallbackMethod { get; set; }

@@ -47,6 +47,7 @@ namespace Netsphere.Network
             config.Version = new Guid("{beb92241-8333-4117-ab92-9b4af78c688f}");
             config.MessageFactories = new MessageFactory[] { new GameMessageFactory(), new GameRuleMessageFactory() };
             config.SessionFactory = new GameSessionFactory();
+            config.Logger = Logger.ForContext(Constants.SourceContextPropertyName, "GameServer-ProudNet");
 
             // ReSharper disable InconsistentNaming
             Predicate<GameSession> MustBeLoggedIn = session => session.IsLoggedIn();

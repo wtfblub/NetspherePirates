@@ -19,22 +19,27 @@ namespace ProudNet
         {
             var group = new P2PGroup(_server, allowDirectP2P);
             _groups.TryAdd(group.HostId, group);
+            _server.Configuration.Logger?.Debug("Created P2PGroup({HostId}) directP2P={AllowDirectP2P}", group.HostId, allowDirectP2P);
             return group;
         }
 
         public void Remove(uint groupHostId)
         {
-            P2PGroup group;
-            if (_groups.TryRemove(groupHostId, out group))
+            if (_groups.TryRemove(groupHostId, out var group))
             {
                 foreach (var member in group.Members)
                     group.Leave(member.Key);
 
                 _server.Configuration.HostIdFactory.Free(groupHostId);
             }
+            
+            _server.Configuration.Logger?.Debug("Removed P2PGroup({HostId})", group.HostId);
         }
 
-        public void Remove(P2PGroup group) => Remove(group.HostId);
+        public void Remove(P2PGroup group)
+        {
+            Remove(group.HostId);
+        }
 
         #region IReadOnlyDictionary
 

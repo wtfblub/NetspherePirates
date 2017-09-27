@@ -28,15 +28,14 @@ namespace ProudNet
             var encrypted = _server.Configuration.EnableP2PEncryptedMessaging;
             Crypt crypt = null;
             if (encrypted)
-            {
                 crypt = new Crypt(_server.Configuration.EncryptedMessageKeyLength);
-            }
 
             var session = _server.Sessions[hostId];
             var remotePeer = new RemotePeer(this, session, crypt);
             if (!_members.TryAdd(hostId, remotePeer))
                 throw new ProudException($"Member {hostId} is already in P2PGroup {HostId}");
 
+            _server.Configuration.Logger?.Debug("Client({HostId}) joined P2PGroup({GroupHostId})", hostId, HostId);
             session.P2PGroup = this;
 
             if (encrypted)
@@ -68,10 +67,10 @@ namespace ProudNet
 
         public void Leave(uint hostId)
         {
-            RemotePeer memberToLeave;
-            if (!_members.TryRemove(hostId, out memberToLeave))
+            if (!_members.TryRemove(hostId, out var memberToLeave))
                 return;
-
+            
+            _server.Configuration.Logger?.Debug("Client({HostId}) left P2PGroup({GroupHostId})", hostId, HostId);
             var session = memberToLeave.Session;
             session.P2PGroup = null;
             session.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));

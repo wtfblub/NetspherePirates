@@ -20,27 +20,30 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(P2PGroup_MemberJoin_AckMessage))]
         public void P2PGroupMemberJoinAck(ProudSession session, P2PGroup_MemberJoin_AckMessage message)
         {
+            session.Logger?.Debug("P2PGroupMemberJoinAck {@Message}", message);
             if (session.P2PGroup == null || session.HostId == message.AddedMemberHostId)
                 return;
 
             var remotePeer = session.P2PGroup?.Members[session.HostId];
-            var connectionState = remotePeer?.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
-
-            if (connectionState?.EventId != message.EventId)
+            var stateA = remotePeer?.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
+            if (stateA?.EventId != message.EventId)
                 return;
 
-            connectionState.IsJoined = true;
-            var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
-            if (connectionStateB.IsJoined)
+            stateA.IsJoined = true;
+            var stateB = stateA.RemotePeer.ConnectionStates[session.HostId];
+            if (stateB.IsJoined)
             {
-                remotePeer.SendAsync(new P2PRecycleCompleteMessage(connectionState.RemotePeer.HostId));
-                connectionState.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(session.HostId));
+                session.Logger?.Debug("Initiate P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                stateA.RemotePeer.Session.Logger?.Debug("Initiate P2P with {TargetHostId}", session.HostId);
+                remotePeer.SendAsync(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
+                stateA.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(session.HostId));
             }
         }
 
         [MessageHandler(typeof(NotifyP2PHolepunchSuccessMessage))]
         public void NotifyP2PHolepunchSuccess(ProudSession session, NotifyP2PHolepunchSuccessMessage message)
         {
+            session.Logger?.Debug("NotifyP2PHolepunchSuccess {@Message}", message);
             var group = session.P2PGroup;
             if (group == null || (session.HostId != message.A && session.HostId != message.B))
                 return;
@@ -77,16 +80,16 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(NotifyLogMessage))]
-        public void NotifyLog(NotifyLogMessage message)
+        public void NotifyLog(ProudServer server, NotifyLogMessage message)
         {
-            //Logger<>.Debug($"{message.TraceId} - {message.Message}");
+            server.Configuration.Logger?.Debug("NotifyLog {@Message}", message);
         }
 
         [MessageHandler(typeof(NotifyJitDirectP2PTriggeredMessage))]
         public void NotifyJitDirectP2PTriggered(ProudSession session, NotifyJitDirectP2PTriggeredMessage message)
         {
+            session.Logger?.Debug("NotifyJitDirectP2PTriggered {@Message}", message);
             var group = session.P2PGroup;
-
             if (group == null)
                 return;
 
@@ -119,6 +122,7 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(C2S_RequestCreateUdpSocketMessage))]
         public void C2S_RequestCreateUdpSocket(ProudServer server, ProudSession session)
         {
+            session.Logger?.Debug("C2S_RequestCreateUdpSocket");
             if (session.P2PGroup == null || !server.UdpSocketManager.IsRunning)
                 return;
 
@@ -133,6 +137,7 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(C2S_CreateUdpSocketAckMessage))]
         public void C2S_CreateUdpSocketAck(ProudServer server, ProudSession session, C2S_CreateUdpSocketAckMessage message)
         {
+            session.Logger?.Debug("{@Message}", message);
             if (session.P2PGroup == null || session.UdpSocket == null || !server.UdpSocketManager.IsRunning)
                 return;
 

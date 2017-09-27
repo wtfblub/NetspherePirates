@@ -24,6 +24,7 @@ namespace Netsphere.Network
             config.Version = new Guid("{a43a97d1-9ec7-495e-ad5f-8fe45fde1151}");
             config.MessageFactories = new MessageFactory[] { new RelayMessageFactory() };
             config.SessionFactory = new RelaySessionFactory();
+            config.Logger = Logger.ForContext(Constants.SourceContextPropertyName, "RelayServer-ProudNet");
 
             // ReSharper disable InconsistentNaming
             Predicate<RelaySession> MustNotBeLoggedIn = session => !session.IsLoggedIn();
