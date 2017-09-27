@@ -328,7 +328,10 @@ namespace Netsphere
                 // Try to rejoin the old team first then fallback to default join
                 try
                 {
-                    team.Join(plr);
+                    if (team != null)
+                        team.Join(plr);
+                    else
+                        TeamManager.Join(plr);
                 }
                 catch (TeamLimitReachedException)
                 {
