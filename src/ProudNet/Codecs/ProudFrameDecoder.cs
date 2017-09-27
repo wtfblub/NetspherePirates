@@ -17,7 +17,7 @@ namespace ProudNet.Codecs
             var scalarPrefix = buffer.GetByte(offset++);
 
             // lengthFieldOffset from constructor + scalarPrefix from above
-            var bytesLeft = buffer.ReadableBytes - Math.Abs(buffer.ReaderIndex - offset) + 1;
+            var bytesLeft = buffer.ReadableBytes - Math.Abs(buffer.ReaderIndex - offset);
             switch (scalarPrefix)
             {
                 case 1:
