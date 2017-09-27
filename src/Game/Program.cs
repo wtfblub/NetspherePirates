@@ -58,19 +58,35 @@ namespace Netsphere
             LicenseIdGenerator.Initialize();
             DenyIdGenerator.Initialize();
 
-            ChatServer.Initialize(new Configuration());
-            RelayServer.Initialize(new Configuration());
-            GameServer.Initialize(new Configuration());
+            var listenerThreads = new MultithreadEventLoopGroup(Config.Instance.ListenerThreads);
+            var workerThreads = new MultithreadEventLoopGroup(Config.Instance.WorkerThreads);
+            var workerThread = new SingleThreadEventLoop();
+            ChatServer.Initialize(new Configuration
+            {
+                SocketListenerThreads = listenerThreads,
+                SocketWorkerThreads = workerThreads,
+                WorkerThread = workerThread
+            });
+            RelayServer.Initialize(new Configuration
+            {
+                SocketListenerThreads = listenerThreads,
+                SocketWorkerThreads = workerThreads,
+                WorkerThread = workerThread
+            });
+            GameServer.Initialize(new Configuration
+            {
+                SocketListenerThreads = listenerThreads,
+                SocketWorkerThreads = workerThreads,
+                WorkerThread = workerThread
+            });
 
             FillShop();
 
             Log.Information("Starting server...");
 
-            var listenerThreads = new MultithreadEventLoopGroup(Config.Instance.ListenerThreads);
-            var workerThreads = new MultithreadEventLoopGroup(Config.Instance.WorkerThreads);
-            ChatServer.Instance.Listen(Config.Instance.ChatListener, listenerEventLoopGroup: listenerThreads, workerEventLoopGroup: workerThreads);
-            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts, listenerThreads, workerThreads);
-            GameServer.Instance.Listen(Config.Instance.Listener, listenerEventLoopGroup: listenerThreads, workerEventLoopGroup: workerThreads);
+            ChatServer.Instance.Listen(Config.Instance.ChatListener);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts);
+            GameServer.Instance.Listen(Config.Instance.Listener);
 
             Log.Information("Ready for connections!");
 

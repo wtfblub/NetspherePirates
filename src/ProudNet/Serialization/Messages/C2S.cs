@@ -22,6 +22,10 @@ namespace ProudNet.Serialization.Messages
     }
 
     [BlubContract]
+    internal class NotifyUdpToTcpFallbackByClientMessage : IMessage
+    { }
+
+    [BlubContract]
     internal class P2PGroup_MemberJoin_AckMessage : IMessage
     {
         [BlubMember(0)]

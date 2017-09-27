@@ -29,9 +29,11 @@ namespace ProudNet
         {
             ThrowIfDisposed();
 
-            _eventLoopGroup = eventLoopGroup != null
-                ? null
-                : new MultithreadEventLoopGroup();
+            if (eventLoopGroup == null)
+                throw new ArgumentNullException(nameof(eventLoopGroup));
+
+            _eventLoopGroup = eventLoopGroup;
+
             try
             {
                 Channel = new Bootstrap()
@@ -48,7 +50,7 @@ namespace ProudNet
             }
             catch (Exception ex)
             {
-                _eventLoopGroup?.ShutdownGracefullyAsync();
+                _eventLoopGroup?.ShutdownGracefullyAsync(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10)).WaitEx();
                 _eventLoopGroup = null;
                 Channel = null;
                 ex.Rethrow();
@@ -66,9 +68,7 @@ namespace ProudNet
                 return;
 
             _disposed = true;
-
-            Channel.CloseAsync().WaitEx();
-            _eventLoopGroup?.ShutdownGracefullyAsync().WaitEx();
+            _eventLoopGroup?.ShutdownGracefullyAsync(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10)).WaitEx();
         }
 
         private void ThrowIfDisposed()

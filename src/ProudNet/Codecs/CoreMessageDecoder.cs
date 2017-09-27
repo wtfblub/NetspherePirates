@@ -8,11 +8,23 @@ using ReadOnlyByteBufferStream = BlubLib.DotNetty.ReadOnlyByteBufferStream;
 
 namespace ProudNet.Codecs
 {
-    internal class CoreMessageDecoder : MessageToMessageDecoder<IByteBuffer>
+    internal class CoreMessageDecoder : MessageToMessageDecoder<RecvContext>
     {
-        protected override void Decode(IChannelHandlerContext context, IByteBuffer message, List<object> output)
+        protected override void Decode(IChannelHandlerContext context, RecvContext message, List<object> output)
         {
-            output.Add(Decode(message));
+            var buffer = message.Message as IByteBuffer;
+            try
+            {
+                if (buffer == null)
+                    throw new ProudException($"{nameof(CoreMessageDecoder)} can only handle {nameof(IByteBuffer)}");
+
+                message.Message = Decode(buffer);
+                output.Add(message);
+            }
+            finally
+            {
+                buffer?.Release();
+            }
         }
 
         public static ICoreMessage Decode(IByteBuffer buffer)

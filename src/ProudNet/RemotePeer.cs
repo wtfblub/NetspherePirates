@@ -20,6 +20,11 @@ namespace ProudNet
             Session = session;
         }
 
-        public Task SendAsync(object message) => Session.SendAsync(message);
+        public Task SendAsync(object message)
+        {
+            return Session.P2PGroup.Members.ContainsKey(Session.HostId)
+                ? Session.SendAsync(message)
+                : Task.CompletedTask;
+        }
     }
 }

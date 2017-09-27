@@ -43,10 +43,9 @@ namespace ProudNet
             else
                 session.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, AllowDirectP2P));
 
-            foreach (var member in _members.Values.Where(member => member.HostId != hostId).Cast<RemotePeer>())
+            foreach (var member in _members.Values.Where(member => member.HostId != hostId))
             {
                 var memberSession = _server.Sessions[member.HostId];
-
                 var stateA = new P2PConnectionState(member);
                 var stateB = new P2PConnectionState(remotePeer);
 
@@ -74,7 +73,7 @@ namespace ProudNet
             var session = memberToLeave.Session;
             session.P2PGroup = null;
             session.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
-
+            memberToLeave.ConnectionStates.Clear();
             foreach (var member in _members.Values.Where(entry => entry.HostId != hostId))
             {
                 var memberSession = _server.Sessions.GetValueOrDefault(member.HostId);

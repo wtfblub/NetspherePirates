@@ -53,6 +53,7 @@ namespace ProudNet
         internal UdpSocket UdpSocket { get; set; }
 
         public double UnreliablePing { get; internal set; }
+        internal DateTimeOffset LastUdpPing { get; set; }
 
         public ProudSession(uint hostId, IChannel channel, ProudServer server)
         {

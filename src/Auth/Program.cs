@@ -52,7 +52,12 @@ namespace Netsphere
 
             Log.Information("Starting server...");
 
-            AuthServer.Initialize(new Configuration());
+            AuthServer.Initialize(new Configuration
+            {
+                SocketListenerThreads = new MultithreadEventLoopGroup(1),
+                SocketWorkerThreads = new MultithreadEventLoopGroup(1),
+                WorkerThread = new SingleThreadEventLoop()
+            });
             AuthServer.Instance.Listen(Config.Instance.Listener);
 
             s_apiEventLoopGroup = new MultithreadEventLoopGroup(1);
