@@ -43,7 +43,6 @@ namespace Netsphere.Game.Systems
         public void Remove(Team team)
         {
             _teams.Remove(team);
-
         }
 
         public void Join(Player plr)
@@ -258,7 +257,7 @@ namespace Netsphere.Game.Systems
             }
 
             var isChange = false;
-            if (plr.RoomInfo.Team != null)
+            if (plr.RoomInfo.Team != null && plr.RoomInfo.Team.Team != Team)
             {
                 plr.RoomInfo.Team.Leave(plr);
                 isChange = true;

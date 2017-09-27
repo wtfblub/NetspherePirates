@@ -13,7 +13,7 @@ namespace Netsphere.Game.Systems
         public Room Room { get; }
         public GameRuleBase GameRule
         {
-            get { return _gameRule; }
+            get => _gameRule;
             set
             {
                 if (value != _gameRule)
@@ -27,7 +27,7 @@ namespace Netsphere.Game.Systems
         }
         public MapInfo MapInfo
         {
-            get { return _mapInfo; }
+            get => _mapInfo;
             set
             {
                 if (value != _mapInfo)
