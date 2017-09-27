@@ -22,6 +22,9 @@ namespace Netsphere
 {
     internal class Program
     {
+        private static readonly object s_exitMutex = new object();
+        private static bool s_isExiting;
+
         public static Stopwatch AppTime { get; } = Stopwatch.StartNew();
 
         private static void Main()
@@ -30,7 +33,7 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
-            
+
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.json");
             var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.log");
             Log.Logger = new LoggerConfiguration()
@@ -104,11 +107,19 @@ namespace Netsphere
 
         private static void Exit()
         {
-            Log.Information("Closing...");
+            lock (s_exitMutex)
+            {
+                if (s_isExiting)
+                    return;
 
-            ChatServer.Instance.Dispose();
-            RelayServer.Instance.Dispose();
-            GameServer.Instance.Dispose();
+                s_isExiting = true;
+            }
+
+            Log.Information("Closing...");
+            var chat = Task.Run(() => ChatServer.Instance.Dispose());
+            var relay = Task.Run(() => RelayServer.Instance.Dispose());
+            var game = Task.Run(() => GameServer.Instance.Dispose());
+            Task.WaitAll(chat, relay, game);
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
