@@ -23,9 +23,13 @@ build_script:
 
     xcopy /S src\Game\bin\Release\netcoreapp2.0\publish\* build_release\game\
 
+    xcopy /S src\tools\DatabaseMigrator\bin\Debug\net461\*.exe build_debug\tools\DatabaseMigrator\
+
     xcopy /S src\tools\DataExtractor\bin\Debug\net461\*.exe build_debug\tools\extractor\
 
     xcopy /S src\tools\NetsphereExplorer\bin\Debug\net461\*.exe build_debug\tools\NetsphereExplorer\
+
+    xcopy /S src\tools\DatabaseMigrator\bin\Release\net461\*.exe build_release\tools\DatabaseMigrator\
 
     xcopy /S src\tools\DataExtractor\bin\Release\net461\*.exe build_release\tools\extractor\
 
