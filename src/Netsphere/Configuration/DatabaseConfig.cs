@@ -19,6 +19,9 @@ namespace Netsphere.Configuration
         [JsonProperty("database")]
         public string Database { get; set; }
 
+        [JsonProperty("run_migration")]
+        public bool RunMigration { get; set; }
+
         public DatabaseConfig()
         {
             Host = "localhost";

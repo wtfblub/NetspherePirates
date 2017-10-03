@@ -27,7 +27,12 @@ namespace Netsphere.Database
                 var migrator = new SimpleMigrator(assemblyProvider, databaseProvider);
                 migrator.Load();
                 if (migrator.CurrentMigration.Version != migrator.LatestMigration.Version)
-                    throw new DatabaseVersionMismatchException(migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
+                {
+                    if (config.RunMigration)
+                        migrator.MigrateToLatest();
+                    else
+                        throw new DatabaseVersionMismatchException(migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
+                }
             }
         }
 
