@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib;
-using Dapper;
 using Dapper.FastCrud;
 using DotNetty.Transport.Channels;
+using Netsphere.Configuration;
+using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Newtonsoft.Json;
-using ProudNet;
 using Serilog;
-using Serilog.Core;
 using Serilog.Formatting.Json;
-using SimpleMigrations;
-using SimpleMigrations.DatabaseProvider;
-using ILogger = Serilog.ILogger;
 
 namespace Netsphere
 {
@@ -37,6 +31,8 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
+            
+            Config<Config>.Initialize("game.hjson", "NETSPHEREPIRATES_GAMECONF");
 
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.json");
             var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.log");
@@ -54,8 +50,23 @@ namespace Netsphere
 
             Log.Information("Initializing...");
 
-            AuthDatabase.Initialize();
-            GameDatabase.Initialize();
+            try
+            {
+                AuthDatabase.Initialize(Config.Instance.Database.Auth);
+                GameDatabase.Initialize(Config.Instance.Database.Game);
+            }
+            catch (DatabaseNotFoundException ex)
+            {
+                Log.Error("Database {Name} not found", ex.Name);
+                Environment.Exit(1);
+            }
+            
+            catch (DatabaseVersionMismatchException ex)
+            {
+                Log.Error("Invalid version. Database={CurrentVersion} Required={RequiredVersion}. Run the DatabaseMigrator to update your database.",
+                    ex.CurrentVersion, ex.RequiredVersion);
+                Environment.Exit(1);
+            }
 
             ItemIdGenerator.Initialize();
             CharacterIdGenerator.Initialize();
@@ -65,19 +76,19 @@ namespace Netsphere
             var listenerThreads = new MultithreadEventLoopGroup(Config.Instance.ListenerThreads);
             var workerThreads = new MultithreadEventLoopGroup(Config.Instance.WorkerThreads);
             var workerThread = new SingleThreadEventLoop();
-            ChatServer.Initialize(new Configuration
+            ChatServer.Initialize(new ProudNet.Configuration
             {
                 SocketListenerThreads = listenerThreads,
                 SocketWorkerThreads = workerThreads,
                 WorkerThread = workerThread
             });
-            RelayServer.Initialize(new Configuration
+            RelayServer.Initialize(new ProudNet.Configuration
             {
                 SocketListenerThreads = listenerThreads,
                 SocketWorkerThreads = workerThreads,
                 WorkerThread = workerThread
             });
-            GameServer.Initialize(new Configuration
+            GameServer.Initialize(new ProudNet.Configuration
             {
                 SocketListenerThreads = listenerThreads,
                 SocketWorkerThreads = workerThreads,
@@ -198,8 +209,10 @@ namespace Netsphere
                         effects[pair.Key] = Tuple.Create(pair.Value.Item1, effectGroup.Id);
 
                         foreach (var effect in pair.Value.Item1)
+                        {
                             db.Insert(new ShopEffectDto { EffectGroupId = effectGroup.Id, Effect = effect },
                                 statement => statement.AttachToTransaction(transaction));
+                        }
                     }
 
                     #endregion
@@ -314,91 +327,5 @@ namespace Netsphere
             }
         }
 
-    }
-
-    internal static class AuthDatabase
-    {
-        // ReSharper disable once InconsistentNaming
-        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthDatabase));
-        private static string s_connectionString;
-
-        public static void Initialize()
-        {
-            Logger.Information("Initializing...");
-            var config = Config.Instance.Database;
-            s_connectionString =
-                $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
-            OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-            using (var con = Open())
-            {
-                if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
-                {
-                    Logger.Error($"Database '{config.Auth.Database}' not found");
-                    Environment.Exit(1);
-                }
-
-                var databaseProvider = new MysqlDatabaseProvider(con) {TableName = "__version"};
-                var assemblyProvider = new AssemblyMigrationProvider(typeof(Database.Migration.Auth.Base).Assembly, typeof(Database.Migration.Auth.Base).Namespace);
-                var migrator = new SimpleMigrator(assemblyProvider, databaseProvider);
-                migrator.Load();
-                if (migrator.CurrentMigration.Version != migrator.LatestMigration.Version)
-                {
-                    Logger.Error("Invalid version. Database={CurrentVersion} Latest={LatestVersion}. Run the DatabaseMigrator to update your database.",
-                        migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        public static DbConnection Open()
-        {
-            var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-            connection.Open();
-            return connection;
-        }
-    }
-
-    internal static class GameDatabase
-    {
-        // ReSharper disable once InconsistentNaming
-        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(GameDatabase));
-        private static string s_connectionString;
-
-        public static void Initialize()
-        {
-            Logger.Information("Initializing...");
-            var config = Config.Instance.Database;
-            s_connectionString =
-                $"SslMode=none;Server={config.Game.Host};Port={config.Game.Port};Database={config.Game.Database};Uid={config.Game.Username};Pwd={config.Game.Password};Pooling=true;";
-            OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-            using (var con = Open())
-            {
-                if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Game.Database}\"") == null)
-                {
-                    Logger.Error($"Database '{config.Game.Database}' not found");
-                    Environment.Exit(1);
-                }
-
-                var databaseProvider = new MysqlDatabaseProvider(con) {TableName = "__version"};
-                var assemblyProvider = new AssemblyMigrationProvider(typeof(Database.Migration.Game.Base).Assembly, typeof(Database.Migration.Game.Base).Namespace);
-                var migrator = new SimpleMigrator(assemblyProvider, databaseProvider);
-                migrator.Load();
-                if (migrator.CurrentMigration.Version != migrator.LatestMigration.Version)
-                {
-                    Logger.Error("Invalid version. Database={CurrentVersion} Latest={LatestVersion}. Run the DatabaseMigrator to update your database.",
-                        migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        public static DbConnection Open()
-        {
-            var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-            connection.Open();
-            return connection;
-        }
     }
 }

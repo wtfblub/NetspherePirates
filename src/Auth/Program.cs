@@ -1,26 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
-using Dapper;
-using Dapper.FastCrud;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Netsphere.API;
-using Netsphere.Database.Migration.Auth;
+using Netsphere.Configuration;
+using Netsphere.Database;
 using Netsphere.Network;
 using Newtonsoft.Json;
-using ProudNet;
 using Serilog;
-using Serilog.Core;
 using Serilog.Formatting.Json;
-using SimpleMigrations;
-using SimpleMigrations.DatabaseProvider;
-using ILogger = Serilog.ILogger;
 
 namespace Netsphere
 {
@@ -38,6 +31,8 @@ namespace Netsphere
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
 
+            Config<Config>.Initialize("auth.hjson", "NETSPHEREPIRATES_AUTHCONF");
+
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
             var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
             Log.Logger = new LoggerConfiguration()
@@ -52,11 +47,26 @@ namespace Netsphere
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            AuthDatabase.Initialize();
+            try
+            {
+                AuthDatabase.Initialize(Config.Instance.Database.Auth);
+            }
+            catch (DatabaseNotFoundException ex)
+            {
+                Log.Error("Database {Name} not found", ex.Name);
+                Environment.Exit(1);
+            }
+            
+            catch (DatabaseVersionMismatchException ex)
+            {
+                Log.Error("Invalid version. Database={CurrentVersion} Required={RequiredVersion}. Run the DatabaseMigrator to update your database.",
+                    ex.CurrentVersion, ex.RequiredVersion);
+                Environment.Exit(1);
+            }
 
             Log.Information("Starting server...");
 
-            AuthServer.Initialize(new Configuration
+            AuthServer.Initialize(new ProudNet.Configuration
             {
                 SocketListenerThreads = new MultithreadEventLoopGroup(1),
                 SocketWorkerThreads = new MultithreadEventLoopGroup(1),
@@ -125,49 +135,6 @@ namespace Netsphere
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
             Log.Error((Exception)e.ExceptionObject, "UnhandledException");
-        }
-    }
-
-    internal static class AuthDatabase
-    {
-        // ReSharper disable once InconsistentNaming
-        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthDatabase));
-        private static string s_connectionString;
-
-        public static void Initialize()
-        {
-            Logger.Information("Initializing...");
-
-            var config = Config.Instance.Database;
-            s_connectionString = $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
-            OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-            using (var con = Open())
-            {
-                if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
-                {
-                    Logger.Error($"Database '{config.Auth.Database}' not found");
-                    Environment.Exit(1);
-                }
-
-                var databaseProvider = new MysqlDatabaseProvider(con) {TableName = "__version"};
-                var assemblyProvider = new AssemblyMigrationProvider(typeof(Base).Assembly, typeof(Base).Namespace);
-                var migrator = new SimpleMigrator(assemblyProvider, databaseProvider);
-                migrator.Load();
-                if (migrator.CurrentMigration.Version != migrator.LatestMigration.Version)
-                {
-                    Logger.Error("Invalid version. Database={CurrentVersion} Latest={LatestVersion}. Run the DatabaseMigrator to update your database.",
-                        migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        public static DbConnection Open()
-        {
-            var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-            connection.Open();
-            return connection;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Netsphere.Network
         // ReSharper disable once InconsistentNaming
         private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ChatServer));
 
-        public static void Initialize(Configuration config)
+        public static void Initialize(ProudNet.Configuration config)
         {
             if (Instance != null)
                 throw new InvalidOperationException("Server is already initialized");
@@ -54,7 +54,7 @@ namespace Netsphere.Network
             Instance = new ChatServer(config);
         }
 
-        private ChatServer(Configuration config)
+        private ChatServer(ProudNet.Configuration config)
             : base(config)
         { }
 

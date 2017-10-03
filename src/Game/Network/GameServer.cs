@@ -39,7 +39,7 @@ namespace Netsphere.Network
         public ChannelManager ChannelManager { get; }
         public ResourceCache ResourceCache { get; }
 
-        public static void Initialize(Configuration config)
+        public static void Initialize(ProudNet.Configuration config)
         {
             if (Instance != null)
                 throw new InvalidOperationException("Server is already initialized");
@@ -137,7 +137,7 @@ namespace Netsphere.Network
             Instance = new GameServer(config);
         }
 
-        private GameServer(Configuration config)
+        private GameServer(ProudNet.Configuration config)
             : base(config)
         {
             RegisterMappings();

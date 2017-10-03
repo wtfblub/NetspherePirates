@@ -16,7 +16,7 @@ namespace Netsphere.Network
         // ReSharper disable once InconsistentNaming
         private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(RelayServer));
 
-        public static void Initialize(Configuration config)
+        public static void Initialize(ProudNet.Configuration config)
         {
             if (Instance != null)
                 throw new InvalidOperationException("Server is already initialized");
@@ -40,7 +40,7 @@ namespace Netsphere.Network
             Instance = new RelayServer(config);
         }
 
-        private RelayServer(Configuration config)
+        private RelayServer(ProudNet.Configuration config)
             : base(config)
         { }
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.Security.Cryptography;
 using Dapper.FastCrud;
+using Netsphere.Database;
 using Netsphere.Database.Auth;
 using Netsphere.Network.Message.Auth;
 using ProudNet;
