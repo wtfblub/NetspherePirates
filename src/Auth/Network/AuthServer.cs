@@ -23,7 +23,7 @@ namespace Netsphere.Network
 
         public ServerManager ServerManager { get; }
 
-        public static void Initialize(Configuration config)
+        public static void Initialize(ProudNet.Configuration config)
         {
             if (Instance != null)
                 throw new InvalidOperationException("Server is already initialized");
@@ -35,7 +35,7 @@ namespace Netsphere.Network
             Instance = new AuthServer(config);
         }
 
-        private AuthServer(Configuration config)
+        private AuthServer(ProudNet.Configuration config)
             : base(config)
         {
             _worker = new TaskLoop(TimeSpan.FromSeconds(10), Worker);
