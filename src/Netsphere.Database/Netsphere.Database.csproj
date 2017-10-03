@@ -6,5 +6,6 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2.0" />
     <PackageReference Include="Dapper.FastCrud" Version="2.4.1" />
+    <PackageReference Include="Simple.Migrations" Version="0.9.16" />
   </ItemGroup>
 </Project>

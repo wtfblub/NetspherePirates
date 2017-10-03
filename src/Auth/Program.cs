@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Data.Common;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -11,12 +11,16 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Netsphere.API;
+using Netsphere.Database.Migration.Auth;
 using Netsphere.Network;
 using Newtonsoft.Json;
 using ProudNet;
 using Serilog;
 using Serilog.Core;
 using Serilog.Formatting.Json;
+using SimpleMigrations;
+using SimpleMigrations.DatabaseProvider;
+using ILogger = Serilog.ILogger;
 
 namespace Netsphere
 {
@@ -33,7 +37,7 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
-            
+
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
             var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
             Log.Logger = new LoggerConfiguration()
@@ -143,12 +147,23 @@ namespace Netsphere
                 if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
                 {
                     Logger.Error($"Database '{config.Auth.Database}' not found");
-                    Environment.Exit(0);
+                    Environment.Exit(1);
+                }
+
+                var databaseProvider = new MysqlDatabaseProvider(con) {TableName = "__version"};
+                var assemblyProvider = new AssemblyMigrationProvider(typeof(Base).Assembly, typeof(Base).Namespace);
+                var migrator = new SimpleMigrator(assemblyProvider, databaseProvider);
+                migrator.Load();
+                if (migrator.CurrentMigration.Version != migrator.LatestMigration.Version)
+                {
+                    Logger.Error("Invalid version. Database={CurrentVersion} Latest={LatestVersion}. Run the DatabaseMigrator to update your database.",
+                        migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
+                    Environment.Exit(1);
                 }
             }
         }
 
-        public static IDbConnection Open()
+        public static DbConnection Open()
         {
             var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
             connection.Open();

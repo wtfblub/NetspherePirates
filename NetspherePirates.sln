@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Auth.ServiceModel", "src\Au
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetsphereExplorer", "src\tools\NetsphereExplorer\NetsphereExplorer.csproj", "{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseMigrator", "src\tools\DatabaseMigrator\DatabaseMigrator.csproj", "{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,16 @@ Global
 		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.ReleaseNoTools|Any CPU.ActiveCfg = Release|Any CPU
 		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.ReleaseOnlyTools|Any CPU.ActiveCfg = Release|Any CPU
 		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3}.ReleaseOnlyTools|Any CPU.Build.0 = Release|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.DebugNoTools|Any CPU.ActiveCfg = Debug|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.DebugOnlyTools|Any CPU.ActiveCfg = Debug|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.DebugOnlyTools|Any CPU.Build.0 = Debug|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.ReleaseNoTools|Any CPU.ActiveCfg = Release|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.ReleaseOnlyTools|Any CPU.ActiveCfg = Release|Any CPU
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}.ReleaseOnlyTools|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,6 +164,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7364B088-32B5-4033-B5A0-5147B8939F6E} = {D196F056-F7FD-4F53-AD64-3D8677631492}
 		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3} = {D196F056-F7FD-4F53-AD64-3D8677631492}
+		{73685AD2-2638-4FF2-BA0C-7BD5E4534B26} = {D196F056-F7FD-4F53-AD64-3D8677631492}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01EAF340-829E-4876-AA91-1A8B27DDED00}

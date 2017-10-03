@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,9 @@ using ProudNet;
 using Serilog;
 using Serilog.Core;
 using Serilog.Formatting.Json;
+using SimpleMigrations;
+using SimpleMigrations.DatabaseProvider;
+using ILogger = Serilog.ILogger;
 
 namespace Netsphere
 {
@@ -331,12 +335,23 @@ namespace Netsphere
                 if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
                 {
                     Logger.Error($"Database '{config.Auth.Database}' not found");
-                    Environment.Exit(0);
+                    Environment.Exit(1);
+                }
+
+                var databaseProvider = new MysqlDatabaseProvider(con) {TableName = "__version"};
+                var assemblyProvider = new AssemblyMigrationProvider(typeof(Database.Migration.Auth.Base).Assembly, typeof(Database.Migration.Auth.Base).Namespace);
+                var migrator = new SimpleMigrator(assemblyProvider, databaseProvider);
+                migrator.Load();
+                if (migrator.CurrentMigration.Version != migrator.LatestMigration.Version)
+                {
+                    Logger.Error("Invalid version. Database={CurrentVersion} Latest={LatestVersion}. Run the DatabaseMigrator to update your database.",
+                        migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
+                    Environment.Exit(1);
                 }
             }
         }
 
-        public static IDbConnection Open()
+        public static DbConnection Open()
         {
             var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
             connection.Open();
@@ -363,12 +378,23 @@ namespace Netsphere
                 if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Game.Database}\"") == null)
                 {
                     Logger.Error($"Database '{config.Game.Database}' not found");
-                    Environment.Exit(0);
+                    Environment.Exit(1);
+                }
+
+                var databaseProvider = new MysqlDatabaseProvider(con) {TableName = "__version"};
+                var assemblyProvider = new AssemblyMigrationProvider(typeof(Database.Migration.Game.Base).Assembly, typeof(Database.Migration.Game.Base).Namespace);
+                var migrator = new SimpleMigrator(assemblyProvider, databaseProvider);
+                migrator.Load();
+                if (migrator.CurrentMigration.Version != migrator.LatestMigration.Version)
+                {
+                    Logger.Error("Invalid version. Database={CurrentVersion} Latest={LatestVersion}. Run the DatabaseMigrator to update your database.",
+                        migrator.CurrentMigration.Version, migrator.LatestMigration.Version);
+                    Environment.Exit(1);
                 }
             }
         }
 
-        public static IDbConnection Open()
+        public static DbConnection Open()
         {
             var connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
             connection.Open();
