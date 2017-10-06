@@ -4,6 +4,6 @@ namespace ProudNet
 {
     public interface ISessionFactory
     {
-        ProudSession Create(uint hostId, IChannel channel);
+        ProudSession Create(uint hostId, IChannel channel, ProudServer server);
     }
 }

@@ -4,7 +4,6 @@ using System.Linq;
 using BlubLib.IO;
 using Netsphere.Game.GameRules;
 using Netsphere.Game.Systems;
-using Netsphere.Network;
 
 // ReSharper disable once CheckNamespace
 namespace Netsphere.Game

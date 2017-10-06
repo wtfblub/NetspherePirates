@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
-using BlubLib;
 using BlubLib.Threading.Tasks;
-using Dapper;
-using Dapper.FastCrud;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Netsphere.API;
+using Netsphere.Configuration;
+using Netsphere.Database;
 using Netsphere.Network;
 using Newtonsoft.Json;
-using ProudNet;
 using Serilog;
-using Serilog.Core;
 using Serilog.Formatting.Json;
 
 namespace Netsphere
@@ -24,6 +21,8 @@ namespace Netsphere
     {
         private static IEventLoopGroup s_apiEventLoopGroup;
         private static IChannel s_apiHost;
+        private static readonly object s_exitMutex = new object();
+        private static bool s_isExiting;
 
         private static void Main()
         {
@@ -31,24 +30,48 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
-            
+
+            Config<Config>.Initialize("auth.hjson", "NETSPHEREPIRATES_AUTHCONF");
+
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
             var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
             Log.Logger = new LoggerConfiguration()
+                .Destructure.ByTransforming<IPEndPoint>(endPoint => endPoint.ToString())
+                .Destructure.ByTransforming<EndPoint>(endPoint => endPoint.ToString())
                 .WriteTo.File(new JsonFormatter(), jsonlog)
                 .WriteTo.File(logfile)
                 .WriteTo.Console(outputTemplate: "[{Level} {SourceContext}] {Message}{NewLine}{Exception}")
-                .MinimumLevel.Verbose()
+                .MinimumLevel.Debug()
                 .CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-            AuthDatabase.Initialize();
+            try
+            {
+                AuthDatabase.Initialize(Config.Instance.Database.Auth);
+            }
+            catch (DatabaseNotFoundException ex)
+            {
+                Log.Error("Database {Name} not found", ex.Name);
+                Environment.Exit(1);
+            }
+            
+            catch (DatabaseVersionMismatchException ex)
+            {
+                Log.Error("Invalid version. Database={CurrentVersion} Required={RequiredVersion}. Run the DatabaseMigrator to update your database.",
+                    ex.CurrentVersion, ex.RequiredVersion);
+                Environment.Exit(1);
+            }
 
             Log.Information("Starting server...");
 
-            AuthServer.Initialize(new Configuration());
+            AuthServer.Initialize(new ProudNet.Configuration
+            {
+                SocketListenerThreads = new MultithreadEventLoopGroup(1),
+                SocketWorkerThreads = new MultithreadEventLoopGroup(1),
+                WorkerThread = new SingleThreadEventLoop()
+            });
             AuthServer.Instance.Listen(Config.Instance.Listener);
 
             s_apiEventLoopGroup = new MultithreadEventLoopGroup(1);
@@ -90,6 +113,14 @@ namespace Netsphere
 
         private static void Exit()
         {
+            lock (s_exitMutex)
+            {
+                if (s_isExiting)
+                    return;
+
+                s_isExiting = true;
+            }
+
             Log.Information("Closing...");
             s_apiHost.CloseAsync().WaitEx();
             s_apiEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
@@ -104,76 +135,6 @@ namespace Netsphere
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
             Log.Error((Exception)e.ExceptionObject, "UnhandledException");
-        }
-    }
-
-    internal static class AuthDatabase
-    {
-        // ReSharper disable once InconsistentNaming
-        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthDatabase));
-        private static string s_connectionString;
-
-        public static void Initialize()
-        {
-            Logger.Information("Initializing...");
-
-            var config = Config.Instance.Database;
-
-            switch (config.Engine)
-            {
-                case DatabaseEngine.MySQL:
-                    s_connectionString = $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
-                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-                    using (var con = Open())
-                    {
-                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
-                        {
-                            Logger.Error($"Database '{config.Auth.Database}' not found");
-                            Environment.Exit(0);
-                        }
-                    }
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    s_connectionString = $"Data Source={config.Auth.Filename};Pooling=true;";
-                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
-
-                    if (!File.Exists(config.Auth.Filename))
-                    {
-                        Logger.Error($"Database '{config.Auth.Filename}' not found");
-                        Environment.Exit(0);
-                    }
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {config.Engine}");
-                    Environment.Exit(0);
-                    return;
-            }
-        }
-
-        public static IDbConnection Open()
-        {
-            var engine = Config.Instance.Database.Engine;
-            IDbConnection connection;
-            switch (engine)
-            {
-                case DatabaseEngine.MySQL:
-                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {engine}");
-                    Environment.Exit(0);
-                    return null;
-            }
-            connection.Open();
-            return connection;
         }
     }
 }

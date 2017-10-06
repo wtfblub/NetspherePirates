@@ -38,6 +38,7 @@ namespace ProudNet
             if (!_members.TryAdd(hostId, remotePeer))
                 throw new ProudException($"Member {hostId} is already in P2PGroup {HostId}");
 
+            _server.Configuration.Logger?.Debug("Client({HostId}) joined P2PGroup({GroupHostId})", hostId, HostId);
             session.P2PGroup = this;
 
             if (encrypted)
@@ -45,10 +46,9 @@ namespace ProudNet
             else
                 session.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, AllowDirectP2P));
 
-            foreach (var member in _members.Values.Where(member => member.HostId != hostId).Cast<RemotePeer>())
+            foreach (var member in _members.Values.Where(member => member.HostId != hostId))
             {
                 var memberSession = _server.Sessions[member.HostId];
-
                 var stateA = new P2PConnectionState(member);
                 var stateB = new P2PConnectionState(remotePeer);
 
@@ -69,14 +69,14 @@ namespace ProudNet
 
         public void Leave(uint hostId)
         {
-            RemotePeer memberToLeave;
-            if (!_members.TryRemove(hostId, out memberToLeave))
+            if (!_members.TryRemove(hostId, out var memberToLeave))
                 return;
-
+            
+            _server.Configuration.Logger?.Debug("Client({HostId}) left P2PGroup({GroupHostId})", hostId, HostId);
             var session = memberToLeave.Session;
             session.P2PGroup = null;
             session.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
-
+            memberToLeave.ConnectionStates.Clear();
             foreach (var member in _members.Values.Where(entry => entry.HostId != hostId))
             {
                 var memberSession = _server.Sessions.GetValueOrDefault(member.HostId);

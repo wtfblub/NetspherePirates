@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using BlubLib.IO;
 using DotNetty.Buffers;
@@ -11,7 +10,7 @@ using ReadOnlyByteBufferStream = BlubLib.DotNetty.ReadOnlyByteBufferStream;
 
 namespace ProudNet.Codecs
 {
-    internal class MessageDecoder : MessageToMessageDecoder<IByteBuffer>
+    internal class MessageDecoder : MessageToMessageDecoder<RecvContext>
     {
         private readonly MessageFactory[] _userMessageFactories;
 
@@ -20,26 +19,39 @@ namespace ProudNet.Codecs
             _userMessageFactories = userMessageFactories;
         }
 
-        protected override void Decode(IChannelHandlerContext context, IByteBuffer message, List<object> output)
+        protected override void Decode(IChannelHandlerContext context, RecvContext message, List<object> output)
         {
-            using (var r = new ReadOnlyByteBufferStream(message, false).ToBinaryReader(false))
+            var buffer = message.Message as IByteBuffer;
+            try
             {
-                var opCode = r.ReadUInt16();
-                var isInternal = opCode >= 64000;
-                var factory = isInternal
-                    ? RmiMessageFactory.Default
-                    : _userMessageFactories.FirstOrDefault(userFactory => userFactory.ContainsOpCode(opCode));
+                // Drop core messages
+                if (buffer == null)
+                    return;
 
-                if (factory == null)
+                using (var r = new ReadOnlyByteBufferStream(buffer, false).ToBinaryReader(false))
                 {
-#if DEBUG
-                    throw new ProudBadOpCodeException(opCode, message.ToArray());
-#else
-                    throw new ProudException($"No {nameof(MessageFactory)} found for opcode {opCode}");
-#endif
-                }
+                    var opCode = r.ReadUInt16();
+                    var isInternal = opCode >= 64000;
+                    var factory = isInternal
+                        ? RmiMessageFactory.Default
+                        : _userMessageFactories.FirstOrDefault(userFactory => userFactory.ContainsOpCode(opCode));
 
-                output.Add(factory.GetMessage(opCode, r));
+                    if (factory == null)
+                    {
+#if DEBUG
+                        throw new ProudBadOpCodeException(opCode, buffer.ToArray());
+#else
+                        throw new ProudException($"No {nameof(MessageFactory)} found for opcode {opCode}");
+#endif
+                    }
+
+                    message.Message = factory.GetMessage(opCode, r);
+                    output.Add(message);
+                }
+            }
+            finally
+            {
+                buffer?.Release();
             }
         }
     }

@@ -16,7 +16,7 @@ namespace Netsphere.Network
         // ReSharper disable once InconsistentNaming
         private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(RelayServer));
 
-        public static void Initialize(Configuration config)
+        public static void Initialize(ProudNet.Configuration config)
         {
             if (Instance != null)
                 throw new InvalidOperationException("Server is already initialized");
@@ -24,6 +24,7 @@ namespace Netsphere.Network
             config.Version = new Guid("{a43a97d1-9ec7-495e-ad5f-8fe45fde1151}");
             config.MessageFactories = new MessageFactory[] { new RelayMessageFactory() };
             config.SessionFactory = new RelaySessionFactory();
+            config.Logger = Logger.ForContext(Constants.SourceContextPropertyName, "RelayServer-ProudNet");
 
             // ReSharper disable InconsistentNaming
             Predicate<RelaySession> MustNotBeLoggedIn = session => !session.IsLoggedIn();
@@ -39,7 +40,7 @@ namespace Netsphere.Network
             Instance = new RelayServer(config);
         }
 
-        private RelayServer(Configuration config)
+        private RelayServer(ProudNet.Configuration config)
             : base(config)
         { }
 

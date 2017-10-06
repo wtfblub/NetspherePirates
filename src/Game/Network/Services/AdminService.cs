@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using Netsphere.Network.Message.Game;

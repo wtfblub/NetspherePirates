@@ -4,13 +4,13 @@
         <TargetFramework>netcoreapp2.0</TargetFramework>
         <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
         <RootNamespace>Netsphere</RootNamespace>
+        <RuntimeIdentifiers>win-x86;win-x64;linux-x64</RuntimeIdentifiers>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Expressmapper" Version="1.9.1" />
         <PackageReference Include="Hjson" Version="3.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
         <PackageReference Include="MySql.Data" Version="8.0.8-dmr" />
-        <PackageReference Include="Microsoft.Data.SQLite" Version="2.0.0" />
         <PackageReference Include="Serilog" Version="2.5.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="3.0.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="3.2.0" />

@@ -7,6 +7,7 @@ using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.Security.Cryptography;
 using Dapper.FastCrud;
 using ExpressMapper.Extensions;
+using Netsphere.Database;
 using Netsphere.Database.Auth;
 using Netsphere.Database.Game;
 using Netsphere.Network.Data.Chat;

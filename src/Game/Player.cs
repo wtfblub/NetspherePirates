@@ -2,6 +2,7 @@
 using System.Linq;
 using Dapper.FastCrud;
 using ExpressMapper.Extensions;
+using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Netsphere.Network.Data.Chat;

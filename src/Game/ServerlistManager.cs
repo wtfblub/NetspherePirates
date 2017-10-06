@@ -65,7 +65,7 @@ namespace Netsphere
                 // ignored
             }
 
-            _channel.CloseAsync().WaitEx();
+            _channel?.CloseAsync().WaitEx();
             _eventLoopGroup.ShutdownGracefullyAsync().WaitEx();
         }
 

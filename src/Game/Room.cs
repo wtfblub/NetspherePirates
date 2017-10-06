@@ -98,7 +98,6 @@ namespace Netsphere
             Group = group;
 
             TeamManager.TeamChanged += TeamManager_TeamChanged;
-
             GameRuleManager.GameRuleChanged += GameRuleManager_OnGameRuleChanged;
             GameRuleManager.MapInfo = GameServer.Instance.ResourceCache.GetMaps()[options.MatchKey.Map];
             GameRuleManager.GameRule = RoomManager.GameRuleFactory.Get(Options.MatchKey.GameRule, this);
@@ -323,8 +322,22 @@ namespace Netsphere
             foreach (var plr in Players.Values)
             {
                 plr.RoomInfo.Stats = GameRuleManager.GameRule.GetPlayerRecord(plr);
-                TeamManager.Join(plr);
+                var team = TeamManager[plr.RoomInfo.Team.Team];
+
+                // Try to rejoin the old team first then fallback to default join
+                try
+                {
+                    if (team != null)
+                        team.Join(plr);
+                    else
+                        TeamManager.Join(plr);
+                }
+                catch (TeamLimitReachedException)
+                {
+                    TeamManager.Join(plr);
+                }
             }
+
             BroadcastBriefing();
         }
 

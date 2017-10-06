@@ -28,32 +28,32 @@ namespace NetsphereExplorer.ViewModels
 
         public string Destination
         {
-            get { return _destination; }
-            set { this.RaiseAndSetIfChanged(ref _destination, value); }
+            get => _destination;
+            set => this.RaiseAndSetIfChanged(ref _destination, value);
         }
 
         public OperationMode Mode
         {
-            get { return _mode; }
-            set { this.RaiseAndSetIfChanged(ref _mode, value); }
+            get => _mode;
+            set => this.RaiseAndSetIfChanged(ref _mode, value);
         }
 
         public OperationStatus Status
         {
-            get { return _status; }
-            set { this.RaiseAndSetIfChanged(ref _status, value); }
+            get => _status;
+            set => this.RaiseAndSetIfChanged(ref _status, value);
         }
 
         public int FileCount
         {
-            get { return _fileCount; }
-            set { this.RaiseAndSetIfChanged(ref _fileCount, value); }
+            get => _fileCount;
+            set => this.RaiseAndSetIfChanged(ref _fileCount, value);
         }
 
         public int Progress
         {
-            get { return _progress; }
-            set { this.RaiseAndSetIfChanged(ref _progress, value); }
+            get => _progress;
+            set => this.RaiseAndSetIfChanged(ref _progress, value);
         }
 
         public FileOperationViewModel(IFilesystem filesystem)
@@ -237,6 +237,7 @@ namespace NetsphereExplorer.ViewModels
                     FileCount++;
             }
         }
+
         private async Task Extract(IFolder folder, string path)
         {
             path = Path.Combine(path, folder.Name);

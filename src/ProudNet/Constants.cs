@@ -157,7 +157,7 @@ namespace ProudNet
     {
         public const uint NetVersion = 196980;
         public const short NetMagic = 0x5713;
-        public static readonly Encoding Encoding = Encoding.GetEncoding("Windows-1252");
+        public static readonly Encoding Encoding = CodePagesEncodingProvider.Instance.GetEncoding(1252);
     }
 
     internal static class ChannelAttributes

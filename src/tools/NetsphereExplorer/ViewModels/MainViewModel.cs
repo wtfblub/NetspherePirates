@@ -37,6 +37,7 @@ namespace NetsphereExplorer.ViewModels
         public ReactiveCommand<Unit> RemoveFolder { get; }
         public ReactiveCommand<Unit> ExtractItems { get; }
         public ReactiveCommand<Unit> RemoveItems { get; }
+        public ReactiveCommand<Unit> Cleaner { get; }
 
         public ReactiveCommand<Unit> DragEnter { get; }
         public ReactiveCommand<Unit> DragDrop { get; }
@@ -46,24 +47,24 @@ namespace NetsphereExplorer.ViewModels
 
         public TreeNode RootFolderNode
         {
-            get { return _rootFolderNode; }
-            set { this.RaiseAndSetIfChanged(ref _rootFolderNode, value); }
+            get => _rootFolderNode;
+            set => this.RaiseAndSetIfChanged(ref _rootFolderNode, value);
         }
         public TreeNode SelectedFolderNode
         {
-            get { return _selectedFolderNode; }
-            set { this.RaiseAndSetIfChanged(ref _selectedFolderNode, value); }
+            get => _selectedFolderNode;
+            set => this.RaiseAndSetIfChanged(ref _selectedFolderNode, value);
         }
         public IFolder CurrentFolder => _currentFolder.Value;
         public ListViewItem[] ListViewItems
         {
-            get { return _listViewItems; }
-            private set { this.RaiseAndSetIfChanged(ref _listViewItems, value); }
+            get => _listViewItems;
+            private set => this.RaiseAndSetIfChanged(ref _listViewItems, value);
         }
         public ListViewItem[] SelectedItems
         {
-            get { return _selectedItems; }
-            set { this.RaiseAndSetIfChanged(ref _selectedItems, value); }
+            get => _selectedItems;
+            set => this.RaiseAndSetIfChanged(ref _selectedItems, value);
         }
 
         public MainViewModel(IWin32Window window, Overlay overlay)
@@ -91,6 +92,9 @@ namespace NetsphereExplorer.ViewModels
                 .Select(items => items?.All(item => item.Tag != null) ?? false);
             ExtractItems = ReactiveCommand.CreateAsyncTask(hasItems, _ => ExtractItemsImpl());
             RemoveItems = ReactiveCommand.CreateAsyncTask(hasItems, _ => RemoveItemsImpl());
+
+            var canClean = _filesystem.WhenAnyValue(x => x.IsOpen);
+            Cleaner = ReactiveCommand.CreateAsyncTask(canClean, _ => CleanerImpl());
 
             DragEnter = ReactiveCommand.CreateAsyncTask(DragEnterImpl);
             DragDrop = ReactiveCommand.CreateAsyncTask(DragDropImpl);
@@ -320,6 +324,19 @@ namespace NetsphereExplorer.ViewModels
             catch (Exception ex)
             {
                 TaskDialog.Show(_window, "Failed to delete some items", ex);
+            }
+            _overlay.Hide();
+        }
+
+        private async Task CleanerImpl()
+        {
+            try
+            {
+                await CleanerView.Start(_window, _overlay, _filesystem.Zip);
+            }
+            catch (Exception ex)
+            {
+                TaskDialog.Show(_window, "Something went wrong", ex);
             }
             _overlay.Hide();
         }

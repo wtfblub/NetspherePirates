@@ -162,8 +162,8 @@ namespace ProudNet
 
             if (RC4 != null)
             {
-                RC4.Dispose();
-                RC4 = null;
+                AES.Dispose();
+                AES = null;
             }
         }
 

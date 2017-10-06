@@ -4,6 +4,7 @@
         <TargetFramework>net461</TargetFramework>
         <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
         <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+        <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="BlubLib.GUI" Version="0.1.4" />
@@ -14,110 +15,33 @@
         <PackageReference Include="reactiveui-winforms" Version="6.5.0" />
         <PackageReference Include="Splat" Version="1.6.2" />
         <Reference Include="..\..\..\libs\WindowsAPICodePack.dll" />
-    </ItemGroup>
-    <ItemGroup>
+        <Reference Include="System.Windows.Forms" />
         <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <None Include="Controls\ImageButton.cs">
-            <SubType>UserControl</SubType>
-        </None>
-      <None Include="Controls\Overlay.cs">
-            <SubType>Component</SubType>
-        </None>
-      <None Include="Views\FileOperationView.cs">
-            <SubType>UserControl</SubType>
-        </None>
-      <None Include="Views\FileOperationView.Designer.cs">
-            <DependentUpon>FileOperationView.cs</DependentUpon>
-        </None>
-      <None Include="Views\MainView.cs">
-            <SubType>Form</SubType>
-        </None>
-      <None Include="Views\MainView.Designer.cs">
-        <DependentUpon>MainView.cs</DependentUpon>
-      </None>
-      <None Include="Views\SimpleInfoView.cs">
-            <SubType>UserControl</SubType>
-        </None>
-      <None Include="Views\SimpleInfoView.designer.cs">
-            <DependentUpon>SimpleInfoView.cs</DependentUpon>
-        </None>
-      <None Include="Views\SimpleProgressView.cs">
-            <SubType>UserControl</SubType>
-        </None>
-      <None Include="Views\SimpleProgressView.designer.cs">
-            <DependentUpon>SimpleProgressView.cs</DependentUpon>
-        </None>
-        <EmbeddedResource Include="Views\FileOperationView.resx">
-            <DependentUpon>FileOperationView.cs</DependentUpon>
-        </EmbeddedResource>
-        <EmbeddedResource Include="Views\MainView.resx">
-            <DependentUpon>MainView.cs</DependentUpon>
-        </EmbeddedResource>
-        <EmbeddedResource Include="Properties\Resources.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-          <SubType>Designer</SubType>
-        </EmbeddedResource>
-        <None Include="Properties\Resources.Designer.cs">
-          <AutoGen>True</AutoGen>
-          <DependentUpon>Resources.resx</DependentUpon>
-          <DesignTime>True</DesignTime>
-        </None>
-        <EmbeddedResource Include="Views\SimpleInfoView.resx">
-            <DependentUpon>SimpleInfoView.cs</DependentUpon>
-        </EmbeddedResource>
-        <EmbeddedResource Include="Views\SimpleProgressView.resx">
-            <DependentUpon>SimpleProgressView.cs</DependentUpon>
-        </EmbeddedResource>
-        <None Include="Properties\Settings.settings">
-          <Generator>SettingsSingleFileGenerator</Generator>
-          <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-        </None>
-        <None Include="Properties\Settings.Designer.cs">
-          <AutoGen>True</AutoGen>
-          <DependentUpon>Settings.settings</DependentUpon>
-          <DesignTimeSharedInput>True</DesignTimeSharedInput>
-        </None>
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\ajax-loader.gif" />
-        <None Include="Resources\folder-open.png" />
-        <None Include="Resources\folders.png" />
-        <None Include="Resources\folder--plus.png" />
-        <None Include="Resources\document--plus.png" />
-        <None Include="Resources\bin.png" />
-        <None Include="Resources\control-stop-square.png" />
-        <None Include="Resources\control-180.png" />
-        <None Include="Resources\control-pause.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <EmbeddedResource Include="..\..\..\libs\miniLzo_x64.dll">
-            <Link>costura64\miniLzo_x64.dll</Link>
-        </EmbeddedResource>
-        <EmbeddedResource Include="..\..\..\libs\miniLzo_x86.dll">
-            <Link>costura32\miniLzo_x86.dll</Link>
-        </EmbeddedResource>
+        <EmbeddedResource Include="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+        <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
+        <None Include="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" />
+        <None Include="Resources\*" />
         <Content Include="FodyWeavers.xml" />
+        <EmbeddedResource Include="..\..\..\libs\miniLzo_x64.dll" Link="costura64\miniLzo_x64.dll" />
+        <EmbeddedResource Include="..\..\..\libs\miniLzo_x86.dll" Link="costura32\miniLzo_x86.dll" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Update="Properties\Resources.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Resources.resx</DependentUpon>
-      </Compile>
-    </ItemGroup>
-    <ItemGroup>
-      <None Update="Properties\Resources.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      </None>
+        <Compile Update="Controls\*.cs" SubType="UserControl" />
+        <Compile Update="Views\*View.cs" SubType="Form" />
+        <Compile Update="Views\CleanerView.Designer.cs" DependentUpon="CleanerView.cs" />
+        <EmbeddedResource Include="Views\CleanerView.resx" DependentUpon="CleanerView.cs" />
+        <Compile Update="Views\FileOperationView.Designer.cs" DependentUpon="FileOperationView.cs" />
+        <EmbeddedResource Include="Views\FileOperationView.resx" DependentUpon="FileOperationView.cs" />
+        <Compile Update="Views\MainView.Designer.cs" DependentUpon="MainView.cs" />
+        <EmbeddedResource Include="Views\MainView.resx" DependentUpon="MainView.cs" />
+        <Compile Update="Views\SimpleInfoView.Designer.cs" DependentUpon="SimpleInfoView.cs" />
+        <EmbeddedResource Include="Views\SimpleInfoView.resx" DependentUpon="SimpleInfoView.cs" />
+        <Compile Update="Views\SimpleProgressView.Designer.cs" DependentUpon="SimpleProgressView.cs" />
+        <EmbeddedResource Include="Views\SimpleProgressView.resx" DependentUpon="SimpleProgressView.cs" />
     </ItemGroup>
     <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
         <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
     </Target>
-    <PropertyGroup>
-        <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
-    </PropertyGroup>
 </Project>

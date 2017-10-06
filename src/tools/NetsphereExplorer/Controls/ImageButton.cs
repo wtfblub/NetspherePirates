@@ -15,7 +15,7 @@ namespace NetsphereExplorer.Controls
 
         public Image Image
         {
-            get { return _image; }
+            get => _image;
             set
             {
                 _image = value;
@@ -24,7 +24,7 @@ namespace NetsphereExplorer.Controls
         }
         public Size ImageSize
         {
-            get { return _imageSize; }
+            get => _imageSize;
             set
             {
                 _imageSize = value;

@@ -21,14 +21,14 @@ namespace NetsphereExplorer.Filesystem
         public IObservable<IFilesystem> FileOrFolderChanged { get; }
         public bool IsOpen
         {
-            get { return _isOpen; }
-            private set { this.RaiseAndSetIfChanged(ref _isOpen, value); }
+            get => _isOpen;
+            private set => this.RaiseAndSetIfChanged(ref _isOpen, value);
         }
 
         public S4Zip Zip
         {
-            get { return _zip; }
-            private set { this.RaiseAndSetIfChanged(ref _zip, value); }
+            get => _zip;
+            private set => this.RaiseAndSetIfChanged(ref _zip, value);
         }
 
         public NetsphereFilesystem()
@@ -230,15 +230,15 @@ namespace NetsphereExplorer.Filesystem
         public IFilesystem Filesystem { get; }
         public string Name
         {
-            get { return _name; }
-            private set { this.RaiseAndSetIfChanged(ref _name, value); }
+            get => _name;
+            private set => this.RaiseAndSetIfChanged(ref _name, value);
         }
         public string FullName => Parent.FullName + Name;
         public IFolder Parent { get; }
         public int Length
         {
-            get { return _length; }
-            private set { this.RaiseAndSetIfChanged(ref _length, value); }
+            get => _length;
+            private set => this.RaiseAndSetIfChanged(ref _length, value);
         }
 
         public NetsphereFile(S4ZipEntry entry, IFolder parent)

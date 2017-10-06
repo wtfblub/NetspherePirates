@@ -1,17 +1,26 @@
 ﻿using System;
 using BlubLib.DotNetty.Handlers.MessageHandling;
+using DotNetty.Transport.Channels;
 using ProudNet.Serialization;
+using Serilog;
 
 namespace ProudNet
 {
     public class Configuration
     {
+        internal TimeSpan PingTimeout { get; }
+
         public Guid Version { get; set; }
         public IHostIdFactory HostIdFactory { get; set; }
         public ISessionFactory SessionFactory { get; set; }
         public TimeSpan ConnectTimeout { get; set; }
+        public TimeSpan HolepunchTimeout { get; set; }
         public MessageFactory[] MessageFactories { get; set; }
         public IMessageHandler[] MessageHandlers { get; set; }
+        public IEventLoopGroup SocketListenerThreads { get; set; }
+        public IEventLoopGroup SocketWorkerThreads { get; set; }
+        public IEventLoop WorkerThread { get; set; }
+        public ILogger Logger { get; set; }
 
         public bool EnableServerLog { get; set; }
         public FallbackMethod FallbackMethod { get; set; }
@@ -32,10 +41,13 @@ namespace ProudNet
 
         public Configuration()
         {
+            // Client sends a ping every 10 seconds
+            PingTimeout = TimeSpan.FromSeconds(20);
             Version = Guid.Empty;
             HostIdFactory = new HostIdFactory();
             SessionFactory = new ProudSessionFactory();
             ConnectTimeout = TimeSpan.FromSeconds(10);
+            HolepunchTimeout = TimeSpan.FromSeconds(30);
 
             EnableServerLog = false;
             FallbackMethod = FallbackMethod.None;

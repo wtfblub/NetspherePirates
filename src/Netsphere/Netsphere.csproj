@@ -3,4 +3,9 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="BlubLib" Version="0.1.4" />
+      <PackageReference Include="Hjson" Version="3.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    </ItemGroup>
 </Project>

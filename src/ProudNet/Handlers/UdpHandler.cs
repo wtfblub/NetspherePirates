@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,24 +26,37 @@ namespace ProudNet.Handlers
             var message = obj as UdpMessage;
             Debug.Assert(message != null);
 
+            var log = _server.Configuration.Logger?
+                .ForContext("EndPoint", message.EndPoint.ToString());
+
             try
             {
                 var session = _server.SessionsByUdpId.GetValueOrDefault(message.SessionId);
                 if (session == null)
                 {
                     if (message.Content.GetByte(0) != (byte)ProudCoreOpCode.ServerHolepunch)
-                        throw new ProudException(
-                            $"Expected {ProudCoreOpCode.ServerHolepunch} as first udp message but got {(ProudCoreOpCode)message.Content.GetByte(0)}");
+                    {
+                        log?.Warning("Expected ServerHolepunch as first udp message but got {MessageType}", (ProudCoreOpCode)message.Content.GetByte(0));
+                        return;
+                    }
 
                     var holepunch = (ServerHolepunchMessage)CoreMessageDecoder.Decode(message.Content);
 
+                    // TODO add a lookup by holepunch magic
                     session = _server.Sessions.Values.FirstOrDefault(x =>
                         x.HolepunchMagicNumber.Equals(holepunch.MagicNumber));
+
                     if (session == null)
+                    {
+                        log?.Warning("Invalid holepunch magic number");
                         return;
+                    }
 
                     if (session.UdpSocket != _socket)
+                    {
+                        log?.Warning("Client is sending to the wrong udp socket");
                         return;
+                    }
 
                     session.UdpSessionId = message.SessionId;
                     session.UdpEndPoint = message.EndPoint;
@@ -55,9 +67,17 @@ namespace ProudNet.Handlers
                 }
 
                 if (session.UdpSocket != _socket)
+                {
+                    log?.Warning("Client is sending to the wrong udp socket");
                     return;
+                }
 
-                session.Channel.Pipeline.Context<ProudFrameDecoder>().FireChannelRead(message.Content.Retain());
+                var recvContext = new RecvContext
+                {
+                    Message = message.Content.Retain(),
+                    UdpEndPoint = message.EndPoint
+                };
+                session.Channel.Pipeline.Context<RecvContextDecoder>().FireChannelRead(recvContext);
             }
             finally
             {

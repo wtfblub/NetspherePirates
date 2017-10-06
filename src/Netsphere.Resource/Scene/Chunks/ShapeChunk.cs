@@ -8,7 +8,7 @@ namespace Netsphere.Resource.Scene.Chunks
 {
     public class ShapeChunk : SceneChunk
     {
-        public override ChunkType ChunkType => ChunkType.BoneSystem;
+        public override ChunkType ChunkType => ChunkType.Shape;
 
         public float Unk2 { get; set; }
         public IList<Tuple<Vector3, Vector3>> Unk3 { get; set; }

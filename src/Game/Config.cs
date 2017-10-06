@@ -1,16 +1,13 @@
 ﻿using System;
-using System.IO;
 using System.Net;
+using Netsphere.Configuration;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Netsphere
 {
     public class Config
     {
-        private static readonly string s_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.hjson");
-
-        public static Config Instance { get; }
+        public static Config Instance => Config<Config>.Instance;
 
         [JsonProperty("server_name")]
         public string Name { get; set; }
@@ -22,15 +19,12 @@ namespace Netsphere
         public string IP { get; set; }
 
         [JsonProperty("listener")]
-        [JsonConverter(typeof(IPEndPointConverter))]
         public IPEndPoint Listener { get; set; }
 
         [JsonProperty("listener_chat")]
-        [JsonConverter(typeof(IPEndPointConverter))]
         public IPEndPoint ChatListener { get; set; }
 
         [JsonProperty("listener_relay")]
-        [JsonConverter(typeof(IPEndPointConverter))]
         public IPEndPoint RelayListener { get; set; }
 
         [JsonProperty("listener_relay_udp_ports")]
@@ -64,19 +58,6 @@ namespace Netsphere
         [JsonProperty("game")]
         public GameSettings Game { get; set; }
 
-        static Config()
-        {
-            if (!File.Exists(s_path))
-            {
-                Instance = new Config();
-                Instance.Save();
-                return;
-            }
-
-            using (var fs = new FileStream(s_path, FileMode.Open, FileAccess.Read))
-                Instance = JsonConvert.DeserializeObject<Config>(Hjson.HjsonValue.Load(fs).ToString(Hjson.Stringify.Plain));
-        }
-
         public Config()
         {
             Name = "Netsphere";
@@ -85,7 +66,7 @@ namespace Netsphere
             ChatListener = new IPEndPoint(IPAddress.Loopback, 28004);
             RelayListener = new IPEndPoint(IPAddress.Loopback, 28005);
             ListenerThreads = 1;
-            WorkerThreads = -1;
+            WorkerThreads = 2;
             IP = "127.0.0.1";
             PlayerLimit = 100;
             SecurityLevel = SecurityLevel.User;
@@ -98,15 +79,13 @@ namespace Netsphere
 
         public void Save()
         {
-            var json = JsonConvert.SerializeObject(this, Formatting.None);
-            File.WriteAllText(s_path, Hjson.JsonValue.Parse(json).ToString(Hjson.Stringify.Hjson));
+            Config<Config>.Save();
         }
     }
 
     public class AuthAPI
     {
         [JsonProperty("endpoint")]
-        [JsonConverter(typeof(IPEndPointConverter))]
         public IPEndPoint EndPoint { get; set; }
 
         [JsonProperty("serverlist_update_interval")]
@@ -122,10 +101,6 @@ namespace Netsphere
 
     public class DatabasesConfig
     {
-        [JsonProperty("engine")]
-        [JsonConverter(typeof(StringEnumConverter))]
-        public DatabaseEngine Engine { get; set; }
-
         [JsonProperty("auth")]
         public DatabaseConfig Auth { get; set; }
 
@@ -134,44 +109,9 @@ namespace Netsphere
 
         public DatabasesConfig()
         {
-            Engine = DatabaseEngine.SQLite;
-            Auth = new DatabaseConfig { Filename = "..\\db\\auth.db" };
-            Game = new DatabaseConfig { Filename = "..\\db\\game.db" };
+            Auth = new DatabaseConfig { Database = "auth" };
+            Game = new DatabaseConfig { Database = "game" };
         }
-
-        public class DatabaseConfig
-        {
-            [JsonProperty("filename")]
-            public string Filename { get; set; }
-
-            [JsonProperty("host")]
-            public string Host { get; set; }
-
-            [JsonProperty("port")]
-            public int Port { get; set; }
-
-            [JsonProperty("username")]
-            public string Username { get; set; }
-
-            [JsonProperty("password")]
-            public string Password { get; set; }
-
-            [JsonProperty("database")]
-            public string Database { get; set; }
-
-            public DatabaseConfig()
-            {
-                Host = "localhost";
-                Port = 3306;
-            }
-        }
-    }
-
-    public enum DatabaseEngine
-    {
-        SQLite,
-        MySQL,
-        PostgreSQL
     }
 
     public class GameSettings

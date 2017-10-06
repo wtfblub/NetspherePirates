@@ -12,8 +12,7 @@ namespace ProudNet.Handlers
     {
         protected override void Encode(IChannelHandlerContext context, SendContext message, List<object> output)
         {
-            var buffer = message.Message as IByteBuffer;
-            if (buffer == null)
+            if (!(message.Message is IByteBuffer buffer))
                 throw new ProudException($"{nameof(SendContextEncoder)} can only handle {nameof(IByteBuffer)}");
 
             try

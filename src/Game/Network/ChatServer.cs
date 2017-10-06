@@ -16,7 +16,7 @@ namespace Netsphere.Network
         // ReSharper disable once InconsistentNaming
         private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(ChatServer));
 
-        public static void Initialize(Configuration config)
+        public static void Initialize(ProudNet.Configuration config)
         {
             if (Instance != null)
                 throw new InvalidOperationException("Server is already initialized");
@@ -24,6 +24,7 @@ namespace Netsphere.Network
             config.Version = new Guid("{97d36acf-8cc0-4dfb-bcc9-97cab255e2bc}");
             config.MessageFactories = new MessageFactory[] { new ChatMessageFactory() };
             config.SessionFactory = new ChatSessionFactory();
+            config.Logger = Logger.ForContext(Constants.SourceContextPropertyName, "ChatServer-ProudNet");
 
             // ReSharper disable InconsistentNaming
             Predicate<ChatSession> MustBeLoggedIn = session => session.IsLoggedIn();
@@ -52,7 +53,7 @@ namespace Netsphere.Network
             Instance = new ChatServer(config);
         }
 
-        private ChatServer(Configuration config)
+        private ChatServer(ProudNet.Configuration config)
             : base(config)
         { }
 

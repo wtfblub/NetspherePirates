@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib;
-using Dapper;
 using Dapper.FastCrud;
 using DotNetty.Transport.Channels;
+using Netsphere.Configuration;
+using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Network;
 using Newtonsoft.Json;
-using ProudNet;
 using Serilog;
-using Serilog.Core;
 using Serilog.Formatting.Json;
 
 namespace Netsphere
 {
     internal class Program
     {
+        private static readonly object s_exitMutex = new object();
+        private static bool s_isExiting;
+
         public static Stopwatch AppTime { get; } = Stopwatch.StartNew();
 
         private static void Main()
@@ -30,14 +31,18 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
+            
+            Config<Config>.Initialize("game.hjson", "NETSPHEREPIRATES_GAMECONF");
 
-            var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.json");
-            var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "auth.log");
+            var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.json");
+            var logfile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.log");
             Log.Logger = new LoggerConfiguration()
+                .Destructure.ByTransforming<IPEndPoint>(endPoint => endPoint.ToString())
+                .Destructure.ByTransforming<EndPoint>(endPoint => endPoint.ToString())
                 .WriteTo.File(new JsonFormatter(), jsonlog)
                 .WriteTo.File(logfile)
                 .WriteTo.Console(outputTemplate: "[{Level} {SourceContext}] {Message}{NewLine}{Exception}")
-                .MinimumLevel.Verbose()
+                .MinimumLevel.Debug()
                 .CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -45,26 +50,57 @@ namespace Netsphere
 
             Log.Information("Initializing...");
 
-            AuthDatabase.Initialize();
-            GameDatabase.Initialize();
+            try
+            {
+                AuthDatabase.Initialize(Config.Instance.Database.Auth);
+                GameDatabase.Initialize(Config.Instance.Database.Game);
+            }
+            catch (DatabaseNotFoundException ex)
+            {
+                Log.Error("Database {Name} not found", ex.Name);
+                Environment.Exit(1);
+            }
+            
+            catch (DatabaseVersionMismatchException ex)
+            {
+                Log.Error("Invalid version. Database={CurrentVersion} Required={RequiredVersion}. Run the DatabaseMigrator to update your database.",
+                    ex.CurrentVersion, ex.RequiredVersion);
+                Environment.Exit(1);
+            }
 
             ItemIdGenerator.Initialize();
             CharacterIdGenerator.Initialize();
             DenyIdGenerator.Initialize();
 
-            ChatServer.Initialize(new Configuration());
-            RelayServer.Initialize(new Configuration());
-            GameServer.Initialize(new Configuration());
+            var listenerThreads = new MultithreadEventLoopGroup(Config.Instance.ListenerThreads);
+            var workerThreads = new MultithreadEventLoopGroup(Config.Instance.WorkerThreads);
+            var workerThread = new SingleThreadEventLoop();
+            ChatServer.Initialize(new ProudNet.Configuration
+            {
+                SocketListenerThreads = listenerThreads,
+                SocketWorkerThreads = workerThreads,
+                WorkerThread = workerThread
+            });
+            RelayServer.Initialize(new ProudNet.Configuration
+            {
+                SocketListenerThreads = listenerThreads,
+                SocketWorkerThreads = workerThreads,
+                WorkerThread = workerThread
+            });
+            GameServer.Initialize(new ProudNet.Configuration
+            {
+                SocketListenerThreads = listenerThreads,
+                SocketWorkerThreads = workerThreads,
+                WorkerThread = workerThread
+            });
 
             FillShop();
 
             Log.Information("Starting server...");
 
-            var listenerThreads = new MultithreadEventLoopGroup(Config.Instance.ListenerThreads);
-            var workerThreads = new MultithreadEventLoopGroup(Config.Instance.WorkerThreads);
-            ChatServer.Instance.Listen(Config.Instance.ChatListener, listenerEventLoopGroup: listenerThreads, workerEventLoopGroup: workerThreads);
-            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts, listenerThreads, workerThreads);
-            GameServer.Instance.Listen(Config.Instance.Listener, listenerEventLoopGroup: listenerThreads, workerEventLoopGroup: workerThreads);
+            ChatServer.Instance.Listen(Config.Instance.ChatListener);
+            RelayServer.Instance.Listen(Config.Instance.RelayListener, IPAddress.Parse(Config.Instance.IP), Config.Instance.RelayUdpPorts);
+            GameServer.Instance.Listen(Config.Instance.Listener);
 
             Log.Information("Ready for connections!");
 
@@ -101,11 +137,19 @@ namespace Netsphere
 
         private static void Exit()
         {
-            Log.Information("Closing...");
+            lock (s_exitMutex)
+            {
+                if (s_isExiting)
+                    return;
 
-            ChatServer.Instance.Dispose();
-            RelayServer.Instance.Dispose();
-            GameServer.Instance.Dispose();
+                s_isExiting = true;
+            }
+
+            Log.Information("Closing...");
+            var chat = Task.Run(() => ChatServer.Instance.Dispose());
+            var relay = Task.Run(() => RelayServer.Instance.Dispose());
+            var game = Task.Run(() => GameServer.Instance.Dispose());
+            Task.WaitAll(chat, relay, game);
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -167,8 +211,10 @@ namespace Netsphere
                         effects[pair.Key] = Tuple.Create(pair.Value.Item1, effectGroup.Id);
 
                         foreach (var effect in pair.Value.Item1)
+                        {
                             db.Insert(new ShopEffectDto { EffectGroupId = effectGroup.Id, Effect = effect },
                                 statement => statement.AttachToTransaction(transaction));
+                        }
                     }
 
                     #endregion
@@ -342,145 +388,5 @@ namespace Netsphere
             }
         }
 
-    }
-
-    internal static class AuthDatabase
-    {
-        // ReSharper disable once InconsistentNaming
-        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(AuthDatabase));
-        private static string s_connectionString;
-
-        public static void Initialize()
-        {
-            Logger.Information("Initializing...");
-            var config = Config.Instance.Database;
-
-            switch (config.Engine)
-            {
-                case DatabaseEngine.MySQL:
-                    s_connectionString =
-                        $"SslMode=none;Server={config.Auth.Host};Port={config.Auth.Port};Database={config.Auth.Database};Uid={config.Auth.Username};Pwd={config.Auth.Password};Pooling=true;";
-                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-                    using (var con = Open())
-                    {
-                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Auth.Database}\"") == null)
-                        {
-                            Logger.Error($"Database '{config.Auth.Database}' not found");
-                            Environment.Exit(0);
-                        }
-                    }
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    s_connectionString = $"Data Source={config.Auth.Filename};";
-                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
-
-                    if (!File.Exists(config.Auth.Filename))
-                    {
-                        Logger.Error($"Database '{config.Auth.Filename}' not found");
-                        Environment.Exit(0);
-                    }
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {config.Engine}");
-                    Environment.Exit(0);
-                    return;
-            }
-        }
-
-        public static IDbConnection Open()
-        {
-            var engine = Config.Instance.Database.Engine;
-            IDbConnection connection;
-            switch (engine)
-            {
-                case DatabaseEngine.MySQL:
-                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {engine}");
-                    Environment.Exit(0);
-                    return null;
-            }
-            connection.Open();
-            return connection;
-        }
-    }
-
-    internal static class GameDatabase
-    {
-        // ReSharper disable once InconsistentNaming
-        private static readonly ILogger Logger = Log.ForContext(Constants.SourceContextPropertyName, nameof(GameDatabase));
-        private static string s_connectionString;
-
-        public static void Initialize()
-        {
-            Logger.Information("Initializing...");
-            var config = Config.Instance.Database;
-
-            switch (config.Engine)
-            {
-                case DatabaseEngine.MySQL:
-                    s_connectionString =
-                        $"SslMode=none;Server={config.Game.Host};Port={config.Game.Port};Database={config.Game.Database};Uid={config.Game.Username};Pwd={config.Game.Password};Pooling=true;";
-                    OrmConfiguration.DefaultDialect = SqlDialect.MySql;
-
-                    using (var con = Open())
-                    {
-                        if (con.QueryFirstOrDefault($"SHOW DATABASES LIKE \"{config.Game.Database}\"") == null)
-                        {
-                            Logger.Error($"Database '{config.Game.Database}' not found");
-                            Environment.Exit(0);
-                        }
-                    }
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    s_connectionString = $"Data Source={config.Game.Filename};";
-                    OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
-
-                    if (!File.Exists(config.Game.Filename))
-                    {
-                        Logger.Error($"Database '{config.Game.Filename}' not found");
-                        Environment.Exit(0);
-                    }
-                    break;
-
-                default:
-                    Logger.Error($"Invalid database engine {config.Engine}");
-                    Environment.Exit(0);
-                    return;
-            }
-        }
-
-        public static IDbConnection Open()
-        {
-            var engine = Config.Instance.Database.Engine;
-            IDbConnection connection;
-            switch (engine)
-            {
-                case DatabaseEngine.MySQL:
-                    connection = new MySql.Data.MySqlClient.MySqlConnection(s_connectionString);
-                    break;
-
-                case DatabaseEngine.SQLite:
-                    connection = new Microsoft.Data.Sqlite.SqliteConnection(s_connectionString);
-                    break;
-
-                default:
-                    Log.Error($"Invalid database engine {engine}");
-                    Environment.Exit(0);
-                    return null;
-            }
-            connection.Open();
-            return connection;
-        }
     }
 }

@@ -16,8 +16,7 @@ namespace ProudNet
 
         public uint New()
         {
-            uint hostId;
-            return _pool.TryPop(out hostId) ? hostId : (uint)Interlocked.Increment(ref _counter);
+            return _pool.TryPop(out var hostId) ? hostId : (uint)Interlocked.Increment(ref _counter);
         }
 
         public void Free(uint hostId)

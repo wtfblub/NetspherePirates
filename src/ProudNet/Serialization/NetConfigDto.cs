@@ -52,5 +52,11 @@ namespace ProudNet.Serialization
 
         [BlubMember(15)]
         public uint EmergencyLogLineCount { get; set; }
+        
+        [BlubMember(14)]
+        public bool EnableLookaheadP2PSend { get; set; }
+
+        [BlubMember(15)]
+        public bool EnablePingTest { get; set; }
     }
 }
