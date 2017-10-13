@@ -63,6 +63,9 @@ namespace ProudNet.Handlers
             var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
             if (stateB?.IsJoined == true)
             {
+                if (!session.P2PGroup.AllowDirectP2P)
+                    return;
+                
                 // Do not try p2p when the udp relay is not used by one of the clients
                 if (!stateA.RemotePeer.Session.UdpEnabled || !stateB.RemotePeer.Session.UdpEnabled)
                     return;

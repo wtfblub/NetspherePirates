@@ -342,10 +342,10 @@ namespace ProudNet
                                 stateA.JitTriggered = stateB.JitTriggered = false;
                                 stateA.PeerUdpHolepunchSuccess = stateB.PeerUdpHolepunchSuccess = false;
                                 stateA.LastHolepunch = stateB.LastHolepunch = now;
-                                member.SendAsync(new RenewP2PConnectionStateMessage(stateA.RemotePeer.HostId));
-                                stateA.RemotePeer.SendAsync(new RenewP2PConnectionStateMessage(member.HostId));
-                                //member.SendAsync(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
-                                //stateA.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(member.HostId));
+                                //member.SendAsync(new RenewP2PConnectionStateMessage(stateA.RemotePeer.HostId));
+                                //stateA.RemotePeer.SendAsync(new RenewP2PConnectionStateMessage(member.HostId));
+                                member.SendAsync(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
+                                stateA.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(member.HostId));
                             }
                         }
                         else
