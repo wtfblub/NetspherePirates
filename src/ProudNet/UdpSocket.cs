@@ -44,7 +44,8 @@ namespace ProudNet
                         ch.Pipeline
                             .AddLast(new UdpFrameDecoder((int)_owner.Configuration.MessageMaxLength))
                             .AddLast(new UdpFrameEncoder())
-                            .AddLast(new UdpHandler(this, _owner));
+                            .AddLast(new UdpHandler(this, _owner))
+                            .AddLast(new ErrorHandler(_owner));
                     }))
                     .BindAsync(endPoint).WaitEx();
             }

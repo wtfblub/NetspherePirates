@@ -360,6 +360,7 @@
     public enum EventOpCode : ushort
     {
         Chat = 12001,
+        // 20001 ??? no string inside clietn
         EventMessage = 20002,
         ChangeTarget = 20003,
         ArcadeSync = 20004,

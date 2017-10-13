@@ -17,7 +17,7 @@ namespace ProudNet.Handlers
             _server.Configuration.Logger?.Error(exception, "Unhandled exception");
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
             _server.RaiseError(new ErrorEventArgs(session, exception));
-            session.CloseAsync();
+            session?.CloseAsync();
         }
     }
 }

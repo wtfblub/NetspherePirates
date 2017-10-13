@@ -320,6 +320,10 @@ namespace ProudNet
                             member.SendAsync(new NotifyUdpToTcpFallbackByServerMessage());
                         }
                     }
+                    
+                    // Skip p2p stuff when not enabled
+                    if(!group.AllowDirectP2P)
+                        continue;
 
                     // Retry p2p holepunch
                     foreach (var stateA in member.ConnectionStates.Values)
