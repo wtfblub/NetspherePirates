@@ -163,10 +163,10 @@ namespace Netsphere.Network.Message.Game
         public CharacterStyle Style { get; set; }
 
         [BlubMember(2)]
-        public byte Unk1 { get; set; }
+        public byte MaxSkills { get; set; }
 
         [BlubMember(3)]
-        public byte Unk2 { get; set; }
+        public byte MaxWeapons { get; set; }
 
         public CSuccessCreateCharacterAckMessage()
         {

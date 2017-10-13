@@ -35,7 +35,7 @@ namespace ProudNet
 
         internal Configuration Configuration { get; }
         internal RSACryptoServiceProvider Rsa { get; }
-        internal ConcurrentDictionary<uint, ProudSession> SessionsByUdpId => _sessionsByUdpId;
+        internal ConcurrentDictionary<uint, ProudSession> SessionsByUdpId { get; private set; }
         internal UdpSocketManager UdpSocketManager { get; }
 
         #region Events

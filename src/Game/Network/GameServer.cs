@@ -291,7 +291,12 @@ namespace Netsphere.Network
                 .Member(dest => dest.Nickname, src => src.Account.Nickname);
 
             Mapper.Register<Channel, ChannelInfoDto>()
-                .Member(dest => dest.PlayersOnline, src => src.Players.Count);
+                .Member(dest => dest.PlayersOnline, src => src.Players.Count)
+                .Function(dest => dest.IsClanChannel, src => false)
+                .Function(dest => dest.PlayerLimit, src => 10)
+                .Function(dest => dest.PlayersOnline, src => 5)
+                .Function(dest => dest.MinLevel, src => 0)
+                .Function(dest => dest.MaxLevel, src => 0);
 
             Mapper.Register<PlayerItem, ItemDto>()
                 .Function(dest => dest.ExpireTime,

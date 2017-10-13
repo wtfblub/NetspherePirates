@@ -360,7 +360,6 @@ namespace Netsphere.Network.Services
                     plr.Inventory.Create(itemInfo, price, color, effect.Effect, (uint)count);
                 }
             }
-
             //session.Send(new ItemEquipBoostItemInfoAckMessage());
             //session.Send(new ItemClearInvalidEquipItemAckMessage());
         }
