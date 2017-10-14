@@ -346,7 +346,19 @@ namespace Netsphere
                 }
                 catch (TeamLimitReachedException)
                 {
-                    TeamManager.Join(plr);
+                    try
+                    {
+                        // Original team was full
+                        // fallback to default join and try to join another team
+                        TeamManager.Join(plr);
+                    }
+                    catch (TeamLimitReachedException) when (plr.RoomInfo.Mode == PlayerGameMode.Spectate)
+                    {
+                        // Should only happen when the spectator limit got reduced
+                        // Move spectators to normal when spectator slots are filled
+                        plr.RoomInfo.Mode = PlayerGameMode.Normal;
+                        TeamManager.Join(plr);
+                    }
                 }
             }
 
