@@ -4,33 +4,18 @@ namespace Netsphere
 {
     public class MatchKey : IEquatable<MatchKey>
     {
-        private byte[] _key;
+        private readonly byte[] _key;
 
         public uint Key { get; }
-        public byte GameType
-        {
-            get { return (byte)(_key[0] & 1); }
-        }
-        public byte PublicType
-        {
-            get { return (byte)((_key[0] >> 1) & 1); }
-        }
-        public byte JoinAuth
-        {
-            get { return (byte)((_key[0] >> 2) & 1); }
-        }
-        public bool IsObserveEnabled
-        {
-            get { return ((_key[3] >> 1) & 1) > 0; }
-        }
-        public GameRule GameRule
-        {
-            get { return (GameRule)(byte)(_key[0] >> 4); }
-        }
-        public byte Map
-        {
-            get { return _key[1]; }
-        }
+        public byte GameType => (byte)(_key[0] & 1);
+        public byte PublicType => (byte)((_key[0] >> 1) & 1);
+        public byte JoinAuth => (byte)((_key[0] >> 2) & 1);
+
+        // Contains spectator limit
+        public bool IsObserveEnabled => _key[3] > 0; 
+        public GameRule GameRule => (GameRule)(byte)(_key[0] >> 4);
+        public byte Map => _key[1];
+
         public int PlayerLimit
         {
             get
