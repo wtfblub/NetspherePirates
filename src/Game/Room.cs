@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using BlubLib.Threading.Tasks;
 using ExpressMapper.Extensions;
@@ -289,7 +290,13 @@ namespace Netsphere
                 return;
             }
 
-            // ToDo check if current player count is not above the new player limit
+            if (options.MatchKey.PlayerLimit < Players.Count)
+            {
+                Logger.ForAccount(Master)
+                    .Error("Room has more players than the selected player limit");
+                Master.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                return;
+            }
 
             _changingRulesTimer = TimeSpan.Zero;
             IsChangingRules = true;
@@ -324,6 +331,10 @@ namespace Netsphere
             {
                 plr.RoomInfo.Stats = GameRuleManager.GameRule.GetPlayerRecord(plr);
                 var team = TeamManager[plr.RoomInfo.Team.Team];
+
+                // Move spectators to normal when spectators are disabled
+                if (plr.RoomInfo.Mode == PlayerGameMode.Spectate && !Options.MatchKey.IsObserveEnabled)
+                    plr.RoomInfo.Mode = PlayerGameMode.Normal;
 
                 // Try to rejoin the old team first then fallback to default join
                 try
