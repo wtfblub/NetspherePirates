@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Numerics;
 using BlubLib.Serialization;
 using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Serializers;
 using ProudNet.Serialization.Serializers;
-using SlimMath;
 
 namespace Netsphere.Network.Data.P2P
 {
@@ -44,15 +44,21 @@ namespace Netsphere.Network.Data.P2P
         public string Name { get; set; }
 
         [BlubMember(11)]
-        public byte Unk4 { get; set; }
+        public byte Unk1 { get; set; }
 
-        [BlubMember(12, typeof(CompressedFloatSerializer))]
-        public float CurrentHP { get; set; }
+        [BlubMember(12, typeof(StringSerializer))]
+        public string Unk2 { get;set; }
 
         [BlubMember(13, typeof(CompressedFloatSerializer))]
+        public float CurrentHP { get; set; }
+
+        [BlubMember(14, typeof(CompressedFloatSerializer))]
         public float MaxHP { get; set; }
 
-        [BlubMember(14, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(15, typeof(CompressedFloatSerializer))]
+        public float Unk3 { get; set; }
+
+        [BlubMember(16, typeof(ArrayWithIntPrefixSerializer))]
         public ValueDto[] Values { get; set; }
 
         public CharacterDto()
@@ -64,6 +70,7 @@ namespace Netsphere.Network.Data.P2P
             Skills = Array.Empty<ItemDto>();
             Weapons = Array.Empty<ItemDto>();
             Name = "";
+            Unk2 = "";
             Values = Array.Empty<ValueDto>();
         }
     }

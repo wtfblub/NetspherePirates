@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using BlubLib.IO;
 using Netsphere.Resource.Scene.Chunks;
-using SlimMath;
 
 namespace Netsphere.Resource.Scene
 {
@@ -167,7 +167,7 @@ namespace Netsphere.Resource.Scene
         public string Name { get; set; }
         public string SubName { get; set; }
         public float Unk1 { get; set; }
-        public Matrix Matrix { get; set; }
+        public Matrix4x4 Matrix { get; set; }
         public float Unk2 { get; set; }
 
         internal SceneHeader()
@@ -175,7 +175,7 @@ namespace Netsphere.Resource.Scene
             Name = "";
             SubName = "";
             Unk1 = 0.1f;
-            Matrix = Matrix.Identity;
+            Matrix = Matrix4x4.Identity;
             Unk2 = 0.1f;
         }
 

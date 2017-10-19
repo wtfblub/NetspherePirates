@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using BlubLib.IO;
-using SlimMath;
 
 namespace Netsphere.Resource.Scene.Chunks
 {
@@ -93,7 +93,7 @@ namespace Netsphere.Resource.Scene.Chunks
         public TransformKey()
         {
             Translation = Vector3.Zero;
-            Rotation = Quaternion.Zero;
+            Rotation = Quaternion.Identity;
             Scale = Vector3.Zero;
 
             Unk1 = new List<Tuple<int, Vector3>>();
@@ -156,7 +156,7 @@ namespace Netsphere.Resource.Scene.Chunks
             using (var r = stream.ToBinaryReader(true))
             {
                 Translation = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
-                Rotation = new Quaternion(new Vector4(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle()));
+                Rotation = new Quaternion(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
                 Scale = new Vector3(r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
 
                 var count = r.ReadUInt32();
@@ -165,7 +165,7 @@ namespace Netsphere.Resource.Scene.Chunks
 
                 count = r.ReadUInt32();
                 for (var n = 0; n < count; n++)
-                    Unk2.Add(Tuple.Create(r.ReadInt32(), new Quaternion(new Vector4(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle()))));
+                    Unk2.Add(Tuple.Create(r.ReadInt32(), new Quaternion(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle())));
 
                 count = r.ReadUInt32();
                 for (var n = 0; n < count; n++)
@@ -243,7 +243,7 @@ namespace Netsphere.Resource.Scene.Chunks
 
                 var count = r.ReadInt32();
                 for (var j = 0; j < count; j++)
-                    Rotations.Add(new Quaternion(new Vector4(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle())));
+                    Rotations.Add(new Quaternion(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle()));
 
                 count = r.ReadInt32();
                 for (var j = 0; j < count; j++)

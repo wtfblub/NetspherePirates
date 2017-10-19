@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using BlubLib.IO;
 using BlubLib.Serialization;
 using Netsphere.Network.Data.P2P;
 using Netsphere.Network.Serializers;
 using ProudNet.Serialization.Serializers;
-using SlimMath;
 
 namespace Netsphere.Network.Message.P2P
 {
@@ -85,7 +85,7 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
-    [BlubContract(typeof(Serializer))]
+    [BlubContract(typeof(DamageInfoMessage.Serializer))]
     public class DamageInfoMessage : IP2PMessage
     {
         public PeerId Target { get; set; }
@@ -194,32 +194,24 @@ namespace Netsphere.Network.Message.P2P
         }
     }
 
-    [BlubContract]
+    [BlubContract(typeof(DamageRemoteInfoMessage.Serializer))]
     public class DamageRemoteInfoMessage : IP2PMessage
     {
-        [BlubMember(0)]
         public PeerId Target { get; set; }
-
-        [BlubMember(1)]
         public AttackAttribute AttackAttribute { get; set; }
-
-        [BlubMember(2)]
         public uint GameTime { get; set; }
-
-        [BlubMember(3)]
         public PeerId Source { get; set; }
-
-        [BlubMember(4, typeof(RotationVectorSerializer))]
         public Vector2 Rotation { get; set; }
-
-        [BlubMember(5, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
-
-        [BlubMember(6, typeof(CompressedFloatSerializer))]
         public float Unk { get; set; }
-
-        [BlubMember(7, typeof(CompressedFloatSerializer))]
         public float Damage { get; set; }
+        public byte Flag1 { get; set; }
+        public byte Flag2 { get; set; }
+        public byte Flag3 { get; set; }
+        public byte Flag4 { get; set; }
+        public byte Flag5 { get; set; }
+        public byte Flag6 { get; set; }
+        public byte Flag7 { get; set; }
 
         public DamageRemoteInfoMessage()
         {
@@ -227,6 +219,63 @@ namespace Netsphere.Network.Message.P2P
             Source = 0;
             Position = Vector3.Zero;
             Rotation = Vector2.Zero;
+        }
+
+        internal class Serializer : ISerializer<DamageRemoteInfoMessage>
+        {
+            public bool CanHandle(Type type) => type == typeof(DamageRemoteInfoMessage);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void Serialize(BinaryWriter writer, DamageRemoteInfoMessage value)
+            {
+                writer.Write(value.Target);
+                writer.WriteEnum(value.AttackAttribute);
+                writer.Write(value.GameTime);
+                writer.Write(value.Source);
+                writer.WriteRotation(value.Rotation);
+                writer.WriteCompressed(value.Position);
+                writer.WriteCompressed(value.Unk);
+                writer.WriteCompressed(value.Damage);
+
+                var ls = new List<byte>();
+                var bw = new BitStreamWriter(ls);
+                bw.Write(value.Flag1, 2);
+                bw.Write(value.Flag2, 1);
+                bw.Write(value.Flag3, 1);
+                bw.Write(value.Flag4, 1);
+                bw.Write(value.Flag5, 3);
+
+                bw.Write(value.Flag6, 4);
+                bw.Write(value.Flag7, 4);
+
+                writer.Write(ls);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public DamageRemoteInfoMessage Deserialize(BinaryReader reader)
+            {
+                var message = new DamageRemoteInfoMessage();
+                message.Target = reader.ReadUInt16();
+                message.AttackAttribute = reader.ReadEnum<AttackAttribute>();
+                message.GameTime = reader.ReadUInt32();
+                message.Source = reader.ReadUInt16();
+                message.Rotation = reader.ReadRotation();
+                message.Position = reader.ReadCompressedVector3();
+                message.Unk = reader.ReadCompressedFloat();
+                message.Damage = reader.ReadCompressedFloat();
+
+                var br = new BitStreamReader(reader.ReadBytes(2));
+                message.Flag1 = br.ReadByte(2);
+                message.Flag2 = br.ReadByte(1);
+                message.Flag3 = br.ReadByte(1);
+                message.Flag4 = br.ReadByte(1);
+                message.Flag5 = br.ReadByte(3);
+
+                message.Flag6 = br.ReadByte(4);
+                message.Flag7 = br.ReadByte(4);
+
+                return message;
+            }
         }
     }
 
@@ -237,7 +286,7 @@ namespace Netsphere.Network.Message.P2P
         public uint Time { get; set; }
 
         [BlubMember(1)]
-        public byte Unk { get; set; }
+        public byte Unk { get; set; } // 3 bits, 5 bits
 
         [BlubMember(2, typeof(CompressedVectorSerializer))]
         public Vector3 Position { get; set; }
@@ -273,7 +322,7 @@ namespace Netsphere.Network.Message.P2P
         public ActorState State { get; set; }
 
         [BlubMember(3)]
-        public byte CurrentWeapon { get; set; }
+        public byte CurrentWeapon { get; set; } // 4 bits, 4 bits
 
         public StateSyncMessage()
         { }
@@ -320,7 +369,7 @@ namespace Netsphere.Network.Message.P2P
         public byte Unk7 { get; set; }
 
         [BlubMember(8)]
-        public byte Unk8 { get; set; }
+        public byte Unk8 { get; set; } // 4 bits, 4 bits
 
         public BGEffectMessage()
         {
@@ -449,8 +498,8 @@ namespace Netsphere.Network.Message.P2P
         [BlubMember(3)]
         public float Unk4 { get; set; }
 
-        [BlubMember(4, typeof(CompressedVectorSerializer))]
-        public Vector3 Position { get; set; }
+        [BlubMember(4, typeof(RotationVectorSerializer))]
+        public Vector2 Rotation { get; set; }
 
         [BlubMember(5)]
         public byte Unk5 { get; set; }
@@ -858,15 +907,6 @@ namespace Netsphere.Network.Message.P2P
 
         [BlubMember(5, typeof(CompressedFloatSerializer))]
         public float Unk4 { get; set; }
-
-        [BlubMember(6)]
-        public short Unk5 { get; set; }
-
-        [BlubMember(7)]
-        public short Unk6 { get; set; }
-
-        [BlubMember(8)]
-        public short Unk7 { get; set; }
     }
 
     [BlubContract]

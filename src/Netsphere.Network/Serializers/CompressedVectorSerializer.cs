@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using BlubLib.Serialization;
 using Sigil;
 using Sigil.NonGeneric;
-using SlimMath;
 
 namespace Netsphere.Network.Serializers
 {

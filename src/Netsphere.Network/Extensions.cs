@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using BlubLib.Threading.Tasks;
 using SharpLzo;
-using SlimMath;
 
 namespace Netsphere.Network
 {

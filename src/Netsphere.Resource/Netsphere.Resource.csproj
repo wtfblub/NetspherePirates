@@ -4,7 +4,6 @@
     <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="..\..\libs\SlimMath.dll" />
     <Reference Include="..\..\libs\SharpLzo.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -21,5 +20,6 @@
   <ItemGroup>
     <PackageReference Include="BlubLib" Version="0.1.4" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
   </ItemGroup>
 </Project>

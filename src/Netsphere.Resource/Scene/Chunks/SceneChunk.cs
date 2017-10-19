@@ -1,6 +1,6 @@
 using System.IO;
+using System.Numerics;
 using BlubLib.IO;
-using SlimMath;
 
 namespace Netsphere.Resource.Scene.Chunks
 {
@@ -13,14 +13,14 @@ namespace Netsphere.Resource.Scene.Chunks
         public string SubName { get; set; }
 
         public float Unk1 { get; set; }
-        public Matrix Matrix { get; set; }
+        public Matrix4x4 Matrix { get; set; }
 
         protected SceneChunk(SceneContainer container)
         {
             Name = "";
             SubName = "";
             Unk1 = 0.1f;
-            Matrix = Matrix.Identity;
+            Matrix = Matrix4x4.Identity;
             Container = container;
         }
 

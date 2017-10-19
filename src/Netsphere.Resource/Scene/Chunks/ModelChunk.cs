@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using BlubLib.IO;
-using SlimMath;
 
 namespace Netsphere.Resource.Scene.Chunks
 {
@@ -21,7 +21,7 @@ namespace Netsphere.Resource.Scene.Chunks
             : base(container)
         {
             Unk1 = 0.1f;
-            Matrix = Matrix.Identity;
+            Matrix = Matrix4x4.Identity;
             Unk2 = 0.1f;
             RenderState = RenderState.None;
             TextureData = new TextureData(this);
@@ -195,13 +195,13 @@ namespace Netsphere.Resource.Scene.Chunks
     public class WeightData : IManualSerializer
     {
         public string Unk1 { get; set; }
-        public Matrix Matrix { get; set; }
+        public Matrix4x4 Matrix { get; set; }
         public IList<Vector2> Unk2 { get; set; }
 
         public WeightData()
         {
             Unk1 = "";
-            Matrix = Matrix.Identity;
+            Matrix = Matrix4x4.Identity;
             Unk2 = new List<Vector2>();
         }
 
@@ -239,7 +239,7 @@ namespace Netsphere.Resource.Scene.Chunks
     public class TextureData : IManualSerializer
     {
         public float Unk1 { get; set; }
-        public ModelChunk ModelChunk { get; private set; }
+        public ModelChunk ModelChunk { get; }
         public int Unk2 { get; set; }
         public List<TextureEntry> Textures { get; set; }
 

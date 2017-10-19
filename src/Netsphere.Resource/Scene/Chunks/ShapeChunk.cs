@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using BlubLib.IO;
-using SlimMath;
 
 namespace Netsphere.Resource.Scene.Chunks
 {
