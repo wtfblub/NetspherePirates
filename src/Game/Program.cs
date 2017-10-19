@@ -21,7 +21,7 @@ namespace Netsphere
     internal class Program
     {
         private static readonly object s_exitMutex = new object();
-        private static bool s_isExiting;
+        private static bool s_hasExiting;
 
         public static Stopwatch AppTime { get; } = Stopwatch.StartNew();
 
@@ -140,17 +140,16 @@ namespace Netsphere
         {
             lock (s_exitMutex)
             {
-                if (s_isExiting)
+                if (s_hasExiting)
                     return;
-
-                s_isExiting = true;
+                
+                Log.Information("Closing...");
+                var chat = Task.Run(() => ChatServer.Instance.Dispose());
+                var relay = Task.Run(() => RelayServer.Instance.Dispose());
+                var game = Task.Run(() => GameServer.Instance.Dispose());
+                Task.WaitAll(chat, relay, game);
+                s_hasExiting = true;
             }
-
-            Log.Information("Closing...");
-            var chat = Task.Run(() => ChatServer.Instance.Dispose());
-            var relay = Task.Run(() => RelayServer.Instance.Dispose());
-            var game = Task.Run(() => GameServer.Instance.Dispose());
-            Task.WaitAll(chat, relay, game);
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)

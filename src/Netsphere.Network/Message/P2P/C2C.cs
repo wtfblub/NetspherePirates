@@ -489,6 +489,7 @@ namespace Netsphere.Network.Message.P2P
         [BlubMember(0)]
         public LongPeerId Id { get; set; }
 
+        // TODO Position?
         [BlubMember(1)]
         public float Unk2 { get; set; }
 

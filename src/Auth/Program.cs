@@ -22,7 +22,7 @@ namespace Netsphere
         private static IEventLoopGroup s_apiEventLoopGroup;
         private static IChannel s_apiHost;
         private static readonly object s_exitMutex = new object();
-        private static bool s_isExiting;
+        private static bool s_hasExited;
 
         private static void Main()
         {
@@ -115,16 +115,15 @@ namespace Netsphere
         {
             lock (s_exitMutex)
             {
-                if (s_isExiting)
+                if (s_hasExited)
                     return;
-
-                s_isExiting = true;
+                
+                Log.Information("Closing...");
+                s_apiHost.CloseAsync().WaitEx();
+                s_apiEventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).WaitEx();
+                AuthServer.Instance.Dispose();
+                s_hasExited = true;
             }
-
-            Log.Information("Closing...");
-            s_apiHost.CloseAsync().WaitEx();
-            s_apiEventLoopGroup.ShutdownGracefullyAsync().WaitEx();
-            AuthServer.Instance.Dispose();
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
