@@ -18,10 +18,10 @@ using Serilog.Formatting.Json;
 
 namespace Netsphere
 {
-    internal class Program
+    internal static class Program
     {
         private static readonly object s_exitMutex = new object();
-        private static bool s_hasExiting;
+        private static bool s_hasExited;
 
         public static Stopwatch AppTime { get; } = Stopwatch.StartNew();
 
@@ -31,7 +31,7 @@ namespace Netsphere
             {
                 Converters = new List<JsonConverter> { new IPEndPointConverter() }
             };
-            
+
             Config<Config>.Initialize("game.hjson", "NETSPHEREPIRATES_GAMECONF");
 
             var jsonlog = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "game.json");
@@ -60,7 +60,6 @@ namespace Netsphere
                 Log.Error("Database {Name} not found", ex.Name);
                 Environment.Exit(1);
             }
-            
             catch (DatabaseVersionMismatchException ex)
             {
                 Log.Error("Invalid version. Database={CurrentVersion} Required={RequiredVersion}. Run the DatabaseMigrator to update your database.",
@@ -140,15 +139,15 @@ namespace Netsphere
         {
             lock (s_exitMutex)
             {
-                if (s_hasExiting)
+                if (s_hasExited)
                     return;
-                
+
                 Log.Information("Closing...");
                 var chat = Task.Run(() => ChatServer.Instance.Dispose());
                 var relay = Task.Run(() => RelayServer.Instance.Dispose());
                 var game = Task.Run(() => GameServer.Instance.Dispose());
                 Task.WaitAll(chat, relay, game);
-                s_hasExiting = true;
+                s_hasExited = true;
             }
         }
 
