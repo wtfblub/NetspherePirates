@@ -2,10 +2,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+    <CodeAnalysisRuleSet>..\..\Rules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BlubLib.DotNetty.SimpleRmi" Version="0.1.4" />
     <PackageReference Include="BlubLib.Serialization" Version="0.1.4" />
+    <PackageReference Include="RefactoringEssentials" Version="5.4.0" />
+    <PackageReference Include="Roslynator.Analyzers" Version="1.5.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProudNet\ProudNet.csproj" />

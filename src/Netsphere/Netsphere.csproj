@@ -1,11 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
-    </PropertyGroup>
-    <ItemGroup>
-      <PackageReference Include="BlubLib" Version="0.1.4" />
-      <PackageReference Include="Hjson" Version="3.0.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+    <CodeAnalysisRuleSet>..\..\Rules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BlubLib" Version="0.1.4" />
+    <PackageReference Include="Hjson" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="RefactoringEssentials" Version="5.4.0" />
+    <PackageReference Include="Roslynator.Analyzers" Version="1.5.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
+  </ItemGroup>
 </Project>

@@ -1,47 +1,51 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>WinExe</OutputType>
-        <TargetFramework>net461</TargetFramework>
-        <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
-        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
-        <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="BlubLib.GUI" Version="0.1.4" />
-        <PackageReference Include="Costura.Fody" Version="1.6.2" />
-        <PackageReference Include="Fody" Version="2.1.2" />
-        <PackageReference Include="reactiveui" Version="6.5.0" />
-        <PackageReference Include="reactiveui-events-winforms" Version="6.5.0.3" />
-        <PackageReference Include="reactiveui-winforms" Version="6.5.0" />
-        <PackageReference Include="Splat" Version="1.6.2" />
-        <Reference Include="..\..\..\libs\WindowsAPICodePack.dll" />
-        <Reference Include="System.Windows.Forms" />
-        <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <EmbeddedResource Include="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
-        <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
-        <None Include="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" />
-        <None Include="Resources\*" />
-        <Content Include="FodyWeavers.xml" />
-        <EmbeddedResource Include="..\..\..\libs\miniLzo_x64.dll" Link="costura64\miniLzo_x64.dll" />
-        <EmbeddedResource Include="..\..\..\libs\miniLzo_x86.dll" Link="costura32\miniLzo_x86.dll" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Update="Controls\*.cs" SubType="UserControl" />
-        <Compile Update="Views\*View.cs" SubType="Form" />
-        <Compile Update="Views\CleanerView.Designer.cs" DependentUpon="CleanerView.cs" />
-        <EmbeddedResource Include="Views\CleanerView.resx" DependentUpon="CleanerView.cs" />
-        <Compile Update="Views\FileOperationView.Designer.cs" DependentUpon="FileOperationView.cs" />
-        <EmbeddedResource Include="Views\FileOperationView.resx" DependentUpon="FileOperationView.cs" />
-        <Compile Update="Views\MainView.Designer.cs" DependentUpon="MainView.cs" />
-        <EmbeddedResource Include="Views\MainView.resx" DependentUpon="MainView.cs" />
-        <Compile Update="Views\SimpleInfoView.Designer.cs" DependentUpon="SimpleInfoView.cs" />
-        <EmbeddedResource Include="Views\SimpleInfoView.resx" DependentUpon="SimpleInfoView.cs" />
-        <Compile Update="Views\SimpleProgressView.Designer.cs" DependentUpon="SimpleProgressView.cs" />
-        <EmbeddedResource Include="Views\SimpleProgressView.resx" DependentUpon="SimpleProgressView.cs" />
-    </ItemGroup>
-    <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
-        <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
-    </Target>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
+    <CodeAnalysisRuleSet>..\..\..\Rules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BlubLib.GUI" Version="0.1.4" />
+    <PackageReference Include="Costura.Fody" Version="1.6.2" />
+    <PackageReference Include="Fody" Version="2.1.2" />
+    <PackageReference Include="reactiveui" Version="6.5.0" />
+    <PackageReference Include="reactiveui-events-winforms" Version="6.5.0.3" />
+    <PackageReference Include="reactiveui-winforms" Version="6.5.0" />
+    <PackageReference Include="RefactoringEssentials" Version="5.4.0" />
+    <PackageReference Include="Roslynator.Analyzers" Version="1.5.0" />
+    <PackageReference Include="Splat" Version="1.6.2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
+    <Reference Include="..\..\..\libs\WindowsAPICodePack.dll" />
+    <Reference Include="System.Windows.Forms" />
+    <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+    <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
+    <None Include="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" />
+    <None Include="Resources\*" />
+    <Content Include="FodyWeavers.xml" />
+    <EmbeddedResource Include="..\..\..\libs\miniLzo_x64.dll" Link="costura64\miniLzo_x64.dll" />
+    <EmbeddedResource Include="..\..\..\libs\miniLzo_x86.dll" Link="costura32\miniLzo_x86.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Controls\*.cs" SubType="UserControl" />
+    <Compile Update="Views\*View.cs" SubType="Form" />
+    <Compile Update="Views\CleanerView.Designer.cs" DependentUpon="CleanerView.cs" />
+    <EmbeddedResource Include="Views\CleanerView.resx" DependentUpon="CleanerView.cs" />
+    <Compile Update="Views\FileOperationView.Designer.cs" DependentUpon="FileOperationView.cs" />
+    <EmbeddedResource Include="Views\FileOperationView.resx" DependentUpon="FileOperationView.cs" />
+    <Compile Update="Views\MainView.Designer.cs" DependentUpon="MainView.cs" />
+    <EmbeddedResource Include="Views\MainView.resx" DependentUpon="MainView.cs" />
+    <Compile Update="Views\SimpleInfoView.Designer.cs" DependentUpon="SimpleInfoView.cs" />
+    <EmbeddedResource Include="Views\SimpleInfoView.resx" DependentUpon="SimpleInfoView.cs" />
+    <Compile Update="Views\SimpleProgressView.Designer.cs" DependentUpon="SimpleProgressView.cs" />
+    <EmbeddedResource Include="Views\SimpleProgressView.resx" DependentUpon="SimpleProgressView.cs" />
+  </ItemGroup>
+  <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
+    <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

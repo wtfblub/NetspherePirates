@@ -1,25 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net461</TargetFramework>
-        <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Costura.Fody" Version="1.6.2" />
-        <PackageReference Include="EntryPoint" Version="1.2.2" />
-        <PackageReference Include="Fody" Version="2.1.2" />
-        <PackageReference Include="MySql.Data" Version="8.0.8-dmr" />
-        <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\..\Netsphere.Database\Netsphere.Database.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="FodyWeavers.xml">
-            <SubType>Designer</SubType>
-        </Content>
-    </ItemGroup>
-    <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
-        <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
-    </Target>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+    <CodeAnalysisRuleSet>..\..\..\Rules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="1.6.2" />
+    <PackageReference Include="EntryPoint" Version="1.2.2" />
+    <PackageReference Include="Fody" Version="2.1.2" />
+    <PackageReference Include="MySql.Data" Version="8.0.9-dmr" />
+    <PackageReference Include="RefactoringEssentials" Version="5.4.0" />
+    <PackageReference Include="Roslynator.Analyzers" Version="1.5.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Netsphere.Database\Netsphere.Database.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FodyWeavers.xml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
+    <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

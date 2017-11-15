@@ -51,13 +51,13 @@ namespace Netsphere.Network.Message.Auth
             Result = result;
         }
 
-        public SAuthInEuAckMessage(AuthLoginResult result, ulong accountId, uint sessionId)
+        public SAuthInEuAckMessage(AuthLoginResult result, ulong accountId, string sessionId)
             : this()
         {
             Result = result;
             AccountId = accountId;
             SessionId = (uint) accountId;
-            SessionId2 = sessionId.ToString();
+            SessionId2 = sessionId;
         }
     }
 
