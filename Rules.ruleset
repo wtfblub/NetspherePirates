@@ -109,7 +109,7 @@
     <Rule Id="RECS0075" Action="Warning" />
     <Rule Id="RECS0091" Action="Warning" />
     <Rule Id="RECS0092" Action="Warning" />
-    <Rule Id="RECS0093" Action="Warning" />
+    <Rule Id="RECS0093" Action="Info" />
     <Rule Id="RECS0103" Action="Info" />
     <Rule Id="RECS0104" Action="Warning" />
     <Rule Id="RECS0106" Action="Warning" />
@@ -126,6 +126,8 @@
     <Rule Id="RECS0164" Action="Warning" />
     <Rule Id="RECS0012" Action="Warning" />
     <Rule Id="RECS0108" Action="Info" />
+    <Rule Id="RECS0154" Action="Info" />
+    <Rule Id="RECS0133" Action="Info" />
   </Rules>
   <Rules AnalyzerId="Roslynator.CSharp.Analyzers" RuleNamespace="Roslynator.CSharp.Analyzers">
     <Rule Id="RCS1002" Action="None" />
@@ -142,7 +144,7 @@
     <Rule Id="RCS1015FadeOut" Action="Warning" />
     <Rule Id="RCS1015" Action="None" />
     <Rule Id="RCS1018" Action="Warning" />
-    <Rule Id="RCS1019" Action="Warning" />
+    <Rule Id="RCS1019" Action="Hidden" />
     <Rule Id="RCS1027" Action="Warning" />
     <Rule Id="RCS1032" Action="Warning" />
     <Rule Id="RCS1035" Action="Warning" />
@@ -159,7 +161,7 @@
     <Rule Id="RCS1080" Action="Warning" />
     <Rule Id="RCS1081" Action="Warning" />
     <Rule Id="RCS1082" Action="Warning" />
-    <Rule Id="RCS1094" Action="Warning" />
+    <Rule Id="RCS1094" Action="Info" />
     <Rule Id="RCS1103" Action="Warning" />
     <Rule Id="RCS1104" Action="Warning" />
     <Rule Id="RCS1106" Action="Warning" />
@@ -183,6 +185,9 @@
     <Rule Id="RCS1187" Action="Warning" />
     <Rule Id="RCS1021FadeOut" Action="Warning" />
     <Rule Id="RCS1021" Action="None" />
+    <Rule Id="RCS1168" Action="Hidden" />
+    <Rule Id="RCS1175" Action="None" />
+    <Rule Id="RCS1194" Action="None" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1101" Action="None" />
@@ -214,5 +219,9 @@
     <Rule Id="SA1009" Action="Info" />
     <Rule Id="SA1008" Action="Info" />
     <Rule Id="SA1204" Action="Info" />
+    <Rule Id="SA1005" Action="Info" />
+    <Rule Id="SA1515" Action="Info" />
+    <Rule Id="SA1118" Action="Info" />
+    <Rule Id="SA1202" Action="Info" />
   </Rules>
 </RuleSet>

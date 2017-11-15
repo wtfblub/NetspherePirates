@@ -9,7 +9,7 @@ indent_size = 4
 insert_final_newline = true 
 trim_trailing_whitespace = true
 
-[*.{yml,csproj,xml,json,hjson,config}] 
+[*.{yml,csproj,xml,json,hjson}] 
 end_of_line = lf
 indent_size = 2
 insert_final_newline = true 
@@ -55,7 +55,7 @@ csharp_style_inlined_variable_declaration = true:warning
 
 # Expression-level Preferences
 csharp_prefer_simple_default_expression = true:warning
-csharp_style_throw_expression = true:warning
+csharp_style_throw_expression = false:warning
 csharp_style_conditional_delegate_call = true:warning
 
 # Code Block Preferences
