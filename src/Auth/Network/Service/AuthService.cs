@@ -45,7 +45,7 @@ namespace Netsphere.Network.Service
                         var newSalt = new byte[24];
                         using (var csprng = new RNGCryptoServiceProvider())
                             csprng.GetBytes(newSalt);
-                        
+
                         var hash = new byte[24];
                         using (var pbkdf2 = new Rfc2898DeriveBytes(message.Password, newSalt, 24000))
                             hash = pbkdf2.GetBytes(24);
@@ -64,19 +64,19 @@ namespace Netsphere.Network.Service
                 }
 
                 var salt = Convert.FromBase64String(account.Salt);
-                
+
                 var passwordGuess = new byte[24];
                 using (var pbkdf2 = new Rfc2898DeriveBytes(message.Password, salt, 24000))
                     passwordGuess = pbkdf2.GetBytes(24);
-                
+
                 var actualPassword = Convert.FromBase64String(account.Password);
-                
+
                 uint difference = (uint)passwordGuess.Length ^ (uint)actualPassword.Length;
                 for (var i = 0; i < passwordGuess.Length && i < actualPassword.Length; i++)
                 {
                     difference |= (uint)(passwordGuess[i] ^ actualPassword[i]);
                 }
-                
+
                 if (difference != 0 || string.IsNullOrWhiteSpace(account.Password))
                 {
                     if (Config.Instance.NoobMode)
@@ -126,7 +126,7 @@ namespace Netsphere.Network.Service
 
             // ToDo proper session generation
             var sessionId = Hash.GetUInt32<CRC32>($"<{account.Username}+{account.Password}>");
-            session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
+            session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId.ToString()));
         }
 
         [MessageHandler(typeof(CServerListReqMessage))]
