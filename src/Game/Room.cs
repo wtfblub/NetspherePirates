@@ -210,7 +210,13 @@ namespace Netsphere
             if (_players.Count > 0)
             {
                 if (Master == plr)
-                    ChangeMaster(GetPlayerWithLowestPing());
+                {
+                    // Prioritize players that are ready
+                    // This makes it possible for players to give master to a specific player
+                    var newMaster = GetPlayerWithLowestPing(Players.Values.Where(x => x.RoomInfo.IsReady))
+                                    ?? GetPlayerWithLowestPing();
+                    ChangeMaster(newMaster);
+                }
 
                 if (Host == plr)
                     ChangeHost(GetPlayerWithLowestPing());
@@ -313,9 +319,10 @@ namespace Netsphere
             Broadcast(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
         }
 
-        private Player GetPlayerWithLowestPing()
+        private Player GetPlayerWithLowestPing(IEnumerable<Player> players = null)
         {
-            return _players.Values.Aggregate((lowestPlayer, player) => (lowestPlayer == null || player.Session.UnreliablePing < lowestPlayer.Session.UnreliablePing ? player : lowestPlayer));
+            players = players ?? Players.Values;
+            return players.Aggregate(default(Player), (lowestPlayer, player) => (lowestPlayer == null || player.Session.UnreliablePing < lowestPlayer.Session.UnreliablePing ? player : lowestPlayer));
         }
 
         private void TeamManager_TeamChanged(object sender, TeamChangedEventArgs e)
