@@ -153,6 +153,8 @@ namespace Netsphere
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
+            // Prevents the process from crashing
+            e.SetObserved();
             Log.Error(e.Exception, "UnobservedTaskException");
         }
 

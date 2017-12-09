@@ -56,7 +56,7 @@ namespace Netsphere
                 Log.Error("Database {Name} not found", ex.Name);
                 Environment.Exit(1);
             }
-            
+
             catch (DatabaseVersionMismatchException ex)
             {
                 Log.Error("Invalid version. Database={CurrentVersion} Required={RequiredVersion}. Run the DatabaseMigrator to update your database.",
@@ -117,7 +117,7 @@ namespace Netsphere
             {
                 if (s_hasExited)
                     return;
-                
+
                 Log.Information("Closing...");
                 s_apiHost.CloseAsync().WaitEx();
                 s_apiEventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).WaitEx();
@@ -128,6 +128,8 @@ namespace Netsphere
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
+            // Prevents the process from crashing
+            e.SetObserved();
             Log.Error(e.Exception, "UnobservedTaskException");
         }
 
