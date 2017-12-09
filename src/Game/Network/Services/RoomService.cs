@@ -175,15 +175,33 @@ namespace Netsphere.Network.Services
         public void CReadyRoundReq(GameSession session)
         {
             var plr = session.Player;
+            var gameRule = plr.Room.GameRuleManager.GameRule;
+            if (gameRule.StateMachine.IsInState(GameRuleState.Starting) && plr.RoomInfo.State == PlayerState.Lobby)
+            {
+                plr.RoomInfo.State = plr.RoomInfo.Mode == PlayerGameMode.Normal
+                    ? PlayerState.Alive
+                    : PlayerState.Spectating;
 
-            plr.RoomInfo.IsReady = !plr.RoomInfo.IsReady;
-            plr.Room.Broadcast(new SReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
+                plr.Room.BroadcastBriefing();
+                plr.Session.SendAsync(new SEventMessageAckMessage(GameEventMessage.HalfTimeIn, 1, 0, 0, ""));
+                plr.Session.SendAsync(new SEventMessageAckMessage(GameEventMessage.NextRoundIn,
+                    (ulong)(GameRuleBase.StartingWaitTime - gameRule.RoundTime).TotalMilliseconds, 0, 0, ""));
+
+                // Remove the "Requesting" box
+                plr.Session.SendAsync(new SReadyRoundAckMessage(plr.Account.Id, false));
+            }
+            else
+            {
+                plr.RoomInfo.IsReady = !plr.RoomInfo.IsReady;
+                plr.Room.Broadcast(new SReadyRoundAckMessage(plr.Account.Id, plr.RoomInfo.IsReady));
+            }
         }
 
         [MessageHandler(typeof(CEventMessageReqMessage))]
         public void CEventMessageReq(GameSession session, CEventMessageReqMessage message)
         {
             var plr = session.Player;
+            var gameRule = plr.Room.GameRuleManager.GameRule;
 
             plr.Room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""));
             //if (message.Event == GameEventMessage.BallReset && plr == plr.Room.Host)
@@ -195,13 +213,20 @@ namespace Netsphere.Network.Services
             //if (message.Event != GameEventMessage.StartGame)
             //    return;
 
-            if (plr.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Playing) && plr.RoomInfo.State == PlayerState.Lobby)
+            if (gameRule.StateMachine.IsInState(GameRuleState.Playing) && plr.RoomInfo.State == PlayerState.Lobby)
             {
                 plr.RoomInfo.State = plr.RoomInfo.Mode == PlayerGameMode.Normal
                     ? PlayerState.Alive
                     : PlayerState.Spectating;
 
                 plr.Room.BroadcastBriefing();
+
+                if (gameRule.StateMachine.IsInState(GameRuleState.Playing))
+                {
+                    plr.Session.SendAsync(new SEventMessageAckMessage(GameEventMessage.HalfTimeIn, 1, 0, 0, ""));
+                    plr.Session.SendAsync(new SEventMessageAckMessage(GameEventMessage.NextRoundIn,
+                        (ulong)(GameRuleBase.StartingWaitTime - gameRule.RoundTime).TotalMilliseconds, 0, 0, ""));
+                }
             }
         }
 
@@ -316,6 +341,7 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CLeavePlayerRequestReqMessage))]
         public void CLeavePlayerRequestReq(GameSession session, CLeavePlayerRequestReqMessage message)
         {
+            return; // TODO JUST FOR DEBUGGING - REMOVE BEFORE COMMIT
             var plr = session.Player;
             var room = plr.Room;
 

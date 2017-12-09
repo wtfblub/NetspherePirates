@@ -10,10 +10,12 @@ namespace Netsphere.Game.GameRules
 {
     internal abstract class GameRuleBase
     {
-        private static readonly TimeSpan PreHalfTimeWaitTime = TimeSpan.FromSeconds(9);
-        private static readonly TimeSpan PreResultWaitTime = TimeSpan.FromSeconds(9);
-        private static readonly TimeSpan HalfTimeWaitTime = TimeSpan.FromSeconds(24);
-        private static readonly TimeSpan ResultWaitTime = TimeSpan.FromSeconds(14);
+        private static readonly TimeSpan s_preHalfTimeWaitTime = TimeSpan.FromSeconds(9);
+        private static readonly TimeSpan s_preResultWaitTime = TimeSpan.FromSeconds(9);
+        private static readonly TimeSpan s_halfTimeWaitTime = TimeSpan.FromSeconds(24);
+        private static readonly TimeSpan s_resultWaitTime = TimeSpan.FromSeconds(14);
+        public static readonly TimeSpan StartingWaitTime = TimeSpan.FromSeconds(6);
+        private bool _sentStartingCountdown;
 
         public abstract GameRule GameRule { get; }
         public Room Room { get; }
@@ -31,13 +33,16 @@ namespace Netsphere.Game.GameRules
         }
 
         public virtual void Initialize()
-        { }
+        {
+        }
 
         public virtual void Cleanup()
-        { }
+        {
+        }
 
         public virtual void Reload()
-        { }
+        {
+        }
 
         public virtual void Update(TimeSpan delta)
         {
@@ -53,11 +58,51 @@ namespace Netsphere.Game.GameRules
                 }
             }
 
-            #region HalfTime
+            #region Starting
+            if (StateMachine.IsInState(GameRuleState.Starting))
+            {
+                if (!_sentStartingCountdown)
+                {
+                    // Wait a second before starting the countdown to prevent client bugs
+                    if (RoundTime >= TimeSpan.FromSeconds(1))
+                    {
+                        foreach (var plr in Room.TeamManager.PlayersInGame)
+                        {
+                            // Prevents the client from using weapons
+                            plr.Session.SendAsync(new SEventMessageAckMessage(GameEventMessage.HalfTimeIn, 1, 0, 0, ""));
 
+                            // Starts the next round countdown
+                            plr.Session.SendAsync(new SEventMessageAckMessage(GameEventMessage.NextRoundIn,
+                                (ulong)StartingWaitTime.TotalMilliseconds, 0, 0, ""));
+                        }
+
+                        _sentStartingCountdown = true;
+                        RoundTime = TimeSpan.Zero;
+                    }
+                }
+                else
+                {
+                    if (RoundTime >= StartingWaitTime)
+                    {
+                        RoundTime = TimeSpan.Zero;
+                        StateMachine.Fire(GameRuleStateTrigger.StartGame);
+
+                        // The client needs ResetRound after NextRoundIn
+                        foreach (var plr in Room.TeamManager.PlayersInGame)
+                        {
+                            // HalfTimeIn gets the client stuck after ResetRound so we need to reset the sub state
+                            //plr.Session.SendAsync(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
+                            plr.Session.SendAsync(new SEventMessageAckMessage(GameEventMessage.ResetRound, 0, 0, 0, ""));
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region HalfTime
             if (StateMachine.IsInState(GameRuleState.EnteringHalfTime))
             {
-                if (RoundTime >= PreHalfTimeWaitTime)
+                if (RoundTime >= s_preHalfTimeWaitTime)
                 {
                     RoundTime = TimeSpan.Zero;
                     StateMachine.Fire(GameRuleStateTrigger.StartHalfTime);
@@ -65,23 +110,21 @@ namespace Netsphere.Game.GameRules
                 else
                 {
                     Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.HalfTimeIn, 2, 0, 0,
-                        ((int)(PreHalfTimeWaitTime - RoundTime).TotalSeconds + 1).ToString()));
+                        ((int)(s_preHalfTimeWaitTime - RoundTime).TotalSeconds + 1).ToString()));
                 }
             }
 
             if (StateMachine.IsInState(GameRuleState.HalfTime))
             {
-                if (RoundTime >= HalfTimeWaitTime)
+                if (RoundTime >= s_halfTimeWaitTime)
                     StateMachine.Fire(GameRuleStateTrigger.StartSecondHalf);
             }
-
             #endregion
 
             #region Result
-
             if (StateMachine.IsInState(GameRuleState.EnteringResult))
             {
-                if (RoundTime >= PreResultWaitTime)
+                if (RoundTime >= s_preResultWaitTime)
                 {
                     RoundTime = TimeSpan.Zero;
                     StateMachine.Fire(GameRuleStateTrigger.StartResult);
@@ -89,23 +132,21 @@ namespace Netsphere.Game.GameRules
                 else
                 {
                     Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.ResultIn, 3, 0, 0,
-                        (int)(PreResultWaitTime - RoundTime).TotalSeconds + 1 + " second(s)"));
+                        (int)(s_preResultWaitTime - RoundTime).TotalSeconds + 1 + " second(s)"));
                 }
             }
 
             if (StateMachine.IsInState(GameRuleState.Result))
             {
-                if (RoundTime >= ResultWaitTime)
+                if (RoundTime >= s_resultWaitTime)
                     StateMachine.Fire(GameRuleStateTrigger.EndGame);
             }
-
             #endregion
         }
 
         public abstract PlayerRecord GetPlayerRecord(Player plr);
 
         #region Scores
-
         public virtual void OnScoreKill(Player killer, Player assist, Player target, AttackAttribute attackAttribute)
         {
             killer.RoomInfo.Stats.Kills++;
@@ -146,7 +187,6 @@ namespace Netsphere.Game.GameRules
             plr.RoomInfo.Stats.Deaths++;
             Room.Broadcast(new SScoreSuicideAckMessage(plr.RoomInfo.PeerId, AttackAttribute.KillOneSelf));
         }
-
         #endregion
 
         private void StateMachine_OnTransition(StateMachine<GameRuleState, GameRuleStateTrigger>.Transition transition)
@@ -154,18 +194,14 @@ namespace Netsphere.Game.GameRules
             RoundTime = TimeSpan.Zero;
             switch (transition.Destination)
             {
-                case GameRuleState.FirstHalf:
-                    GameTime = TimeSpan.Zero;
+                case GameRuleState.Starting:
+                    _sentStartingCountdown = false;
                     foreach (var team in Room.TeamManager.Values)
                         team.Score = 0;
-                    foreach ( // ToDo Use one of the Player properties
-                        var plr in
-                            Room.TeamManager.Values.SelectMany(
-                                team =>
-                                    team.Values.Where(
-                                        plr =>
-                                            plr.RoomInfo.IsReady || Room.Master == plr ||
-                                            plr.RoomInfo.Mode == PlayerGameMode.Spectate)))
+
+                    foreach (var plr in Room.TeamManager.Values.SelectMany(
+                            team => team.Values.Where(
+                                plr => plr.RoomInfo.IsReady || Room.Master == plr)))
                     {
                         plr.RoomInfo.Reset();
                         plr.RoomInfo.State = plr.RoomInfo.Mode == PlayerGameMode.Normal
@@ -176,6 +212,18 @@ namespace Netsphere.Game.GameRules
 
                     Room.BroadcastBriefing();
                     Room.Broadcast(new SChangeStateAckMessage(GameState.Playing));
+                    Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
+
+                    // Friendly games have no starting countdown
+                    if (Room.Options.IsFriendly)
+                        StateMachine.Fire(GameRuleStateTrigger.StartGame);
+
+                    break;
+
+                case GameRuleState.FirstHalf:
+                    GameTime = TimeSpan.Zero;
+
+                    // Make sure the client resets the first half timer after the starting countdown
                     Room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
                     break;
 

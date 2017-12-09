@@ -8,7 +8,7 @@ namespace Netsphere.Game.GameRules
 {
     internal sealed class TouchdownGameRule : GameRuleBase
     {
-        private static readonly TimeSpan TouchdownWaitTime = TimeSpan.FromSeconds(12);
+        private static readonly TimeSpan s_touchdownWaitTime = TimeSpan.FromSeconds(12);
 
         private readonly TouchdownAssistHelper _touchdownAssistHelper = new TouchdownAssistHelper();
         private TimeSpan _touchdownTime;
@@ -23,7 +23,11 @@ namespace Netsphere.Game.GameRules
             Briefing = new Briefing(this);
 
             StateMachine.Configure(GameRuleState.Waiting)
-                .PermitIf(GameRuleStateTrigger.StartGame, GameRuleState.FirstHalf, CanStartGame);
+                .PermitIf(GameRuleStateTrigger.StartGame, GameRuleState.Starting, CanStartGame);
+
+            StateMachine.Configure(GameRuleState.Starting)
+                .SubstateOf(GameRuleState.Playing)
+                .Permit(GameRuleStateTrigger.StartGame, GameRuleState.FirstHalf);
 
             StateMachine.Configure(GameRuleState.FirstHalf)
                 .SubstateOf(GameRuleState.Playing)
@@ -112,7 +116,7 @@ namespace Netsphere.Game.GameRules
                     if (!StateMachine.IsInState(GameRuleState.EnteringHalfTime) && !StateMachine.IsInState(GameRuleState.HalfTime) &&
                         !StateMachine.IsInState(GameRuleState.EnteringResult) && !StateMachine.IsInState(GameRuleState.Result))
                     {
-                        if (_touchdownTime >= TouchdownWaitTime)
+                        if (_touchdownTime >= s_touchdownWaitTime)
                         {
                             IsInTouchdown = false;
                             _touchdownTime = TimeSpan.Zero;
@@ -166,8 +170,8 @@ namespace Netsphere.Game.GameRules
         {
             if (IsInTouchdown)
                 return;
-                
-            if(oldPlr != null)
+
+            if (oldPlr != null)
                 _touchdownAssistHelper.Update(oldPlr);
 
             if (newPlr != null)
@@ -200,7 +204,7 @@ namespace Netsphere.Game.GameRules
             if (diff <= TimeSpan.FromSeconds(10)) // ToDo use const
                 return;
 
-            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)TouchdownWaitTime.TotalMilliseconds, 0, 0, ""));
+            Room.Broadcast(new SEventMessageAckMessage(GameEventMessage.NextRoundIn, (ulong)s_touchdownWaitTime.TotalMilliseconds, 0, 0, ""));
             _touchdownTime = TimeSpan.Zero;
         }
 

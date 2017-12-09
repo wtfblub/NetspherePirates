@@ -45,7 +45,11 @@ namespace Netsphere.Game.GameRules
             Briefing = new ChaserBriefing(this);
 
             StateMachine.Configure(GameRuleState.Waiting)
-                .PermitIf(GameRuleStateTrigger.StartGame, GameRuleState.FirstHalf, CanStartGame);
+                .PermitIf(GameRuleStateTrigger.StartGame, GameRuleState.Starting, CanStartGame);
+
+            StateMachine.Configure(GameRuleState.Starting)
+                .SubstateOf(GameRuleState.Playing)
+                .Permit(GameRuleStateTrigger.StartGame, GameRuleState.FirstHalf);
 
             StateMachine.Configure(GameRuleState.FirstHalf)
                 .SubstateOf(GameRuleState.Playing)
@@ -146,7 +150,7 @@ namespace Netsphere.Game.GameRules
                 Bonus = GetBonus();
             }
 
-            if(Chaser == target)
+            if (Chaser == target)
                 ChaserLose();
 
             base.OnScoreKill(killer, null, target, attackAttribute);
@@ -154,7 +158,7 @@ namespace Netsphere.Game.GameRules
 
         public override void OnScoreSuicide(Player plr)
         {
-            if(Chaser == plr)
+            if (Chaser == plr)
                 ChaserLose();
             base.OnScoreSuicide(plr);
         }

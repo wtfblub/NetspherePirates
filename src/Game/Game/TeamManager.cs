@@ -20,6 +20,7 @@ namespace Netsphere.Game.Systems
         public IEnumerable<Player> Players => _teams.Values.SelectMany(team => team.Players);
         public IEnumerable<Player> PlayersPlaying => _teams.Values.SelectMany(team => team.PlayersPlaying);
         public IEnumerable<Player> Spectators => _teams.Values.SelectMany(team => team.Spectators);
+        public IEnumerable<Player> PlayersInGame => _teams.Values.SelectMany(team => team.PlayersInGame);
 
         public EventHandler<TeamChangedEventArgs> TeamChanged;
 
@@ -215,9 +216,10 @@ namespace Netsphere.Game.Systems
         public uint SpectatorLimit { get; set; }
         public uint Score { get; set; }
 
-        public IEnumerable<Player> PlayersPlaying => _players.Values.Where(plr => plr.RoomInfo.Mode == PlayerGameMode.Normal && plr.RoomInfo.State != PlayerState.Lobby);
         public IEnumerable<Player> Players => _players.Values.Where(plr => plr.RoomInfo.Mode == PlayerGameMode.Normal);
+        public IEnumerable<Player> PlayersPlaying => _players.Values.Where(plr => plr.RoomInfo.Mode == PlayerGameMode.Normal && plr.RoomInfo.State != PlayerState.Lobby);
         public IEnumerable<Player> Spectators => _players.Values.Where(plr => plr.RoomInfo.Mode == PlayerGameMode.Spectate);
+        public IEnumerable<Player> PlayersInGame => PlayersPlaying.Concat(Spectators);
 
         public EventHandler<RoomPlayerEventArgs> PlayerJoined;
         public EventHandler<RoomPlayerEventArgs> PlayerLeft;

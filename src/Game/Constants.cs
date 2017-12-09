@@ -1,4 +1,4 @@
-﻿ // ReSharper disable once CheckNamespace
+﻿// ReSharper disable once CheckNamespace
 namespace Netsphere
 {
     internal enum PlayerSetting
@@ -19,10 +19,12 @@ namespace Netsphere
         FirstHalf,
         EnteringHalfTime,
         HalfTime,
-        SecondHalf
+        SecondHalf,
+
+        Starting
     }
 
-    enum GameRuleStateTrigger
+    internal enum GameRuleStateTrigger
     {
         StartGame,
         EndGame,
