@@ -341,7 +341,6 @@ namespace Netsphere.Network.Services
         [MessageHandler(typeof(CLeavePlayerRequestReqMessage))]
         public void CLeavePlayerRequestReq(GameSession session, CLeavePlayerRequestReqMessage message)
         {
-            return; // TODO JUST FOR DEBUGGING - REMOVE BEFORE COMMIT
             var plr = session.Player;
             var room = plr.Room;
 
