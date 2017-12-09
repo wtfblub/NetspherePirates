@@ -223,5 +223,7 @@
     <Rule Id="SA1515" Action="Info" />
     <Rule Id="SA1118" Action="Info" />
     <Rule Id="SA1202" Action="Info" />
+    <Rule Id="SA1600" Action="Info" />
+    <Rule Id="SA1119" Action="Info" />
   </Rules>
 </RuleSet>
