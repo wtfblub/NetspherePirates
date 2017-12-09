@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using BlubLib.DotNetty.Handlers.MessageHandling;
+using DotNetty.Transport.Channels;
 using Netsphere.Game.GameRules;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
@@ -156,6 +158,49 @@ namespace Netsphere.Network.Services
             {
                 Logger.ForAccount(plr)
                     .Error(ex, "Failed to change mode to {mode}", message.Mode);
+            }
+        }
+
+        [MessageHandler(typeof(CMixChangeTeamReqMessage))]
+        public void CMixChangeTeamReq(GameSession session, CMixChangeTeamReqMessage message)
+        {
+            var plr = session.Player;
+            var plrToMove = plr.Room.Players.GetValueOrDefault(message.PlayerToMove);
+            var plrToReplace = plr.Room.Players.GetValueOrDefault(message.PlayerToReplace);
+            var fromTeam = plr.Room.TeamManager[message.FromTeam];
+            var toTeam = plr.Room.TeamManager[message.ToTeam];
+
+            if (fromTeam == null || toTeam == null || plrToMove == null ||
+                fromTeam != plrToMove.RoomInfo.Team ||
+                (plrToReplace != null && toTeam != plrToReplace.RoomInfo.Team))
+            {
+                session.SendAsync(new SMixChangeTeamFailAckMessage());
+                return;
+            }
+
+            if (plrToReplace == null)
+            {
+                try
+                {
+                    toTeam.Join(plrToMove);
+                }
+                catch (TeamLimitReachedException)
+                {
+                    session.SendAsync(new SMixChangeTeamFailAckMessage());
+                }
+            }
+            else
+            {
+                fromTeam.Leave(plrToMove);
+                toTeam.Leave(plrToReplace);
+                fromTeam.Join(plrToReplace);
+                toTeam.Join(plrToMove);
+
+                plr.Room.Broadcast(new SMixChangeTeamAckMessage(plrToMove.Account.Id, plrToReplace.Account.Id,
+                    fromTeam.Team, toTeam.Team));
+
+                // SMixChangeTeamAckMessage alone doesn't seem to change the player list
+                plr.Room.BroadcastBriefing();
             }
         }
 

@@ -131,7 +131,7 @@ namespace Netsphere.Network
                     .RegisterRule<CClubAddressReqMessage>(MustBeLoggedIn, MustBeInChannel)
                     .RegisterRule<CClubInfoReqMessage>(MustBeLoggedIn, MustBeInChannel)
                     .RegisterRule<CLeavePlayerRequestReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom)
-
+                    .RegisterRule<CMixChangeTeamReqMessage>(MustBeLoggedIn, MustBeInChannel, MustBeInRoom, MustBeRoomMaster)
             };
 
             Instance = new GameServer(config);

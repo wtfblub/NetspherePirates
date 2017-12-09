@@ -114,16 +114,28 @@ namespace Netsphere.Network.Message.GameRule
     public class SMixChangeTeamAckMessage: IGameRuleMessage
     {
         [BlubMember(0)]
-        public ulong Unk1 { get; set; }
+        public ulong PlayerToMove { get; set; }
 
         [BlubMember(1)]
-        public ulong Unk2 { get; set; }
+        public ulong PlayerToReplace { get; set; }
 
         [BlubMember(2)]
-        public byte Unk3 { get; set; }
+        public Team FromTeam { get; set; }
 
         [BlubMember(3)]
-        public byte Unk4 { get; set; }
+        public Team ToTeam { get; set; }
+
+        public SMixChangeTeamAckMessage()
+        {
+        }
+
+        public SMixChangeTeamAckMessage(ulong playerToMove, ulong playerToReplace, Team fromTeam, Team toTeam)
+        {
+            PlayerToMove = playerToMove;
+            PlayerToReplace = playerToReplace;
+            FromTeam = fromTeam;
+            ToTeam = toTeam;
+        }
     }
 
     [BlubContract]
