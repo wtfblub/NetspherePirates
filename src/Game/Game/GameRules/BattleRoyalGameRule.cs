@@ -76,7 +76,8 @@ namespace Netsphere.Game.GameRules
 
             if (StateMachine.IsInState(GameRuleState.Playing) &&
                 !StateMachine.IsInState(GameRuleState.EnteringResult) &&
-                !StateMachine.IsInState(GameRuleState.Result))
+                !StateMachine.IsInState(GameRuleState.Result) &&
+                RoundTime >= TimeSpan.FromSeconds(5)) // Let the round run for at least 5 seconds - Fixes StartResult trigger on game start(race condition)
             {
                 if (StateMachine.IsInState(GameRuleState.FirstHalf))
                 {
