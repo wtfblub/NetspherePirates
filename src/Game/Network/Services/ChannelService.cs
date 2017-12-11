@@ -150,6 +150,21 @@ namespace Netsphere.Network.Services
             return session.SendAsync(new SServerResultInfoAckMessage(ServerResult.QuickJoinFailed));
         }
 
+        [MessageHandler(typeof(CEnableAccountStatusAckMessage))]
+        public Task EnableAccountStatus(GameSession session, CEnableAccountStatusAckMessage message)
+        {
+            var plr = session.Player;
+
+            if(plr.TutorialState != 2 && Config.Instance.Game.EnableTutorial)
+            {
+                plr.PEN += 5000;
+                plr.TutorialState = message.TutorialState;
+                session.SendAsync(new SRefreshCashInfoAckMessage { PEN = plr.PEN, AP = plr.AP });
+            }
+
+            return Task.CompletedTask;
+        }
+
         [MessageHandler(typeof(CTaskRequestReqMessage))]
         public Task TaskRequestReq(GameSession session, CTaskRequestReqMessage message)
         {

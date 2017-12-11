@@ -230,6 +230,10 @@ namespace Netsphere.Network.Services
         {
             var plr = session.Player;
 
+            // For some reason, when a Player ends the tutorial this function is run without a Room set even though
+            // the RegisterRule for "CEventMessageReqMessage" has the "MustBeInRoom" predicate...
+            if(plr.Room == null) return;
+
             plr.Room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id, message.Unk1, message.Value, ""));
             //if (message.Event == GameEventMessage.BallReset && plr == plr.Room.Host)
             //{

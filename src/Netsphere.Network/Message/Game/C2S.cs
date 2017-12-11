@@ -501,6 +501,6 @@ namespace Netsphere.Network.Message.Game
     public class CEnableAccountStatusAckMessage : IGameMessage
     {
         [BlubMember(0)]
-        public uint Unk { get; set; }
+        public byte TutorialState { get; set; }
     }
 }
