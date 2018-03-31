@@ -201,8 +201,9 @@ namespace ProudNet.Handlers
             var target = session.P2PGroup?.Members.GetValueOrDefault(message.HostId)?.Session;
             if (target == null || !target.UdpEnabled)
                 return;
-
-            session.SendUdpAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, (IPEndPoint)channel.RemoteAddress, target.HostId));
+            
+            var x = (IPEndPoint)channel.RemoteAddress;
+            session.SendUdpAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, new IPEndPoint(x.Address.MapToIPv4(), x.Port), target.HostId));
         }
 
         [MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
