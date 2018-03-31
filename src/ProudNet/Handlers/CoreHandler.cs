@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -192,7 +191,7 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(PeerUdp_ServerHolepunchMessage))]
-        public void PeerUdp_ServerHolepunch(IChannel channel, ProudSession session, PeerUdp_ServerHolepunchMessage message)
+        public void PeerUdp_ServerHolepunch(IChannel channel, ProudSession session, PeerUdp_ServerHolepunchMessage message, RecvContext recvContext)
         {
             session.Logger?.Debug("PeerUdp_ServerHolepunch={@Message}", message);
             if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
@@ -202,8 +201,7 @@ namespace ProudNet.Handlers
             if (target == null || !target.UdpEnabled)
                 return;
             
-            var x = (IPEndPoint)channel.RemoteAddress;
-            session.SendUdpAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, new IPEndPoint(x.Address.MapToIPv4(), x.Port), target.HostId));
+            session.SendUdpAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, recvContext.UdpEndPoint, target.HostId));
         }
 
         [MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
