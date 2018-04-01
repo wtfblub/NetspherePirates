@@ -191,7 +191,7 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(PeerUdp_ServerHolepunchMessage))]
-        public void PeerUdp_ServerHolepunch(IChannel channel, ProudSession session, PeerUdp_ServerHolepunchMessage message)
+        public void PeerUdp_ServerHolepunch(IChannel channel, ProudSession session, PeerUdp_ServerHolepunchMessage message, RecvContext recvContext)
         {
             session.Logger?.Debug("PeerUdp_ServerHolepunch={@Message}", message);
             if (!session.UdpEnabled || !_server.UdpSocketManager.IsRunning)
@@ -200,8 +200,8 @@ namespace ProudNet.Handlers
             var target = session.P2PGroup?.Members.GetValueOrDefault(message.HostId)?.Session;
             if (target == null || !target.UdpEnabled)
                 return;
-
-            session.SendUdpAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
+            
+            session.SendUdpAsync(new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, recvContext.UdpEndPoint, target.HostId));
         }
 
         [MessageHandler(typeof(PeerUdp_NotifyHolepunchSuccessMessage))]
@@ -220,8 +220,8 @@ namespace ProudNet.Handlers
             var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
             if (connectionStateB.PeerUdpHolepunchSuccess)
             {
-                remotePeer.SendAsync(new RequestP2PHolepunchMessage(message.HostId, connectionStateB.LocalEndPoint, connectionState.EndPoint));
-                connectionState.RemotePeer.SendAsync(new RequestP2PHolepunchMessage(session.HostId, connectionState.LocalEndPoint, connectionStateB.EndPoint));
+                remotePeer.SendAsync(new RequestP2PHolepunchMessage(message.HostId, connectionStateB.LocalEndPoint, connectionStateB.EndPoint));
+                connectionState.RemotePeer.SendAsync(new RequestP2PHolepunchMessage(session.HostId, connectionState.LocalEndPoint, connectionState.EndPoint));
 
                 //remotePeer.SendAsync(new RequestP2PHolepunchMessage(message.HostId, message.LocalEndPoint, new IPEndPoint(message.EndPoint.Address, message.LocalEndPoint.Port)));
                 //connectionState.RemotePeer.SendAsync(new RequestP2PHolepunchMessage(session.HostId, session.UdpLocalEndPoint, new IPEndPoint(session.UdpEndPoint.Address, session.UdpLocalEndPoint.Port)));
