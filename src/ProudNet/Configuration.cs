@@ -50,7 +50,7 @@ namespace ProudNet
 
             EnableServerLog = false;
             FallbackMethod = FallbackMethod.None;
-            MessageMaxLength = 65000;
+            MessageMaxLength = 1048576;
             IdleTimeout = TimeSpan.FromMilliseconds(900);
             DirectP2PStartCondition = DirectP2PStartCondition.Jit;
             OverSendSuspectingThresholdInBytes = 15360;

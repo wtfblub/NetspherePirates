@@ -131,13 +131,13 @@ namespace ProudNet.Handlers
                 if (session.P2PGroup == null)
                 {
                     //Logger<>.Debug($"Client {session.HostId} is not in a P2PGroup");
-                    return;
+                    continue;
                 }
 
                 if (!session.P2PGroup.Members.ContainsKey(destination.HostId))
                 {
                     //Logger<>.Debug($"Client {session.HostId} trying to relay to non existant {destination.HostId}");
-                    return;
+                    continue;
                 }
 
                 var target = _server.Sessions.GetValueOrDefault(destination.HostId);
@@ -153,13 +153,13 @@ namespace ProudNet.Handlers
                 if (session.P2PGroup == null)
                 {
                     //Logger<>.Debug($"Client {session.HostId} in not a p2pgroup");
-                    return;
+                    continue;
                 }
 
                 if (!session.P2PGroup.Members.ContainsKey(destination))
                 {
                     //Logger<>.Debug($"Client {session.HostId} trying to relay to non existant {destination}");
-                    return;
+                    continue;
                 }
 
                 var target = _server.Sessions.GetValueOrDefault(destination);

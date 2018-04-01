@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 using DotNetty.Transport.Channels;
 
 namespace ProudNet.Handlers
@@ -14,10 +15,16 @@ namespace ProudNet.Handlers
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
         {
-            _server.Configuration.Logger?.Error(exception, "Unhandled exception");
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
-            _server.RaiseError(new ErrorEventArgs(session, exception));
-            session?.CloseAsync();
+            if (exception.GetType() == typeof(SocketException))
+            {
+                session.CloseAsync();
+            }
+            else
+            {
+                _server.Configuration.Logger?.Error(exception, "Unhandled exception");
+                _server.RaiseError(new ErrorEventArgs(session, exception));
+            }
         }
     }
 }
