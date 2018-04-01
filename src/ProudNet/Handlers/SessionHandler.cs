@@ -68,11 +68,13 @@ namespace ProudNet.Handlers
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
+
             _server.Configuration.Logger?
                 .ForContext("HostId", session.HostId)
                 .ForContext("EndPoint", context.Channel.RemoteAddress.ToString())
                 .Debug("Client({HostId}) disconnected");
 
+            session.P2PGroup?.Leave(session.HostId);
             session.Dispose();
             _server.RemoveSession(session);
             _server.Configuration.HostIdFactory.Free(session.HostId);
