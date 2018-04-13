@@ -103,7 +103,7 @@ namespace ProudNet.Handlers
             else if (session.HostId == remotePeerB.HostId)
                 stateB.HolepunchSuccess = true;
 
-            if (stateA.HolepunchSuccess && stateB.HolepunchSuccess)
+            if (stateA.HolepunchSuccess || stateB.HolepunchSuccess)
             {
                 var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr, message.ABRecvAddr,
                     message.BASendAddr, message.BARecvAddr);
@@ -148,7 +148,7 @@ namespace ProudNet.Handlers
             else if (session.HostId == remotePeerB.HostId)
                 stateB.JitTriggered = true;
 
-            if (stateA.JitTriggered && stateB.JitTriggered)
+            if (stateA.JitTriggered || stateB.JitTriggered)
             {
                 remotePeerA.SendAsync(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
                 remotePeerB.SendAsync(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
