@@ -15,13 +15,13 @@ build_script:
 
     msbuild /p:Configuration=ReleaseOnlyTools
 
-    xcopy /S src\Auth\bin\Debug\netcoreapp2.0\publish\* build_debug\auth\
+    xcopy /S src\Auth\bin\Debug\netcoreapp2.1\publish\* build_debug\auth\
 
-    xcopy /S src\Game\bin\Debug\netcoreapp2.0\publish\* build_debug\game\
+    xcopy /S src\Game\bin\Debug\netcoreapp2.1\publish\* build_debug\game\
 
-    xcopy /S src\Auth\bin\Release\netcoreapp2.0\publish\* build_release\auth\
+    xcopy /S src\Auth\bin\Release\netcoreapp2.1\publish\* build_release\auth\
 
-    xcopy /S src\Game\bin\Release\netcoreapp2.0\publish\* build_release\game\
+    xcopy /S src\Game\bin\Release\netcoreapp2.1\publish\* build_release\game\
 
     xcopy /S src\tools\DatabaseMigrator\bin\Debug\net461\*.exe build_debug\tools\DatabaseMigrator\
 
