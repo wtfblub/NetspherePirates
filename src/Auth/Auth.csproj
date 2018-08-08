@@ -5,7 +5,6 @@
     <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
     <RootNamespace>Netsphere</RootNamespace>
     <RuntimeIdentifiers>win-x86;win-x64;linux-x64</RuntimeIdentifiers>
-    <CodeAnalysisRuleSet>..\..\Rules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BlubLib" Version="0.1.4" />
@@ -13,12 +12,9 @@
     <PackageReference Include="Hjson" Version="3.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="MySql.Data" Version="8.0.8-dmr" />
-    <PackageReference Include="RefactoringEssentials" Version="5.4.0" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="1.5.0" PrivateAssets="All" />
     <PackageReference Include="Serilog" Version="2.5.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="3.2.0" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Auth.ServiceModel\Auth.ServiceModel.csproj" />
@@ -27,4 +23,5 @@
     <ProjectReference Include="..\Netsphere.Network\Netsphere.Network.csproj" />
     <ProjectReference Include="..\ProudNet\ProudNet.csproj" />
   </ItemGroup>
+  <Import Project="..\..\Rules.targets" />
 </Project>

@@ -2,18 +2,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
-    <CodeAnalysisRuleSet>..\..\Rules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2.0" />
     <PackageReference Include="Dapper.FastCrud" Version="2.4.1" />
     <PackageReference Include="MySql.Data" Version="8.0.8-dmr" />
-    <PackageReference Include="RefactoringEssentials" Version="5.4.0" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="1.5.0" PrivateAssets="All" />
     <PackageReference Include="Simple.Migrations" Version="0.9.16" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Netsphere\Netsphere.csproj" />
   </ItemGroup>
+  <Import Project="..\..\Rules.targets" />
 </Project>

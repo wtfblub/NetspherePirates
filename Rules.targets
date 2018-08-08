@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Rules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="RefactoringEssentials" Version="5.6.0" PrivateAssets="All"/>
+    <PackageReference Include="Roslynator.Analyzers" Version="1.8.0" PrivateAssets="All"/>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" PrivateAssets="All"/>
+  </ItemGroup>
+</Project>

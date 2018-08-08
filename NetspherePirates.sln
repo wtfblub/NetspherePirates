@@ -37,6 +37,7 @@ ProjectSection(SolutionItems) = preProject
 	.editorconfig = .editorconfig
 	.gitattributes = .gitattributes
 	NetspherePirates.sln.DotSettings = NetspherePirates.sln.DotSettings
+	Rules.targets = Rules.targets
 EndProjectSection
 EndProject
 Global
