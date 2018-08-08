@@ -9,7 +9,7 @@ indent_size = 4
 insert_final_newline = true 
 trim_trailing_whitespace = true
 
-[*.{yml,csproj,xml,json,hjson}] 
+[*.{yml,csproj,props,targets,xml,json,hjson,sql,xaml}]
 end_of_line = lf
 indent_size = 2
 insert_final_newline = true 

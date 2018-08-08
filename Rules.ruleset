@@ -188,10 +188,21 @@
     <Rule Id="RCS1168" Action="Hidden" />
     <Rule Id="RCS1175" Action="None" />
     <Rule Id="RCS1194" Action="None" />
+    <Rule Id="RCS1029" Action="None" />
+    <Rule Id="RCS1210" Action="Warning" />
+    <Rule Id="RCS1211" Action="Info" />
+    <Rule Id="RCS1212" Action="Info" />
+    <Rule Id="RCS1213" Action="Warning" />
+    <Rule Id="RCS1214" Action="Info" />
+    <Rule Id="RCS1215" Action="Warning" />
+    <Rule Id="RCS1216" Action="Warning" />
+    <Rule Id="RCS1217" Action="Hidden" />
+    <Rule Id="RCS1217FadeOut" Action="Hidden" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1101" Action="None" />
     <Rule Id="SA1122" Action="None" />
+    <Rule Id="SA1123" Action="None" />
     <Rule Id="SA1124" Action="None" />
     <Rule Id="SA1125" Action="Info" />
     <Rule Id="SA1200" Action="None" />
@@ -209,7 +220,7 @@
     <Rule Id="SA1652" Action="None" />
     <Rule Id="SA1201" Action="None" />
     <Rule Id="SA1312" Action="Info" />
-    <Rule Id="SA1516" Action="Info" />
+    <Rule Id="SA1516" Action="None" />
     <Rule Id="SA1649" Action="Info" />
     <Rule Id="SA1116" Action="None" />
     <Rule Id="SA1117" Action="None" />
@@ -220,10 +231,11 @@
     <Rule Id="SA1008" Action="Info" />
     <Rule Id="SA1204" Action="Info" />
     <Rule Id="SA1005" Action="Info" />
-    <Rule Id="SA1515" Action="Info" />
+    <Rule Id="SA1515" Action="None" />
     <Rule Id="SA1118" Action="Info" />
     <Rule Id="SA1202" Action="Info" />
     <Rule Id="SA1600" Action="Info" />
     <Rule Id="SA1119" Action="Info" />
+    <Rule Id="SA1407" Action="Hidden" />
   </Rules>
 </RuleSet>

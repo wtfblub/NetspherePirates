@@ -27,6 +27,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetsphereExplorer", "src\to
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseMigrator", "src\tools\DatabaseMigrator\DatabaseMigrator.csproj", "{73685AD2-2638-4FF2-BA0C-7BD5E4534B26}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{5FC2263D-9EA6-4055-B97E-4AAC8163452F}"
+ProjectSection(SolutionItems) = preProject
+	appveyor.yml = appveyor.yml
+	global.json = global.json
+	Rules.ruleset = Rules.ruleset
+	README.md = README.md
+	.gitignore = .gitignore
+	.editorconfig = .editorconfig
+	.gitattributes = .gitattributes
+	NetspherePirates.sln.DotSettings = NetspherePirates.sln.DotSettings
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
