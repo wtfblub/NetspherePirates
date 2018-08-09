@@ -6,23 +6,12 @@
   <ItemGroup>
     <PackageReference Include="BlubLib" Version="0.1.20" />
     <PackageReference Include="BlubLib.Serialization" Version="0.1.20" />
+    <PackageReference Include="SharpLzo" Version="0.1.2" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
-    <Reference Include="..\..\libs\SharpLzo.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Netsphere\Netsphere.csproj" />
     <ProjectReference Include="..\ProudNet\ProudNet.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\..\libs\miniLzo_x64.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\libs\miniLzo_x86.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\libs\liblzo.so">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="..\..\Rules.targets" />
 </Project>

@@ -4,7 +4,6 @@
     <TargetFramework>net461</TargetFramework>
     <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
-    <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BlubLib.GUI" Version="0.1.20" />
@@ -24,8 +23,6 @@
     <None Include="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" />
     <None Include="Resources\*" />
     <Content Include="FodyWeavers.xml" />
-    <EmbeddedResource Include="..\..\..\libs\miniLzo_x64.dll" Link="costura64\miniLzo_x64.dll" />
-    <EmbeddedResource Include="..\..\..\libs\miniLzo_x86.dll" Link="costura32\miniLzo_x86.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Controls\*.cs" SubType="UserControl" />
@@ -41,8 +38,6 @@
     <Compile Update="Views\SimpleProgressView.Designer.cs" DependentUpon="SimpleProgressView.cs" />
     <EmbeddedResource Include="Views\SimpleProgressView.resx" DependentUpon="SimpleProgressView.cs" />
   </ItemGroup>
-  <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
-    <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
-  </Target>
+  <Import Project="..\SharpLzo.targets" />
   <Import Project="..\..\..\Rules.targets" />
 </Project>

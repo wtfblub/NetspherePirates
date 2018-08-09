@@ -1,0 +1,11 @@
+<Project>
+    <PropertyGroup>
+        <SharpLzoVersion>0.1.2</SharpLzoVersion>
+        <PostBuildEvent>del "$(TargetDir)Minilzo.so" "$(TargetDir)MiniLzo_x86.dll" "$(TargetDir)MiniLzo_x64.dll"</PostBuildEvent>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="SharpLzo" Version="$(SharpLzoVersion)"/>
+        <EmbeddedResource Include="$(NuGetPackageRoot)sharplzo\$(SharpLzoVersion)\contentFiles\any\netstandard2.0\MiniLzo_x64.dll" Link="costura64\MiniLzo_x64.dll"/>
+        <EmbeddedResource Include="$(NuGetPackageRoot)sharplzo\$(SharpLzoVersion)\contentFiles\any\netstandard2.0\MiniLzo_x86.dll" Link="costura32\MiniLzo_x86.dll"/>
+    </ItemGroup>
+</Project>
