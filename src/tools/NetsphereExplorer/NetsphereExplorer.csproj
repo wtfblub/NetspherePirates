@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net461</TargetFramework>
-    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+    <TargetFramework>NET471</TargetFramework>
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BlubLib.GUI" Version="0.1.20" />
-    <PackageReference Include="Costura.Fody" Version="1.6.2" />
-    <PackageReference Include="Fody" Version="2.1.2" />
+    <PackageReference Include="Costura.Fody" Version="3.1.0" />
+    <PackageReference Include="Fody" Version="3.1.4" />
     <PackageReference Include="reactiveui" Version="6.5.0" />
     <PackageReference Include="reactiveui-events-winforms" Version="6.5.0.3" />
     <PackageReference Include="reactiveui-winforms" Version="6.5.0" />

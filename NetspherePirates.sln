@@ -18,6 +18,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Netsphere.Resource", "src\Netsphere.Resource\Netsphere.Resource.csproj", "{662E4FB4-5053-49B4-970C-369296C27E7D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{D196F056-F7FD-4F53-AD64-3D8677631492}"
+ProjectSection(SolutionItems) = preProject
+	src\tools\SharpLzo.targets = src\tools\SharpLzo.targets
+	src\tools\OSPlatform.targets = src\tools\OSPlatform.targets
+EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataExtractor", "src\tools\DataExtractor\DataExtractor.csproj", "{7364B088-32B5-4033-B5A0-5147B8939F6E}"
 EndProject

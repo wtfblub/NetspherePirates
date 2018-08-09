@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <IsWindows>$([MSBuild]::IsOSPlatform("Windows"))</IsWindows>
+    <IsOSX>$([MSBuild]::IsOSPlatform("OSX"))</IsOSX>
+    <IsLinux>$([MSBuild]::IsOSPlatform("Linux"))</IsLinux>
+    <DefineConstants Condition=" '$(IsWindows)' == 'true' ">$(DefineConstants);WINDOWS</DefineConstants>
+    <DefineConstants Condition=" '$(IsOSX)' == 'true' ">$(DefineConstants);OSX</DefineConstants>
+    <DefineConstants Condition=" '$(IsLinux)' == 'true' ">$(DefineConstants);LINUX</DefineConstants>
+  </PropertyGroup>
+</Project>

@@ -160,7 +160,7 @@ namespace Netsphere.Resource
         public static byte[] EncryptS4(byte[] data)
         {
             var realSize = data.Length;
-            var buffer = miniLzo.Compress(data);
+            var buffer = MiniLzo.Instance.Compress(data);
             S4Crypt.Old40.Encrypt(buffer);
 
             using (var w = new BinaryWriter(new MemoryStream()))
@@ -182,7 +182,7 @@ namespace Netsphere.Resource
             }
 
             S4Crypt.Old40.Decrypt(buffer);
-            return miniLzo.Decompress(buffer, realSize);
+            return MiniLzo.Instance.Decompress(buffer, realSize);
         }
 
         #region IReadOnlyDictionary
@@ -295,7 +295,7 @@ namespace Netsphere.Resource
 
             S4Crypt.OldCapped32.Encrypt(data);
             if (data.Length < 1048576)
-                data = miniLzo.Compress(data);
+                data = MiniLzo.Instance.Compress(data);
             data.SwapBytes();
 
             return data;
@@ -305,7 +305,7 @@ namespace Netsphere.Resource
         {
             data.SwapBytes();
             if (data.Length < 1048576)
-                data = miniLzo.Decompress(data, Length);
+                data = MiniLzo.Instance.Decompress(data, Length);
             S4Crypt.OldCapped32.Decrypt(data);
 
             var isX7 = Name.EndsWith(".x7", StringComparison.InvariantCultureIgnoreCase);
@@ -457,7 +457,7 @@ namespace Netsphere.Resource
                 }
             },
             #endregion
-                
+
             #region Table2
             new byte[10][]
             {
@@ -892,7 +892,7 @@ namespace Netsphere.Resource
             var crc = X7CRC(@this);
             var realSize = @this.Length;
 
-            @this = miniLzo.Compress(@this);
+            @this = MiniLzo.Instance.Compress(@this);
             @this = BuildX7(@this, crc, realSize);
 
             return @this;
@@ -904,7 +904,7 @@ namespace Netsphere.Resource
             @this = RemoveX7Junk(@this);
 
             LzoResult res;
-            @this = miniLzo.Decompress(@this, realSize, out res);
+            @this = MiniLzo.Instance.Decompress(@this, realSize, out res);
             return @this;
         }
 
