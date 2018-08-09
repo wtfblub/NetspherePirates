@@ -4,8 +4,8 @@
     <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BlubLib.DotNetty.SimpleRmi" Version="0.1.4" />
-    <PackageReference Include="BlubLib.Serialization" Version="0.1.4" />
+    <PackageReference Include="BlubLib.DotNetty.SimpleRmi" Version="0.1.20" />
+    <PackageReference Include="BlubLib.Serialization" Version="0.1.20" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProudNet\ProudNet.csproj" />

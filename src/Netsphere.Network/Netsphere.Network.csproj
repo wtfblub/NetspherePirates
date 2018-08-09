@@ -4,8 +4,8 @@
     <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BlubLib" Version="0.1.4" />
-    <PackageReference Include="BlubLib.Serialization" Version="0.1.4" />
+    <PackageReference Include="BlubLib" Version="0.1.20" />
+    <PackageReference Include="BlubLib.Serialization" Version="0.1.20" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
     <Reference Include="..\..\libs\SharpLzo.dll" />
   </ItemGroup>

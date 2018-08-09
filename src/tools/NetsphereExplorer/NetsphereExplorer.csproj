@@ -7,7 +7,7 @@
     <PostBuildEvent>del "$(TargetDir)liblzo.so" "$(TargetDir)miniLzo_x86.dll" "$(TargetDir)miniLzo_x64.dll"</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BlubLib.GUI" Version="0.1.4" />
+    <PackageReference Include="BlubLib.GUI" Version="0.1.20" />
     <PackageReference Include="Costura.Fody" Version="1.6.2" />
     <PackageReference Include="Fody" Version="2.1.2" />
     <PackageReference Include="reactiveui" Version="6.5.0" />

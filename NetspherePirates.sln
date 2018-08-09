@@ -38,6 +38,7 @@ ProjectSection(SolutionItems) = preProject
 	.gitattributes = .gitattributes
 	NetspherePirates.sln.DotSettings = NetspherePirates.sln.DotSettings
 	Rules.targets = Rules.targets
+	NuGet.Config = NuGet.Config
 EndProjectSection
 EndProject
 Global
