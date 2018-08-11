@@ -3,7 +3,8 @@ using ProudNet.Serialization;
 namespace Netsphere.Network.Message.Auth
 {
     public interface IAuthMessage
-    { }
+    {
+    }
 
     public class AuthMessageFactory : MessageFactory<AuthOpCode, IAuthMessage>
     {

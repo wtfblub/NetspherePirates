@@ -1,29 +1,39 @@
 ﻿using System;
 using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class MatchKeySerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes <see cref="MatchKey"/> as int32
+    /// </summary>
+    public class MatchKeySerializer : ISerializerCompiler
     {
-        public bool CanHandle(Type type) => type == typeof(MatchKey);
-
-        public void EmitSerialize(Emit emiter, Local value)
+        public bool CanHandle(Type type)
         {
-            emiter.LoadArgument(1);
-            emiter.LoadLocal(value);
-            emiter.Call(typeof(MatchKey).GetMethod("op_Implicit", new[] { typeof(MatchKey) }));
-            emiter.CallVirtual(typeof(BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] { typeof(uint) }));
+            return type == typeof(MatchKey);
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt32)));
-            emiter.Call(typeof(MatchKey).GetMethod("op_Implicit", new[] { typeof(uint) }));
-            emiter.StoreLocal(value);
+            // BinaryWriter.Write(value)
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocal(value);
+            context.Emit.Call(typeof(MatchKey).GetMethod("op_Implicit", new[] { typeof(MatchKey) }));
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryWriter _) => _.Write(default(uint))));
+        }
+
+        public void EmitDeserialize(CompilerContext context, Local value)
+        {
+            // value = BinaryReader.ReadUInt32()
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadUInt32()));
+            context.Emit.Call(typeof(MatchKey).GetMethod("op_Implicit", new[] { typeof(uint) }));
+            context.Emit.StoreLocal(value);
         }
     }
 }

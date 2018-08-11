@@ -11,9 +11,7 @@ namespace ProudNet.Codecs
         {
             var buffer = context.Allocator
                 .Buffer(2 + 1 + message.ReadableBytes)
-                .WithOrder(ByteOrder.LittleEndian)
-
-                .WriteShort(Constants.NetMagic)
+                .WriteShortLE(Constants.NetMagic)
                 .WriteScalar(message.ReadableBytes);
 
             output.Add(buffer);

@@ -6,13 +6,14 @@ namespace ProudNet
     public interface IHostIdFactory
     {
         uint New();
+
         void Free(uint hostId);
     }
 
     public class HostIdFactory : IHostIdFactory
     {
-        private long _counter = 1000;
         private readonly ConcurrentStack<uint> _pool = new ConcurrentStack<uint>();
+        private long _counter = 1000;
 
         public uint New()
         {

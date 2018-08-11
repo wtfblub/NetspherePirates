@@ -12,7 +12,8 @@ namespace ProudNet.Serialization
         public uint FrameNumber { get; set; }
 
         public RelayDestinationDto()
-        { }
+        {
+        }
 
         public RelayDestinationDto(uint hostId, uint frameNumber)
         {

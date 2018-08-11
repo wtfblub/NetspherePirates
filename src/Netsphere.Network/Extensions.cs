@@ -9,17 +9,18 @@ namespace Netsphere.Network
     public static class NetsphereExtensions
     {
         private static readonly AsyncLock s_sync = new AsyncLock();
+        private static readonly MiniLzo s_lzo = new MiniLzo();
 
         public static byte[] CompressLZO(this byte[] data)
         {
             using (s_sync.Lock())
-                return miniLzo.Compress(data);
+                return s_lzo.Compress(data);
         }
 
         public static byte[] DecompressLZO(this byte[] data, int realSize)
         {
             using (s_sync.Lock())
-                return miniLzo.Decompress(data, realSize);
+                return s_lzo.Decompress(data, realSize);
         }
 
         public static Vector2 ReadRotation(this BinaryReader r)

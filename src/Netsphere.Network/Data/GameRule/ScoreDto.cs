@@ -1,5 +1,6 @@
 ﻿using BlubLib.Serialization;
 using BlubLib.Serialization.Serializers;
+
 namespace Netsphere.Network.Data.GameRule
 {
     [BlubContract]
@@ -8,7 +9,8 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(0)]
         public LongPeerId Killer { get; set; }
 
-        [BlubMember(1, typeof(EnumSerializer), typeof(int))]
+        [BlubMember(1)]
+        [BlubSerializer(typeof(EnumSerializer), typeof(int))]
         public AttackAttribute Weapon { get; set; }
 
         [BlubMember(2)]
@@ -37,7 +39,8 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(0)]
         public LongPeerId Killer { get; set; }
 
-        [BlubMember(1, typeof(EnumSerializer), typeof(int))]
+        [BlubMember(1)]
+        [BlubSerializer(typeof(EnumSerializer), typeof(int))]
         public AttackAttribute Weapon { get; set; }
 
         [BlubMember(2)]

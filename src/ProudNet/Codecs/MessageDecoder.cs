@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using BlubLib.IO;
+using BlubLib.Serialization;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
@@ -12,10 +13,12 @@ namespace ProudNet.Codecs
 {
     internal class MessageDecoder : MessageToMessageDecoder<RecvContext>
     {
+        private readonly BlubSerializer _serializer;
         private readonly MessageFactory[] _userMessageFactories;
 
-        public MessageDecoder(MessageFactory[] userMessageFactories)
+        public MessageDecoder(BlubSerializer serializer, MessageFactory[] userMessageFactories)
         {
+            _serializer = serializer;
             _userMessageFactories = userMessageFactories;
         }
 
@@ -39,13 +42,13 @@ namespace ProudNet.Codecs
                     if (factory == null)
                     {
 #if DEBUG
-                        throw new ProudBadOpCodeException(opCode, buffer.ToArray());
+                        throw new ProudBadOpCodeException(opCode, buffer.GetIoBuffer());
 #else
                         throw new ProudException($"No {nameof(MessageFactory)} found for opcode {opCode}");
 #endif
                     }
 
-                    message.Message = factory.GetMessage(opCode, r);
+                    message.Message = factory.GetMessage(_serializer, opCode, r);
                     output.Add(message);
                 }
             }

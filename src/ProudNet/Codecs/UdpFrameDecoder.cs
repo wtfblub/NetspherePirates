@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -18,12 +17,12 @@ namespace ProudNet.Codecs
 
         protected override void Decode(IChannelHandlerContext context, DatagramPacket message, List<object> output)
         {
-            var content = message.Content.WithOrder(ByteOrder.LittleEndian);
-            var flag = content.ReadUnsignedShort();
-            var sessionId = content.ReadUnsignedShort();
-            var length = content.ReadInt();
-            var id = content.ReadUnsignedInt();
-            var fragId = content.ReadUnsignedInt();
+            var content = message.Content;
+            var flag = content.ReadUnsignedShortLE();
+            var sessionId = content.ReadUnsignedShortLE();
+            var length = content.ReadIntLE();
+            var id = content.ReadUnsignedIntLE();
+            var fragId = content.ReadUnsignedIntLE();
 
             if (length > _maxFrameLength)
                 throw new TooLongFrameException("Received message is too long");

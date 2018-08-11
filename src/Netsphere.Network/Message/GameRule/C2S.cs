@@ -7,7 +7,8 @@ namespace Netsphere.Network.Message.GameRule
 {
     [BlubContract]
     public class CEnterPlayerReqMessage : IGameRuleMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CLeavePlayerRequestReqMessage : IGameRuleMessage
@@ -38,7 +39,8 @@ namespace Netsphere.Network.Message.GameRule
 
     [BlubContract]
     public class CAutoMixingTeamReqMessage : IGameRuleMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CMixChangeTeamReqMessage : IGameRuleMessage
@@ -91,7 +93,8 @@ namespace Netsphere.Network.Message.GameRule
 
     [BlubContract]
     public class CAvatarDurabilityDecreaseReqMessage : IGameRuleMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CAvatarChangeReqMessage : IGameRuleMessage
@@ -99,7 +102,8 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(0)]
         public ChangeAvatarUnk1Dto Unk1 { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
         public CAvatarChangeReqMessage()
@@ -217,7 +221,8 @@ namespace Netsphere.Network.Message.GameRule
         [BlubMember(0)]
         public ChangeItemsUnkDto Unk1 { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ChangeAvatarUnk2Dto[] Unk2 { get; set; }
 
         public CItemsChangeReqMessage()
@@ -244,7 +249,8 @@ namespace Netsphere.Network.Message.GameRule
     [BlubContract]
     public class CArcadeScoreSyncReqMessage : IGameRuleMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
 
         public CArcadeScoreSyncReqMessage()
@@ -266,7 +272,8 @@ namespace Netsphere.Network.Message.GameRule
     [BlubContract]
     public class CArcadeStageClearReqMessage : IGameRuleMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
 
         public CArcadeStageClearReqMessage()
@@ -278,7 +285,8 @@ namespace Netsphere.Network.Message.GameRule
     [BlubContract]
     public class CArcadeStageFailedReqMessage : IGameRuleMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ArcadeScoreSyncReqDto[] Scores { get; set; }
 
         public CArcadeStageFailedReqMessage()
@@ -356,7 +364,8 @@ namespace Netsphere.Network.Message.GameRule
 
     [BlubContract]
     public class CArcadeLoadingSucceesReqMessage : IGameRuleMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CUseCoinReqMessage : IGameRuleMessage

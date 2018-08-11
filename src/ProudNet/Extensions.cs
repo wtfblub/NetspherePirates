@@ -4,6 +4,7 @@ using System.Text;
 using BlubLib.IO;
 using DotNetty.Buffers;
 using Ionic.Zlib;
+using Microsoft.Extensions.Hosting;
 
 namespace ProudNet
 {
@@ -38,7 +39,8 @@ namespace ProudNet
         {
             var stringType = @this.ReadByte();
             var size = @this.ReadScalar();
-            if (size <= 0) return "";
+            if (size <= 0)
+                return "";
 
             switch (stringType)
             {
@@ -138,10 +140,10 @@ namespace ProudNet
                     return @this.ReadByte();
 
                 case 2:
-                    return @this.ReadShort();
+                    return @this.ReadShortLE();
 
                 case 4:
-                    return @this.ReadInt();
+                    return @this.ReadIntLE();
 
                 default:
                     throw new Exception($"Invalid prefix {prefix}");
@@ -158,7 +160,8 @@ namespace ProudNet
         {
             var stringType = @this.ReadByte();
             var size = @this.ReadScalar();
-            if (size <= 0) return "";
+            if (size <= 0)
+                return "";
 
             string str;
             switch (stringType)
@@ -176,6 +179,7 @@ namespace ProudNet
                 default:
                     throw new Exception("Unknown StringType: " + stringType);
             }
+
             return str;
         }
 
@@ -196,12 +200,12 @@ namespace ProudNet
 
                 case 2:
                     @this.WriteByte(prefix);
-                    @this.WriteShort((short)value);
+                    @this.WriteShortLE((short)value);
                     break;
 
                 case 4:
                     @this.WriteByte(prefix);
-                    @this.WriteInt(value);
+                    @this.WriteIntLE(value);
                     break;
 
                 default:

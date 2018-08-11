@@ -7,15 +7,16 @@ using BlubLib.Serialization;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Security;
-using ProudNet.Serialization.Serializers;
 
 namespace ProudNet.Serialization.Messages.Core
 {
     [BlubContract]
     internal class ConnectServerTimedoutMessage : ICoreMessage
-    { }
+    {
+    }
 
-    [BlubContract(typeof(Serializer))]
+    [BlubContract]
+    [BlubSerializer(typeof(Serializer))]
     internal class NotifyServerConnectionHintMessage : ICoreMessage
     {
         public NetConfigDto Config { get; set; }
@@ -35,22 +36,25 @@ namespace ProudNet.Serialization.Messages.Core
 
         internal class Serializer : ISerializer<NotifyServerConnectionHintMessage>
         {
-            public bool CanHandle(Type type) => type == typeof(NotifyServerConnectionHintMessage);
+            public bool CanHandle(Type type)
+            {
+                return type == typeof(NotifyServerConnectionHintMessage);
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Serialize(BinaryWriter writer, NotifyServerConnectionHintMessage value)
+            public void Serialize(BlubSerializer serializer, BinaryWriter writer, NotifyServerConnectionHintMessage value)
             {
                 var pubKey = DotNetUtilities.GetRsaPublicKey(value.PublicKey);
                 var pubKeyStruct = new RsaPublicKeyStructure(pubKey.Modulus, pubKey.Exponent);
                 var encodedKey = pubKeyStruct.GetDerEncoded();
-                BlubLib.Serialization.Serializer.Serialize(writer, value.Config);
+                serializer.Serialize(writer, value.Config);
                 writer.WriteStruct(encodedKey);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public NotifyServerConnectionHintMessage Deserialize(BinaryReader reader)
+            public NotifyServerConnectionHintMessage Deserialize(BlubSerializer serializer, BinaryReader reader)
             {
-                var config = BlubLib.Serialization.Serializer.Deserialize<NetConfigDto>(reader);
+                var config = serializer.Deserialize<NetConfigDto>(reader);
                 var encodedKey = reader.ReadStruct();
                 var sequence = (DerSequence)Asn1Object.FromByteArray(encodedKey);
                 var modulus = ((DerInteger)sequence[0]).Value.ToByteArrayUnsigned();
@@ -63,11 +67,13 @@ namespace ProudNet.Serialization.Messages.Core
 
     [BlubContract]
     internal class NotifyCSSessionKeySuccessMessage : ICoreMessage
-    { }
+    {
+    }
 
     [BlubContract]
     internal class NotifyProtocolVersionMismatchMessage : ICoreMessage
-    { }
+    {
+    }
 
     [BlubContract]
     internal class NotifyServerDeniedConnectionMessage : ICoreMessage
@@ -85,17 +91,16 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(1)]
         public Guid Version { get; set; }
 
-        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2)]
         public byte[] UserData { get; set; }
 
-        [BlubMember(3, typeof(IPEndPointSerializer))]
+        [BlubMember(3)]
         public IPEndPoint EndPoint { get; set; }
 
         public NotifyServerConnectSuccessMessage()
         {
             Version = Guid.Empty;
             UserData = Array.Empty<byte>();
-            EndPoint = new IPEndPoint(0, 0);
         }
 
         public NotifyServerConnectSuccessMessage(uint hostId, Guid version, IPEndPoint endPoint)
@@ -130,13 +135,12 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
 
-        [BlubMember(1, typeof(IPEndPointSerializer))]
+        [BlubMember(1)]
         public IPEndPoint EndPoint { get; set; }
 
         public ServerHolepunchAckMessage()
         {
             MagicNumber = Guid.Empty;
-            EndPoint = new IPEndPoint(0, 0);
         }
 
         public ServerHolepunchAckMessage(Guid magicNumber, IPEndPoint endPoint)
@@ -169,7 +173,7 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public Guid MagicNumber { get; set; }
 
-        [BlubMember(1, typeof(IPEndPointSerializer))]
+        [BlubMember(1)]
         public IPEndPoint EndPoint { get; set; }
 
         [BlubMember(2)]
@@ -178,7 +182,6 @@ namespace ProudNet.Serialization.Messages.Core
         public PeerUdp_ServerHolepunchAckMessage()
         {
             MagicNumber = Guid.Empty;
-            EndPoint = new IPEndPoint(0, 0);
         }
 
         public PeerUdp_ServerHolepunchAckMessage(Guid magicNumber, IPEndPoint endPoint, uint hostId)
@@ -199,7 +202,8 @@ namespace ProudNet.Serialization.Messages.Core
         public double ServerTime { get; set; }
 
         public UnreliablePongMessage()
-        { }
+        {
+        }
 
         public UnreliablePongMessage(double clientTime, double serverTime)
         {
@@ -214,7 +218,7 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public RelayDestinationDto Destination { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1)]
         public byte[] Data { get; set; }
 
         public ReliableRelay2Message()
@@ -235,11 +239,12 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public uint HostId { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1)]
         public byte[] Data { get; set; }
 
         public UnreliableRelay2Message()
-        { }
+        {
+        }
 
         public UnreliableRelay2Message(uint hostId, byte[] data)
         {

@@ -3,7 +3,8 @@ using ProudNet.Serialization;
 namespace Netsphere.Network.Message.P2P
 {
     public interface IP2PMessage
-    { }
+    {
+    }
 
     public class P2PMessageFactory : MessageFactory<P2POpCode, IP2PMessage>
     {

@@ -1,30 +1,40 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class LongPeerIdSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes <see cref="LongPeerId"/> as int64
+    /// </summary>
+    public class LongPeerIdSerializer : ISerializerCompiler
     {
-        public bool CanHandle(Type type) => type == typeof(LongPeerId);
-
-        public void EmitSerialize(Emit emiter, Local value)
+        public bool CanHandle(Type type)
         {
-            emiter.LoadArgument(1);
-            emiter.LoadLocal(value);
-            emiter.Call(typeof(LongPeerId).GetMethods().First(m => m.Name == "op_Implicit" && m.ReturnType == typeof(ulong)));
-            emiter.CallVirtual(typeof(BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] { typeof(ulong) }));
+            return type == typeof(LongPeerId);
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt64)));
-            emiter.Call(typeof(LongPeerId).GetMethod("op_Implicit", new[] { typeof(ulong) }));
-            emiter.StoreLocal(value);
+            // BinaryWriter.Write(value)
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocal(value);
+            context.Emit.Call(typeof(LongPeerId).GetMethods().First(m => m.Name == "op_Implicit" && m.ReturnType == typeof(ulong)));
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryWriter _) => _.Write(default(ulong))));
+        }
+
+        public void EmitDeserialize(CompilerContext context, Local value)
+        {
+            // value = BinaryReader.ReadUInt64()
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadUInt64()));
+            context.Emit.Call(typeof(LongPeerId).GetMethod("op_Implicit", new[] { typeof(ulong) }));
+            context.Emit.StoreLocal(value);
         }
     }
 }

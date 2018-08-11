@@ -12,10 +12,12 @@ namespace ProudNet.Codecs
 {
     internal class MessageEncoder : MessageToMessageEncoder<SendContext>
     {
+        private readonly BlubSerializer _serializer;
         private readonly MessageFactory[] _userMessageFactories;
 
-        public MessageEncoder(MessageFactory[] userMessageFactories)
+        public MessageEncoder(BlubSerializer serializer, MessageFactory[] userMessageFactories)
         {
+            _serializer = serializer;
             _userMessageFactories = userMessageFactories;
         }
 
@@ -35,8 +37,9 @@ namespace ProudNet.Codecs
             using (var w = new WriteOnlyByteBufferStream(buffer, false).ToBinaryWriter(false))
             {
                 w.Write(opCode);
-                Serializer.Serialize(w, message.Message);
+                _serializer.Serialize(w, message.Message);
             }
+
             message.Message = buffer;
             output.Add(message);
         }

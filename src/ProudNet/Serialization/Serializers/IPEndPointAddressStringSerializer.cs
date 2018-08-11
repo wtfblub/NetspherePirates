@@ -4,71 +4,76 @@ using System.Net;
 using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace ProudNet.Serialization.Serializers
 {
+    /// <summary>
+    /// Serializes a <see cref="IPEndPoint"/>
+    /// </summary>
+    /// <remarks>
+    /// Serializes the <see cref="IPEndPoint"/> as ProudString address, int16 port
+    /// </remarks>
     public class IPEndPointAddressStringSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {
-            throw new NotImplementedException();
+            return type.IsAssignableFrom(typeof(IPEndPoint));
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitDeserialize(CompilerContext context, Local value)
         {
             // value = new IPEndPoint(IPAddress.Parse(ProudNetBinaryReaderExtensions.ReadProudString(reader)), reader.ReadUInt16())
-            emiter.LoadArgument(1);
-            emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadProudString()));
-            emiter.Call(ReflectionHelper.GetMethod(() => IPAddress.Parse(default(string))));
-            emiter.LoadArgument(1);
-            emiter.CallVirtual(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadUInt16()));
-            emiter.NewObject(typeof(IPEndPoint).GetConstructor(new[] { typeof(IPAddress), typeof(int) }));
-            emiter.StoreLocal(value);
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.Call(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadProudString()));
+            context.Emit.Call(ReflectionHelper.GetMethod(() => IPAddress.Parse(default(string))));
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadUInt16()));
+            context.Emit.NewObject(typeof(IPEndPoint).GetConstructor(new[] { typeof(IPAddress), typeof(int) }));
+            context.Emit.StoreLocal(value);
         }
 
-        public void EmitSerialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            using (var address = emiter.DeclareLocal<string>("str"))
-            using (var port = emiter.DeclareLocal<ushort>("port"))
+            using (var address = context.Emit.DeclareLocal<string>("str"))
+            using (var port = context.Emit.DeclareLocal<ushort>("port"))
             {
-                var isNull = emiter.DefineLabel();
-                var write = emiter.DefineLabel();
+                var isNullLabel = context.Emit.DefineLabel();
+                var writeLabel = context.Emit.DefineLabel();
 
                 // if (value == null) goto isNull
-                emiter.LoadLocal(value);
-                emiter.LoadNull();
-                emiter.BranchIfEqual(isNull);
+                context.Emit.LoadLocal(value);
+                context.Emit.LoadNull();
+                context.Emit.BranchIfEqual(isNullLabel);
 
                 // address = value.Address.ToString()
-                emiter.LoadLocal(value);
-                emiter.Call(typeof(IPEndPoint).GetProperty(nameof(IPEndPoint.Address)).GetMethod);
-                emiter.CallVirtual(typeof(IPAddress).GetMethod(nameof(IPAddress.ToString)));
-                emiter.StoreLocal(address);
+                context.Emit.LoadLocal(value);
+                context.Emit.Call(typeof(IPEndPoint).GetProperty(nameof(IPEndPoint.Address)).GetMethod);
+                context.Emit.CallVirtual(ReflectionHelper.GetMethod((IPEndPoint _) => _.ToString()));
+                context.Emit.StoreLocal(address);
 
                 // port = (ushort)value.Port
-                emiter.LoadLocal(value);
-                emiter.Call(typeof(IPEndPoint).GetProperty(nameof(IPEndPoint.Port)).GetMethod);
-                emiter.Convert<ushort>();
-                emiter.StoreLocal(port);
-                emiter.Branch(write);
+                context.Emit.LoadLocal(value);
+                context.Emit.Call(typeof(IPEndPoint).GetProperty(nameof(IPEndPoint.Port)).GetMethod);
+                context.Emit.Convert<ushort>();
+                context.Emit.StoreLocal(port);
+                context.Emit.Branch(writeLabel);
 
-                emiter.MarkLabel(isNull);
+                context.Emit.MarkLabel(isNullLabel);
 
                 // address = "255.255.255.255"
-                emiter.LoadConstant("255.255.255.255");
-                emiter.StoreLocal(address);
+                context.Emit.LoadConstant("255.255.255.255");
+                context.Emit.StoreLocal(address);
 
-                emiter.MarkLabel(write);
+                context.Emit.MarkLabel(writeLabel);
 
                 // ProudNetBinaryWriterExtensions.WriteProudString(writer, address, false)
-                emiter.LoadArgument(1);
-                emiter.LoadLocal(address);
-                emiter.LoadConstant(false);
-                emiter.Call(ReflectionHelper.GetMethod((BinaryWriter x) => x.WriteProudString(default(string), default(bool))));
+                context.Emit.LoadReaderOrWriterParam();
+                context.Emit.LoadLocal(address);
+                context.Emit.LoadConstant(false);
+                context.Emit.Call(ReflectionHelper.GetMethod((BinaryWriter _) => _.WriteProudString(default(string), default(bool))));
 
                 // writer.Write(port)
-                emiter.CallSerializerForType(typeof(ushort), port);
+                context.EmitSerialize(port);
             }
         }
     }

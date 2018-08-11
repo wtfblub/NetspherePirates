@@ -1,6 +1,5 @@
 ﻿using BlubLib.Serialization;
 using Netsphere.Network.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.Chat
 {
@@ -10,10 +9,11 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(0)]
         public ulong Id { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Sender { get; set; }
 
-        [BlubMember(2, typeof(IntBooleanSerializer))]
+        [BlubMember(2)]
+        [BlubSerializer(typeof(IntBooleanSerializer))]
         public bool IsGift { get; set; }
 
         [BlubMember(3)]
@@ -22,7 +22,7 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(4)]
         public ulong Unk2 { get; set; }
 
-        [BlubMember(5, typeof(StringSerializer))]
+        [BlubMember(5)]
         public string Title { get; set; }
 
         [BlubMember(6)]

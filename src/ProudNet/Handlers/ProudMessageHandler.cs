@@ -1,4 +1,5 @@
-﻿using BlubLib;
+﻿using System;
+using BlubLib;
 using BlubLib.DotNetty.Handlers.MessageHandling;
 using DotNetty.Transport.Channels;
 
@@ -33,20 +34,23 @@ namespace ProudNet.Handlers
                 return true;
             }
 
-            if (typeof(ProudServer).IsAssignableFrom(typeof(T)))
-            {
-                var server = context.Channel.GetAttribute(ChannelAttributes.Server).Get();
-                value = DynamicCast<T>.From(server);
-                return true;
-            }
-
             if (typeof(RecvContext).IsAssignableFrom(typeof(T)))
             {
                 value = DynamicCast<T>.From(message);
                 return true;
             }
 
-            return base.GetParameter(context, message, out value);
+            var foundParameter = base.GetParameter(context, message, out value);
+            if (foundParameter)
+                return foundParameter;
+
+            var serviceProvider = context.Channel.GetAttribute(ChannelAttributes.ServiceProvider).Get();
+            var service = serviceProvider.GetService(typeof(T));
+            if (service == null)
+                return false;
+
+            value = DynamicCast<T>.From(service);
+            return true;
         }
     }
 }

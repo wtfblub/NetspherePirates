@@ -12,7 +12,8 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(1)]
         public LongPeerId Assist { get; set; }
 
-        [BlubMember(2, typeof(EnumSerializer), typeof(int))]
+        [BlubMember(2)]
+        [BlubSerializer(typeof(EnumSerializer), typeof(int))]
         public AttackAttribute Weapon { get; set; }
 
         [BlubMember(3)]
@@ -46,7 +47,8 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(1)]
         public LongPeerId Assist { get; set; }
 
-        [BlubMember(2, typeof(EnumSerializer), typeof(int))]
+        [BlubMember(2)]
+        [BlubSerializer(typeof(EnumSerializer), typeof(int))]
         public AttackAttribute Weapon { get; set; }
 
         [BlubMember(3)]

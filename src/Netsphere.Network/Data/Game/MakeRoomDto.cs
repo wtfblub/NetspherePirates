@@ -1,12 +1,11 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
     [BlubContract]
     public class MakeRoomDto
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Name { get; set; }
 
         [BlubMember(1)]
@@ -24,7 +23,7 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(5)]
         public uint Unk2 { get; set; }
 
-        [BlubMember(6, typeof(StringSerializer))]
+        [BlubMember(6)]
         public string Password { get; set; }
 
         [BlubMember(7)]

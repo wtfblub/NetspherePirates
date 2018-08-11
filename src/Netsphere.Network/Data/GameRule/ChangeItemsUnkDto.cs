@@ -10,16 +10,20 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] Skills { get; set; }
 
-        [BlubMember(2, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(2)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] Weapons { get; set; }
 
-        [BlubMember(3, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(3)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk4 { get; set; }
 
-        [BlubMember(4, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(4)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public int[] Unk5 { get; set; }
 
         [BlubMember(5)]

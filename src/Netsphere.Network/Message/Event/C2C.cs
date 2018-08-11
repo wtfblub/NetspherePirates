@@ -1,21 +1,21 @@
 using System;
 using BlubLib.Serialization;
 using BlubLib.Serialization.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Event
 {
     [BlubContract]
     public class ChatMessage : IEventMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Message { get; set; }
     }
 
     [BlubContract]
     public class EventMessageMessage : IEventMessage
     {
-        [BlubMember(0, typeof(EnumSerializer), typeof(uint))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(EnumSerializer), typeof(uint))]
         public GameEventMessage Event { get; set; }
 
         [BlubMember(1)]
@@ -27,7 +27,7 @@ namespace Netsphere.Network.Message.Event
         [BlubMember(3)]
         public ushort Value { get; set; }
 
-        [BlubMember(4, typeof(StringSerializer))]
+        [BlubMember(4)]
         public string String { get; set; }
 
         public EventMessageMessage()
@@ -64,7 +64,7 @@ namespace Netsphere.Network.Message.Event
         [BlubMember(1)]
         public int Unk2 { get; set; }
 
-        [BlubMember(2, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(2)]
         public byte[] Unk3 { get; set; }
 
         public ArcadeSyncMessage()
@@ -79,7 +79,7 @@ namespace Netsphere.Network.Message.Event
         [BlubMember(0)]
         public int Unk1 { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1)]
         public byte[] Unk2 { get; set; }
 
         public ArcadeSyncReqMessage()
@@ -94,7 +94,7 @@ namespace Netsphere.Network.Message.Event
         [BlubMember(0)]
         public bool IsCompressed { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1)]
         public byte[] Data { get; set; }
 
         public PacketMessage()

@@ -1,5 +1,4 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.Chat
 {
@@ -33,16 +32,16 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(8)]
         public ulong Unk9 { get; set; }
 
-        [BlubMember(9, typeof(StringSerializer))]
+        [BlubMember(9)]
         public string Unk10 { get; set; }
 
-        [BlubMember(10, typeof(StringSerializer))]
+        [BlubMember(10)]
         public string Unk11 { get; set; }
 
-        [BlubMember(11, typeof(StringSerializer))]
+        [BlubMember(11)]
         public string Unk12 { get; set; }
 
-        [BlubMember(12, typeof(StringSerializer))]
+        [BlubMember(12)]
         public string Unk13 { get; set; }
 
         public CombiDto()

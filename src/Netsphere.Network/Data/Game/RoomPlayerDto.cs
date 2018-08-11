@@ -1,5 +1,4 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
@@ -12,7 +11,7 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(1)]
         public byte Unk1 { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
+        [BlubMember(2)]
         public string Nickname { get; set; }
 
         [BlubMember(3)]

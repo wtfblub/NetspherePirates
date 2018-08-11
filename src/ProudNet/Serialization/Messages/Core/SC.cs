@@ -9,11 +9,13 @@ namespace ProudNet.Serialization.Messages.Core
     [BlubContract]
     internal class RmiMessage : ICoreMessage
     {
-        [BlubMember(0, typeof(ReadToEndSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ReadToEndSerializer))]
         public byte[] Data { get; set; }
 
         public RmiMessage()
-        { }
+        {
+        }
 
         public RmiMessage(byte[] data)
         {
@@ -27,11 +29,12 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public EncryptMode EncryptMode { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1)]
         public byte[] Data { get; set; }
 
         public EncryptedReliableMessage()
-        { }
+        {
+        }
 
         public EncryptedReliableMessage(byte[] data, EncryptMode encryptMode)
         {
@@ -46,11 +49,12 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1)]
         public byte[] Data { get; set; }
 
         public Encrypted_UnReliableMessage()
-        { }
+        {
+        }
 
         public Encrypted_UnReliableMessage(byte[] data)
         {
@@ -58,14 +62,16 @@ namespace ProudNet.Serialization.Messages.Core
         }
     }
 
-    [BlubContract(typeof(Serializer))]
+    [BlubContract]
+    [BlubSerializer(typeof(Serializer))]
     internal class CompressedMessage : ICoreMessage
     {
         public int DecompressedLength { get; set; }
         public byte[] Data { get; set; }
 
         public CompressedMessage()
-        { }
+        {
+        }
 
         public CompressedMessage(int decompressedLength, byte[] data)
         {
@@ -76,18 +82,21 @@ namespace ProudNet.Serialization.Messages.Core
         internal class Serializer : ISerializer<CompressedMessage>
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool CanHandle(Type type) => type == typeof(CompressedMessage);
+            public bool CanHandle(Type type)
+            {
+                return type == typeof(CompressedMessage);
+            }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Serialize(BinaryWriter writer, CompressedMessage value)
+            public void Serialize(BlubSerializer serializer, BinaryWriter writer, CompressedMessage value)
             {
-                writer.WriteScalar((int)value.Data.Length);
+                writer.WriteScalar(value.Data.Length);
                 writer.WriteScalar(value.DecompressedLength);
                 writer.Write(value.Data);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public CompressedMessage Deserialize(BinaryReader reader)
+            public CompressedMessage Deserialize(BlubSerializer serializer, BinaryReader reader)
             {
                 var length = reader.ReadScalar();
                 return new CompressedMessage(reader.ReadScalar(), reader.ReadBytes(length));
@@ -101,7 +110,7 @@ namespace ProudNet.Serialization.Messages.Core
         [BlubMember(0)]
         public byte Unk { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithScalarSerializer))]
+        [BlubMember(1)]
         public byte[] Data { get; set; }
     }
 }

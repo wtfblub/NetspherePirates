@@ -5,7 +5,7 @@
         OK = 0,
         WrongIdorPw = 1,
         Banned = 2,
-        Failed = 3, // Used for permanent ban
+        Failed = 3 // Used for permanent ban
     }
 
     public enum GameLoginResult : uint
@@ -19,7 +19,7 @@
         ChooseNickname = 6,
 
         FailedAndRestart = 7,
-        SessionTimeout = 8,
+        SessionTimeout = 8
     }
 
     public enum ServerResult : uint
@@ -58,16 +58,17 @@
         ItemExchangeFailed = 33,
         ItemExchangeFailed2 = 34,
         SelectGameMode = 35,
+
         //36 -> db error
         //37 -> entering failed you should clear the low level first
-        WelcomeToS4World = 39,
+        WelcomeToS4World = 39
     }
 
     public enum ChannelInfoRequest : byte
     {
         RoomList = 3,
         RoomList2 = 4,
-        ChannelList = 5,
+        ChannelList = 5
     }
 
     public enum ChangeTeamResult : byte

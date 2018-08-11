@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using BlubLib;
-using BlubLib.Collections.Concurrent;
+using BlubLib.Serialization;
 using DotNetty.Transport.Channels;
+using Microsoft.Extensions.Logging;
 using ProudNet.Codecs;
 using ProudNet.Serialization.Messages.Core;
 
@@ -13,12 +13,19 @@ namespace ProudNet.Handlers
     internal class UdpHandler : ChannelHandlerAdapter
     {
         private readonly UdpSocket _socket;
-        private readonly ProudServer _server;
+        private readonly BlubSerializer _serializer;
+        private readonly ILogger _log;
+        private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
+        private readonly IInternalSessionManager<uint> _udpSessionManager;
 
-        public UdpHandler(UdpSocket socket, ProudServer server)
+        public UdpHandler(ILogger logger, UdpSocket socket, BlubSerializer serializer,
+            ISessionManagerFactory sessionManagerFactory)
         {
             _socket = socket;
-            _server = server;
+            _serializer = serializer;
+            _log = logger;
+            _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
+            _udpSessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.UdpId);
         }
 
         public override void ChannelRead(IChannelHandlerContext context, object obj)
@@ -26,49 +33,45 @@ namespace ProudNet.Handlers
             var message = obj as UdpMessage;
             Debug.Assert(message != null);
 
-            var log = _server.Configuration.Logger?
-                .ForContext("EndPoint", message.EndPoint.ToString());
-
             try
             {
-                var session = _server.SessionsByUdpId.GetValueOrDefault(message.SessionId);
+                var session = _udpSessionManager.GetSession(message.SessionId);
                 if (session == null)
                 {
                     if (message.Content.GetByte(0) != (byte)ProudCoreOpCode.ServerHolepunch)
                     {
-                        log?.Warning("Expected ServerHolepunch as first udp message but got {MessageType}", (ProudCoreOpCode)message.Content.GetByte(0));
+                        _log.LogWarning("<{EndPoint}> Expected ServerHolepunch as first udp message but got {MessageType}",
+                            message.EndPoint.ToString(), (ProudCoreOpCode)message.Content.GetByte(0));
                         return;
                     }
 
-                    var holepunch = (ServerHolepunchMessage)CoreMessageDecoder.Decode(message.Content);
-
-                    // TODO add a lookup by holepunch magic
-                    session = _server.Sessions.Values.FirstOrDefault(x =>
-                        x.HolepunchMagicNumber.Equals(holepunch.MagicNumber));
-
+                    var holepunch = (ServerHolepunchMessage)CoreMessageDecoder.Decode(_serializer, message.Content);
+                    session = _magicNumberSessionManager.GetSession(holepunch.MagicNumber);
                     if (session == null)
                     {
-                        log?.Warning("Invalid holepunch magic number");
+                        _log.LogWarning("<{EndPoint}> Invalid holepunch magic number={MagicNumber}",
+                            message.EndPoint.ToString(), holepunch.MagicNumber);
                         return;
                     }
 
                     if (session.UdpSocket != _socket)
                     {
-                        log?.Warning("Client is sending to the wrong udp socket");
+                        _log.LogWarning("<{EndPoint}> Client is sending to the wrong udp socket",
+                            message.EndPoint.ToString());
                         return;
                     }
 
                     session.UdpSessionId = message.SessionId;
                     session.UdpEndPoint = message.EndPoint;
-                    _server.SessionsByUdpId[session.UdpSessionId] = session;
-
+                    _udpSessionManager.AddSession(session.UdpSessionId, session);
                     session.SendUdpAsync(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint));
                     return;
                 }
 
                 if (session.UdpSocket != _socket)
                 {
-                    log?.Warning("Client is sending to the wrong udp socket");
+                    _log.LogWarning("<{EndPoint}> Client is sending to the wrong udp socket",
+                        message.EndPoint.ToString());
                     return;
                 }
 
@@ -95,7 +98,7 @@ namespace ProudNet.Handlers
             var buffer = context.Allocator.Buffer();
             try
             {
-                CoreMessageEncoder.Encode(coreMessage, buffer);
+                CoreMessageEncoder.Encode(_serializer, coreMessage, buffer);
 
                 return base.WriteAsync(context, new UdpMessage
                 {

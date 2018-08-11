@@ -1,29 +1,35 @@
 ﻿using System;
 using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class CharacterStyleSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes <see cref="CharacterStyle"/> as int32
+    /// </summary>
+    public class CharacterStyleSerializer : ISerializerCompiler
     {
-        public bool CanHandle(Type type) => type == typeof(CharacterStyle);
-
-        public void EmitSerialize(Emit emiter, Local value)
+        public bool CanHandle(Type type)
         {
-            emiter.LoadArgument(1);
-            emiter.LoadLocalAddress(value);
-            emiter.Call(typeof(CharacterStyle).GetProperty(nameof(CharacterStyle.Value)).GetMethod);
-            emiter.CallVirtual(typeof(BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] { typeof(uint) }));
+            return type == typeof(CharacterStyle);
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt32)));
-            emiter.NewObject<CharacterStyle, uint>();
-            emiter.StoreLocal(value);
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocalAddress(value);
+            context.Emit.Call(typeof(CharacterStyle).GetProperty(nameof(CharacterStyle.Value)).GetMethod);
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryWriter _) => _.Write(default(uint))));
+        }
+
+        public void EmitDeserialize(CompilerContext context, Local value)
+        {
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadUInt32()));
+            context.Emit.NewObject<CharacterStyle, uint>();
+            context.Emit.StoreLocal(value);
         }
     }
 }

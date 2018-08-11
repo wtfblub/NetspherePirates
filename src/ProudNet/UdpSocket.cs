@@ -2,11 +2,15 @@
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib;
+using BlubLib.Serialization;
 using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ProudNet.Codecs;
+using ProudNet.Configuration;
 using ProudNet.Handlers;
 using ProudNet.Serialization.Messages.Core;
 
@@ -14,15 +18,18 @@ namespace ProudNet
 {
     internal class UdpSocket : IDisposable
     {
+        private readonly NetworkOptions _options;
+        private readonly IServiceProvider _serviceProvider;
+
         private bool _disposed;
         private IEventLoopGroup _eventLoopGroup;
-        private readonly ProudServer _owner;
 
         public IChannel Channel { get; private set; }
 
-        public UdpSocket(ProudServer owner)
+        public UdpSocket(IOptions<NetworkOptions> options, IServiceProvider serviceProvider)
         {
-            _owner = owner;
+            _options = options.Value;
+            _serviceProvider = serviceProvider;
         }
 
         public void Listen(IPEndPoint endPoint, IEventLoopGroup eventLoopGroup)
@@ -42,10 +49,10 @@ namespace ProudNet
                     .Handler(new ActionChannelInitializer<IChannel>(ch =>
                     {
                         ch.Pipeline
-                            .AddLast(new UdpFrameDecoder((int)_owner.Configuration.MessageMaxLength))
+                            .AddLast(new UdpFrameDecoder((int)_options.MessageMaxLength))
                             .AddLast(new UdpFrameEncoder())
-                            .AddLast(new UdpHandler(this, _owner))
-                            .AddLast(new ErrorHandler(_owner));
+                            .AddLast(_serviceProvider.GetService<UdpHandler>())
+                            .AddLast(_serviceProvider.GetService<ErrorHandler>());
                     }))
                     .BindAsync(endPoint).WaitEx();
             }

@@ -1,33 +1,40 @@
 ﻿using System;
 using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Relay;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class RoomLocationSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes <see cref="RoomLocation"/> as int32
+    /// </summary>
+    public class RoomLocationSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {
-            throw new NotImplementedException();
+            return type == typeof(RoomLocation);
         }
 
-        public void EmitSerialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.LoadLocalAddress(value);
-            emiter.Call(typeof(RoomLocation).GetProperty(nameof(RoomLocation.Value)).GetMethod);
-            emiter.CallVirtual(typeof(BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] { typeof(uint) }));
+            // BinaryWriter.Write(value.Value)
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocalAddress(value);
+            context.Emit.Call(typeof(RoomLocation).GetProperty(nameof(RoomLocation.Value)).GetMethod);
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryWriter _) => _.Write(default(uint))));
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitDeserialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt32)));
-            emiter.NewObject<RoomLocation, uint>();
-            emiter.StoreLocal(value);
+            // value = new RoomLocation(BinaryReader.ReadUInt32())
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadUInt32()));
+            context.Emit.NewObject<RoomLocation, uint>();
+            context.Emit.StoreLocal(value);
         }
     }
 }

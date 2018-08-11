@@ -3,7 +3,8 @@
 namespace Netsphere.Network.Message.GameRule
 {
     public interface IGameRuleMessage
-    { }
+    {
+    }
 
     public class GameRuleMessageFactory : MessageFactory<GameRuleOpCode, IGameRuleMessage>
     {

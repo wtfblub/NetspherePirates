@@ -18,7 +18,7 @@ namespace ProudNet
         private int _decryptCounter;
 
         public SymmetricAlgorithm AES { get; private set; }
-        
+
         public Crypt(int keySize)
         {
             if (keySize == 0)
@@ -39,7 +39,7 @@ namespace ProudNet
                     BlockSize = keySize,
                     KeySize = keySize,
                     Padding = PaddingMode.None,
-                    Mode = CipherMode.ECB,
+                    Mode = CipherMode.ECB
                 };
                 AES.GenerateKey();
             }
@@ -59,20 +59,20 @@ namespace ProudNet
 
         public void Encrypt(IByteBufferAllocator allocator, EncryptMode mode, Stream src, Stream dst, bool reliable)
         {
-            using (var data = new BufferWrapper(allocator.Buffer().WithOrder(ByteOrder.LittleEndian)))
+            using (var data = new BufferWrapper(allocator.Buffer()))
             using (var encryptor = GetAlgorithm(mode).CreateEncryptor())
             using (var cs = new CryptoStream(new NonClosingStream(dst), encryptor, CryptoStreamMode.Write))
             using (var w = cs.ToBinaryWriter(false))
             {
                 var blockSize = AES.BlockSize / 8;
-                var padding = blockSize - (src.Length + 1 + 4) % blockSize;
+                var padding = blockSize - ((src.Length + 1 + 4) % blockSize);
                 if (reliable)
-                    padding = blockSize - (src.Length + 1 + 4 + 2) % blockSize;
+                    padding = blockSize - ((src.Length + 1 + 4 + 2) % blockSize);
 
                 if (reliable)
                 {
                     var counter = (ushort)(Interlocked.Increment(ref _encryptCounter) - 1);
-                    data.Buffer.WriteShort(counter);
+                    data.Buffer.WriteShortLE(counter);
                 }
 
                 using (var dataStream = new WriteOnlyByteBufferStream(data.Buffer, false))
@@ -85,13 +85,14 @@ namespace ProudNet
                     dataStream.Position = 0;
                     dataStream.CopyTo(cs);
                 }
+
                 w.Fill((int)padding);
             }
         }
 
         public void Decrypt(IByteBufferAllocator allocator, EncryptMode mode, Stream src, Stream dst, bool reliable)
         {
-            using (var data = new BufferWrapper(allocator.Buffer().WithOrder(ByteOrder.LittleEndian)))
+            using (var data = new BufferWrapper(allocator.Buffer()))
             using (var decryptor = GetAlgorithm(mode).CreateDecryptor())
             using (var cs = new CryptoStream(src, decryptor, CryptoStreamMode.Read))
             {
@@ -104,7 +105,7 @@ namespace ProudNet
                 if (reliable)
                 {
                     var counter = (ushort)(Interlocked.Increment(ref _decryptCounter) - 1);
-                    var messageCounter = data.Buffer.GetShort(data.Buffer.ReaderIndex);
+                    var messageCounter = data.Buffer.GetShortLE(data.Buffer.ReaderIndex);
 
                     if (counter != messageCounter)
                         throw new ProudException($"Invalid decrypt counter! Remote: {messageCounter} Local: {counter}");

@@ -1,7 +1,6 @@
 ﻿using BlubLib.Serialization;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Chat
 {
@@ -11,10 +10,10 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Nickname { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
+        [BlubMember(2)]
         public string SessionId { get; set; }
     }
 
@@ -37,14 +36,14 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
+        [BlubMember(2)]
         public string Nickname { get; set; }
     }
 
     [BlubContract]
     public class CCheckCombiNameReqMessage : IChatMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Name { get; set; }
     }
 
@@ -57,10 +56,10 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(1)]
         public ulong Unk2 { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
+        [BlubMember(2)]
         public string Unk3 { get; set; }
 
-        [BlubMember(3, typeof(StringSerializer))]
+        [BlubMember(3)]
         public string Unk4 { get; set; }
     }
 
@@ -87,17 +86,17 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(0)]
         public ChatType ChatType { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Message { get; set; }
     }
 
     [BlubContract]
     public class CWhisperChatMessageReqMessage : IChatMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string ToNickname { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Message { get; set; }
     }
 
@@ -121,16 +120,16 @@ namespace Netsphere.Network.Message.Chat
     [BlubContract]
     public class CSendNoteReqMessage : IChatMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Receiver { get; set; }
 
         [BlubMember(1)]
         public ulong Unk1 { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
+        [BlubMember(2)]
         public string Title { get; set; }
 
-        [BlubMember(3, typeof(StringSerializer))]
+        [BlubMember(3)]
         public string Message { get; set; }
 
         [BlubMember(4)]
@@ -150,7 +149,8 @@ namespace Netsphere.Network.Message.Chat
     [BlubContract]
     public class CDeleteNoteReqMessage : IChatMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Notes { get; set; }
     }
 

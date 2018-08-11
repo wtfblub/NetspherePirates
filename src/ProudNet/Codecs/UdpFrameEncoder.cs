@@ -12,19 +12,19 @@ namespace ProudNet.Codecs
     {
         protected override void Encode(IChannelHandlerContext context, UdpMessage message, List<object> output)
         {
-            var buffer = context.Allocator.Buffer().WithOrder(ByteOrder.LittleEndian);
+            var buffer = context.Allocator.Buffer();
             try
             {
-                buffer.WriteShort(message.Flag)
-                    .WriteShort(message.SessionId)
-                    .WriteInt(0)
-                    .WriteInt((int)message.Id)
-                    .WriteInt((int)message.FragId);
+                buffer.WriteShortLE(message.Flag)
+                    .WriteShortLE(message.SessionId)
+                    .WriteIntLE(0)
+                    .WriteIntLE((int)message.Id)
+                    .WriteIntLE((int)message.FragId);
 
                 var headerLength = buffer.ReadableBytes;
-                buffer.WriteShort(Constants.NetMagic)
+                buffer.WriteShortLE(Constants.NetMagic)
                     .WriteStruct(message.Content)
-                    .SetInt(4, buffer.ReadableBytes - headerLength);
+                    .SetIntLE(4, buffer.ReadableBytes - headerLength);
 
                 output.Add(new DatagramPacket(buffer, message.EndPoint));
             }

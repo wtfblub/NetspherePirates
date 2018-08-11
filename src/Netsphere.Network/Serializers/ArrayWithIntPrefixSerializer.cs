@@ -1,166 +1,161 @@
 ﻿using System;
 using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class ArrayWithIntPrefixSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes an array with a int32 length prefix
+    /// </summary>
+    public class ArrayWithIntPrefixSerializer : ISerializerCompiler
     {
-        private readonly ISerializer _serializer;
-        private readonly ISerializerCompiler _compiler;
-
         public bool CanHandle(Type type)
         {
-            throw new NotImplementedException();
+            return type.IsArray || typeof(Array).IsAssignableFrom(type);
         }
 
-        public ArrayWithIntPrefixSerializer()
-        { }
-
-        public ArrayWithIntPrefixSerializer(Type serializer, object[] parameters = null)
-        {
-            if (serializer == null)
-                throw new ArgumentNullException(nameof(serializer));
-
-            if (typeof(ISerializer).IsAssignableFrom(serializer))
-                _serializer = (ISerializer)Activator.CreateInstance(serializer, parameters);
-            else if (typeof(ISerializerCompiler).IsAssignableFrom(serializer))
-                _compiler = (ISerializerCompiler)Activator.CreateInstance(serializer, parameters);
-            else
-                throw new ArgumentException($"{serializer.FullName} must be a ISerializer or ISerializerCompiler", nameof(serializer));
-        }
-
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
             var elementType = value.LocalType.GetElementType();
-            var emptyArray = emiter.DefineLabel();
-            var end = emiter.DefineLabel();
-
-            using (var length = emiter.DeclareLocal<int>("length"))
+            using (var length = context.Emit.DeclareLocal<int>("length"))
             {
-                emiter.CallDeserializerForType(length.LocalType, length);
+                var writeLabel = context.Emit.DefineLabel();
+
+                // if (value != null) goto write
+                context.Emit.LoadLocal(value);
+                context.Emit.LoadNull();
+                context.Emit.CompareEqual();
+                context.Emit.BranchIfFalse(writeLabel);
+
+                // value = Array.Empty<>()
+                context.Emit.Call(typeof(Array)
+                    .GetMethod(nameof(Array.Empty))
+                    .GetGenericMethodDefinition()
+                    .MakeGenericMethod(elementType));
+                context.Emit.StoreLocal(value);
+
+                // length = value.Length
+                context.Emit.MarkLabel(writeLabel);
+                context.Emit.LoadLocal(value);
+                context.Emit.Call(value.LocalType.GetProperty(nameof(Array.Length)).GetMethod);
+                context.Emit.StoreLocal(length);
+
+                // ProudNetBinaryWriterExtensions.WriteScalar(writer, length)
+                context.Emit.LoadReaderOrWriterParam();
+                context.Emit.LoadLocal(length);
+                context.Emit.Call(ReflectionHelper.GetMethod((BinaryWriter _) => _.Write(default(int))));
+
+                var loopLabel = context.Emit.DefineLabel();
+                var loopCheckLabel = context.Emit.DefineLabel();
+
+                using (var element = context.Emit.DeclareLocal(elementType, "element"))
+                using (var i = context.Emit.DeclareLocal<int>("i"))
+                {
+                    context.Emit.Branch(loopCheckLabel);
+                    context.Emit.MarkLabel(loopLabel);
+
+                    // element = value[i]
+                    context.Emit.LoadLocal(value);
+                    context.Emit.LoadLocal(i);
+                    context.Emit.LoadElement(elementType);
+                    context.Emit.StoreLocal(element);
+
+                    context.EmitSerialize(element);
+
+                    // ++i
+                    context.Emit.LoadLocal(i);
+                    context.Emit.LoadConstant(1);
+                    context.Emit.Add();
+                    context.Emit.StoreLocal(i);
+
+                    // i < length
+                    context.Emit.MarkLabel(loopCheckLabel);
+                    context.Emit.LoadLocal(i);
+                    context.Emit.LoadLocal(length);
+                    context.Emit.BranchIfLess(loopLabel);
+                }
+            }
+        }
+
+        public void EmitDeserialize(CompilerContext context, Local value)
+        {
+            var elementType = value.LocalType.GetElementType();
+            var emptyArrayLabel = context.Emit.DefineLabel();
+            var endLabel = context.Emit.DefineLabel();
+
+            using (var length = context.Emit.DeclareLocal<int>("length"))
+            {
+                // length = ProudNetBinaryReaderExtensions.ReadScalar(reader)
+                context.Emit.LoadReaderOrWriterParam();
+                context.Emit.Call(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadInt32()));
+                context.Emit.StoreLocal(length);
 
                 // if(length < 1) {
                 //  value = Array.Empty<>()
                 //  return
                 // }
-                emiter.LoadLocal(length);
-                emiter.LoadConstant(1);
-                emiter.BranchIfLess(emptyArray);
+                context.Emit.LoadLocal(length);
+                context.Emit.LoadConstant(1);
+                context.Emit.BranchIfLess(emptyArrayLabel);
 
                 // value = new [length]
-                emiter.LoadLocal(length);
-                emiter.NewArray(elementType);
-                emiter.StoreLocal(value);
-
-                var loop = emiter.DefineLabel();
-                var loopCheck = emiter.DefineLabel();
+                context.Emit.LoadLocal(length);
+                context.Emit.NewArray(elementType);
+                context.Emit.StoreLocal(value);
 
                 // Little optimization for byte arrays
                 if (elementType == typeof(byte))
                 {
                     // value = reader.ReadBytes(length);
-                    emiter.LoadArgument(1);
-                    emiter.LoadLocal(length);
-                    emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadBytes)));
-                    emiter.StoreLocal(value);
-                    emiter.Branch(end);
+                    context.Emit.LoadReaderOrWriterParam();
+                    context.Emit.LoadLocal(length);
+                    context.Emit.Call(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadBytes(default(int))));
+                    context.Emit.StoreLocal(value);
                 }
                 else
                 {
-                    using (var element = emiter.DeclareLocal(elementType, "element"))
-                    using (var i = emiter.DeclareLocal<int>("i"))
-                    {
-                        emiter.MarkLabel(loop);
+                    var loopLabel = context.Emit.DefineLabel();
+                    var loopCheckLabel = context.Emit.DefineLabel();
 
-                        if (_compiler != null)
-                            _compiler.EmitDeserialize(emiter, element);
-                        else if (_serializer != null)
-                            emiter.CallDeserializer(_serializer, element);
-                        else
-                            emiter.CallDeserializerForType(elementType, element);
+                    using (var element = context.Emit.DeclareLocal(elementType, "element"))
+                    using (var i = context.Emit.DeclareLocal<int>("i"))
+                    {
+                        context.Emit.MarkLabel(loopLabel);
+                        context.EmitDeserialize(element);
 
                         // value[i] = element
-                        emiter.LoadLocal(value);
-                        emiter.LoadLocal(i);
-                        emiter.LoadLocal(element);
-                        emiter.StoreElement(elementType);
+                        context.Emit.LoadLocal(value);
+                        context.Emit.LoadLocal(i);
+                        context.Emit.LoadLocal(element);
+                        context.Emit.StoreElement(elementType);
 
                         // ++i
-                        emiter.LoadLocal(i);
-                        emiter.LoadConstant(1);
-                        emiter.Add();
-                        emiter.StoreLocal(i);
+                        context.Emit.LoadLocal(i);
+                        context.Emit.LoadConstant(1);
+                        context.Emit.Add();
+                        context.Emit.StoreLocal(i);
 
                         // i < length
-                        emiter.MarkLabel(loopCheck);
-                        emiter.LoadLocal(i);
-                        emiter.LoadLocal(length);
-                        emiter.BranchIfLess(loop);
+                        context.Emit.MarkLabel(loopCheckLabel);
+                        context.Emit.LoadLocal(i);
+                        context.Emit.LoadLocal(length);
+                        context.Emit.BranchIfLess(loopLabel);
                     }
                 }
-                emiter.Branch(end);
+
+                context.Emit.Branch(endLabel);
             }
 
             // value = Array.Empty<>()
-            emiter.MarkLabel(emptyArray);
-            emiter.Call(typeof(Array)
+            context.Emit.MarkLabel(emptyArrayLabel);
+            context.Emit.Call(typeof(Array)
                 .GetMethod(nameof(Array.Empty))
                 .GetGenericMethodDefinition()
                 .MakeGenericMethod(elementType));
-            emiter.StoreLocal(value);
-            emiter.MarkLabel(end);
-        }
-
-        public void EmitSerialize(Emit emiter, Local value)
-        {
-            var elementType = value.LocalType.GetElementType();
-            using (var length = emiter.DeclareLocal<int>("length"))
-            {
-                // length = value.Length
-                emiter.LoadLocal(value);
-                emiter.Call(value.LocalType.GetProperty(nameof(Array.Length)).GetMethod);
-                emiter.StoreLocal(length);
-
-                emiter.CallSerializerForType(length.LocalType, length);
-
-                var loop = emiter.DefineLabel();
-                var loopCheck = emiter.DefineLabel();
-
-                using (var element = emiter.DeclareLocal(elementType, "element"))
-                using (var i = emiter.DeclareLocal<int>("i"))
-                {
-                    emiter.Branch(loopCheck);
-                    emiter.MarkLabel(loop);
-
-                    // element = value[i]
-                    emiter.LoadLocal(value);
-                    emiter.LoadLocal(i);
-                    emiter.LoadElement(elementType);
-                    emiter.StoreLocal(element);
-
-                    if (_compiler != null)
-                        _compiler.EmitSerialize(emiter, element);
-                    else if (_serializer != null)
-                        emiter.CallSerializer(_serializer, element);
-                    else
-                        emiter.CallSerializerForType(elementType, element);
-
-                    // ++i
-                    emiter.LoadLocal(i);
-                    emiter.LoadConstant(1);
-                    emiter.Add();
-                    emiter.StoreLocal(i);
-
-                    // i < length
-                    emiter.MarkLabel(loopCheck);
-                    emiter.LoadLocal(i);
-                    emiter.LoadLocal(length);
-                    emiter.BranchIfLess(loop);
-                }
-            }
+            context.Emit.StoreLocal(value);
+            context.Emit.MarkLabel(endLabel);
         }
     }
 }

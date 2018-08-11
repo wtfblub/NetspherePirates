@@ -9,7 +9,8 @@ namespace ProudNet
         public IPEndPoint UdpEndPoint { get; set; }
 
         public SendContext()
-        { }
+        {
+        }
 
         public SendContext(object message, SendOptions sendOptions)
         {

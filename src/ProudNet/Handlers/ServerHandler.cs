@@ -2,8 +2,8 @@
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
-using BlubLib.Collections.Generic;
 using BlubLib.DotNetty.Handlers.MessageHandling;
+using Microsoft.Extensions.Logging;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
 
@@ -11,6 +11,18 @@ namespace ProudNet.Handlers
 {
     internal class ServerHandler : ProudMessageHandler
     {
+        private readonly ILogger _log;
+        private readonly IInternalSessionManager<uint> _udpSessionManager;
+        private readonly UdpSocketManager _udpSocketManager;
+
+        public ServerHandler(ILogger<ServerHandler> logger, ISessionManagerFactory sessionManagerFactory,
+            UdpSocketManager udpSocketManager)
+        {
+            _log = logger;
+            _udpSessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.UdpId);
+            _udpSocketManager = udpSocketManager;
+        }
+
         [MessageHandler(typeof(ReliablePingMessage))]
         public Task ReliablePing(ProudSession session)
         {
@@ -18,18 +30,20 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(P2P_NotifyDirectP2PDisconnectedMessage))]
-        public void P2P_NotifyDirectP2PDisconnected(ProudSession session, P2P_NotifyDirectP2PDisconnectedMessage message)
+        public void P2P_NotifyDirectP2PDisconnected(ProudSession session,
+            P2P_NotifyDirectP2PDisconnectedMessage message)
         {
             if (session.P2PGroup == null)
                 return;
 
-            session.Logger?.Debug("P2P_NotifyDirectP2PDisconnected {@Message}", message);
-            var remotePeer = session.P2PGroup.Members.GetValueOrDefault(session.HostId);
+            session.Logger.LogDebug("P2P_NotifyDirectP2PDisconnected {@Message}", message);
+            var remotePeer = session.P2PGroup.GetMemberInternal(session.HostId);
             var stateA = remotePeer?.ConnectionStates.GetValueOrDefault(message.RemotePeerHostId);
             var stateB = stateA?.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
             if (stateA?.HolepunchSuccess == true)
             {
-                session.Logger?.Information("P2P to {TargetHostId} disconnected with {Reason}", message.RemotePeerHostId, message.Reason);
+                session.Logger.LogInformation("P2P to {TargetHostId} disconnected with {Reason}",
+                    message.RemotePeerHostId, message.Reason);
                 stateA.HolepunchSuccess = false;
                 stateA.RemotePeer.SendAsync(
                     new P2P_NotifyDirectP2PDisconnected2Message(session.HostId, message.Reason));
@@ -40,21 +54,21 @@ namespace ProudNet.Handlers
         }
 
         [MessageHandler(typeof(NotifyUdpToTcpFallbackByClientMessage))]
-        public void NotifyUdpToTcpFallbackByClient(ProudServer server, ProudSession session)
+        public void NotifyUdpToTcpFallbackByClient(ProudSession session)
         {
-            session.Logger?.Information("Fallback to tcp relay by client");
+            session.Logger.LogDebug("Fallback to tcp relay by client");
             session.UdpEnabled = false;
-            server.SessionsByUdpId.Remove(session.UdpSessionId);
+            _udpSessionManager.RemoveSession(session.UdpSessionId);
         }
 
         [MessageHandler(typeof(P2PGroup_MemberJoin_AckMessage))]
         public void P2PGroupMemberJoinAck(ProudSession session, P2PGroup_MemberJoin_AckMessage message)
         {
-            session.Logger?.Debug("P2PGroupMemberJoinAck {@Message}", message);
+            session.Logger.LogDebug("P2PGroupMemberJoinAck {@Message}", message);
             if (session.P2PGroup == null || session.HostId == message.AddedMemberHostId)
                 return;
 
-            var remotePeer = session.P2PGroup?.Members[session.HostId];
+            var remotePeer = session.P2PGroup?.GetMemberInternal(session.HostId);
             var stateA = remotePeer?.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
             if (stateA?.EventId != message.EventId)
                 return;
@@ -63,16 +77,16 @@ namespace ProudNet.Handlers
             var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
             if (stateB?.IsJoined == true)
             {
-                //disabled cuz breaks stuff, client will init p2p even with tcp
-                //if (!session.P2PGroup.AllowDirectP2P)
-                //    return;
-                //
-                //// Do not try p2p when the udp relay is not used by one of the clients
-                //if (!stateA.RemotePeer.Session.UdpEnabled || !stateB.RemotePeer.Session.UdpEnabled)
-                //    return;
+                if (!session.P2PGroup.AllowDirectP2P)
+                    return;
 
-                session.Logger?.Debug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
-                stateA.RemotePeer.Session.Logger?.Debug("Initialize P2P with {TargetHostId}", session.HostId);
+                // Do not try p2p when the udp relay is not used by one of the clients
+                if (!(stateA.RemotePeer is ProudSession sessionA) || !sessionA.UdpEnabled ||
+                    !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
+                    return;
+
+                session.Logger.LogDebug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", session.HostId);
                 stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
                 stateA.IsInitialized = stateB.IsInitialized = true;
                 remotePeer.SendAsync(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
@@ -83,13 +97,13 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(NotifyP2PHolepunchSuccessMessage))]
         public void NotifyP2PHolepunchSuccess(ProudSession session, NotifyP2PHolepunchSuccessMessage message)
         {
-            session.Logger?.Debug("NotifyP2PHolepunchSuccess {@Message}", message);
+            session.Logger.LogDebug("NotifyP2PHolepunchSuccess {@Message}", message);
             var group = session.P2PGroup;
             if (group == null || (session.HostId != message.A && session.HostId != message.B))
                 return;
 
-            var remotePeerA = group.Members.GetValueOrDefault(message.A);
-            var remotePeerB = group.Members.GetValueOrDefault(message.B);
+            var remotePeerA = group.GetMemberInternal(message.A);
+            var remotePeerB = group.GetMemberInternal(message.B);
             if (remotePeerA == null || remotePeerB == null)
                 return;
 
@@ -103,9 +117,10 @@ namespace ProudNet.Handlers
             else if (session.HostId == remotePeerB.HostId)
                 stateB.HolepunchSuccess = true;
 
-            if (stateA.HolepunchSuccess || stateB.HolepunchSuccess)
+            if (stateA.HolepunchSuccess && stateB.HolepunchSuccess)
             {
-                var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr, message.ABRecvAddr,
+                var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr,
+                    message.ABRecvAddr,
                     message.BASendAddr, message.BARecvAddr);
 
                 remotePeerA.SendAsync(notify);
@@ -116,25 +131,25 @@ namespace ProudNet.Handlers
         [MessageHandler(typeof(ShutdownTcpMessage))]
         public void ShutdownTcp(ProudSession session)
         {
-            session.CloseAsync();
+            var _ = session.CloseAsync();
         }
 
         [MessageHandler(typeof(NotifyLogMessage))]
-        public void NotifyLog(ProudServer server, NotifyLogMessage message)
+        public void NotifyLog(NotifyLogMessage message)
         {
-            server.Configuration.Logger?.Debug("NotifyLog {@Message}", message);
+            _log.LogDebug("NotifyLog {@Message}", message);
         }
 
         [MessageHandler(typeof(NotifyJitDirectP2PTriggeredMessage))]
         public void NotifyJitDirectP2PTriggered(ProudSession session, NotifyJitDirectP2PTriggeredMessage message)
         {
-            session.Logger?.Debug("NotifyJitDirectP2PTriggered {@Message}", message);
+            session.Logger.LogDebug("NotifyJitDirectP2PTriggered {@Message}", message);
             var group = session.P2PGroup;
             if (group == null)
                 return;
 
-            var remotePeerA = group.Members.GetValueOrDefault(session.HostId);
-            var remotePeerB = group.Members.GetValueOrDefault(message.HostId);
+            var remotePeerA = group.GetMemberInternal(session.HostId);
+            var remotePeerB = group.GetMemberInternal(message.HostId);
             if (remotePeerA == null || remotePeerB == null)
                 return;
 
@@ -148,7 +163,7 @@ namespace ProudNet.Handlers
             else if (session.HostId == remotePeerB.HostId)
                 stateB.JitTriggered = true;
 
-            if (stateA.JitTriggered || stateB.JitTriggered)
+            if (stateA.JitTriggered && stateB.JitTriggered)
             {
                 remotePeerA.SendAsync(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
                 remotePeerB.SendAsync(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
@@ -157,27 +172,28 @@ namespace ProudNet.Handlers
 
         [MessageHandler(typeof(NotifyNatDeviceNameDetectedMessage))]
         public void NotifyNatDeviceNameDetected()
-        { }
+        {
+        }
 
         [MessageHandler(typeof(C2S_RequestCreateUdpSocketMessage))]
-        public void C2S_RequestCreateUdpSocket(ProudServer server, ProudSession session)
+        public void C2S_RequestCreateUdpSocket(ProudSession session)
         {
-            session.Logger?.Debug("C2S_RequestCreateUdpSocket");
-            if (session.P2PGroup == null || session.UdpEnabled || !server.UdpSocketManager.IsRunning)
+            session.Logger.LogDebug("C2S_RequestCreateUdpSocket");
+            if (session.P2PGroup == null || session.UdpEnabled || !_udpSocketManager.IsRunning)
                 return;
 
-            var socket = server.UdpSocketManager.NextSocket();
+            var socket = _udpSocketManager.NextSocket();
             session.UdpSocket = socket;
             session.HolepunchMagicNumber = Guid.NewGuid();
-            session.SendAsync(new S2C_RequestCreateUdpSocketMessage(new IPEndPoint(server.UdpSocketManager.Address, ((IPEndPoint)socket.Channel.LocalAddress).Port)));
+            session.SendAsync(new S2C_RequestCreateUdpSocketMessage(new IPEndPoint(_udpSocketManager.Address,
+                ((IPEndPoint)socket.Channel.LocalAddress).Port)));
         }
 
         [MessageHandler(typeof(C2S_CreateUdpSocketAckMessage))]
-        public void C2S_CreateUdpSocketAck(ProudServer server, ProudSession session, C2S_CreateUdpSocketAckMessage message)
+        public void C2S_CreateUdpSocketAck(ProudSession session, C2S_CreateUdpSocketAckMessage message)
         {
-            session.Logger?.Debug("{@Message}", message);
-            if (session.P2PGroup == null || session.UdpSocket == null || session.UdpEnabled ||
-                !server.UdpSocketManager.IsRunning)
+            session.Logger.LogDebug("{@Message}", message);
+            if (session.P2PGroup == null || session.UdpSocket == null || session.UdpEnabled || !_udpSocketManager.IsRunning)
                 return;
 
             session.SendAsync(new RequestStartServerHolepunchMessage(session.HolepunchMagicNumber));
@@ -185,6 +201,7 @@ namespace ProudNet.Handlers
 
         [MessageHandler(typeof(ReportC2SUdpMessageTrialCountMessage))]
         public void ReportC2SUdpMessageTrialCount()
-        { }
+        {
+        }
     }
 }

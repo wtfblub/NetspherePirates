@@ -1,7 +1,5 @@
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Relay;
-using Netsphere.Network.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Relay
 {
@@ -11,10 +9,10 @@ namespace Netsphere.Network.Message.Relay
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Nickname { get; set; }
 
-        [BlubMember(2, typeof(RoomLocationSerializer))]
+        [BlubMember(2)]
         public RoomLocation RoomLocation { get; set; }
 
         [BlubMember(3)]

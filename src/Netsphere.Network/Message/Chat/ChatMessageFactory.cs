@@ -1,19 +1,13 @@
-﻿using BlubLib.Serialization;
-using Netsphere.Network.Serializers;
-using ProudNet.Serialization;
+﻿using ProudNet.Serialization;
 
 namespace Netsphere.Network.Message.Chat
 {
     public interface IChatMessage
-    { }
+    {
+    }
 
     public class ChatMessageFactory : MessageFactory<ChatOpCode, IChatMessage>
     {
-        static ChatMessageFactory()
-        {
-            Serializer.AddCompiler(new ItemNumberSerializer());
-        }
-
         public ChatMessageFactory()
         {
             // S2C

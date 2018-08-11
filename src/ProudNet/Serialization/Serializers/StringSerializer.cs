@@ -3,44 +3,47 @@ using System.IO;
 using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace ProudNet.Serialization.Serializers
 {
+    /// <summary>
+    /// Serializes a proudnet string
+    /// Uses <see cref="ProudNetBinaryWriterExtensions.WriteProudString"/>/<see cref="ProudNetBinaryReaderExtensions.ReadProudString"/>
+    /// </summary>
     public class StringSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {
-            throw new NotImplementedException();
+            return type == typeof(string);
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitDeserialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.Call(ReflectionHelper.GetMethod((BinaryReader x) => x.ReadProudString()));
-            emiter.StoreLocal(value);
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.Call(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadProudString()));
+            context.Emit.StoreLocal(value);
         }
 
-        public void EmitSerialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            var write = emiter.DefineLabel(nameof(StringSerializer) + "Write" + Guid.NewGuid());
+            var writeLabel = context.Emit.DefineLabel();
 
             // if (value != null) goto write
-            emiter.LoadLocal(value);
-            emiter.LoadNull();
-            emiter.CompareEqual();
-            emiter.BranchIfFalse(write);
+            context.Emit.LoadLocal(value);
+            context.Emit.LoadNull();
+            context.Emit.CompareEqual();
+            context.Emit.BranchIfFalse(writeLabel);
 
             // value = string.Empty
-            emiter.LoadField(typeof(string).GetField(nameof(string.Empty)));
-            emiter.StoreLocal(value);
+            context.Emit.LoadField(typeof(string).GetField(nameof(string.Empty)));
+            context.Emit.StoreLocal(value);
 
             // ProudNetBinaryWriterExtensions.WriteProudString(writer, value, false)
-            emiter.MarkLabel(write);
-            emiter.LoadArgument(1);
-            emiter.LoadLocal(value);
-            emiter.LoadConstant(false);
-            emiter.Call(ReflectionHelper.GetMethod((BinaryWriter x) => x.WriteProudString(default(string), default(bool))));
+            context.Emit.MarkLabel(writeLabel);
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocal(value);
+            context.Emit.LoadConstant(false);
+            context.Emit.Call(ReflectionHelper.GetMethod((BinaryWriter _) => _.WriteProudString(default(string), default(bool))));
         }
     }
 }

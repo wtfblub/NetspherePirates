@@ -2,7 +2,6 @@
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Game
 {
@@ -36,10 +35,10 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(0)]
         public uint Unk1 { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Username { get; set; }
 
-        [BlubMember(2, typeof(VersionSerializer))]
+        [BlubMember(2)]
         public Version Version { get; set; }
 
         [BlubMember(3)]
@@ -48,10 +47,10 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(4)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(5, typeof(StringSerializer))]
+        [BlubMember(5)]
         public string SessionId { get; set; }
 
-        [BlubMember(6, typeof(StringSerializer))]
+        [BlubMember(6)]
         public string Unk4 { get; set; }
 
         [BlubMember(7)]
@@ -75,14 +74,14 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class CCreateNickReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Nickname { get; set; }
     }
 
     [BlubContract]
     public class CCheckNickReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Nickname { get; set; }
     }
 
@@ -125,22 +124,26 @@ namespace Netsphere.Network.Message.Game
 
     [BlubContract]
     public class CAdminShowWindowReqMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CClubInfoReqMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CIngameEquipCheckReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] ItemIds { get; set; }
     }
 
     [BlubContract]
     public class CUseCoinRandomShopChanceReqMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CChannelEnterReqMessage : IGameMessage
@@ -169,7 +172,7 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(0)]
         public uint RoomId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Password { get; set; }
 
         // player gamemode and ?
@@ -190,14 +193,16 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class CBuyItemReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ShopItemDto[] Items { get; set; }
     }
 
     [BlubContract]
     public class CRepairItemReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ulong[] Items { get; set; }
     }
 
@@ -211,7 +216,7 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class CAdminActionReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Command { get; set; }
     }
 
@@ -232,21 +237,21 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class CClubNoticeChangeReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Unk { get; set; }
     }
 
     [BlubContract]
     public class CGetClubInfoReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Unk { get; set; }
     }
 
     [BlubContract]
     public class CGetClubInfoByNameReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Unk { get; set; }
     }
 
@@ -359,43 +364,43 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(0)]
         public byte Unk1 { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Unk2 { get; set; }
     }
 
     [BlubContract]
     public class CClubUnJoinReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Unk { get; set; }
     }
 
     [BlubContract]
     public class CNewShopUpdateCheckReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
-        public string Date01 { get; set; }
+        [BlubMember(0)]
+        public string PriceVersion { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
-        public string Date02 { get; set; }
+        [BlubMember(1)]
+        public string EffectVersion { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
-        public string Date03 { get; set; }
+        [BlubMember(2)]
+        public string ItemVersion { get; set; }
 
-        [BlubMember(3, typeof(StringSerializer))]
-        public string Date04 { get; set; }
+        [BlubMember(3)]
+        public string UniqueItemVersion { get; set; }
 
         [BlubMember(4)]
-        public uint Checksum01 { get; set; }
+        public uint PriceLength { get; set; }
 
         [BlubMember(5)]
-        public uint Checksum02 { get; set; }
+        public uint EffectLength { get; set; }
 
         [BlubMember(6)]
-        public uint Checksum03 { get; set; }
+        public uint ItemLength { get; set; }
 
         [BlubMember(7)]
-        public uint Checksum04 { get; set; }
+        public uint UniqueItemLength { get; set; }
     }
 
     [BlubContract]
@@ -404,7 +409,7 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(0)]
         public ulong ItemId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Nickname { get; set; }
     }
 
@@ -441,7 +446,7 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class CFindUserReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Nickname { get; set; }
     }
 
@@ -462,7 +467,8 @@ namespace Netsphere.Network.Message.Game
     [BlubContract]
     public class CSaveConfigPermissionNotifyReqMessage : IGameMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public uint[] Settings { get; set; }
     }
 
@@ -485,17 +491,19 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(0)]
         public uint Unk1 { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Unk2 { get; set; }
     }
 
     [BlubContract]
     public class CClubHistoryReqMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CChangeNickCancelReqMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class CEnableAccountStatusAckMessage : IGameMessage

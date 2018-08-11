@@ -1,5 +1,4 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.Game
 {
@@ -24,25 +23,25 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(5)]
         public uint Unk6 { get; set; }
 
-        [BlubMember(6, typeof(StringSerializer))]
+        [BlubMember(6)]
         public string Unk7 { get; set; }
 
-        [BlubMember(7, typeof(StringSerializer))]
+        [BlubMember(7)]
         public string Unk8 { get; set; }
 
-        [BlubMember(8, typeof(StringSerializer))]
+        [BlubMember(8)]
         public string Unk9 { get; set; } // Clan name?
 
-        [BlubMember(9, typeof(StringSerializer))]
+        [BlubMember(9)]
         public string ModeratorName { get; set; }
 
-        [BlubMember(10, typeof(StringSerializer))]
+        [BlubMember(10)]
         public string Unk11 { get; set; }
 
-        [BlubMember(11, typeof(StringSerializer))]
+        [BlubMember(11)]
         public string Unk12 { get; set; }
 
-        [BlubMember(12, typeof(StringSerializer))]
+        [BlubMember(12)]
         public string Unk13 { get; set; }
 
         public PlayerClubInfoDto()

@@ -22,33 +22,30 @@ namespace ProudNet.Serialization
 
         public ushort GetOpCode(Type type)
         {
-            ushort opCode;
-            if (_opCodeLookup.TryGetValue(type, out opCode))
+            if (_opCodeLookup.TryGetValue(type, out var opCode))
                 return opCode;
 
             throw new ProudException($"No opcode found for type {type.FullName}");
         }
 
-        public object GetMessage(ushort opCode, Stream stream)
+        public object GetMessage(BlubSerializer serializer, ushort opCode, Stream stream)
         {
-            Type type;
-            if (!_typeLookup.TryGetValue(opCode, out type))
+            if (!_typeLookup.TryGetValue(opCode, out var type))
                 throw new ProudException($"No type found for opcode {opCode}");
 
-            return Serializer.Deserialize(stream, type);
+            return serializer.Deserialize(stream, type);
         }
 
-        public object GetMessage(ushort opCode, BinaryReader reader)
+        public object GetMessage(BlubSerializer serializer, ushort opCode, BinaryReader reader)
         {
-            Type type;
-            if (!_typeLookup.TryGetValue(opCode, out type))
+            if (!_typeLookup.TryGetValue(opCode, out var type))
 #if DEBUG
                 throw new ProudBadOpCodeException(opCode, reader.ReadToEnd());
 #else
             throw new ProudBadOpCodeException(opCode);
 #endif
 
-            return Serializer.Deserialize(reader, type);
+            return serializer.Deserialize(reader, type);
         }
 
         public bool ContainsType(Type type)
@@ -75,14 +72,14 @@ namespace ProudNet.Serialization
             return DynamicCast<TOpCode>.From(base.GetOpCode(type));
         }
 
-        public TMessage GetMessage(TOpCode opCode, Stream stream)
+        public TMessage GetMessage(BlubSerializer serializer, TOpCode opCode, Stream stream)
         {
-            return (TMessage)GetMessage(DynamicCast<ushort>.From(opCode), stream);
+            return (TMessage)GetMessage(serializer, DynamicCast<ushort>.From(opCode), stream);
         }
 
-        public TMessage GetMessage(TOpCode opCode, BinaryReader reader)
+        public TMessage GetMessage(BlubSerializer serializer, TOpCode opCode, BinaryReader reader)
         {
-            return (TMessage)GetMessage(DynamicCast<ushort>.From(opCode), reader);
+            return (TMessage)GetMessage(serializer, DynamicCast<ushort>.From(opCode), reader);
         }
 
         public bool ContainsOpCode(TOpCode opCode)

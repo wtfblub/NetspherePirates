@@ -9,7 +9,8 @@ namespace ProudNet
 
         public ErrorEventArgs(Exception exception)
             : this(null, exception)
-        { }
+        {
+        }
 
         public ErrorEventArgs(ProudSession session, Exception exception)
         {

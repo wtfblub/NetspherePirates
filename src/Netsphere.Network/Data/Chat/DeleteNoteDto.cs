@@ -12,7 +12,8 @@ namespace Netsphere.Network.Data.Chat
         public int Unk2 { get; set; }
 
         public DeleteNoteDto()
-        { }
+        {
+        }
 
         public DeleteNoteDto(ulong unk1, int unk2)
         {

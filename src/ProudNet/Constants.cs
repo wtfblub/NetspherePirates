@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Net;
+using System.Text;
 using DotNetty.Common.Utilities;
 
 namespace ProudNet
@@ -7,6 +9,7 @@ namespace ProudNet
     {
         // C2S
         NotifyCSEncryptedSessionKey = 5,
+
         NotifyServerConnectionRequestData = 7,
         ServerHolepunch = 12,
         NotifyHolepunchSuccess = 14,
@@ -19,6 +22,7 @@ namespace ProudNet
 
         // S2C
         ConnectServerTimedout = 3,
+
         NotifyServerConnectionHint = 4,
         NotifyCSSessionKeySuccess = 6,
         NotifyProtocolVersionMismatch = 8,
@@ -34,6 +38,7 @@ namespace ProudNet
 
         // SC
         Rmi = 1,
+
         UserMessage = 2,
         EncryptedReliable = 36,
         Encrypted_UnReliable = 37,
@@ -41,6 +46,7 @@ namespace ProudNet
 
         // Unk
         ReliableUdp_Frame = 19,
+
         UnreliableRelay1_RelayDestListCompressed = 22,
         LingerDataFrame2 = 25,
         ArbitaryTouch = 29,
@@ -67,6 +73,7 @@ namespace ProudNet
     {
         // C2S
         ReliablePing = 64001,
+
         P2P_NotifyDirectP2PDisconnected = 64002,
         NotifyUdpToTcpFallbackByClient = 64003,
         P2PGroup_MemberJoin_Ack = 64004,
@@ -88,6 +95,7 @@ namespace ProudNet
 
         // S2C
         P2PGroup_MemberJoin = 64501,
+
         P2PGroup_MemberJoin_Unencrypted = 64502,
         P2PRecycleComplete = 64503,
         RequestP2PHolepunch = 64504,
@@ -158,11 +166,15 @@ namespace ProudNet
         public const uint NetVersion = 196977;
         public const short NetMagic = 0x5713;
         public static readonly Encoding Encoding = CodePagesEncodingProvider.Instance.GetEncoding(1252);
+        public static readonly IPEndPoint EmptyIPEndPoint = new IPEndPoint(0, 0);
     }
 
     internal static class ChannelAttributes
     {
-        public static readonly AttributeKey<ProudServer> Server = AttributeKey<ProudServer>.ValueOf($"ProudNet-{nameof(Server)}");
-        public static readonly AttributeKey<ProudSession> Session = AttributeKey<ProudSession>.ValueOf($"ProudNet-{nameof(Session)}");
+        public static readonly AttributeKey<IServiceProvider> ServiceProvider =
+            AttributeKey<IServiceProvider>.ValueOf($"ProudNet-{nameof(ServiceProvider)}");
+
+        public static readonly AttributeKey<ProudSession> Session =
+            AttributeKey<ProudSession>.ValueOf($"ProudNet-{nameof(Session)}");
     }
 }

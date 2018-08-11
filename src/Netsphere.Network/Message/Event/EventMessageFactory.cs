@@ -3,7 +3,8 @@ using ProudNet.Serialization;
 namespace Netsphere.Network.Message.Event
 {
     public interface IEventMessage
-    { }
+    {
+    }
 
     public class EventMessageFactory : MessageFactory<EventOpCode, IEventMessage>
     {

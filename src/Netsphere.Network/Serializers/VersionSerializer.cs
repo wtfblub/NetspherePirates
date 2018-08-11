@@ -1,90 +1,93 @@
 ﻿using System;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class VersionSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes <see cref="Version"/> as a byte array of length 4
+    /// </summary>
+    public class VersionSerializer : ISerializerCompiler
     {
+        private const int ArraySize = 4;
         private readonly ArrayWithIntPrefixSerializer _arraySerializer = new ArrayWithIntPrefixSerializer();
 
         public bool CanHandle(Type type)
         {
-            throw new NotImplementedException();
+            return type == typeof(Version);
         }
 
-        public void EmitSerialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            //w.Write(new[] { (ushort)Version.Major, (ushort)Version.Minor, (ushort)Version.Build, (ushort)Version.Revision });
+            var writeLabel = context.Emit.DefineLabel();
 
-            using (var array = emiter.DeclareLocal<ushort[]>("array"))
+            // if (value != null) goto write
+            context.Emit.LoadLocal(value);
+            context.Emit.LoadNull();
+            context.Emit.CompareEqual();
+            context.Emit.BranchIfFalse(writeLabel);
+
+            // value = new Version()
+            context.Emit.NewObject<Version>();
+            context.Emit.StoreLocal(value);
+
+            context.Emit.MarkLabel(writeLabel);
+
+            // w.Write(new[] { (ushort)Version.Major, (ushort)Version.Minor, (ushort)Version.Build, (ushort)Version.Revision });
+            using (var array = context.Emit.DeclareLocal<ushort[]>("array"))
             {
-                emiter.LoadConstant(4);
-                emiter.NewArray<ushort>();
-                emiter.StoreLocal(array);
+                context.Emit.LoadConstant(ArraySize);
+                context.Emit.NewArray<ushort>();
+                context.Emit.StoreLocal(array);
 
-                emiter.LoadLocal(array);
-                emiter.LoadConstant(0);
-                emiter.LoadLocal(value);
-                emiter.Call(typeof (Version).GetProperty(nameof(Version.Major)).GetMethod);
-                emiter.Convert<ushort>();
-                emiter.StoreElement<ushort>();
+                context.Emit.LoadLocal(array);
+                context.Emit.LoadConstant(0);
+                context.Emit.LoadLocal(value);
+                context.Emit.Call(typeof(Version).GetProperty(nameof(Version.Major)).GetMethod);
+                context.Emit.Convert<ushort>();
+                context.Emit.StoreElement<ushort>();
 
-                emiter.LoadLocal(array);
-                emiter.LoadConstant(1);
-                emiter.LoadLocal(value);
-                emiter.Call(typeof(Version).GetProperty(nameof(Version.Minor)).GetMethod);
-                emiter.Convert<ushort>();
-                emiter.StoreElement<ushort>();
+                context.Emit.LoadLocal(array);
+                context.Emit.LoadConstant(1);
+                context.Emit.LoadLocal(value);
+                context.Emit.Call(typeof(Version).GetProperty(nameof(Version.Minor)).GetMethod);
+                context.Emit.Convert<ushort>();
+                context.Emit.StoreElement<ushort>();
 
-                emiter.LoadLocal(array);
-                emiter.LoadConstant(2);
-                emiter.LoadLocal(value);
-                emiter.Call(typeof(Version).GetProperty(nameof(Version.Build)).GetMethod);
-                emiter.Convert<ushort>();
-                emiter.StoreElement<ushort>();
+                context.Emit.LoadLocal(array);
+                context.Emit.LoadConstant(2);
+                context.Emit.LoadLocal(value);
+                context.Emit.Call(typeof(Version).GetProperty(nameof(Version.Build)).GetMethod);
+                context.Emit.Convert<ushort>();
+                context.Emit.StoreElement<ushort>();
 
-                emiter.LoadLocal(array);
-                emiter.LoadConstant(3);
-                emiter.LoadLocal(value);
-                emiter.Call(typeof(Version).GetProperty(nameof(Version.Revision)).GetMethod);
-                emiter.Convert<ushort>();
-                emiter.StoreElement<ushort>();
+                context.Emit.LoadLocal(array);
+                context.Emit.LoadConstant(3);
+                context.Emit.LoadLocal(value);
+                context.Emit.Call(typeof(Version).GetProperty(nameof(Version.Revision)).GetMethod);
+                context.Emit.Convert<ushort>();
+                context.Emit.StoreElement<ushort>();
 
-                _arraySerializer.EmitSerialize(emiter, array);
+                _arraySerializer.EmitSerialize(context, array);
             }
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitDeserialize(CompilerContext context, Local value)
         {
-            var ok = emiter.DefineLabel();
-
-            using (var array = emiter.DeclareLocal<ushort[]>("array"))
+            using (var array = context.Emit.DeclareLocal<ushort[]>("array"))
             {
-                _arraySerializer.EmitDeserialize(emiter, array);
-
-                // if(array.Length != 4) throw new Exception("Invalid count for version")
-                emiter.LoadLocal(array);
-                emiter.Call(typeof(Array).GetProperty(nameof(Array.Length)).GetMethod);
-                emiter.LoadConstant(4);
-                emiter.BranchIfEqual(ok);
-
-                emiter.LoadConstant("Invalid count for version");
-                emiter.NewObject(typeof(Exception).GetConstructor(new[] { typeof(string) }));
-                emiter.Throw();
-
-                emiter.MarkLabel(ok);
+                _arraySerializer.EmitDeserialize(context, array);
 
                 // value = new Version(array[0], array[1], array[2], array[3])
-                for (var i = 0; i < 4; i++)
+                for (var i = 0; i < ArraySize; i++)
                 {
-                    emiter.LoadLocal(array);
-                    emiter.LoadConstant(i);
-                    emiter.LoadElement<ushort>();
+                    context.Emit.LoadLocal(array);
+                    context.Emit.LoadConstant(i);
+                    context.Emit.LoadElement<ushort>();
                 }
-                emiter.NewObject(typeof(Version).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }));
-                emiter.StoreLocal(value);
+
+                context.Emit.NewObject(typeof(Version).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }));
+                context.Emit.StoreLocal(value);
             }
         }
     }

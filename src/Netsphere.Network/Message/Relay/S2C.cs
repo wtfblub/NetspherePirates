@@ -1,5 +1,4 @@
 ﻿using BlubLib.Serialization;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Relay
 {
@@ -12,7 +11,7 @@ namespace Netsphere.Network.Message.Relay
         [BlubMember(1)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
+        [BlubMember(2)]
         public string Nickname { get; set; }
 
         public SEnterLoginPlayerMessage()
@@ -35,7 +34,8 @@ namespace Netsphere.Network.Message.Relay
         public int Result { get; set; }
 
         public SNotifyLoginResultMessage()
-        { }
+        {
+        }
 
         public SNotifyLoginResultMessage(int result)
         {

@@ -1,29 +1,34 @@
 ﻿using System;
+using System.IO;
+using System.Numerics;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class RotationVectorSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes rotation <see cref="Vector2"/>
+    /// </summary>
+    public class RotationVectorSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {
-            throw new NotImplementedException();
+            return type == typeof(Vector2);
         }
 
-        public void EmitSerialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.LoadLocal(value);
-            emiter.Call(typeof (NetsphereExtensions).GetMethod(nameof(NetsphereExtensions.WriteRotation)));
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocal(value);
+            context.Emit.Call(ReflectionHelper.GetMethod((BinaryWriter _) => _.WriteRotation(default(Vector2))));
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitDeserialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.Call(typeof (NetsphereExtensions).GetMethod(nameof(NetsphereExtensions.ReadRotation)));
-            emiter.StoreLocal(value);
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.Call(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadRotation()));
+            context.Emit.StoreLocal(value);
         }
     }
 }

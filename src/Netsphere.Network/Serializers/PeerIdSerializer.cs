@@ -1,29 +1,39 @@
 ﻿using System;
 using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class PeerIdSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes <see cref="PeerId"/> as int16
+    /// </summary>
+    public class PeerIdSerializer : ISerializerCompiler
     {
-        public bool CanHandle(Type type) => type == typeof(PeerId);
-
-        public void EmitSerialize(Emit emiter, Local value)
+        public bool CanHandle(Type type)
         {
-            emiter.LoadArgument(1);
-            emiter.LoadLocal(value);
-            emiter.Call(typeof(PeerId).GetMethod("op_Implicit", new[] { typeof(PeerId) }));
-            emiter.CallVirtual(typeof(BinaryWriter).GetMethod(nameof(BinaryWriter.Write), new[] { typeof(ushort) }));
+            return type == typeof(PeerId);
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.CallVirtual(typeof(BinaryReader).GetMethod(nameof(BinaryReader.ReadUInt16)));
-            emiter.Call(typeof(PeerId).GetMethod("op_Implicit", new[] { typeof(ushort) }));
-            emiter.StoreLocal(value);
+            // BinaryWriter.Write(value)
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocal(value);
+            context.Emit.Call(typeof(PeerId).GetMethod("op_Implicit", new[] { typeof(PeerId) }));
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryWriter _) => _.Write(default(ushort))));
+        }
+
+        public void EmitDeserialize(CompilerContext context, Local value)
+        {
+            // value = BinaryReader.ReadUInt16()
+
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.CallVirtual(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadUInt16()));
+            context.Emit.Call(typeof(PeerId).GetMethod("op_Implicit", new[] { typeof(ushort) }));
+            context.Emit.StoreLocal(value);
         }
     }
 }

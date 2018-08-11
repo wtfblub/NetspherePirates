@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using BlubLib.IO;
+using BlubLib.Serialization;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
@@ -10,6 +11,13 @@ namespace ProudNet.Codecs
 {
     internal class CoreMessageDecoder : MessageToMessageDecoder<RecvContext>
     {
+        private readonly BlubSerializer _serializer;
+
+        public CoreMessageDecoder(BlubSerializer serializer)
+        {
+            _serializer = serializer;
+        }
+
         protected override void Decode(IChannelHandlerContext context, RecvContext message, List<object> output)
         {
             var buffer = message.Message as IByteBuffer;
@@ -18,7 +26,7 @@ namespace ProudNet.Codecs
                 if (buffer == null)
                     throw new ProudException($"{nameof(CoreMessageDecoder)} can only handle {nameof(IByteBuffer)}");
 
-                message.Message = Decode(buffer);
+                message.Message = Decode(_serializer, buffer);
                 output.Add(message);
             }
             finally
@@ -27,12 +35,12 @@ namespace ProudNet.Codecs
             }
         }
 
-        public static ICoreMessage Decode(IByteBuffer buffer)
+        public static ICoreMessage Decode(BlubSerializer serializer, IByteBuffer buffer)
         {
             using (var r = new ReadOnlyByteBufferStream(buffer, false).ToBinaryReader(false))
             {
                 var opCode = r.ReadEnum<ProudCoreOpCode>();
-                return CoreMessageFactory.Default.GetMessage(opCode, r);
+                return CoreMessageFactory.Default.GetMessage(serializer, opCode, r);
             }
         }
     }

@@ -2,7 +2,6 @@
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Auth;
 using Netsphere.Network.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Auth
 {
@@ -15,19 +14,19 @@ namespace Netsphere.Network.Message.Auth
         [BlubMember(1)]
         public uint SessionId { get; set; }
 
-        [BlubMember(2, typeof(StringSerializer))]
+        [BlubMember(2)]
         public string Unk1 { get; set; }
 
-        [BlubMember(3, typeof(StringSerializer))]
+        [BlubMember(3)]
         public string SessionId2 { get; set; }
 
         [BlubMember(4)]
         public AuthLoginResult Result { get; set; }
 
-        [BlubMember(5, typeof(StringSerializer))]
+        [BlubMember(5)]
         public string Unk2 { get; set; }
 
-        [BlubMember(6, typeof(StringSerializer))]
+        [BlubMember(6)]
         public string BannedUntil { get; set; }
 
         public SAuthInEuAckMessage()
@@ -56,7 +55,7 @@ namespace Netsphere.Network.Message.Auth
         {
             Result = result;
             AccountId = accountId;
-            SessionId = (uint) accountId;
+            SessionId = (uint)accountId;
             SessionId2 = sessionId;
         }
     }
@@ -64,12 +63,14 @@ namespace Netsphere.Network.Message.Auth
     [BlubContract]
     public class SServerListAckMessage : IAuthMessage
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ServerInfoDto[] ServerList { get; set; }
 
         public SServerListAckMessage()
             : this(Array.Empty<ServerInfoDto>())
-        { }
+        {
+        }
 
         public SServerListAckMessage(ServerInfoDto[] serverList)
         {

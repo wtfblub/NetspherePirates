@@ -1,21 +1,13 @@
-﻿using BlubLib.Serialization;
-using Netsphere.Network.Serializers;
-using ProudNet.Serialization;
+﻿using ProudNet.Serialization;
 
 namespace Netsphere.Network.Message.Game
 {
     public interface IGameMessage
-    { }
+    {
+    }
 
     public class GameMessageFactory : MessageFactory<GameOpCode, IGameMessage>
     {
-        static GameMessageFactory()
-        {
-            Serializer.AddCompiler(new MatchKeySerializer());
-            Serializer.AddCompiler(new LongPeerIdSerializer());
-            Serializer.AddCompiler(new CharacterStyleSerializer());
-        }
-
         public GameMessageFactory()
         {
             // S2C

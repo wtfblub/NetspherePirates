@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using BlubLib.Serialization;
-using ProudNet.Serialization.Serializers;
 
 namespace ProudNet.Serialization.Messages
 {
@@ -23,7 +22,8 @@ namespace ProudNet.Serialization.Messages
 
     [BlubContract]
     internal class NotifyUdpToTcpFallbackByClientMessage : IMessage
-    { }
+    {
+    }
 
     [BlubContract]
     internal class P2PGroup_MemberJoin_AckMessage : IMessage
@@ -50,25 +50,17 @@ namespace ProudNet.Serialization.Messages
         [BlubMember(1)]
         public uint B { get; set; }
 
-        [BlubMember(2, typeof(IPEndPointSerializer))]
+        [BlubMember(2)]
         public IPEndPoint ABSendAddr { get; set; }
 
-        [BlubMember(3, typeof(IPEndPointSerializer))]
+        [BlubMember(3)]
         public IPEndPoint ABRecvAddr { get; set; }
 
-        [BlubMember(4, typeof(IPEndPointSerializer))]
+        [BlubMember(4)]
         public IPEndPoint BASendAddr { get; set; }
 
-        [BlubMember(5, typeof(IPEndPointSerializer))]
+        [BlubMember(5)]
         public IPEndPoint BARecvAddr { get; set; }
-
-        public NotifyP2PHolepunchSuccessMessage()
-        {
-            ABSendAddr = new IPEndPoint(0, 0);
-            ABRecvAddr = ABRecvAddr;
-            BASendAddr = ABRecvAddr;
-            BARecvAddr = ABRecvAddr;
-        }
     }
 
     [BlubContract]
@@ -84,7 +76,7 @@ namespace ProudNet.Serialization.Messages
         [BlubMember(0)]
         public TraceId TraceId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Message { get; set; }
     }
 
@@ -98,13 +90,14 @@ namespace ProudNet.Serialization.Messages
     [BlubContract]
     internal class NotifyNatDeviceNameDetectedMessage : IMessage
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Name { get; set; }
     }
 
     [BlubContract]
     internal class C2S_RequestCreateUdpSocketMessage : IMessage
-    { }
+    {
+    }
 
     [BlubContract]
     internal class C2S_CreateUdpSocketAckMessage : IMessage

@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using DotNetty.Transport.Channels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ProudNet
 {
     internal class UdpSocketManager : IDisposable
     {
-        private readonly ProudServer _server;
         private readonly List<UdpSocket> _sockets = new List<UdpSocket>();
+        private readonly IServiceProvider _serviceProvider;
         private int _counter;
 
         public bool IsRunning => Sockets.Count > 0;
         public IReadOnlyList<UdpSocket> Sockets => _sockets;
         public IPAddress Address { get; private set; }
 
-        public UdpSocketManager(ProudServer server)
+        public UdpSocketManager(IServiceProvider serviceProvider)
         {
-            _server = server;
+            _serviceProvider = serviceProvider;
         }
 
-        public void Listen(IPAddress address, IPAddress listenerAddress, int[] ports, IEventLoopGroup eventLoopGroup)
+        public void Listen(IPAddress address, IPAddress listenerAddress, ushort[] ports, IEventLoopGroup eventLoopGroup)
         {
             if (address == null)
                 throw new ArgumentNullException(nameof(address));
@@ -41,7 +42,7 @@ namespace ProudNet
             Address = address;
             foreach (var port in ports)
             {
-                var socket = new UdpSocket(_server);
+                var socket = _serviceProvider.GetService<UdpSocket>();
                 socket.Listen(new IPEndPoint(listenerAddress, port), eventLoopGroup);
                 _sockets.Add(socket);
             }

@@ -46,7 +46,7 @@ namespace ProudNet.Serialization
 
         [BlubMember(13)]
         public uint EmergencyLogLineCount { get; set; }
-        
+
         [BlubMember(14)]
         public bool EnableLookaheadP2PSend { get; set; }
 

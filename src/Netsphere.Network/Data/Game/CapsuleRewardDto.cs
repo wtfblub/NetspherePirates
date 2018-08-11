@@ -27,6 +27,6 @@ namespace Netsphere.Network.Data.Game
         public byte Unk { get; set; }
 
         [BlubMember(7)]
-        public uint Effect{ get; set; }
+        public uint Effect { get; set; }
     }
 }

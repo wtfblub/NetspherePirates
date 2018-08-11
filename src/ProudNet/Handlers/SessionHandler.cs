@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Security.Cryptography;
 using System.Threading;
 using DotNetty.Transport.Channels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ProudNet.Configuration;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Messages.Core;
 
@@ -8,44 +13,56 @@ namespace ProudNet.Handlers
 {
     internal class SessionHandler : ChannelHandlerAdapter
     {
-        private readonly ProudServer _server;
+        private readonly ILogger _log;
+        private readonly NetworkOptions _networkOptions;
+        private readonly RSACryptoServiceProvider _rsa;
+        private readonly IHostIdFactory _hostIdFactory;
+        private readonly ISessionFactory _sessionFactory;
+        private readonly IInternalSessionManager<uint> _sessionManager;
+        private readonly IServiceProvider _serviceProvider;
 
-        public SessionHandler(ProudServer server)
+        public SessionHandler(ILogger<SessionHandler> logger, IOptions<NetworkOptions> networkOptions,
+            RSACryptoServiceProvider rsa, IHostIdFactory hostIdFactory,
+            ISessionFactory sessionFactory, ISessionManagerFactory sessionManagerFactory,
+            IServiceProvider serviceProvider)
         {
-            _server = server;
+            _log = logger;
+            _networkOptions = networkOptions.Value;
+            _rsa = rsa;
+            _hostIdFactory = hostIdFactory;
+            _sessionFactory = sessionFactory;
+            _sessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.HostId);
+            _serviceProvider = serviceProvider;
         }
 
         public override async void ChannelActive(IChannelHandlerContext context)
         {
-            var hostId = _server.Configuration.HostIdFactory.New();
-            var session = _server.Configuration.SessionFactory.Create(hostId, context.Channel, _server);
+            var hostId = _hostIdFactory.New();
+            var session = _sessionFactory.Create(_serviceProvider.GetService<ILogger<ProudSession>>(), hostId, context.Channel);
             context.Channel.GetAttribute(ChannelAttributes.Session).Set(session);
 
-            var log = _server.Configuration.Logger?
-                .ForContext("HostId", hostId)
-                .ForContext("EndPoint", context.Channel.RemoteAddress.ToString());
-            log?.Debug("New incoming client({HostId}) on {EndPoint}");
+            _log?.LogDebug("New incoming client({HostId}) on {EndPoint}", hostId, context.Channel.RemoteAddress.ToString());
 
             var config = new NetConfigDto
             {
-                EnableServerLog = _server.Configuration.EnableServerLog,
-                FallbackMethod = _server.Configuration.FallbackMethod,
-                MessageMaxLength = _server.Configuration.MessageMaxLength,
-                TimeoutTimeMs = _server.Configuration.IdleTimeout.TotalMilliseconds,
-                DirectP2PStartCondition = _server.Configuration.DirectP2PStartCondition,
-                OverSendSuspectingThresholdInBytes = _server.Configuration.OverSendSuspectingThresholdInBytes,
-                EnableNagleAlgorithm = _server.Configuration.EnableNagleAlgorithm,
-                EncryptedMessageKeyLength = _server.Configuration.EncryptedMessageKeyLength,
-                AllowServerAsP2PGroupMember = _server.Configuration.AllowServerAsP2PGroupMember,
-                EnableP2PEncryptedMessaging = _server.Configuration.EnableP2PEncryptedMessaging,
-                UpnpDetectNatDevice = _server.Configuration.UpnpDetectNatDevice,
-                UpnpTcpAddrPortMapping = _server.Configuration.UpnpTcpAddrPortMapping,
-                EnablePingTest = _server.Configuration.EnablePingTest,
-                EmergencyLogLineCount = _server.Configuration.EmergencyLogLineCount
+                EnableServerLog = _networkOptions.EnableServerLog,
+                FallbackMethod = _networkOptions.FallbackMethod,
+                MessageMaxLength = _networkOptions.MessageMaxLength,
+                TimeoutTimeMs = _networkOptions.IdleTimeout.TotalMilliseconds,
+                DirectP2PStartCondition = _networkOptions.DirectP2PStartCondition,
+                OverSendSuspectingThresholdInBytes = _networkOptions.OverSendSuspectingThresholdInBytes,
+                EnableNagleAlgorithm = _networkOptions.EnableNagleAlgorithm,
+                EncryptedMessageKeyLength = _networkOptions.EncryptedMessageKeyLength,
+                AllowServerAsP2PGroupMember = _networkOptions.AllowServerAsP2PGroupMember,
+                EnableP2PEncryptedMessaging = _networkOptions.EnableP2PEncryptedMessaging,
+                UpnpDetectNatDevice = _networkOptions.UpnpDetectNatDevice,
+                UpnpTcpAddrPortMapping = _networkOptions.UpnpTcpAddrPortMapping,
+                EnablePingTest = _networkOptions.EnablePingTest,
+                EmergencyLogLineCount = _networkOptions.EmergencyLogLineCount
             };
-            await session.SendAsync(new NotifyServerConnectionHintMessage(config, _server.Rsa.ExportParameters(false)));
+            await session.SendAsync(new NotifyServerConnectionHintMessage(config, _rsa.ExportParameters(false)));
 
-            using (var cts = new CancellationTokenSource(_server.Configuration.ConnectTimeout))
+            using (var cts = new CancellationTokenSource(_networkOptions.ConnectTimeout))
             {
                 try
                 {
@@ -56,28 +73,24 @@ namespace ProudNet.Handlers
                     if (!session.IsConnected)
                         return;
 
-                    log?.Debug("Client({HostId}) handshake timeout");
+                    _log.LogDebug("Client({HostId} - {EndPoint}) handshake timeout", hostId, context.Channel.RemoteAddress.ToString());
                     await session.SendAsync(new ConnectServerTimedoutMessage());
                     await session.CloseAsync();
                     return;
                 }
             }
+
             base.ChannelActive(context);
         }
 
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
+            _log.LogDebug("Client({HostId} - {EndPoint}) disconnected", session.HostId, context.Channel.RemoteAddress.ToString());
 
-            _server.Configuration.Logger?
-                .ForContext("HostId", session.HostId)
-                .ForContext("EndPoint", context.Channel.RemoteAddress.ToString())
-                .Debug("Client({HostId}) disconnected");
-
-            session.P2PGroup?.Leave(session.HostId);
             session.Dispose();
-            _server.RemoveSession(session);
-            _server.Configuration.HostIdFactory.Free(session.HostId);
+            _sessionManager.RemoveSession(session.HostId);
+            _hostIdFactory.Free(session.HostId);
             base.ChannelInactive(context);
         }
     }

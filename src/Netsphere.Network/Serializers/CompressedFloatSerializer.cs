@@ -1,30 +1,33 @@
 ﻿using System;
 using System.IO;
+using BlubLib.Reflection;
 using BlubLib.Serialization;
 using Sigil;
-using Sigil.NonGeneric;
 
 namespace Netsphere.Network.Serializers
 {
-    internal class CompressedFloatSerializer : ISerializerCompiler
+    /// <summary>
+    /// Serializes <see cref="float"/> as a compressed int16
+    /// </summary>
+    public class CompressedFloatSerializer : ISerializerCompiler
     {
         public bool CanHandle(Type type)
         {
-            throw new NotImplementedException();
+            return type == typeof(float);
         }
 
-        public void EmitSerialize(Emit emiter, Local value)
+        public void EmitSerialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.LoadLocal(value);
-            emiter.Call(typeof(NetsphereExtensions).GetMethod(nameof(NetsphereExtensions.WriteCompressed), new[] { typeof(BinaryWriter), typeof(float) }));
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.LoadLocal(value);
+            context.Emit.Call(ReflectionHelper.GetMethod((BinaryWriter _) => _.WriteCompressed(default(float))));
         }
 
-        public void EmitDeserialize(Emit emiter, Local value)
+        public void EmitDeserialize(CompilerContext context, Local value)
         {
-            emiter.LoadArgument(1);
-            emiter.Call(typeof(NetsphereExtensions).GetMethod(nameof(NetsphereExtensions.ReadCompressedFloat)));
-            emiter.StoreLocal(value);
+            context.Emit.LoadReaderOrWriterParam();
+            context.Emit.Call(ReflectionHelper.GetMethod((BinaryReader _) => _.ReadCompressedFloat()));
+            context.Emit.StoreLocal(value);
         }
     }
 }

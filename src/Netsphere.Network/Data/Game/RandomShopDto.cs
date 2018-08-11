@@ -7,19 +7,24 @@ namespace Netsphere.Network.Data.Game
     [BlubContract]
     public class RandomShopDto
     {
-        [BlubMember(0, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ItemNumber[] ItemNumbers { get; set; }
 
-        [BlubMember(1, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(1)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public uint[] Effects { get; set; }
 
-        [BlubMember(2, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(2)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public uint[] Colors { get; set; }
 
-        [BlubMember(3, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(3)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ItemPeriodType[] PeriodTypes { get; set; }
 
-        [BlubMember(4, typeof(ArrayWithIntPrefixSerializer))]
+        [BlubMember(4)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ushort[] Periods { get; set; }
 
         [BlubMember(5)]

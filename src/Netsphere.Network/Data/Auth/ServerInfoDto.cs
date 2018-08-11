@@ -16,7 +16,7 @@ namespace Netsphere.Network.Data.Auth
         [BlubMember(2)]
         public ServerType Type { get; set; }
 
-        [BlubMember(3, typeof(StringSerializer))]
+        [BlubMember(3)]
         public string Name { get; set; }
 
         [BlubMember(4)]
@@ -25,7 +25,7 @@ namespace Netsphere.Network.Data.Auth
         [BlubMember(5)]
         public ushort PlayerOnline { get; set; }
 
-        [BlubMember(6, typeof(IPEndPointSerializer))]
+        [BlubMember(6)]
         public IPEndPoint EndPoint { get; set; }
 
         [BlubMember(7)]

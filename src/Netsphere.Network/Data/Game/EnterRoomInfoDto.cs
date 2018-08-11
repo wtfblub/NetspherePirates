@@ -52,7 +52,8 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(14)]
         public byte Unk2 { get; set; }
 
-        [BlubMember(15, typeof(IPEndPointAddressStringSerializer))]
+        [BlubMember(15)]
+        [BlubSerializer(typeof(IPEndPointAddressStringSerializer))]
         public IPEndPoint RelayEndPoint { get; set; }
 
         [BlubMember(16)]
@@ -61,7 +62,6 @@ namespace Netsphere.Network.Data.Game
         public EnterRoomInfoDto()
         {
             MatchKey = 0;
-            RelayEndPoint = new IPEndPoint(0, 0);
             CreatedRoom = false;
         }
     }

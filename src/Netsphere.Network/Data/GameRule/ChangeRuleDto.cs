@@ -1,23 +1,23 @@
 ﻿using System;
 using BlubLib.Serialization;
 using Netsphere.Network.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.GameRule
 {
     [BlubContract]
     public class ChangeRuleDto
     {
-        [BlubMember(0, typeof(StringSerializer))]
+        [BlubMember(0)]
         public string Name { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Password { get; set; }
 
         [BlubMember(2)]
         public MatchKey MatchKey { get; set; }
 
-        [BlubMember(3, typeof(TimeSpanSerializer))]
+        [BlubMember(3)]
+        [BlubSerializer(typeof(TimeLimitSerializer))]
         public TimeSpan TimeLimit { get; set; }
 
         [BlubMember(4)]

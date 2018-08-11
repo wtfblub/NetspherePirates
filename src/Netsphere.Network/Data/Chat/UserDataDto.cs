@@ -1,6 +1,5 @@
 ﻿using BlubLib.Serialization;
 using BlubLib.Serialization.Serializers;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.Chat
 {
@@ -27,6 +26,7 @@ namespace Netsphere.Network.Data.Chat
         0xFFFFFFFD Tutorial
         0xFFFFFFFF No room
         */
+
         [BlubMember(5)]
         public uint RoomId { get; set; }
 
@@ -75,7 +75,8 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(20)]
         public short Unk6 { get; set; }
 
-        [BlubMember(21, typeof(FixedArraySerializer), 9)]
+        [BlubMember(21)]
+        [BlubSerializer(typeof(FixedArraySerializer), 9)]
         public byte[] Unk7 { get; set; }
 
         public UserDataDto()
@@ -97,7 +98,7 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(0)]
         public uint AccountId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Nickname { get; set; }
 
         [BlubMember(2)]
@@ -116,7 +117,7 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        [BlubMember(1, typeof(StringSerializer))]
+        [BlubMember(1)]
         public string Nickname { get; set; }
 
         [BlubMember(2)]
