@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 using Netsphere.Common.Configuration;
-using Netsphere.Common.Configuration.Orleans.Silo;
 
 namespace Netsphere.Database
 {
@@ -86,7 +85,7 @@ namespace Netsphere.Database
                         if (string.IsNullOrWhiteSpace(options.ConnectionString))
                         {
                             connectionStringBuilder.Server = options.Host;
-                            connectionStringBuilder.Port = (uint) options.Port;
+                            connectionStringBuilder.Port = (uint)options.Port;
                             connectionStringBuilder.Database = options.Database;
                             connectionStringBuilder.UserID = options.Username;
                             connectionStringBuilder.Password = options.Password;

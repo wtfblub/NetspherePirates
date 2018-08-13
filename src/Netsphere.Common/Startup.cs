@@ -69,13 +69,6 @@ namespace Netsphere.Common
                 Environment.Exit(1);
             }
 
-            if (!Enum.TryParse<LogEventLevel>(options.OrleansLevel, out var orleansLogLevel))
-            {
-                Console.Error.WriteLine(
-                    $"Invalid log level {options.OrleansLevel}. Valid values are {string.Join(",", Enum.GetNames(typeof(LogEventLevel)))}");
-                Environment.Exit(1);
-            }
-
             var jsonlog = Path.Combine(logDir, $"{options.Name}.log.json");
             var logfile = Path.Combine(logDir, $"{options.Name}.log");
             Log.Logger = new LoggerConfiguration()
@@ -85,9 +78,6 @@ namespace Netsphere.Common
                 .WriteTo.File(logfile, rollingInterval: RollingInterval.Day)
                 .WriteTo.Console(new ConditionalTemplateRenderer())
                 .MinimumLevel.Is(logLevel)
-                .MinimumLevel.Override("Orleans", orleansLogLevel)
-                .MinimumLevel.Override("Runtime", orleansLogLevel)
-                .MinimumLevel.Override("Messaging", orleansLogLevel)
                 .CreateLogger().ForContext(Constants.SourceContextPropertyName, "Main");
         }
 

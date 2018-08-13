@@ -7,7 +7,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 using Netsphere.Common.Configuration;
-using Netsphere.Common.Configuration.Orleans.Silo;
 
 namespace Netsphere.Database
 {
