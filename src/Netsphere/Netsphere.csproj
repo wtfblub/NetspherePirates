@@ -2,10 +2,5 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="BlubLib" Version="0.1.20" />
-    <PackageReference Include="Hjson" Version="3.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-  </ItemGroup>
-  <Import Project="..\..\Rules.targets" />
+  <Import Project="..\..\Rules.targets"/>
 </Project>

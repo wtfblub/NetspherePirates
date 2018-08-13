@@ -23,7 +23,7 @@
             Slot = (byte)(value >> 28);
         }
 
-        public CharacterStyle(CharacterGender gender, byte hair, byte face, byte shirt, byte pants, byte slot)
+        public CharacterStyle(CharacterGender gender, byte slot, byte hair, byte face, byte shirt, byte pants)
         {
             Gender = gender;
             Hair = hair;
@@ -42,7 +42,7 @@
         public static implicit operator uint(CharacterStyle style)
         {
             var value = (byte)style.Gender | style.Hair << 1 | style.Face << 7 | style.Shirt << 13 | style.Pants << 18 | style.Slot << 28;
-            return (uint) value;
+            return (uint)value;
         }
 
         public static implicit operator CharacterStyle(uint value)

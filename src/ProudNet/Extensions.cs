@@ -4,7 +4,6 @@ using System.Text;
 using BlubLib.IO;
 using DotNetty.Buffers;
 using Ionic.Zlib;
-using Microsoft.Extensions.Hosting;
 
 namespace ProudNet
 {

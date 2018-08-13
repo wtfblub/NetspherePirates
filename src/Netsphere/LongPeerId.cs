@@ -7,10 +7,12 @@ namespace Netsphere
         public ulong AccountId { get; set; }
         public PeerId PeerId { get; set; }
 
+        public ulong Value => GetValue();
+
         public LongPeerId(ulong value)
         {
             AccountId = value & 0x0000FFFFFFFFFFFF;
-            PeerId = (ushort) (value >> 48);
+            PeerId = (ushort)(value >> 48);
         }
 
         public LongPeerId(ulong accountId, PeerId peerId)
@@ -50,12 +52,12 @@ namespace Netsphere
             return AccountId | ((ulong)PeerId << 48);
         }
 
-        public static implicit operator PeerId (LongPeerId id)
+        public static implicit operator PeerId(LongPeerId id)
         {
             return id?.PeerId;
         }
 
-        public static implicit operator ulong (LongPeerId id)
+        public static implicit operator ulong(LongPeerId id)
         {
             return id?.GetValue() ?? 0;
         }
@@ -87,6 +89,8 @@ namespace Netsphere
         public byte Id { get; set; }
         public byte Slot { get; set; }
         public byte Unk { get; set; } // maybe source - player,sentry,senti
+
+        public ushort Value => GetValue();
 
         public PeerId(ushort value)
         {
@@ -124,13 +128,13 @@ namespace Netsphere
 
         private ushort GetValue()
         {
-            var value = (ushort) (Unk & 7);
-            value = (ushort) (8 * (Slot & 31) | value);
-            value = (ushort) (Id << 8 | value);
+            var value = (ushort)(Unk & 7);
+            value = (ushort)(8 * (Slot & 31) | value);
+            value = (ushort)(Id << 8 | value);
             return value;
         }
 
-        public static implicit operator ushort (PeerId id)
+        public static implicit operator ushort(PeerId id)
         {
             return id.GetValue();
         }

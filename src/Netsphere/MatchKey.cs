@@ -12,7 +12,8 @@ namespace Netsphere
         public byte JoinAuth => (byte)((_key[0] >> 2) & 1);
 
         // Contains spectator limit
-        public bool IsObserveEnabled => _key[3] > 0; 
+        public bool IsObserveEnabled => _key[3] > 0;
+
         public GameRule GameRule => (GameRule)(byte)(_key[0] >> 4);
         public byte Map => _key[1];
 
@@ -24,12 +25,16 @@ namespace Netsphere
                 {
                     case 8:
                         return 12;
+
                     case 7:
                         return 10;
+
                     case 6:
                         return 8;
+
                     case 5:
                         return 6;
+
                     case 3:
                         return 4;
                 }
@@ -37,6 +42,7 @@ namespace Netsphere
                 return 0;
             }
         }
+
         public int SpectatorLimit => IsObserveEnabled ? 12 - PlayerLimit : 0;
 
         public MatchKey()
@@ -64,7 +70,7 @@ namespace Netsphere
             return Key == other.Key;
         }
 
-        public static implicit operator uint (MatchKey i)
+        public static implicit operator uint(MatchKey i)
         {
             return i.Key;
         }

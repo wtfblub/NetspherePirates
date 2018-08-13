@@ -165,7 +165,7 @@ namespace ProudNet
             lock (_disposeMutex)
             {
                 _disposed = true;
-                _isDisposing = true;
+                _isDisposing = false;
             }
 
             if (Channel != null)

@@ -1,4 +1,6 @@
-﻿namespace Netsphere
+﻿using System;
+
+namespace Netsphere
 {
     public enum SecurityLevel : byte
     {
@@ -51,18 +53,15 @@
         PEN = 1,
     }
 
+    [Flags]
     public enum ShopResourceType : byte
     {
-        NewShopPrice = 1,
-        NewShopEffect = 2,
-        NewShopItem = 4,
-        NewShopUniqueItem = 8
+        None = 0,
+        Price = 1 << 0,
+        Effect = 1 << 1,
+        Item = 1 << 2,
+        UniqueItem = 1 << 3
     }
-
-//    public enum RandomShopResourceType : byte
-//    {
-//        EUNewRandomShop = 31,
-//    }
 
     public enum CostumeSlot : byte
     {
@@ -72,9 +71,7 @@
         Pants = 3,
         Gloves = 4,
         Shoes = 5,
-        Accessory = 6,
-        Max = 7
-        //Pet = 7,
+        Accessory = 6
     }
 
     public enum WeaponSlot : byte
@@ -87,7 +84,7 @@
 
     public enum SkillSlot : byte
     {
-        Skill = 0,
+        Skill = 0
     }
 
     public enum ItemPriceType : uint
@@ -261,14 +258,18 @@
         PlasmaSword = 1,
         CounterSword = 2,
         StormBat = 26,
+
         // AssssinClaw ToDo
         SubmachineGun = 3,
+
         Revolver = 4,
         SemiRifle = 25,
+
         // SMG3 - DualGun
         // HandGun
         // SMG4 BurstShotGun
         HeavymachineGun = 5,
+
         GaussRifle = 27,
         RailGun = 6,
         Cannonade = 7,
@@ -281,6 +282,7 @@
 
         // Skills
         Anchoring = 13,
+
         Flying = 14,
         Invisible = 15,
         Detect = 16,
