@@ -28,6 +28,5 @@
     Name: debug
     Directory: logs
     Level: Debug
-    OrleansLevel: Warning
   }
 }
