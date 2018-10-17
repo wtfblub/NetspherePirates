@@ -4,7 +4,7 @@ using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 
-namespace ProudNet.Codecs
+namespace ProudNet.DotNetty.Codecs
 {
     internal class ProudFrameDecoder : LengthFieldBasedFrameDecoder
     {

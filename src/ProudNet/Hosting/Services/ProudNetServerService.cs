@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.Collections.Concurrent;
-using BlubLib.DotNetty.Handlers.MessageHandling;
 using DotNetty.Common.Internal.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
@@ -13,10 +12,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ProudNet.Codecs;
 using ProudNet.Configuration;
+using ProudNet.DotNetty.Codecs;
+using ProudNet.DotNetty.Handlers;
 using ProudNet.Handlers;
 using ProudNet.Serialization.Messages;
+using ProudNet.Serialization.Messages.Core;
+using MessageHandler = ProudNet.DotNetty.Handlers.MessageHandler;
 
 namespace ProudNet.Hosting.Services
 {
@@ -88,10 +90,10 @@ namespace ProudNet.Hosting.Services
             OnError(e);
         }
 
-        protected virtual void OnUnhandledRmi(ProudSession session, object message)
+        protected virtual void OnUnhandledRmi(MessageContext context)
         {
-            session.Logger.LogDebug("Unhandled rmi message {@Message}", message);
-            UnhandledRmi?.Invoke(this, new UnhandledRmiEventArgs(session, message));
+            context.Session.Logger.LogDebug("Unhandled rmi message {@Message}", context.Message);
+            UnhandledRmi?.Invoke(this, new UnhandledRmiEventArgs(context.Session, context.Message));
         }
         #endregion
 
@@ -139,37 +141,33 @@ namespace ProudNet.Hosting.Services
                     .Handler(new ActionChannelInitializer<IServerSocketChannel>(ch => { }))
                     .ChildHandler(new ActionChannelInitializer<ISocketChannel>(ch =>
                     {
-                        var messageHandlers = _serviceProvider.GetServices<IMessageHandler>();
-                        var userMessageHandler = new SimpleMessageHandler();
-                        foreach (var messageHandler in messageHandlers)
-                            userMessageHandler.Add(messageHandler);
+                        var coreMessageHandler = new MessageHandler(_serviceProvider,
+                            new HandleResolverByBaseType<ICoreMessage>(typeof(AuthenticationHandler).Assembly));
 
-                        void OnUnhandledMessage(object _, UnhandledMessageEventArgs e)
-                        {
-                            var session = ch.GetAttribute(ChannelAttributes.Session).Get();
-                            OnUnhandledRmi(session, e.Message);
-                        }
+                        var internalRmiMessageHandler = new MessageHandler(_serviceProvider,
+                            new HandleResolverByBaseType<IMessage>(typeof(ReliablePingMessage).Assembly));
 
-                        userMessageHandler.UnhandledMessage += OnUnhandledMessage;
+                        var rmiMessageHandler = new MessageHandler(_serviceProvider,
+                            _serviceProvider.GetRequiredService<IHandleResolver>());
+
+                        rmiMessageHandler.UnhandledMessage += OnUnhandledRmi;
 
                         ch.Pipeline
                             .AddLast(_serviceProvider.GetRequiredService<SessionHandler>())
                             .AddLast(_serviceProvider.GetRequiredService<ProudFrameDecoder>())
                             .AddLast(_serviceProvider.GetRequiredService<ProudFrameEncoder>())
-                            .AddLast(_serviceProvider.GetRequiredService<RecvContextDecoder>())
+                            .AddLast(_serviceProvider.GetRequiredService<MessageContextDecoder>())
                             .AddLast(_serviceProvider.GetRequiredService<CoreMessageDecoder>())
                             .AddLast(_serviceProvider.GetRequiredService<CoreMessageEncoder>())
-                            .AddLast("coreHandler", new SimpleMessageHandler()
-                                .Add(_serviceProvider.GetRequiredService<CoreHandler>()))
+                            .AddLast(Constants.Pipeline.CoreMessageHandlerName, coreMessageHandler)
                             .AddLast(_serviceProvider.GetRequiredService<SendContextEncoder>())
                             .AddLast(_serviceProvider.GetRequiredService<MessageDecoder>())
                             .AddLast(_serviceProvider.GetRequiredService<MessageEncoder>())
 
-                            // SimpleMessageHandler discards all handled messages
-                            // So internal messages(if handled) wont reach the userMessageHandler
-                            .AddLast(new SimpleMessageHandler()
-                                .Add(_serviceProvider.GetRequiredService<ServerHandler>()))
-                            .AddLast(userMessageHandler)
+                            // MessageHandler discards the message after handling
+                            // so internal messages wont reach the rmiMessageHandler
+                            .AddLast(internalRmiMessageHandler)
+                            .AddLast(rmiMessageHandler)
                             .AddLast(_serviceProvider.GetRequiredService<ErrorHandler>());
                     }))
                     .ChildOption(ChannelOption.TcpNodelay, !_networkOptions.EnableNagleAlgorithm)

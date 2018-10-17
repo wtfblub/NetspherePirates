@@ -3,7 +3,7 @@ using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 
-namespace ProudNet.Codecs
+namespace ProudNet.DotNetty.Codecs
 {
     internal class ProudFrameEncoder : MessageToMessageEncoder<IByteBuffer>
     {

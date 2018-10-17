@@ -108,7 +108,9 @@ namespace ProudNet
         internal Task SendAsync(ICoreMessage message)
         {
             Logger.LogTrace("Sending core message {MessageType}", message.GetType().Name);
-            return _disposed ? Task.CompletedTask : Channel.Pipeline.Context("coreHandler").WriteAndFlushAsync(message);
+            return _disposed
+                ? Task.CompletedTask
+                : Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).WriteAndFlushAsync(message);
         }
 
         internal Task SendUdpIfAvailableAsync(ICoreMessage message)

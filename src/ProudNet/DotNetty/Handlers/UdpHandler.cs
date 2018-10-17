@@ -5,10 +5,10 @@ using BlubLib;
 using BlubLib.Serialization;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
-using ProudNet.Codecs;
+using ProudNet.DotNetty.Codecs;
 using ProudNet.Serialization.Messages.Core;
 
-namespace ProudNet.Handlers
+namespace ProudNet.DotNetty.Handlers
 {
     internal class UdpHandler : ChannelHandlerAdapter
     {
@@ -75,12 +75,12 @@ namespace ProudNet.Handlers
                     return;
                 }
 
-                var recvContext = new RecvContext
+                var recvContext = new MessageContext
                 {
                     Message = message.Content.Retain(),
                     UdpEndPoint = message.EndPoint
                 };
-                session.Channel.Pipeline.Context<RecvContextDecoder>().FireChannelRead(recvContext);
+                session.Channel.Pipeline.Context<MessageContextDecoder>().FireChannelRead(recvContext);
             }
             finally
             {

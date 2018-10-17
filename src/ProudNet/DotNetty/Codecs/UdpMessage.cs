@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using DotNetty.Buffers;
 
-namespace ProudNet.Codecs
+namespace ProudNet.DotNetty.Codecs
 {
     internal class UdpMessage
     {

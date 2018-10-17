@@ -4,7 +4,7 @@ using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 
-namespace ProudNet.Codecs
+namespace ProudNet.DotNetty.Codecs
 {
     internal class UdpFrameDecoder : MessageToMessageDecoder<DatagramPacket>
     {

@@ -6,9 +6,9 @@ using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ProudNet.Codecs;
 using ProudNet.Configuration;
-using ProudNet.Handlers;
+using ProudNet.DotNetty.Codecs;
+using ProudNet.DotNetty.Handlers;
 using ProudNet.Hosting.Services;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Serializers;
@@ -66,19 +66,16 @@ namespace ProudNet.Hosting
                     .AddTransient<SessionHandler>()
                     .AddTransient<ProudFrameDecoder>()
                     .AddTransient<ProudFrameEncoder>()
-                    .AddTransient<RecvContextDecoder>()
+                    .AddTransient<MessageContextDecoder>()
                     .AddTransient<CoreMessageDecoder>()
                     .AddTransient<CoreMessageEncoder>()
-                    .AddTransient<CoreHandler>()
                     .AddTransient<SendContextEncoder>()
                     .AddTransient<MessageDecoder>()
                     .AddTransient<MessageEncoder>()
-                    .AddTransient<ServerHandler>()
                     .AddTransient<ErrorHandler>()
                     .AddTransient<UdpHandler>()
 
-                    // User message factories/handlers
-                    .AddTransient(_ => _.GetServices<MessageHandler>().ToArray())
+                    // User message factories
                     .AddTransient(_ => _.GetServices<MessageFactory>().ToArray());
             });
 

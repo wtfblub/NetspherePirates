@@ -8,7 +8,7 @@ using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using ProudNet.Serialization.Messages.Core;
 
-namespace ProudNet.Codecs
+namespace ProudNet.DotNetty.Codecs
 {
     internal class CoreMessageEncoder : MessageToMessageEncoder<ICoreMessage>
     {

@@ -9,9 +9,9 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ProudNet.Codecs;
 using ProudNet.Configuration;
-using ProudNet.Handlers;
+using ProudNet.DotNetty.Codecs;
+using ProudNet.DotNetty.Handlers;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet

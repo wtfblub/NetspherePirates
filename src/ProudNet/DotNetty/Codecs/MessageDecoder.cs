@@ -9,9 +9,9 @@ using ProudNet.Serialization;
 using ProudNet.Serialization.Messages;
 using ReadOnlyByteBufferStream = BlubLib.DotNetty.ReadOnlyByteBufferStream;
 
-namespace ProudNet.Codecs
+namespace ProudNet.DotNetty.Codecs
 {
-    internal class MessageDecoder : MessageToMessageDecoder<RecvContext>
+    internal class MessageDecoder : MessageToMessageDecoder<MessageContext>
     {
         private readonly BlubSerializer _serializer;
         private readonly MessageFactory[] _userMessageFactories;
@@ -22,7 +22,7 @@ namespace ProudNet.Codecs
             _userMessageFactories = userMessageFactories;
         }
 
-        protected override void Decode(IChannelHandlerContext context, RecvContext message, List<object> output)
+        protected override void Decode(IChannelHandlerContext context, MessageContext message, List<object> output)
         {
             var buffer = message.Message as IByteBuffer;
             try

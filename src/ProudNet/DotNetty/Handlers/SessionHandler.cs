@@ -9,7 +9,7 @@ using ProudNet.Configuration;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Messages.Core;
 
-namespace ProudNet.Handlers
+namespace ProudNet.DotNetty.Handlers
 {
     internal class SessionHandler : ChannelHandlerAdapter
     {

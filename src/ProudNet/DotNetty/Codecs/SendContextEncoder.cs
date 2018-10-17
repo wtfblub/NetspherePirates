@@ -5,10 +5,9 @@ using BlubLib.Serialization;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
-using ProudNet.Codecs;
 using ProudNet.Serialization.Messages.Core;
 
-namespace ProudNet.Handlers
+namespace ProudNet.DotNetty.Codecs
 {
     internal class SendContextEncoder : MessageToMessageEncoder<SendContext>
     {

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using BlubLib;
-using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 
-namespace ProudNet.Codecs
+namespace ProudNet.DotNetty.Codecs
 {
     internal class UdpFrameEncoder : MessageToMessageEncoder<UdpMessage>
     {

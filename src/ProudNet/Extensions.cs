@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using BlubLib.IO;
 using DotNetty.Buffers;
@@ -269,6 +271,20 @@ namespace ProudNet
             var bytes = encoding.GetBytes(value);
             @this.WriteBytes(bytes);
             return @this;
+        }
+    }
+
+    internal static class TypeExtensions
+    {
+        public static bool IsImplementingHandleInterface(this Type This)
+        {
+            return This.GetTypeInfo().IsImplementingHandleInterface();
+        }
+
+        public static bool IsImplementingHandleInterface(this TypeInfo This)
+        {
+            return This.ImplementedInterfaces.Any(x =>
+                x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IHandle<>));
         }
     }
 }
