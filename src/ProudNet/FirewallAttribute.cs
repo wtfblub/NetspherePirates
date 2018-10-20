@@ -2,11 +2,12 @@ using System;
 
 namespace ProudNet
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class FirewallAttribute : Attribute
     {
         public Type FirewallRuleType { get; set; }
         public object[] Parameters { get; set; }
+        public bool Invert { get; set; }
 
         /// <summary>
         /// Adds a firewall rule to the message handler

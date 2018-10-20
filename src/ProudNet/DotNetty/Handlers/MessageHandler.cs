@@ -52,21 +52,27 @@ namespace ProudNet.DotNetty.Handlers
                     foreach (var handlerInfo in handlerInfos)
                     {
                         var isAllowed = true;
-                        IFirewallRule ruleThatBlocked = null;
-                        foreach (var rule in handlerInfo.Rules)
+                        var ruleThatBlocked = default(RuleInfo);
+
+                        foreach (var ruleInfo in handlerInfo.Rules)
                         {
-                            if (!await rule.IsMessageAllowed(null, messageContext.Message))
+                            var result = await ruleInfo.Rule.IsMessageAllowed(null, messageContext.Message);
+                            if (ruleInfo.Invert)
+                                result = !result;
+
+                            if (!result)
                             {
                                 isAllowed = false;
-                                ruleThatBlocked = rule;
+                                ruleThatBlocked = ruleInfo;
                                 break;
                             }
                         }
 
                         if (!isAllowed)
                         {
-                            _logger.LogDebug("Message {Message} blocked by rule {Rule} for handler={Handler}",
-                                messageContext.Message.GetType().FullName, ruleThatBlocked.GetType().FullName,
+                            _logger.LogDebug("Message {Message} blocked by rule {Rule}(Invert={Invert}) for handler={Handler}",
+                                messageContext.Message.GetType().FullName,
+                                ruleThatBlocked.Rule.GetType().FullName, ruleThatBlocked.Invert,
                                 handlerInfo.Type.FullName);
                             continue;
                         }
@@ -136,7 +142,7 @@ namespace ProudNet.DotNetty.Handlers
                     var rules = GetRulesFromMethod(methodInfo).ToArray();
                     methodInfo = handleInterface.GetMethods().Single();
 
-                    var priorityAttribute = methodInfo.GetCustomAttribute<HandlePriorityAttribute>();
+                    var priorityAttribute = methodInfo.GetCustomAttribute<PriorityAttribute>();
                     var priority = priorityAttribute?.Priority ?? 10;
 
                     var handlerFunc = CreateHandlerFunc(handlerType, methodInfo, messageType);
@@ -152,11 +158,18 @@ namespace ProudNet.DotNetty.Handlers
                 return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IHandle<>);
             }
 
-            IEnumerable<IFirewallRule> GetRulesFromMethod(MethodInfo mi)
+            IEnumerable<MessageHandler.RuleInfo> GetRulesFromMethod(MethodInfo mi)
             {
                 var attributes = mi.GetCustomAttributes<FirewallAttribute>();
                 foreach (var attribute in attributes)
-                    yield return GetFirewallRule(attribute.FirewallRuleType, attribute.Parameters);
+                {
+                    var rule = GetFirewallRule(attribute.FirewallRuleType, attribute.Parameters);
+                    yield return new MessageHandler.RuleInfo
+                    {
+                        Rule = rule,
+                        Invert = attribute.Invert
+                    };
+                }
             }
 
             HandlerDelegate CreateHandlerFunc(Type handlerType, MethodInfo methodInfo, Type messageType)
@@ -210,10 +223,10 @@ namespace ProudNet.DotNetty.Handlers
             public readonly Type Type;
             public readonly object Instance;
             public readonly HandlerDelegate Func;
-            public readonly IFirewallRule[] Rules;
+            public readonly RuleInfo[] Rules;
             public readonly byte Priority;
 
-            public HandlerInfo(object instance, HandlerDelegate func, IFirewallRule[] rules, byte priority)
+            public HandlerInfo(object instance, HandlerDelegate func, RuleInfo[] rules, byte priority)
             {
                 Type = instance.GetType();
                 Instance = instance;
@@ -221,6 +234,12 @@ namespace ProudNet.DotNetty.Handlers
                 Rules = rules;
                 Priority = priority;
             }
+        }
+
+        private struct RuleInfo
+        {
+            public IFirewallRule Rule;
+            public bool Invert;
         }
     }
 }

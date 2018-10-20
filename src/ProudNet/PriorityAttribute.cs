@@ -7,11 +7,11 @@ namespace ProudNet
     /// </summary>
     /// <remarks>Priority defaults to 10</remarks>
     [AttributeUsage(AttributeTargets.Method)]
-    public class HandlePriorityAttribute : Attribute
+    public class PriorityAttribute : Attribute
     {
         public byte Priority { get; }
 
-        public HandlePriorityAttribute(byte priority)
+        public PriorityAttribute(byte priority)
         {
             Priority = priority;
         }
