@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using ProudNet.Firewall;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
@@ -24,15 +25,14 @@ namespace ProudNet.Handlers
             _udpSocketManager = udpSocketManager;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
         public async Task<bool> OnHandle(MessageContext context, ReliableRelay1Message message)
         {
             var session = context.Session;
 
-            if (session.P2PGroup == null)
-                return true;
-
             foreach (var destination in message.Destination.Where(x => x.HostId != session.HostId))
             {
+                // TODO Hack for race condition
                 if (session.P2PGroup?.GetMember(destination.HostId) == null)
                     return true;
 
@@ -46,12 +46,14 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
         public async Task<bool> OnHandle(MessageContext context, UnreliableRelay1Message message)
         {
             var session = context.Session;
 
             foreach (var destination in message.Destination.Where(id => id != session.HostId))
             {
+                // TODO Hack for race condition
                 if (session.P2PGroup?.GetMember(destination) == null)
                     return true;
 
@@ -64,32 +66,32 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
+        [Firewall(typeof(MustBeUdpRelay), Invert = true)]
         public async Task<bool> OnHandle(MessageContext context, C2S_RequestCreateUdpSocketMessage message)
         {
             var session = context.Session;
 
-            // TODO Use firewall
-            session.Logger.LogDebug("C2S_RequestCreateUdpSocket");
-            if (session.P2PGroup == null || session.UdpEnabled || !_udpSocketManager.IsRunning)
+            session.Logger.LogDebug("C2S_RequestCreateUdpSocketMessage {@Message}", message);
+            if (!_udpSocketManager.IsRunning)
                 return true;
 
             var socket = _udpSocketManager.NextSocket();
             session.UdpSocket = socket;
             session.HolepunchMagicNumber = Guid.NewGuid();
-            await session.SendAsync(
-                new S2C_RequestCreateUdpSocketMessage(
-                    new IPEndPoint(_udpSocketManager.Address,
-                        ((IPEndPoint)socket.Channel.LocalAddress).Port)));
+            await session.SendAsync(new S2C_RequestCreateUdpSocketMessage(
+                new IPEndPoint(_udpSocketManager.Address, ((IPEndPoint)socket.Channel.LocalAddress).Port)));
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
+        [Firewall(typeof(MustBeUdpRelay), Invert = true)]
         public async Task<bool> OnHandle(MessageContext context, C2S_CreateUdpSocketAckMessage message)
         {
             var session = context.Session;
 
-            // TODO Use firewall
-            session.Logger.LogDebug("{@Message}", message);
-            if (session.P2PGroup == null || session.UdpSocket == null || session.UdpEnabled || !_udpSocketManager.IsRunning)
+            session.Logger.LogDebug("C2S_CreateUdpSocketAckMessage {@Message}", message);
+            if (!_udpSocketManager.IsRunning)
                 return true;
 
             await session.SendAsync(new RequestStartServerHolepunchMessage(session.HolepunchMagicNumber));

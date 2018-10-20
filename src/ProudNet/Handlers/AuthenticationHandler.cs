@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
+using ProudNet.Firewall;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.Handlers
@@ -25,6 +26,7 @@ namespace ProudNet.Handlers
             _rsa = rsa;
         }
 
+        [Firewall(typeof(MustBeInState), SessionState.Handshake)]
         public async Task<bool> OnHandle(MessageContext context, NotifyCSEncryptedSessionKeyMessage message)
         {
             var session = context.Session;
@@ -36,6 +38,7 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeInState), SessionState.HandshakeKeyExchanged)]
         public async Task<bool> OnHandle(MessageContext context, NotifyServerConnectionRequestDataMessage message)
         {
             var session = context.Session;

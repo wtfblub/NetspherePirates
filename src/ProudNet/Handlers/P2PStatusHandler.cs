@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using ProudNet.Firewall;
 using ProudNet.Serialization.Messages;
 
 namespace ProudNet.Handlers
@@ -16,12 +17,10 @@ namespace ProudNet.Handlers
             _udpSessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.UdpId);
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
         public async Task<bool> OnHandle(MessageContext context, P2P_NotifyDirectP2PDisconnectedMessage message)
         {
             var session = context.Session;
-
-            if (session.P2PGroup == null)
-                return true;
 
             session.Logger.LogDebug("P2P_NotifyDirectP2PDisconnected {@Message}", message);
             var remotePeer = session.P2PGroup.GetMemberInternal(session.HostId);
@@ -42,6 +41,7 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeUdpRelay))]
         public Task<bool> OnHandle(MessageContext context, NotifyUdpToTcpFallbackByClientMessage message)
         {
             var session = context.Session;

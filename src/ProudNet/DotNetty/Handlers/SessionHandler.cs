@@ -39,6 +39,7 @@ namespace ProudNet.DotNetty.Handlers
         {
             var hostId = _hostIdFactory.New();
             var session = _sessionFactory.Create(_serviceProvider.GetService<ILogger<ProudSession>>(), hostId, context.Channel);
+            session.State = SessionState.Handshake;
             context.Channel.GetAttribute(ChannelAttributes.Session).Set(session);
 
             _log?.LogDebug("New incoming client({HostId}) on {EndPoint}", hostId, context.Channel.RemoteAddress.ToString());

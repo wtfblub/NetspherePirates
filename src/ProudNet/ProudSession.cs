@@ -58,6 +58,7 @@ namespace ProudNet
         internal AsyncManualResetEvent HandhsakeEvent { get; set; }
         internal Guid HolepunchMagicNumber { get; set; }
         internal UdpSocket UdpSocket { get; set; }
+        internal SessionState State { get; set; }
 
         Crypt IP2PMemberInternal.Crypt { get; set; }
         ConcurrentDictionary<uint, P2PConnectionState> IP2PMemberInternal.ConnectionStates => _connectionStates;

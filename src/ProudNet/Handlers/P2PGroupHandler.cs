@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using ProudNet.Firewall;
 using ProudNet.Serialization.Messages;
 
 namespace ProudNet.Handlers
@@ -9,13 +10,13 @@ namespace ProudNet.Handlers
     internal class P2PGroupHandler
         : IHandle<P2PGroup_MemberJoin_AckMessage>
     {
+        [Firewall(typeof(MustBeInP2PGroup), Invert = true)]
         public async Task<bool> OnHandle(MessageContext context, P2PGroup_MemberJoin_AckMessage message)
         {
             var session = context.Session;
 
-            // TODO Use firewall
             session.Logger.LogDebug("P2PGroupMemberJoinAck {@Message}", message);
-            if (session.P2PGroup == null || session.HostId == message.AddedMemberHostId)
+            if (session.HostId == message.AddedMemberHostId)
                 return true;
 
             var remotePeer = session.P2PGroup?.GetMemberInternal(session.HostId);

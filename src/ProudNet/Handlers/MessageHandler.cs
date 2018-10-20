@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using BlubLib.DotNetty;
 using DotNetty.Buffers;
 using ProudNet.DotNetty.Codecs;
+using ProudNet.Firewall;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.Handlers
@@ -12,6 +13,7 @@ namespace ProudNet.Handlers
           IHandle<CompressedMessage>,
           IHandle<EncryptedReliableMessage>
     {
+        [Firewall(typeof(MustBeInState), SessionState.Connected)]
         public Task<bool> OnHandle(MessageContext context, RmiMessage message)
         {
             var buffer = Unpooled.WrappedBuffer(message.Data);
@@ -20,6 +22,7 @@ namespace ProudNet.Handlers
             return Task.FromResult(true);
         }
 
+        [Firewall(typeof(MustBeInState), SessionState.Connected)]
         public Task<bool> OnHandle(MessageContext context, CompressedMessage message)
         {
             var decompressed = message.Data.DecompressZLib();
@@ -29,6 +32,7 @@ namespace ProudNet.Handlers
             return Task.FromResult(true);
         }
 
+        [Firewall(typeof(MustBeInState), SessionState.Connected)]
         public Task<bool> OnHandle(MessageContext context, EncryptedReliableMessage message)
         {
             Crypt crypt;

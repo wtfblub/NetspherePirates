@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using ProudNet.Firewall;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
 
@@ -22,26 +23,26 @@ namespace ProudNet.Handlers
             _udpSocketManager = udpSocketManager;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
         public async Task<bool> OnHandle(MessageContext context, ServerHolepunchMessage message)
         {
             var session = context.Session;
 
-            // TODO Use firewall
             session.Logger.LogDebug("ServerHolepunch={@Message}", message);
-            if (session.P2PGroup == null || !_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
+            if (!_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return true;
 
             await session.SendUdpAsync(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint));
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
         public async Task<bool> OnHandle(MessageContext context, NotifyHolepunchSuccessMessage message)
         {
             var session = context.Session;
 
-            // TODO Use firewall
             session.Logger.LogDebug("NotifyHolepunchSuccess={@Message}", message);
-            if (session.P2PGroup == null || !_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
+            if (!_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return true;
 
             session.LastUdpPing = DateTimeOffset.Now;
@@ -51,16 +52,13 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
+        [Firewall(typeof(MustBeUdpRelay))]
         public async Task<bool> OnHandle(MessageContext context, PeerUdp_ServerHolepunchMessage message)
         {
             var session = context.Session;
 
-            // TODO Use firewall
             session.Logger.LogDebug("PeerUdp_ServerHolepunch={@Message}", message);
-            if (!session.UdpEnabled || !_udpSocketManager.IsRunning)
-                return true;
-
-            // TODO Use firewall
             if (!(session.P2PGroup.GetMember(message.HostId) is ProudSession target) || !target.UdpEnabled)
                 return true;
 
@@ -69,15 +67,13 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
+        [Firewall(typeof(MustBeUdpRelay))]
         public async Task<bool> OnHandle(MessageContext context, PeerUdp_NotifyHolepunchSuccessMessage message)
         {
             var session = context.Session;
 
-            // TODO Use firewall
             session.Logger.LogDebug("PeerUdp_NotifyHolepunchSuccess={@Message}", message);
-            if (!session.UdpEnabled || !_udpSocketManager.IsRunning)
-                return true;
-
             var remotePeer = session.P2PGroup.GetMemberInternal(session.HostId);
             var connectionState = remotePeer.ConnectionStates.GetValueOrDefault(message.HostId);
 
@@ -101,13 +97,15 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
+        [Firewall(typeof(MustBeUdpRelay))]
         public async Task<bool> OnHandle(MessageContext context, NotifyP2PHolepunchSuccessMessage message)
         {
             var session = context.Session;
 
             session.Logger.LogDebug("NotifyP2PHolepunchSuccess {@Message}", message);
             var group = session.P2PGroup;
-            if (group == null || (session.HostId != message.A && session.HostId != message.B))
+            if (session.HostId != message.A && session.HostId != message.B)
                 return true;
 
             var remotePeerA = group.GetMemberInternal(message.A);
@@ -138,17 +136,17 @@ namespace ProudNet.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeInP2PGroup))]
+        [Firewall(typeof(MustBeUdpRelay))]
         public async Task<bool> OnHandle(MessageContext context, NotifyJitDirectP2PTriggeredMessage message)
         {
             var session = context.Session;
 
             session.Logger.LogDebug("NotifyJitDirectP2PTriggered {@Message}", message);
             var group = session.P2PGroup;
-            if (group == null)
-                return true;
-
             var remotePeerA = group.GetMemberInternal(session.HostId);
             var remotePeerB = group.GetMemberInternal(message.HostId);
+
             if (remotePeerA == null || remotePeerB == null)
                 return true;
 
