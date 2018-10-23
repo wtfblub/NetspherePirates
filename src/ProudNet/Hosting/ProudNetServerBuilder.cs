@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using BlubLib.DotNetty.Handlers.MessageHandling;
 using BlubLib.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -113,6 +112,12 @@ namespace ProudNet.Hosting
             return this;
         }
 
+        public IProudNetServerBuilder UseMessageHandlerResolver(IMessageHandlerResolver resolver)
+        {
+            _hostBuilder.ConfigureServices((context, collection) => collection.AddSingleton(resolver));
+            return this;
+        }
+
         public IProudNetServerBuilder ConfigureSerializer(Action<BlubSerializer> configure)
         {
             configure(_serializer);
@@ -137,13 +142,6 @@ namespace ProudNet.Hosting
             where TMessageFactory : MessageFactory
         {
             _hostBuilder.ConfigureServices((context, collection) => collection.AddSingleton<MessageFactory, TMessageFactory>());
-            return this;
-        }
-
-        public IProudNetServerBuilder AddMessageHandler<TMessageHandler>()
-            where TMessageHandler : class, IMessageHandler
-        {
-            _hostBuilder.ConfigureServices((context, collection) => collection.AddSingleton<IMessageHandler, TMessageHandler>());
             return this;
         }
     }

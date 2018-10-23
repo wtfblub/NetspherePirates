@@ -10,5 +10,11 @@ namespace ProudNet
         public object Message { get; set; }
 
         internal IPEndPoint UdpEndPoint { get; set; }
+
+        public TSession GetSession<TSession>()
+            where TSession : ProudSession
+        {
+            return (TSession)Session;
+        }
     }
 }

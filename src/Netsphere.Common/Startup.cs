@@ -12,7 +12,6 @@ using Netsphere.Common.Converters;
 using Netsphere.Common.Converters.Json;
 using Newtonsoft.Json;
 using Serilog;
-using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
@@ -78,7 +77,7 @@ namespace Netsphere.Common
                 .WriteTo.File(logfile, rollingInterval: RollingInterval.Day)
                 .WriteTo.Console(new ConditionalTemplateRenderer())
                 .MinimumLevel.Is(logLevel)
-                .CreateLogger().ForContext(Constants.SourceContextPropertyName, "Main");
+                .CreateLogger().ForContext(Serilog.Core.Constants.SourceContextPropertyName, "Main");
         }
 
         private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)

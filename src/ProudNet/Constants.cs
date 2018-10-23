@@ -171,6 +171,7 @@ namespace ProudNet
         public static class Pipeline
         {
             public const string CoreMessageHandlerName = "CoreMessageHandler";
+            public const string InternalMessageHandlerName = "InternalMessageHandler";
         }
     }
 

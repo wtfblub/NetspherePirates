@@ -17,7 +17,7 @@ namespace ProudNet.DotNetty.Handlers
         private delegate Task<bool> HandlerDelegate(object handler, MessageContext context, object messsage);
 
         private readonly ILogger _logger;
-        private readonly IHandleResolver _handleResolver;
+        private readonly IMessageHandlerResolver _messageHandlerResolver;
         private readonly IServiceProvider _serviceProvider;
         private readonly IDictionary<Type, IFirewallRule> _firewallRules;
         private IReadOnlyDictionary<Type, HandlerInfo[]> _handlerMap;
@@ -29,10 +29,10 @@ namespace ProudNet.DotNetty.Handlers
             UnhandledMessage?.Invoke(context);
         }
 
-        public MessageHandler(IServiceProvider serviceProvider, IHandleResolver handleResolver)
+        public MessageHandler(IServiceProvider serviceProvider, IMessageHandlerResolver messageHandlerResolver)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MessageHandler>>();
-            _handleResolver = handleResolver;
+            _messageHandlerResolver = messageHandlerResolver;
             _serviceProvider = serviceProvider;
             _firewallRules = new Dictionary<Type, IFirewallRule>();
         }
@@ -56,7 +56,7 @@ namespace ProudNet.DotNetty.Handlers
 
                         foreach (var ruleInfo in handlerInfo.Rules)
                         {
-                            var result = await ruleInfo.Rule.IsMessageAllowed(null, messageContext.Message);
+                            var result = await ruleInfo.Rule.IsMessageAllowed(messageContext, messageContext.Message);
                             if (ruleInfo.Invert)
                                 result = !result;
 
@@ -77,7 +77,7 @@ namespace ProudNet.DotNetty.Handlers
                             continue;
                         }
 
-                        if (!await handlerInfo.Func(handlerInfo.Instance, null, messageContext.Message))
+                        if (!await handlerInfo.Func(handlerInfo.Instance, messageContext, messageContext.Message))
                         {
                             _logger.LogDebug("Execution cancelled by {HandlerType}", handlerInfo.Type.FullName);
                             break;
@@ -87,7 +87,7 @@ namespace ProudNet.DotNetty.Handlers
                 else
                 {
                     OnUnhandledMessage(messageContext);
-                    _logger.LogDebug("Unhandled message {Message}", messageContext.Message.GetType());
+                    // _logger.LogDebug("Unhandled message {Message}", messageContext.Message.GetType());
                 }
             }
             catch (Exception ex)
@@ -105,7 +105,7 @@ namespace ProudNet.DotNetty.Handlers
             _logger.LogInformation("Initializing handlers...");
 
             var map = new Dictionary<Type, List<HandlerInfo>>();
-            var handlerTypes = _handleResolver.GetImplementations();
+            var handlerTypes = _messageHandlerResolver.GetImplementations();
             foreach (var handlerType in handlerTypes)
             {
                 // Create an instance of the handler and inject dependencies if needed
@@ -129,10 +129,15 @@ namespace ProudNet.DotNetty.Handlers
 
                 // Generate a handler function for every IHandle<> implementation
 
-                var handleInterfaces = handlerType.GetTypeInfo().ImplementedInterfaces.Where(IsHandleInterface);
+                var handleInterfaces = handlerType.GetTypeInfo().ImplementedInterfaces.Where(x => x.IsMessageHandlerInterface());
                 foreach (var handleInterface in handleInterfaces)
                 {
                     var messageType = handleInterface.GenericTypeArguments.Single();
+
+                    // Filter out messages that are not meant to be handled
+                    if (!_messageHandlerResolver.BaseTypes.Any(x => x.IsAssignableFrom(messageType)))
+                        continue;
+
                     var handlerList = map.GetValueOrDefault(messageType) ?? new List<HandlerInfo>();
 
                     // Get the method from the implementing type to scan for FirewallAttributes
@@ -153,18 +158,13 @@ namespace ProudNet.DotNetty.Handlers
 
             _handlerMap = map.ToDictionary(x => x.Key, x => x.Value.OrderByDescending(hi => hi.Priority).ToArray());
 
-            bool IsHandleInterface(Type type)
-            {
-                return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IHandle<>);
-            }
-
-            IEnumerable<MessageHandler.RuleInfo> GetRulesFromMethod(MethodInfo mi)
+            IEnumerable<RuleInfo> GetRulesFromMethod(MethodInfo mi)
             {
                 var attributes = mi.GetCustomAttributes<FirewallAttribute>();
                 foreach (var attribute in attributes)
                 {
                     var rule = GetFirewallRule(attribute.FirewallRuleType, attribute.Parameters);
-                    yield return new MessageHandler.RuleInfo
+                    yield return new RuleInfo
                     {
                         Rule = rule,
                         Invert = attribute.Invert

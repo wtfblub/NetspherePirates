@@ -18,7 +18,21 @@ namespace ProudNet.Handlers
         {
             var buffer = Unpooled.WrappedBuffer(message.Data);
             context.Message = buffer;
-            context.ChannelHandlerContext.FireChannelRead(context);
+
+            var opCode = buffer.GetUnsignedShortLE(buffer.ReaderIndex);
+            var isInternal = opCode >= 64000;
+
+            if (isInternal)
+            {
+                context.ChannelHandlerContext.FireChannelRead(context);
+            }
+            else
+            {
+                context.ChannelHandlerContext.Channel.Pipeline
+                    .Context(Constants.Pipeline.InternalMessageHandlerName)
+                    .FireChannelRead(context);
+            }
+
             return Task.FromResult(true);
         }
 
@@ -28,7 +42,7 @@ namespace ProudNet.Handlers
             var decompressed = message.Data.DecompressZLib();
             var buffer = Unpooled.WrappedBuffer(decompressed);
             context.Message = buffer;
-            context.ChannelHandlerContext.Channel.Pipeline.Context<ProudFrameDecoder>().FireChannelRead(context);
+            context.ChannelHandlerContext.Channel.Pipeline.Context<MessageContextDecoder>().FireChannelRead(context);
             return Task.FromResult(true);
         }
 
@@ -58,7 +72,7 @@ namespace ProudNet.Handlers
                 crypt.Decrypt(context.ChannelHandlerContext.Allocator, message.EncryptMode, src, dst, true);
 
             context.Message = buffer;
-            context.ChannelHandlerContext.Channel.Pipeline.Context<ProudFrameDecoder>().FireChannelRead(context);
+            context.ChannelHandlerContext.Channel.Pipeline.Context<MessageContextDecoder>().FireChannelRead(context);
             return Task.FromResult(true);
         }
     }

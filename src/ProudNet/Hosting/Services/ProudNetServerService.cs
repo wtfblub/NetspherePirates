@@ -142,13 +142,15 @@ namespace ProudNet.Hosting.Services
                     .ChildHandler(new ActionChannelInitializer<ISocketChannel>(ch =>
                     {
                         var coreMessageHandler = new MessageHandler(_serviceProvider,
-                            new HandleResolverByBaseType<ICoreMessage>(typeof(AuthenticationHandler).Assembly));
+                            new DefaultMessageHandlerResolver(
+                                new[] { typeof(AuthenticationHandler).Assembly }, typeof(ICoreMessage)));
+
 
                         var internalRmiMessageHandler = new MessageHandler(_serviceProvider,
-                            new HandleResolverByBaseType<IMessage>(typeof(ReliablePingMessage).Assembly));
+                            new DefaultMessageHandlerResolver(new[] { typeof(ReliablePingMessage).Assembly }, typeof(IMessage)));
 
                         var rmiMessageHandler = new MessageHandler(_serviceProvider,
-                            _serviceProvider.GetRequiredService<IHandleResolver>());
+                            _serviceProvider.GetRequiredService<IMessageHandlerResolver>());
 
                         rmiMessageHandler.UnhandledMessage += OnUnhandledRmi;
 
@@ -166,7 +168,8 @@ namespace ProudNet.Hosting.Services
 
                             // MessageHandler discards the message after handling
                             // so internal messages wont reach the rmiMessageHandler
-                            .AddLast(internalRmiMessageHandler)
+                            .AddLast(Constants.Pipeline.InternalMessageHandlerName, internalRmiMessageHandler)
+                            .AddLast(_serviceProvider.GetRequiredService<MessageDecoder>())
                             .AddLast(rmiMessageHandler)
                             .AddLast(_serviceProvider.GetRequiredService<ErrorHandler>());
                     }))

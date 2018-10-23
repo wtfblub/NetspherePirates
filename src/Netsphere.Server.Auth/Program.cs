@@ -8,7 +8,7 @@ using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
 using Netsphere.Database;
 using Netsphere.Network.Message.Auth;
-using Netsphere.Server.Auth.Services;
+using Netsphere.Server.Auth.Handlers;
 using ProudNet;
 using ProudNet.Hosting;
 using Serilog;
@@ -47,11 +47,14 @@ namespace Netsphere.Server.Auth
                 .ConfigureAppConfiguration(builder => builder.AddConfiguration(configuration))
                 .UseProudNetServer(builder =>
                 {
+                    var messageHandlerResolver = new DefaultMessageHandlerResolver(
+                        new[] { typeof(AuthenticationHandler).Assembly }, typeof(IAuthMessage));
+
                     builder
                         .UseHostIdFactory<HostIdFactory>()
-                        .UseSessionFactory<ProudSessionFactory>()
+                        .UseSessionFactory<SessionFactory>()
                         .AddMessageFactory<AuthMessageFactory>()
-                        .AddMessageHandler<AuthService>()
+                        .UseMessageHandlerResolver(messageHandlerResolver)
                         .UseNetworkConfiguration((context, options) =>
                         {
                             options.Version = new Guid("{9be73c0b-3b10-403e-be7d-9f222702a38c}");
@@ -68,9 +71,6 @@ namespace Netsphere.Server.Auth
                 });
 
             var host = hostBuilder.Build();
-
-            if (appOptions.NoobMode)
-                Log.Warning("!!! NOOB MODE IS ENABLED! EVERY LOGIN SUCCEEDS !!!");
 
             Log.Information("Initializing database provider...");
             var databaseProvider = host.Services.GetRequiredService<IDatabaseProvider>();

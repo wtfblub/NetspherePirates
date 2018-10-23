@@ -12,28 +12,28 @@ namespace Netsphere.Network.Message.Auth
         public ulong AccountId { get; set; }
 
         [BlubMember(1)]
-        public uint SessionId { get; set; }
+        public uint Unk1 { get; set; }
 
         [BlubMember(2)]
-        public string Unk1 { get; set; }
+        public string Unk2 { get; set; }
 
         [BlubMember(3)]
-        public string SessionId2 { get; set; }
+        public string SessionId { get; set; }
 
         [BlubMember(4)]
         public AuthLoginResult Result { get; set; }
 
         [BlubMember(5)]
-        public string Unk2 { get; set; }
+        public string Unk3 { get; set; }
 
         [BlubMember(6)]
         public string BannedUntil { get; set; }
 
         public SAuthInEuAckMessage()
         {
-            Unk1 = "";
-            SessionId2 = "";
             Unk2 = "";
+            SessionId = "";
+            Unk3 = "";
             BannedUntil = "";
         }
 
@@ -55,8 +55,7 @@ namespace Netsphere.Network.Message.Auth
         {
             Result = result;
             AccountId = accountId;
-            SessionId = (uint)accountId;
-            SessionId2 = sessionId;
+            SessionId = sessionId;
         }
     }
 

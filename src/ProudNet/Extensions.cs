@@ -276,15 +276,15 @@ namespace ProudNet
 
     internal static class TypeExtensions
     {
-        public static bool IsImplementingHandleInterface(this Type This)
-        {
-            return This.GetTypeInfo().IsImplementingHandleInterface();
-        }
-
-        public static bool IsImplementingHandleInterface(this TypeInfo This)
+        public static bool ImplementsMessageHandler(this TypeInfo This)
         {
             return This.ImplementedInterfaces.Any(x =>
                 x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IHandle<>));
+        }
+
+        public static bool IsMessageHandlerInterface(this Type This)
+        {
+            return This.IsGenericType && This.GetGenericTypeDefinition() == typeof(IHandle<>);
         }
     }
 }

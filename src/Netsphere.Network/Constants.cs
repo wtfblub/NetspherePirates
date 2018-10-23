@@ -3,7 +3,7 @@
     public enum AuthLoginResult : byte
     {
         OK = 0,
-        WrongIdorPw = 1,
+        WrongLogin = 1,
         Banned = 2,
         Failed = 3 // Used for permanent ban
     }
