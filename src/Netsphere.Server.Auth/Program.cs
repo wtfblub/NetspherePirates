@@ -1,5 +1,6 @@
 ﻿using System;
 using DotNetty.Transport.Channels;
+using Foundatio.Caching;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,6 +13,7 @@ using Netsphere.Server.Auth.Handlers;
 using ProudNet;
 using ProudNet.Hosting;
 using Serilog;
+using StackExchange.Redis;
 
 namespace Netsphere.Server.Auth
 {
@@ -30,6 +32,7 @@ namespace Netsphere.Server.Auth
 
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
+            var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.RedisConnectionString);
 
             hostBuilder
                 .ConfigureServices((context, services) =>
@@ -40,7 +43,13 @@ namespace Netsphere.Server.Auth
                         .Configure<AppOptions>(context.Configuration)
                         .Configure<DatabasesOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
-                        .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>();
+                        .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
+                        .AddSingleton(redisConnectionMultiplexer)
+                        .AddSingleton<ICacheClient, RedisCacheClient>()
+                        .AddSingleton(x => new RedisCacheClientOptions
+                        {
+                            ConnectionMultiplexer = x.GetRequiredService<ConnectionMultiplexer>()
+                        });
                 })
                 .ConfigureLogging(builder => builder.AddSerilog())
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))

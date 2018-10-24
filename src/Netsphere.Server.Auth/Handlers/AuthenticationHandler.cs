@@ -1,9 +1,12 @@
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using BlubLib.Security.Cryptography;
+using Foundatio.Caching;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
+using Netsphere.Common;
 using Netsphere.Common.Cryptography;
 using Netsphere.Database;
 using Netsphere.Database.Auth;
@@ -18,17 +21,22 @@ namespace Netsphere.Server.Auth.Handlers
     {
         private readonly ILogger _logger;
         private readonly IDatabaseProvider _databaseProvider;
+        private readonly ICacheClient _cacheClient;
+        private readonly RandomNumberGenerator _randomNumberGenerator;
 
-        public AuthenticationHandler(ILogger<AuthenticationHandler> logger, IDatabaseProvider databaseProvider)
+        public AuthenticationHandler(ILogger<AuthenticationHandler> logger, IDatabaseProvider databaseProvider,
+            ICacheClient cacheClient)
         {
             _logger = logger;
             _databaseProvider = databaseProvider;
+            _cacheClient = cacheClient;
+            _randomNumberGenerator = RandomNumberGenerator.Create();
         }
 
         [Firewall(typeof(MustBeLoggedIn), Invert = true)]
         public async Task<bool> OnHandle(MessageContext context, CAuthInEUReqMessage message)
         {
-            var session = context.Session;
+            var session = context.GetSession<Session>();
             var remoteAddress = session.RemoteEndPoint.Address.ToString();
 
             using (_logger.BeginScope("RemoteEndPoint={RemoteEndPoint} Username={Username}",
@@ -60,7 +68,7 @@ namespace Netsphere.Server.Auth.Handlers
                     }
 
                     var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-                    var ban = account.Bans.First(x => x.Duration == null || x.Date + x.Duration > now);
+                    var ban = account.Bans.FirstOrDefault(x => x.Duration == null || x.Date + x.Duration > now);
 
                     if (ban != null)
                     {
@@ -83,12 +91,20 @@ namespace Netsphere.Server.Auth.Handlers
 
                 _logger.LogInformation("Login success");
 
-                // TODO proper session ids
-                var sessionId = Hash.GetUInt32<CRC32>($"<{account.Username}+{account.Password}>");
-                session.Send(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId.ToString()));
+                var sessionId = NewSessionId();
+                await _cacheClient.SetAsync(Constants.Cache.SessionKey(account.Id), sessionId, TimeSpan.FromMinutes(30));
+                session.Authenticated = true;
+                session.Send(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
             }
 
             return true;
+        }
+
+        private string NewSessionId()
+        {
+            Span<byte> bytes = stackalloc byte[16];
+            _randomNumberGenerator.GetBytes(bytes);
+            return new Guid(bytes).ToString("N");
         }
     }
 }

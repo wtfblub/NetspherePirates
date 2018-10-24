@@ -2,9 +2,17 @@ namespace Netsphere.Common
 {
     public static class Constants
     {
-        public static class Authentication
+        public static class Cache
         {
-            public const int Rfc2898Iterations = 24000;
+            public static string SessionKey(long accountId)
+            {
+                return $"session_{accountId}";
+            }
+
+            public static string SessionKey(ulong accountId)
+            {
+                return $"session_{accountId}";
+            }
         }
     }
 }

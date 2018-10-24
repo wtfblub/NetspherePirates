@@ -1,6 +1,7 @@
 {
   Listener: 127.0.0.1:28002
   WorkerThreads: -1
+  RedisConnectionString: localhost
   Database:
   {
     Auth:
