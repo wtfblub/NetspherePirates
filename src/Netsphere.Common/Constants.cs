@@ -13,6 +13,8 @@ namespace Netsphere.Common
             {
                 return $"session_{accountId}";
             }
+
+            public const string ServerlistKey = "serverlist";
         }
     }
 }

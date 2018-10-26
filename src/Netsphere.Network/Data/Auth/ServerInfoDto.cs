@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using BlubLib.Serialization;
-using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Data.Auth
 {
