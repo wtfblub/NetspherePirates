@@ -12,14 +12,6 @@
       Password: 1234
       Database: auth
     }
-    Game:
-    {
-      Host: localhost
-      Port: 3306
-      Username: root
-      Password: 1234
-      Database: game
-    }
     RunMigration: true
     UseSqlite: false
   }

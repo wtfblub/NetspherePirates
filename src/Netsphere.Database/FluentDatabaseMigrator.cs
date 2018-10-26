@@ -24,33 +24,42 @@ namespace Netsphere.Database
 
         public bool HasMigrationsToApply()
         {
-            return _auth.HasMigrationsToApplyUp() || _game.HasMigrationsToApplyUp();
+            return _auth?.HasMigrationsToApplyUp() == true || _game?.HasMigrationsToApplyUp() == true;
         }
 
         public void MigrateTo(long version)
         {
-            if (_auth.HasMigrationsToApplyDown(version))
-                _auth.MigrateDown(version);
-            else if (_auth.HasMigrationsToApplyUp(version))
-                _auth.MigrateUp(version);
+            if (_auth != null)
+            {
+                if (_auth.HasMigrationsToApplyDown(version))
+                    _auth.MigrateDown(version);
+                else if (_auth.HasMigrationsToApplyUp(version))
+                    _auth.MigrateUp(version);
+            }
 
-            if (_game.HasMigrationsToApplyDown(version))
-                _game.MigrateDown(version);
-            else if (_game.HasMigrationsToApplyUp(version))
-                _game.MigrateUp(version);
+            if (_game != null)
+            {
+                if (_game.HasMigrationsToApplyDown(version))
+                    _game.MigrateDown(version);
+                else if (_game.HasMigrationsToApplyUp(version))
+                    _game.MigrateUp(version);
+            }
         }
 
         public void MigrateTo()
         {
-            if (_auth.HasMigrationsToApplyUp())
+            if (_auth?.HasMigrationsToApplyUp() == true)
                 _auth.MigrateUp();
 
-            if (_game.HasMigrationsToApplyUp())
+            if (_game?.HasMigrationsToApplyUp() == true)
                 _game.MigrateUp();
         }
 
         private static IMigrationRunner CreateRunner(string database, DatabaseOptions options, string dataProvider)
         {
+            if (options == null)
+                return null;
+
             return new ServiceCollection()
                 .AddFluentMigratorCore()
                 .ConfigureRunner(ConfigureRunner)

@@ -28,8 +28,12 @@ namespace Netsphere.Database
             // Make sure the databases exists
             var (_, authConnectionString) = GetConnectionString(_options.Auth);
             var (_, gameConnectionString) = GetConnectionString(_options.Game);
-            CreateDatabaseIfNotExists(authConnectionString);
-            CreateDatabaseIfNotExists(gameConnectionString);
+
+            if (authConnectionString != null)
+                CreateDatabaseIfNotExists(authConnectionString);
+
+            if (gameConnectionString != null)
+                CreateDatabaseIfNotExists(gameConnectionString);
 
             void CreateDatabaseIfNotExists(string connectionString)
             {
@@ -55,12 +59,18 @@ namespace Netsphere.Database
         {
             if (typeof(TContext) == typeof(AuthContext))
             {
+                if (_options.Auth == null)
+                    throw new Exception("No auth database was configured");
+
                 var (provider, conn) = GetConnectionString(_options.Auth);
                 return DynamicCast<TContext>.From(new AuthContext(provider, conn));
             }
 
             if (typeof(TContext) == typeof(GameContext))
             {
+                if (_options.Game == null)
+                    throw new Exception("No game database was configured");
+
                 var (provider, conn) = GetConnectionString(_options.Game);
                 return DynamicCast<TContext>.From(new GameContext(provider, conn));
             }
@@ -70,6 +80,9 @@ namespace Netsphere.Database
 
         private (string provider, string connectionString) GetConnectionString(DatabaseOptions options)
         {
+            if (options == null)
+                return (null, null);
+
             DbConnectionStringBuilder connectionStringBuilder;
 
             if (_options.UseSqlite)
