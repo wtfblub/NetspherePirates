@@ -3,9 +3,18 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Netsphere.Common
 {
+    public static class ObjectExtensions
+    {
+        public static string ToJson(this object This)
+        {
+            return JsonConvert.SerializeObject(This);
+        }
+    }
+
     public static class DnsEndPointExtensions
     {
         public static IPEndPoint ToIPEndPoint(this DnsEndPoint This)

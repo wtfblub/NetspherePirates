@@ -1,6 +1,7 @@
 {
   Listener: 127.0.0.1:28002
   WorkerThreads: -1
+  ServerlistTimeout: 60000
   RedisConnectionString: localhost
   Database:
   {
@@ -17,7 +18,7 @@
   }
   Logging:
   {
-    Name: debug
+    Name: auth
     Directory: logs
     Level: Debug
   }

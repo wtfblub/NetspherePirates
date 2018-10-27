@@ -1,6 +1,8 @@
 ﻿using System;
 using DotNetty.Transport.Channels;
 using Foundatio.Caching;
+using Foundatio.Messaging;
+using Foundatio.Serializer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +12,8 @@ using Netsphere.Common.Hosting;
 using Netsphere.Database;
 using Netsphere.Network.Message.Auth;
 using Netsphere.Server.Auth.Handlers;
+using Netsphere.Server.Auth.Services;
+using Newtonsoft.Json;
 using ProudNet;
 using ProudNet.Hosting;
 using Serilog;
@@ -45,11 +49,21 @@ namespace Netsphere.Server.Auth
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
                         .AddSingleton(redisConnectionMultiplexer)
+                        .AddTransient<ISerializer>(x => new JsonNetSerializer(JsonConvert.DefaultSettings()))
                         .AddSingleton<ICacheClient, RedisCacheClient>()
+                        .AddSingleton<IMessageBus, RedisMessageBus>()
                         .AddSingleton(x => new RedisCacheClientOptions
                         {
-                            ConnectionMultiplexer = x.GetRequiredService<ConnectionMultiplexer>()
-                        });
+                            ConnectionMultiplexer = x.GetRequiredService<ConnectionMultiplexer>(),
+                            Serializer = x.GetRequiredService<ISerializer>()
+                        })
+                        .AddSingleton(x => new RedisMessageBusOptions
+                        {
+                            Subscriber = x.GetRequiredService<ConnectionMultiplexer>().GetSubscriber(),
+                            Serializer = x.GetRequiredService<ISerializer>()
+                        })
+                        .AddSingleton<ServerlistService>()
+                        .AddSingleton<IHostedService>(x => x.GetRequiredService<ServerlistService>());
                 })
                 .ConfigureLogging(builder => builder.AddSerilog())
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
@@ -92,7 +106,10 @@ namespace Netsphere.Server.Auth
             else if (migrator.HasMigrationsToApply())
                 throw new DatabaseVersionMismatchException();
 
-            Log.Information("Press Ctrl + C to shutdown");
+            host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
+            {
+                Log.Information("Press Ctrl + C to shutdown");
+            });
             host.Run();
         }
     }
