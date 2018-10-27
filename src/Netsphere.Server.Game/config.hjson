@@ -1,0 +1,39 @@
+{
+  Server:
+  {
+    Id: 1
+    Name: Netsphere
+    Listener: 127.0.0.1:28004
+    WorkerThreads: -1
+    PlayerLimit: 100
+    ServerUpdateInterval: 30000
+  }
+  RedisConnectionString: localhost
+  Database:
+  {
+    Auth:
+    {
+      Host: localhost
+      Port: 3306
+      Username: root
+      Password: 1234
+      Database: auth
+    }
+    Game:
+    {
+      Host: localhost
+      Port: 3306
+      Username: root
+      Password: 1234
+      Database: game
+    }
+    RunMigration: true
+    UseSqlite: false
+  }
+  Logging:
+  {
+    Name: game
+    Directory: logs
+    Level: Debug
+  }
+}

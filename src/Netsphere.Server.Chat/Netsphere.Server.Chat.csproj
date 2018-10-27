@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RuntimeIdentifiers>win-x86;win-x64;linux-x64</RuntimeIdentifiers>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Foundatio" Version="7.0.1738" />
+    <PackageReference Include="Foundatio.JsonNet" Version="7.0.1738" />
+    <PackageReference Include="Foundatio.Redis" Version="7.0.1584" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Netsphere.Common\Netsphere.Common.csproj" />
+    <ProjectReference Include="..\Netsphere.Database\Netsphere.Database.csproj" />
+    <ProjectReference Include="..\Netsphere\Netsphere.csproj" />
+    <ProjectReference Include="..\Netsphere.Network\Netsphere.Network.csproj" />
+    <ProjectReference Include="..\ProudNet\ProudNet.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config.hjson">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="..\..\Rules.targets" />
+</Project>
