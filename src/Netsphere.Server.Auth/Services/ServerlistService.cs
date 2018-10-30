@@ -37,6 +37,7 @@ namespace Netsphere.Server.Auth.Services
         {
             _logger.LogInformation("Starting...");
             await _messageBus.SubscribeAsync((Action<ServerUpdateMessage>)OnServerUpdate, _shutdown.Token);
+            await _messageBus.SubscribeAsync((Action<ServerShutdownMessage>)OnServerShutdown, _shutdown.Token);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -65,7 +66,6 @@ namespace Netsphere.Server.Auth.Services
         {
             using (_logger.BeginScope("Message={Message}", message.ToJson()))
             {
-                _logger.LogDebug("OnServerUpdate EnterWriteLock");
                 _mutex.EnterWriteLock();
 
                 try
@@ -83,8 +83,6 @@ namespace Netsphere.Server.Auth.Services
                         EndPoint = message.EndPoint,
                         IsEnabled = true
                     }, DateTimeOffset.Now);
-
-                    CheckServerTimeoutIfNeeded();
                 }
                 catch (Exception ex)
                 {
@@ -92,7 +90,29 @@ namespace Netsphere.Server.Auth.Services
                 }
                 finally
                 {
-                    _logger.LogDebug("OnServerUpdate ExitWriteLock");
+                    _mutex.ExitWriteLock();
+                }
+            }
+        }
+
+        private void OnServerShutdown(ServerShutdownMessage message)
+        {
+            using (_logger.BeginScope("Message={Message}", message.ToJson()))
+            {
+                _mutex.EnterWriteLock();
+
+                try
+                {
+                    _logger.LogDebug("Removign...");
+                    var id = (uint)(message.Id << 8 | (byte)message.ServerType);
+                    _servers.Remove(id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unable to remove server");
+                }
+                finally
+                {
                     _mutex.ExitWriteLock();
                 }
             }

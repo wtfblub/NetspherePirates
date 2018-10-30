@@ -40,11 +40,15 @@ namespace Netsphere.Server.Chat.Services
             return Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping...");
+            await _messageBus.PublishAsync(new ServerShutdownMessage
+            {
+                Id = _serverOptions.Id,
+                ServerType = ServerType.Game
+            });
             _isStopped = true;
-            return Task.CompletedTask;
         }
 
         private async void Update()
