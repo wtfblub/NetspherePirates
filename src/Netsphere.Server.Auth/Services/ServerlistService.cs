@@ -103,7 +103,7 @@ namespace Netsphere.Server.Auth.Services
 
                 try
                 {
-                    _logger.LogDebug("Removign...");
+                    _logger.LogDebug("Removing...");
                     var id = (uint)(message.Id << 8 | (byte)message.ServerType);
                     _servers.Remove(id);
                 }
