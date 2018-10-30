@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using BlubLib.Security.Cryptography;
 using Foundatio.Caching;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
@@ -50,8 +49,7 @@ namespace Netsphere.Server.Auth.Handlers
                     var username = message.Username.ToLower();
                     account = await db.Accounts
                         .LoadWith(x => x.Bans)
-                        .Where(x => x.Username == username)
-                        .FirstOrDefaultAsync();
+                        .FirstOrDefaultAsync(x => x.Username == username);
 
                     if (account == null)
                     {
@@ -76,7 +74,7 @@ namespace Netsphere.Server.Auth.Handlers
                         if (ban.Duration != null)
                             unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
 
-                        _logger.LogInformation("Account is banned until {UnbanDate}", username, unbanDate);
+                        _logger.LogInformation("Account is banned until {UnbanDate}", unbanDate);
                         await session.SendAsync(new SAuthInEuAckMessage(unbanDate));
                         return true;
                     }

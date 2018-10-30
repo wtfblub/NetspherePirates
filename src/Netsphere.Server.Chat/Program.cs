@@ -55,14 +55,14 @@ namespace Netsphere.Server.Chat
                         .UseNetworkConfiguration((context, options) =>
                         {
                             options.Version = new Guid("{97d36acf-8cc0-4dfb-bcc9-97cab255e2bc}");
-                            options.TcpListener = appOptions.Server.Listener;
+                            options.TcpListener = appOptions.Network.Listener;
                         })
                         .UseThreadingConfiguration((context, options) =>
                         {
                             options.SocketListenerThreadsFactory = () => new MultithreadEventLoopGroup(1);
-                            options.SocketWorkerThreadsFactory = () => appOptions.Server.WorkerThreads < 1
+                            options.SocketWorkerThreadsFactory = () => appOptions.Network.WorkerThreads < 1
                                 ? new MultithreadEventLoopGroup()
-                                : new MultithreadEventLoopGroup(appOptions.Server.WorkerThreads);
+                                : new MultithreadEventLoopGroup(appOptions.Network.WorkerThreads);
                             options.WorkerThreadFactory = () => new SingleThreadEventLoop();
                         });
                 })
@@ -72,7 +72,8 @@ namespace Netsphere.Server.Chat
                         .AddSingleton<IHostLifetime, ConsoleApplicationLifetime>()
                         .Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(1))
                         .Configure<AppOptions>(context.Configuration)
-                        .Configure<ServerOptions>(context.Configuration.GetSection(nameof(AppOptions.Server)))
+                        .Configure<NetworkOptions>(context.Configuration.GetSection(nameof(AppOptions.Network)))
+                        .Configure<ServerListOptions>(context.Configuration.GetSection(nameof(AppOptions.ServerList)))
                         .Configure<DatabasesOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()

@@ -1,13 +1,18 @@
 {
-  Server:
+  Network:
+  {
+    Listener: 127.0.0.1:28004
+    WorkerThreads: -1
+    MaxSessions: 100
+  }
+  ServerList:
   {
     Id: 1
     Name: Netsphere
-    Listener: 127.0.0.1:28004
-    WorkerThreads: -1
-    PlayerLimit: 100
-    ServerUpdateInterval: 30000
+    Address: 127.0.0.1
+    UpdateInterval: 30000
   }
+  ClientVersions: ["2.8.3.26956"]
   RedisConnectionString: localhost
   Database:
   {

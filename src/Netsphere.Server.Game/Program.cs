@@ -12,6 +12,7 @@ using Netsphere.Common.Hosting;
 using Netsphere.Database;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
+using Netsphere.Network.Serializers;
 using Netsphere.Server.Game.Handlers;
 using Netsphere.Server.Game.Services;
 using Newtonsoft.Json;
@@ -57,15 +58,22 @@ namespace Netsphere.Server.Game
                         .UseNetworkConfiguration((context, options) =>
                         {
                             options.Version = new Guid("{beb92241-8333-4117-ab92-9b4af78c688f}");
-                            options.TcpListener = appOptions.Server.Listener;
+                            options.TcpListener = appOptions.Network.Listener;
                         })
                         .UseThreadingConfiguration((context, options) =>
                         {
                             options.SocketListenerThreadsFactory = () => new MultithreadEventLoopGroup(1);
-                            options.SocketWorkerThreadsFactory = () => appOptions.Server.WorkerThreads < 1
+                            options.SocketWorkerThreadsFactory = () => appOptions.Network.WorkerThreads < 1
                                 ? new MultithreadEventLoopGroup()
-                                : new MultithreadEventLoopGroup(appOptions.Server.WorkerThreads);
+                                : new MultithreadEventLoopGroup(appOptions.Network.WorkerThreads);
                             options.WorkerThreadFactory = () => new SingleThreadEventLoop();
+                        })
+                        .ConfigureSerializer(serializer =>
+                        {
+                            serializer.AddSerializer(new CharacterStyleSerializer());
+                            serializer.AddSerializer(new ItemNumberSerializer());
+                            serializer.AddSerializer(new MatchKeySerializer());
+                            serializer.AddSerializer(new VersionSerializer());
                         });
                 })
                 .ConfigureServices((context, services) =>
@@ -74,7 +82,8 @@ namespace Netsphere.Server.Game
                         .AddSingleton<IHostLifetime, ConsoleApplicationLifetime>()
                         .Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(1))
                         .Configure<AppOptions>(context.Configuration)
-                        .Configure<ServerOptions>(context.Configuration.GetSection(nameof(AppOptions.Server)))
+                        .Configure<NetworkOptions>(context.Configuration.GetSection(nameof(AppOptions.Network)))
+                        .Configure<ServerListOptions>(context.Configuration.GetSection(nameof(AppOptions.ServerList)))
                         .Configure<DatabasesOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()

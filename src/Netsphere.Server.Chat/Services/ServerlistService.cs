@@ -5,6 +5,7 @@ using Foundatio.Messaging;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Netsphere.Common.Configuration;
 using Netsphere.Common.Messaging;
 using ProudNet;
 using ProudNet.Hosting.Services;
@@ -17,23 +18,25 @@ namespace Netsphere.Server.Chat.Services
         private readonly ISessionManager _sessionManager;
         private readonly ISchedulerService _scheduler;
         private readonly IMessageBus _messageBus;
-        private readonly ServerOptions _options;
+        private readonly NetworkOptions _networkOptions;
+        private readonly ServerListOptions _serverOptions;
         private bool _isStopped;
 
         public ServerlistService(ILogger<ServerlistService> logger, ISessionManager sessionManager, ISchedulerService scheduler,
-            IMessageBus messageBus, IOptions<ServerOptions> options)
+            IMessageBus messageBus, IOptions<NetworkOptions> networkOptions, IOptions<ServerListOptions> serverOptions)
         {
             _logger = logger;
             _sessionManager = sessionManager;
             _scheduler = scheduler;
             _messageBus = messageBus;
-            _options = options.Value;
+            _networkOptions = networkOptions.Value;
+            _serverOptions = serverOptions.Value;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting...");
-            _scheduler.ScheduleAsync(Update, _options.ServerUpdateInterval);
+            _scheduler.ScheduleAsync(Update, _serverOptions.UpdateInterval);
             return Task.CompletedTask;
         }
 
@@ -54,14 +57,14 @@ namespace Netsphere.Server.Chat.Services
                 _logger.LogDebug("Updating serverlist...");
                 await _messageBus.PublishAsync(new ServerUpdateMessage
                 {
-                    Id = _options.Id,
+                    Id = _serverOptions.Id,
                     ServerType = ServerType.Chat,
-                    Name = _options.Name,
+                    Name = _serverOptions.Name,
                     Online = (ushort)_sessionManager.Sessions.Count,
-                    Limit = (ushort)_options.PlayerLimit,
-                    EndPoint = _options.Listener
+                    Limit = (ushort)_networkOptions.MaxSessions,
+                    EndPoint = _networkOptions.Listener
                 });
-                await _scheduler.ScheduleAsync(Update, _options.ServerUpdateInterval);
+                await _scheduler.ScheduleAsync(Update, _serverOptions.UpdateInterval);
             }
             catch (Exception ex)
             {
