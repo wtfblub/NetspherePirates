@@ -38,7 +38,7 @@ namespace Netsphere.Server.Game
 
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
-            var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.RedisConnectionString);
+            var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
             hostBuilder
                 .ConfigureLogging(builder => builder.AddSerilog())
@@ -84,7 +84,7 @@ namespace Netsphere.Server.Game
                         .Configure<AppOptions>(context.Configuration)
                         .Configure<NetworkOptions>(context.Configuration.GetSection(nameof(AppOptions.Network)))
                         .Configure<ServerListOptions>(context.Configuration.GetSection(nameof(AppOptions.ServerList)))
-                        .Configure<DatabasesOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
+                        .Configure<DatabaseOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
                         .AddSingleton(redisConnectionMultiplexer)

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Data.Common;
 using BlubLib;
 using LinqToDB;
 using LinqToDB.Data;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 using Netsphere.Common.Configuration;
@@ -12,9 +10,9 @@ namespace Netsphere.Database
 {
     public class DatabaseProvider : IDatabaseProvider
     {
-        private readonly DatabasesOptions _options;
+        private readonly DatabaseOptions _options;
 
-        public DatabaseProvider(IOptions<DatabasesOptions> options)
+        public DatabaseProvider(IOptions<DatabaseOptions> options)
         {
             LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
             _options = options.Value;
@@ -26,17 +24,14 @@ namespace Netsphere.Database
                 return;
 
             // Make sure the databases exists
-            var (_, authConnectionString) = GetConnectionString(_options.Auth);
-            var (_, gameConnectionString) = GetConnectionString(_options.Game);
-
-            if (authConnectionString != null)
-                CreateDatabaseIfNotExists(authConnectionString);
-
-            if (gameConnectionString != null)
-                CreateDatabaseIfNotExists(gameConnectionString);
+            CreateDatabaseIfNotExists(_options.ConnectionStrings.Auth);
+            CreateDatabaseIfNotExists(_options.ConnectionStrings.Game);
 
             void CreateDatabaseIfNotExists(string connectionString)
             {
+                if (string.IsNullOrWhiteSpace(connectionString))
+                    return;
+
                 var connectionStringBuilder = new MySqlConnectionStringBuilder(connectionString);
                 var database = connectionStringBuilder.Database;
                 connectionStringBuilder.Database = null;
@@ -59,58 +54,26 @@ namespace Netsphere.Database
         {
             if (typeof(TContext) == typeof(AuthContext))
             {
-                if (_options.Auth == null)
+                if (string.IsNullOrWhiteSpace(_options.ConnectionStrings.Auth))
                     throw new Exception("No auth database was configured");
 
-                var (provider, conn) = GetConnectionString(_options.Auth);
-                return DynamicCast<TContext>.From(new AuthContext(provider, conn));
+                return DynamicCast<TContext>.From(new AuthContext(GetProvider(), _options.ConnectionStrings.Auth));
             }
 
             if (typeof(TContext) == typeof(GameContext))
             {
-                if (_options.Game == null)
+                if (string.IsNullOrWhiteSpace(_options.ConnectionStrings.Game))
                     throw new Exception("No game database was configured");
 
-                var (provider, conn) = GetConnectionString(_options.Game);
-                return DynamicCast<TContext>.From(new GameContext(provider, conn));
+                return DynamicCast<TContext>.From(new GameContext(GetProvider(), _options.ConnectionStrings.Game));
             }
 
             throw new ArgumentException("Invalid DataContext", nameof(TContext));
         }
 
-        private (string provider, string connectionString) GetConnectionString(DatabaseOptions options)
+        private string GetProvider()
         {
-            if (options == null)
-                return (null, null);
-
-            DbConnectionStringBuilder connectionStringBuilder;
-
-            if (_options.UseSqlite)
-            {
-                connectionStringBuilder = new SqliteConnectionStringBuilder
-                {
-                    DataSource = options.Host
-                };
-                if (!string.IsNullOrWhiteSpace(options.ConnectionString))
-                    connectionStringBuilder.ConnectionString = options.ConnectionString;
-
-                return (ProviderName.SQLite, connectionStringBuilder.ConnectionString);
-            }
-
-            connectionStringBuilder = new MySqlConnectionStringBuilder
-            {
-                Server = options.Host,
-                Port = (uint)options.Port,
-                Database = options.Database,
-                UserID = options.Username,
-                Password = options.Password,
-                SslMode = MySqlSslMode.None,
-                Pooling = true
-            };
-            if (!string.IsNullOrWhiteSpace(options.ConnectionString))
-                connectionStringBuilder.ConnectionString = options.ConnectionString;
-
-            return (ProviderName.MySql, connectionStringBuilder.ConnectionString);
+            return _options.UseSqlite ? ProviderName.SQLite : ProviderName.MySql;
         }
     }
 }

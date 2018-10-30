@@ -9,8 +9,7 @@ namespace Netsphere.Server.Auth
         public IPEndPoint Listener { get; set; }
         public int WorkerThreads { get; set; }
         public TimeSpan ServerlistTimeout { get; set; }
-        public string RedisConnectionString { get; set; }
-        public DatabasesOptions Database { get; set; }
+        public DatabaseOptions Database { get; set; }
         public LoggerOptions Logging { get; set; }
     }
 }

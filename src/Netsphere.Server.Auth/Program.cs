@@ -36,7 +36,7 @@ namespace Netsphere.Server.Auth
 
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
-            var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.RedisConnectionString);
+            var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
             hostBuilder
                 .ConfigureServices((context, services) =>
@@ -45,7 +45,7 @@ namespace Netsphere.Server.Auth
                         .AddSingleton<IHostLifetime, ConsoleApplicationLifetime>()
                         .Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(1))
                         .Configure<AppOptions>(context.Configuration)
-                        .Configure<DatabasesOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
+                        .Configure<DatabaseOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
                         .AddSingleton(redisConnectionMultiplexer)

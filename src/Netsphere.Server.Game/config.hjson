@@ -13,24 +13,13 @@
     UpdateInterval: 30000
   }
   ClientVersions: ["2.8.3.26956"]
-  RedisConnectionString: localhost
   Database:
   {
-    Auth:
+    ConnectionStrings:
     {
-      Host: localhost
-      Port: 3306
-      Username: root
-      Password: 1234
-      Database: auth
-    }
-    Game:
-    {
-      Host: localhost
-      Port: 3306
-      Username: root
-      Password: 1234
-      Database: game
+      redis: localhost
+      auth: Server=localhost;Database=auth;Uid=root;Pwd=1234;SslMode=None;
+      game: Server=localhost;Database=game;Uid=root;Pwd=1234;SslMode=None;
     }
     RunMigration: true
     UseSqlite: false

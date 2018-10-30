@@ -2,10 +2,8 @@
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
 using LinqToDB;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using MySql.Data.MySqlClient;
 using Netsphere.Common.Configuration;
 
 namespace Netsphere.Database
@@ -15,11 +13,11 @@ namespace Netsphere.Database
         private readonly IMigrationRunner _auth;
         private readonly IMigrationRunner _game;
 
-        public FluentDatabaseMigrator(IOptions<DatabasesOptions> options)
+        public FluentDatabaseMigrator(IOptions<DatabaseOptions> options)
         {
             var provider = options.Value.UseSqlite ? ProviderName.SQLite : ProviderName.MySql;
-            _auth = CreateRunner(nameof(Migration.Auth), options.Value.Auth, provider);
-            _game = CreateRunner(nameof(Migration.Game), options.Value.Game, provider);
+            _auth = CreateRunner(nameof(Migration.Auth), options.Value.ConnectionStrings.Auth, provider);
+            _game = CreateRunner(nameof(Migration.Game), options.Value.ConnectionStrings.Game, provider);
         }
 
         public bool HasMigrationsToApply()
@@ -55,9 +53,9 @@ namespace Netsphere.Database
                 _game.MigrateUp();
         }
 
-        private static IMigrationRunner CreateRunner(string database, DatabaseOptions options, string dataProvider)
+        private static IMigrationRunner CreateRunner(string database, string connectionString, string dataProvider)
         {
-            if (options == null)
+            if (string.IsNullOrWhiteSpace(connectionString))
                 return null;
 
             return new ServiceCollection()
@@ -77,36 +75,12 @@ namespace Netsphere.Database
                     case ProviderName.SQLite:
                     {
                         builder.AddSQLite();
-                        var connectionStringBuilder = new SqliteConnectionStringBuilder();
-                        if (string.IsNullOrWhiteSpace(options.ConnectionString))
-                            connectionStringBuilder.DataSource = options.Host;
-                        else
-                            connectionStringBuilder.ConnectionString = options.ConnectionString;
-
-                        builder.WithGlobalConnectionString(connectionStringBuilder.ConnectionString);
                         break;
                     }
 
                     case ProviderName.MySql:
                     {
                         builder.AddMySql5();
-                        var connectionStringBuilder = new MySqlConnectionStringBuilder();
-                        if (string.IsNullOrWhiteSpace(options.ConnectionString))
-                        {
-                            connectionStringBuilder.Server = options.Host;
-                            connectionStringBuilder.Port = (uint)options.Port;
-                            connectionStringBuilder.Database = options.Database;
-                            connectionStringBuilder.UserID = options.Username;
-                            connectionStringBuilder.Password = options.Password;
-                            connectionStringBuilder.SslMode = MySqlSslMode.None;
-                            connectionStringBuilder.Pooling = true;
-                        }
-                        else
-                        {
-                            connectionStringBuilder.ConnectionString = options.ConnectionString;
-                        }
-
-                        builder.WithGlobalConnectionString(connectionStringBuilder.ConnectionString);
                         break;
                     }
 
@@ -114,6 +88,7 @@ namespace Netsphere.Database
                         throw new NotSupportedException($"DataProvider {dataProvider} is not supported");
                 }
 
+                builder.WithGlobalConnectionString(connectionString);
                 builder.WithMigrationsIn(typeof(FluentDatabaseMigrator).Assembly);
             }
         }
