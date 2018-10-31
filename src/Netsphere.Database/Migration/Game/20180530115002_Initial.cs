@@ -37,8 +37,7 @@ namespace Netsphere.Database.Migration.Game
                 .WithColumn("IsEnabled").AsBoolean().NotNullable();
 
             Create.Table("shop_items")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
-                .WithColumn("ItemNumber").AsInt32().NotNullable().Unique()
+                .WithColumn("Id").AsInt64().NotNullable().PrimaryKey()
                 .WithColumn("RequiredGender").AsByte().NotNullable()
                 .WithColumn("RequiredLicense").AsByte().NotNullable()
                 .WithColumn("Colors").AsByte().NotNullable()
@@ -73,8 +72,7 @@ namespace Netsphere.Database.Migration.Game
                 .WithColumn("RequiredSecurityLevel").AsByte().NotNullable();
 
             Create.Table("players")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
-                .WithColumn("AccountId").AsInt32().NotNullable().Unique()
+                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey()
                 .WithColumn("TutorialState").AsByte().NotNullable()
                 .WithColumn("TotalExperience").AsInt32().NotNullable()
                 .WithColumn("PEN").AsInt32().NotNullable()
@@ -84,7 +82,7 @@ namespace Netsphere.Database.Migration.Game
                 .WithColumn("CurrentCharacterSlot").AsByte().NotNullable();
 
             Create.Table("player_items")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
+                .WithColumn("Id").AsInt64().NotNullable().PrimaryKey()
                 .WithColumn("PlayerId").AsInt32().NotNullable().ForeignKey("players", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("ShopItemInfoId").AsInt32().NotNullable().ForeignKey("shop_iteminfos", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("ShopPriceId").AsInt32().NotNullable().ForeignKey("shop_prices", "Id").OnDelete(Rule.Cascade)
@@ -96,7 +94,7 @@ namespace Netsphere.Database.Migration.Game
 
             {
                 var table = Create.Table("player_characters")
-                    .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
+                    .WithColumn("Id").AsInt64().NotNullable().PrimaryKey()
                     .WithColumn("PlayerId").AsInt32().NotNullable().ForeignKey("players", "Id").OnDelete(Rule.Cascade)
                     .WithColumn("Slot").AsByte().NotNullable()
                     .WithColumn("Gender").AsByte().NotNullable()
@@ -120,7 +118,7 @@ namespace Netsphere.Database.Migration.Game
                 void AddItemColumn(string name)
                 {
                     table.WithColumn(name)
-                        .AsInt32()
+                        .AsInt64()
                         .Nullable()
                         .WithDefaultValue(null)
                         .ForeignKey("player_items", "Id").OnDelete(Rule.SetNull);
@@ -128,19 +126,19 @@ namespace Netsphere.Database.Migration.Game
             }
 
             Create.Table("player_deny")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
+                .WithColumn("Id").AsInt64().NotNullable().PrimaryKey()
                 .WithColumn("PlayerId").AsInt32().NotNullable().ForeignKey("players", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("DenyPlayerId").AsInt32().NotNullable().ForeignKey("players", "Id").OnDelete(Rule.Cascade);
 
             Create.Table("player_licenses")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
+                .WithColumn("Id").AsInt64().NotNullable().PrimaryKey()
                 .WithColumn("PlayerId").AsInt32().NotNullable().ForeignKey("players", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("License").AsByte().NotNullable()
                 .WithColumn("FirstCompletedDate").AsInt64().NotNullable()
                 .WithColumn("CompletedCount").AsInt32().NotNullable();
 
             Create.Table("player_mails")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
+                .WithColumn("Id").AsInt64().NotNullable().PrimaryKey()
                 .WithColumn("PlayerId").AsInt32().NotNullable().ForeignKey("players", "Id")
                 .WithColumn("SenderPlayerId").AsInt32().NotNullable().ForeignKey("players", "Id")
                 .WithColumn("SentDate").AsInt64().NotNullable()
@@ -150,7 +148,7 @@ namespace Netsphere.Database.Migration.Game
                 .WithColumn("IsMailDeleted").AsBoolean().NotNullable();
 
             Create.Table("player_settings")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
+                .WithColumn("Id").AsInt64().NotNullable().PrimaryKey()
                 .WithColumn("PlayerId").AsInt32().NotNullable().ForeignKey("players", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("Setting").AsString(100).NotNullable()
                 .WithColumn("Value").AsString(512).NotNullable();

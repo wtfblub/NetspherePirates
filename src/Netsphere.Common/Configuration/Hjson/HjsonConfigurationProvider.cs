@@ -13,7 +13,7 @@ namespace Netsphere.Common.Configuration.Hjson
 
         public override void Load(Stream stream)
         {
-            var hjson = HjsonValue.Load(stream);//.ToString(Stringify.Plain);
+            var hjson = HjsonValue.Load(stream);
             using (var jsonStream = new MemoryStream())
             {
                 hjson.Save(jsonStream);

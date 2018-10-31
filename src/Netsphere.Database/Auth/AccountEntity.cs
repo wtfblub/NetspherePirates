@@ -5,8 +5,12 @@ using LinqToDB.Mapping;
 namespace Netsphere.Database.Auth
 {
     [Table("accounts")]
-    public class AccountEntity : Entity
+    public class AccountEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column(CanBeNull = false)]
         public string Username { get; set; }
 

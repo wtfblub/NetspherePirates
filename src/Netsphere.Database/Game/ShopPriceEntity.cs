@@ -3,8 +3,12 @@
 namespace Netsphere.Database.Game
 {
     [Table("shop_prices")]
-    public class ShopPriceEntity : Entity
+    public class ShopPriceEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column]
         public int PriceGroupId { get; set; }
 

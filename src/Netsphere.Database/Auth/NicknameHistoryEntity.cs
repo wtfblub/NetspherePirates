@@ -5,6 +5,10 @@ namespace Netsphere.Database.Auth
     [Table("nickname_history")]
     public class NicknameHistoryEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column]
         public int AccountId { get; set; }
 

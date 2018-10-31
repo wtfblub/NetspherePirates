@@ -3,8 +3,12 @@
 namespace Netsphere.Database.Game
 {
     [Table("license_rewards")]
-    public class LicenseRewardEntity : Entity
+    public class LicenseRewardEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column]
         public int ShopItemInfoId { get; set; }
 

@@ -5,10 +5,10 @@ using LinqToDB.Mapping;
 namespace Netsphere.Database.Game
 {
     [Table("shop_items")]
-    public class ShopItemEntity : Entity
+    public class ShopItemEntity
     {
-        [Column]
-        public int ItemNumber { get; set; }
+        [PrimaryKey]
+        public long Id { get; set; }
 
         [Column]
         public byte RequiredGender { get; set; }

@@ -3,8 +3,11 @@
 namespace Netsphere.Database.Game
 {
     [Table("player_items")]
-    public class PlayerItemEntity : Entity
+    public class PlayerItemEntity
     {
+        [PrimaryKey]
+        public long Id { get; set; }
+
         [Column]
         public int PlayerId { get; set; }
 

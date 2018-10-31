@@ -3,8 +3,12 @@
 namespace Netsphere.Database.Auth
 {
     [Table("login_history")]
-    public class LoginHistoryEntity : Entity
+    public class LoginHistoryEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column]
         public int AccountId { get; set; }
 

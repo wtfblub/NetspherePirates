@@ -3,8 +3,12 @@
 namespace Netsphere.Database.Auth
 {
     [Table("bans")]
-    public class BanEntity : Entity
+    public class BanEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column]
         public int AccountId { get; set; }
 

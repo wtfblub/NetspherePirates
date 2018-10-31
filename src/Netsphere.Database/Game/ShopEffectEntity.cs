@@ -3,8 +3,12 @@
 namespace Netsphere.Database.Game
 {
     [Table("shop_effects")]
-    public class ShopEffectEntity : Entity
+    public class ShopEffectEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column]
         public int EffectGroupId { get; set; }
 

@@ -5,8 +5,12 @@ using LinqToDB.Mapping;
 namespace Netsphere.Database.Game
 {
     [Table("shop_price_groups")]
-    public class ShopPriceGroupEntity : Entity
+    public class ShopPriceGroupEntity
     {
+        [PrimaryKey]
+        [Identity]
+        public int Id { get; set; }
+
         [Column(CanBeNull = false)]
         public string Name { get; set; }
 
