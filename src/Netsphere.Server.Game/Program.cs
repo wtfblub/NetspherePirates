@@ -16,6 +16,7 @@ using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
 using Netsphere.Server.Game.Handlers;
+using Netsphere.Server.Game.Services;
 using Newtonsoft.Json;
 using ProudNet;
 using ProudNet.Hosting;
@@ -104,8 +105,12 @@ namespace Netsphere.Server.Game
                             Subscriber = x.GetRequiredService<ConnectionMultiplexer>().GetSubscriber(),
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
-                        .AddSingleton<ServerlistService>()
-                        .AddSingleton<IHostedService>(x => x.GetRequiredService<ServerlistService>());
+                        .AddTransient<Player>()
+                        .AddTransient<LicenseManager>()
+                        .AddService<IdGeneratorService>()
+                        .AddHostedServiceEx<ServerlistService>()
+                        .AddHostedServiceEx<GameDataService>()
+                        .AddHostedServiceEx<ChannelService>();
                 });
 
             var host = hostBuilder.Build();
@@ -122,9 +127,7 @@ namespace Netsphere.Server.Game
                 throw new DatabaseVersionMismatchException();
 
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
-            {
-                Log.Information("Press Ctrl + C to shutdown");
-            });
+                Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
         }
 

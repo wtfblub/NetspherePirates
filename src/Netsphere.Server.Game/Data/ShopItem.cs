@@ -22,8 +22,8 @@ namespace Netsphere.Server.Game.Data
         public ShopItem(ShopItemEntity entity, GameDataService gameDataService)
         {
             ItemNumber = entity.Id;
-            Gender = (Gender) entity.RequiredGender;
-            License = (ItemLicense) entity.RequiredLicense;
+            Gender = (Gender)entity.RequiredGender;
+            License = (ItemLicense)entity.RequiredLicense;
             ColorGroup = entity.Colors;
             UniqueColorGroup = entity.UniqueColors;
             MinLevel = entity.RequiredLevel;

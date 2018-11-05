@@ -91,8 +91,8 @@ namespace Netsphere.Server.Chat
                             Subscriber = x.GetRequiredService<ConnectionMultiplexer>().GetSubscriber(),
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
-                        .AddSingleton<ServerlistService>()
-                        .AddSingleton<IHostedService>(x => x.GetRequiredService<ServerlistService>());
+                        .AddService<IdGeneratorService>()
+                        .AddHostedServiceEx<ServerlistService>();
                 });
 
             var host = hostBuilder.Build();
@@ -109,9 +109,7 @@ namespace Netsphere.Server.Chat
                 throw new DatabaseVersionMismatchException();
 
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
-            {
-                Log.Information("Press Ctrl + C to shutdown");
-            });
+                Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
         }
     }

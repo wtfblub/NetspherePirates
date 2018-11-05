@@ -401,8 +401,10 @@ namespace Netsphere.Server.Game.Services
                 };
 
                 if (itemDto.action.@float != null)
+                {
                     item.ValuesF = itemDto.action.@float
                         .Select(f => float.Parse(f.value.Replace("f", ""), CultureInfo.InvariantCulture)).ToList();
+                }
 
                 if (itemDto.action.integer != null)
                     item.Values = itemDto.action.integer.Select(i => i.value).ToList();
@@ -441,8 +443,10 @@ namespace Netsphere.Server.Game.Services
                 };
 
                 if (itemDto.weapon.@float != null)
+                {
                     item.ValuesF = itemDto.weapon.@float
                         .Select(f => float.Parse(f.value.Replace("f", ""), CultureInfo.InvariantCulture)).ToList();
+                }
 
                 if (itemDto.weapon.integer != null)
                     item.Values = itemDto.weapon.integer.Select(i => i.value).ToList();

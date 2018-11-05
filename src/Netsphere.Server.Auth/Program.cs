@@ -107,9 +107,7 @@ namespace Netsphere.Server.Auth
                 throw new DatabaseVersionMismatchException();
 
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
-            {
-                Log.Information("Press Ctrl + C to shutdown");
-            });
+                Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
         }
     }

@@ -14,7 +14,7 @@ namespace Netsphere.Server.Game.Data
         public ShopPriceGroup(ShopPriceGroupEntity entity)
         {
             Id = entity.Id;
-            PriceType = (ItemPriceType) entity.PriceType;
+            PriceType = (ItemPriceType)entity.PriceType;
             Name = entity.Name;
             Prices = entity.ShopPrices.Select(x => new ShopPrice(x)).ToList();
         }
