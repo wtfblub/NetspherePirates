@@ -4,9 +4,9 @@ using ProudNet;
 
 namespace Netsphere.Server.Game
 {
-    internal class Session : ProudSession
+    public class Session : ProudSession
     {
-        public bool Authenticated { get; set; }
+        public Player Player { get; set; }
 
         public Session(ILogger logger, uint hostId, IChannel channel)
             : base(logger, hostId, channel)

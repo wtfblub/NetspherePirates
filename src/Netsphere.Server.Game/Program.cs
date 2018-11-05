@@ -1,5 +1,6 @@
 ﻿using System;
 using DotNetty.Transport.Channels;
+using ExpressMapper;
 using Foundatio.Caching;
 using Foundatio.Messaging;
 using Foundatio.Serializer;
@@ -10,11 +11,11 @@ using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
 using Netsphere.Database;
+using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
 using Netsphere.Server.Game.Handlers;
-using Netsphere.Server.Game.Services;
 using Newtonsoft.Json;
 using ProudNet;
 using ProudNet.Hosting;
@@ -36,6 +37,7 @@ namespace Netsphere.Server.Game
 
             Log.Information("Starting...");
 
+            ConfigureMapper();
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
@@ -85,6 +87,7 @@ namespace Netsphere.Server.Game
                         .Configure<NetworkOptions>(context.Configuration.GetSection(nameof(AppOptions.Network)))
                         .Configure<ServerListOptions>(context.Configuration.GetSection(nameof(AppOptions.ServerList)))
                         .Configure<DatabaseOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
+                        .Configure<IdGeneratorOptions>(x => x.Id = 0)
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
                         .AddSingleton(redisConnectionMultiplexer)
@@ -123,6 +126,33 @@ namespace Netsphere.Server.Game
                 Log.Information("Press Ctrl + C to shutdown");
             });
             host.Run();
+        }
+
+        private static void ConfigureMapper()
+        {
+            Mapper.Register<Channel, ChannelInfoDto>()
+                .Member(dest => dest.ChannelId, src => src.Id)
+                .Member(dest => dest.PlayerCount, src => src.Players.Count);
+
+            Mapper.Register<PlayerItem, ItemDto>()
+                .Member(dest => dest.Refund, src => src.CalculateRefund())
+                .Member(dest => dest.PurchaseTime, src => src.PurchaseDate.ToUnixTimeSeconds())
+                .Member(dest => dest.ExpireTime,
+                    src => src.ExpireDate == DateTimeOffset.MinValue ? -1 : src.ExpireDate.ToUnixTimeSeconds())
+
+                // ToDo
+                .Value(dest => dest.TimeLeft, 0)
+                .Value(dest => dest.Unk1, (uint)0)
+                .Value(dest => dest.Unk2, 0)
+                .Value(dest => dest.Unk3, 0)
+                .Value(dest => dest.Unk4, 0)
+                .Value(dest => dest.Unk5, (uint)0)
+                .Value(dest => dest.Unk6, (uint)0);
+
+            Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
+                .Member(dest => dest.ItemId, src => src.Id);
+
+            Mapper.Compile(CompilationTypes.Source);
         }
     }
 }
