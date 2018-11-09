@@ -140,11 +140,8 @@ namespace Netsphere.Server.Game.Handlers
                 {
                     var plr = await db.Players
                         .LoadWith(x => x.Characters)
-                        .LoadWith(x => x.Ignores)
                         .LoadWith(x => x.Items)
                         .LoadWith(x => x.Licenses)
-                        .LoadWith(x => x.Inbox)
-                        .LoadWith(x => x.Settings)
                         .FirstOrDefaultAsync(x => x.Id == accountEntity.Id);
 
                     if (plr == null)
