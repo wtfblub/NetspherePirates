@@ -7,6 +7,7 @@ namespace Netsphere.Server.Game
     public class Session : ProudSession
     {
         public Player Player { get; set; }
+        public string SessionId { get; set; }
 
         public Session(ILogger logger, uint hostId, IChannel channel)
             : base(logger, hostId, channel)

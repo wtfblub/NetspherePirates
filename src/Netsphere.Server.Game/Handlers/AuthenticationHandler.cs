@@ -165,6 +165,7 @@ namespace Netsphere.Server.Game.Handlers
 
                     session.Player = _serviceProvider.GetRequiredService<Player>();
                     session.Player.Initialize(session, account, plr);
+                    session.SessionId = message.SessionId;
                 }
 
                 _playerManager.Add(session.Player);

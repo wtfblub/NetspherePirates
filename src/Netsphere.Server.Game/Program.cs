@@ -107,10 +107,12 @@ namespace Netsphere.Server.Game
                         })
                         .AddTransient<Player>()
                         .AddTransient<LicenseManager>()
+                        .AddSingleton<PlayerManager>()
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()
                         .AddHostedServiceEx<GameDataService>()
-                        .AddHostedServiceEx<ChannelService>();
+                        .AddHostedServiceEx<ChannelService>()
+                        .AddHostedServiceEx<IpcService>();
                 });
 
             var host = hostBuilder.Build();
