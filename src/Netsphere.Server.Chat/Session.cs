@@ -4,9 +4,13 @@ using ProudNet;
 
 namespace Netsphere.Server.Chat
 {
-    internal class Session : ProudSession
+    public class Session : ProudSession
     {
-        public bool Authenticated { get; set; }
+        public ulong AccountId { get; set; }
+        public string Nickname { get; set; }
+        public Mailbox Mailbox { get; set; }
+        public DenyManager Ignore { get; set; }
+        public PlayerSettingManager Settings { get; set; }
 
         public Session(ILogger logger, uint hostId, IChannel channel)
             : base(logger, hostId, channel)

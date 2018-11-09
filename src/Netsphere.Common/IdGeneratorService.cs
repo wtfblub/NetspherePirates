@@ -31,6 +31,8 @@ namespace Netsphere.Common
         Item,
         Character,
         License,
-        Deny
+        Deny,
+        Setting,
+        Mail
     }
 }

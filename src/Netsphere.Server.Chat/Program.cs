@@ -75,6 +75,7 @@ namespace Netsphere.Server.Chat
                         .Configure<NetworkOptions>(context.Configuration.GetSection(nameof(AppOptions.Network)))
                         .Configure<ServerListOptions>(context.Configuration.GetSection(nameof(AppOptions.ServerList)))
                         .Configure<DatabaseOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
+                        .Configure<IdGeneratorOptions>(x => x.Id = 1)
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
                         .AddSingleton(redisConnectionMultiplexer)
@@ -92,7 +93,9 @@ namespace Netsphere.Server.Chat
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
                         .AddService<IdGeneratorService>()
-                        .AddHostedServiceEx<ServerlistService>();
+                        .AddHostedServiceEx<ServerlistService>()
+                        .AddSingleton<Mailbox>()
+                        .AddSingleton<DenyManager>();
                 });
 
             var host = hostBuilder.Build();
