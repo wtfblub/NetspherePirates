@@ -50,7 +50,7 @@ namespace Netsphere.Database.Migration.Game
 
             Create.Table("shop_iteminfos")
                 .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
-                .WithColumn("ShopItemId").AsInt32().NotNullable().ForeignKey("shop_items", "Id").OnDelete(Rule.Cascade)
+                .WithColumn("ShopItemId").AsInt64().NotNullable().ForeignKey("shop_items", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("PriceGroupId").AsInt32().NotNullable().ForeignKey("shop_price_groups", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("EffectGroupId").AsInt32().NotNullable().ForeignKey("shop_effect_groups", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("DiscountPercentage").AsByte().NotNullable()
