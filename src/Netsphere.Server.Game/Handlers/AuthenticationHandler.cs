@@ -124,7 +124,10 @@ namespace Netsphere.Server.Game.Handlers
                 {
                     var oldPlr = _playerManager[account.Id];
                     if (oldPlr != null)
+                    {
                         _logger.LogInformation("Kicking old connection hostId={HostId}", oldPlr.Session.HostId);
+                        await oldPlr.DisconnectAsync();
+                    }
                 }
 
                 if (_playerManager.Contains(account.Id))

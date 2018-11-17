@@ -110,6 +110,16 @@ namespace Netsphere.Server.Game
             LicenseManager.Initialize(this, entity.Licenses);
         }
 
+        public void Disconnect()
+        {
+            var _ = DisconnectAsync();
+        }
+
+        public Task DisconnectAsync()
+        {
+            return Session.CloseAsync();
+        }
+
         public async Task SendAccountInformation()
         {
             var licenses = _gameOptions.EnableLicenseRequirement
