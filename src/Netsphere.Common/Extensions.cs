@@ -46,6 +46,8 @@ namespace Netsphere.Common
                 }
             }, cts.Token);
 
+            await This.PublishAsync(request);
+
             // ReSharper disable once MethodSupportsCancellation
             var timeout = Task.Delay(TimeSpan.FromSeconds(30));
             if (await Task.WhenAny(timeout, tcs.Task) == timeout)

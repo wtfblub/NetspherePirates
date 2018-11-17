@@ -94,6 +94,7 @@ namespace Netsphere.Server.Chat
                         })
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()
+                        .AddSingleton<PlayerManager>()
                         .AddSingleton<Mailbox>()
                         .AddSingleton<DenyManager>();
                 });
