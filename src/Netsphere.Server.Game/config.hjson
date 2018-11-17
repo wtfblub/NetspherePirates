@@ -30,4 +30,22 @@
     Directory: logs
     Level: Debug
   }
+  Game:
+  {
+    EnableTutorial: true
+    EnableLicenseRequirement: true
+    StartLevel: 0
+    StartPEN: 30000
+    StartAP: 0
+    StartCoins1: 0
+    StartCoins2: 0
+    NickRestrictions:
+    {
+      MinLength: 4
+      MaxLength: 30
+      MaxRepeat: 3
+      WhitespaceAllowed: false
+      AsciiOnly: true
+    }
+  }
 }

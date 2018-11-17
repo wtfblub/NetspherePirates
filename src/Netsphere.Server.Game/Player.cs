@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ExpressMapper.Extensions;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Netsphere.Common.Configuration;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -86,12 +87,12 @@ namespace Netsphere.Server.Game
                 s_licensesCompleted[i] = i;
         }
 
-        internal Player(ILogger<Player> logger, GameOptions gameOptions, IDatabaseProvider databaseProvider,
+        public Player(ILogger<Player> logger, IOptions<GameOptions> gameOptions, IDatabaseProvider databaseProvider,
             GameDataService gameDataService,
             CharacterManager characterManager, LicenseManager licenseManager, PlayerInventory inventory)
         {
             Logger = logger;
-            _gameOptions = gameOptions;
+            _gameOptions = gameOptions.Value;
             _databaseProvider = databaseProvider;
             _gameDataService = gameDataService;
             CharacterManager = characterManager;

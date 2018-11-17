@@ -211,9 +211,10 @@ namespace Netsphere.Server.Game.Handlers
             {
                 var available = await IsNickAvailableAsync(message.Nickname);
                 if (!available)
+                {
                     _logger.LogDebug("Nickname not available");
-
-                await session.SendAsync(new SCheckNickAckMessage(true));
+                    await session.SendAsync(new SCheckNickAckMessage(true));
+                }
             }
 
             session.Player.Account.Nickname = message.Nickname;
@@ -264,8 +265,11 @@ namespace Netsphere.Server.Game.Handlers
                         current = nickname[i];
                     }
 
-                    counter++;
+                    ++counter;
                 }
+
+                if (counter > maxRepeat)
+                    return false;
             }
 
             var now = DateTimeOffset.Now.ToUnixTimeSeconds();

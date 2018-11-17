@@ -10,5 +10,6 @@ namespace Netsphere.Server.Game
         public Version[] ClientVersions { get; set; }
         public DatabaseOptions Database { get; set; }
         public LoggerOptions Logging { get; set; }
+        public GameOptions Game { get; set; }
     }
 }

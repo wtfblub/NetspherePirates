@@ -7,7 +7,7 @@ namespace Netsphere
         User = 0,
         GameMaster = 1,
         Developer = 2,
-        Administrator = 3,
+        Administrator = 3
     }
 
     public enum ServerType : uint

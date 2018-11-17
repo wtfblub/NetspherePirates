@@ -81,7 +81,7 @@ namespace Netsphere.Server.Chat.Handlers
 
                     session.AccountId = message.AccountId;
                     session.Mailbox = _serviceProvider.GetRequiredService<Mailbox>();
-                    await session.Mailbox.Initialize();
+                    await session.Mailbox.Initialize(session, playerEntity);
 
                     session.Ignore = _serviceProvider.GetRequiredService<DenyManager>();
                     await session.Ignore.Initialize(session, playerEntity);
