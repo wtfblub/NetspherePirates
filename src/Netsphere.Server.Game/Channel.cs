@@ -50,7 +50,6 @@ namespace Netsphere.Server.Game
 
             _players.Add(plr.Account.Id, plr);
             plr.Channel = this;
-            plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelEnter));
             OnPlayerJoined(plr);
             return ChannelJoinError.OK;
         }
@@ -63,7 +62,6 @@ namespace Netsphere.Server.Game
             _players.Remove(plr.Account.Id);
             plr.Channel = null;
             OnPlayerLeft(plr);
-            plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
         }
 
         public void Broadcast(IGameMessage message, bool excludeRooms = false)

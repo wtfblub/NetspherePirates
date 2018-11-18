@@ -19,12 +19,12 @@ namespace Netsphere.Server.Game
         public event EventHandler<PlayerEventArgs> PlayerConnected;
         public event EventHandler<PlayerEventArgs> PlayerDisconnected;
 
-        private void OnPlayerConnected(Player plr)
+        protected virtual void OnPlayerConnected(Player plr)
         {
             PlayerConnected?.Invoke(this, new PlayerEventArgs(plr));
         }
 
-        private void OnPlayerDisconnected(Player plr)
+        protected virtual void OnPlayerDisconnected(Player plr)
         {
             PlayerDisconnected?.Invoke(this, new PlayerEventArgs(plr));
         }
