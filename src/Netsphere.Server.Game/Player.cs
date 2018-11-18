@@ -75,8 +75,9 @@ namespace Netsphere.Server.Game
 
         internal void OnDisconnected()
         {
-            Disconnected?.Invoke(this, new PlayerEventArgs(this));
+            Channel?.Leave(this);
 
+            Disconnected?.Invoke(this, new PlayerEventArgs(this));
             _scope.Dispose();
         }
 
