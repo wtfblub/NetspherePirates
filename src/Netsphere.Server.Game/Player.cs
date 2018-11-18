@@ -106,8 +106,15 @@ namespace Netsphere.Server.Game
             Account = account;
             _scope = Logger.BeginScope("PlayerId={PlayerId} AccountId={AccountId} HostId={HostId} EndPoint={EndPoint}",
                 entity.Id, account.Id, session.HostId, session.RemoteEndPoint);
+            _tutorialState = entity.TutorialState;
+            _totalExperience = (uint)entity.TotalExperience;
+            _pen = (uint)entity.PEN;
+            _ap = (uint)entity.AP;
+            _coins1 = (uint)entity.Coins1;
+            _coins2 = (uint)entity.Coins2;
             CharacterManager.Initialize(this, entity);
             LicenseManager.Initialize(this, entity.Licenses);
+            Inventory.Initialize(this, entity);
         }
 
         public void Disconnect()
