@@ -4,6 +4,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using BlubLib.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
+using Netsphere.Database;
 using ProudNet;
 
 namespace Netsphere.Server.Game
@@ -11,6 +13,7 @@ namespace Netsphere.Server.Game
     public class PlayerManager : IReadOnlyCollection<Player>
     {
         private readonly ISessionManager _sessionManager;
+        private readonly IDatabaseProvider _databaseProvider;
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
 
         public int Count => _players.Count;
@@ -29,9 +32,10 @@ namespace Netsphere.Server.Game
             PlayerDisconnected?.Invoke(this, new PlayerEventArgs(plr));
         }
 
-        public PlayerManager(ISessionManager sessionManager)
+        public PlayerManager(ISessionManager sessionManager, IDatabaseProvider databaseProvider)
         {
             _sessionManager = sessionManager;
+            _databaseProvider = databaseProvider;
             _sessionManager.Removed += SessionDisconnected;
         }
 
@@ -76,14 +80,26 @@ namespace Netsphere.Server.Game
             return _players.ContainsKey(id);
         }
 
-        private void SessionDisconnected(object sender, SessionEventArgs e)
+        private async void SessionDisconnected(object sender, SessionEventArgs e)
         {
-            var session = (Session)e.Session;
-            if (session.Player != null && Contains(session.Player))
+            try
             {
-                OnPlayerDisconnected(session.Player);
-                session.Player.OnDisconnected();
-                Remove(session.Player);
+                var session = (Session)e.Session;
+                if (session.Player != null && Contains(session.Player))
+                {
+                    session.Player.Logger.LogInformation("Disconnected - Saving...");
+
+                    using (var db = _databaseProvider.Open<GameContext>())
+                        await session.Player.Save(db);
+
+                    OnPlayerDisconnected(session.Player);
+                    session.Player.OnDisconnected();
+                    Remove(session.Player);
+                }
+            }
+            catch (Exception ex)
+            {
+                e.Session.Channel.Pipeline.FireExceptionCaught(ex);
             }
         }
 

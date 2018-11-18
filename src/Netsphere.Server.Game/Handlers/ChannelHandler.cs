@@ -11,7 +11,7 @@ using ProudNet;
 
 namespace Netsphere.Server.Game.Handlers
 {
-    public class ChannelHandler
+    internal class ChannelHandler
         : IHandle<CGetChannelInfoReqMessage>, IHandle<CChannelEnterReqMessage>, IHandle<CChannelLeaveReqMessage>
     {
         private readonly ChannelService _channelService;

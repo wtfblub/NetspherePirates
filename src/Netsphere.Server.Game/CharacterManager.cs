@@ -253,7 +253,7 @@ namespace Netsphere.Server.Game
         {
             // Weapons
             var items = character.Weapons.GetItems();
-            for (var slot = 0; slot <= items.Length; ++slot)
+            for (var slot = 0; slot < items.Length; ++slot)
             {
                 var item = items[slot];
                 var itemId = item != null ? (int?)item.Id : null;
@@ -280,7 +280,7 @@ namespace Netsphere.Server.Game
 
             // Costumes
             items = character.Costumes.GetItems();
-            for (var slot = 0; slot <= items.Length; ++slot)
+            for (var slot = 0; slot < items.Length; ++slot)
             {
                 var item = items[slot];
                 var itemId = item != null ? (int?)item.Id : null;
