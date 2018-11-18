@@ -16,6 +16,7 @@ using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
 using Netsphere.Server.Game.Handlers;
+using Netsphere.Server.Game.Serializers;
 using Netsphere.Server.Game.Services;
 using Newtonsoft.Json;
 using ProudNet;
@@ -77,6 +78,9 @@ namespace Netsphere.Server.Game
                             serializer.AddSerializer(new ItemNumberSerializer());
                             serializer.AddSerializer(new MatchKeySerializer());
                             serializer.AddSerializer(new VersionSerializer());
+                            serializer.AddSerializer(new ShopPriceSerializer());
+                            serializer.AddSerializer(new ShopEffectSerializer());
+                            serializer.AddSerializer(new ShopItemSerializer());
                         });
                 })
                 .ConfigureServices((context, services) =>
