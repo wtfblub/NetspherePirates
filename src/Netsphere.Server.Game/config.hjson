@@ -30,6 +30,7 @@
     Directory: logs
     Level: Debug
   }
+  SaveInterval: 30000
   Game:
   {
     EnableTutorial: true

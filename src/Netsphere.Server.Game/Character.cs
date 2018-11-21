@@ -23,7 +23,8 @@ namespace Netsphere.Server.Game
         public CharacterInventory Skills { get; }
         public CharacterInventory Costumes { get; }
 
-        internal Character(CharacterManager characterManager, PlayerCharacterEntity entity, GameDataService gameDataService)
+        internal Character(ILogger<Character> logger, CharacterManager characterManager, PlayerCharacterEntity entity,
+            GameDataService gameDataService)
         {
             SetExistsState(true);
 
@@ -43,6 +44,8 @@ namespace Netsphere.Server.Game
 
             var plr = characterManager.Player;
             var inventory = CharacterManager.Player.Inventory;
+            plr.AddContextToLogger(logger);
+
             SetInventoryIfNeeded(entity.Weapon1Id, (byte)WeaponSlot.Weapon1, Weapons);
             SetInventoryIfNeeded(entity.Weapon2Id, (byte)WeaponSlot.Weapon2, Weapons);
             SetInventoryIfNeeded(entity.Weapon3Id, (byte)WeaponSlot.Weapon3, Weapons);
@@ -78,7 +81,7 @@ namespace Netsphere.Server.Game
 
             void SetInventoryIfNeeded(int? id, byte itemSlot, CharacterInventory characterInventory)
             {
-                using (plr.Logger.BeginScope("Character={CharacterSlot} ItemSlot={ItemSlot} ItemId={ItemId}", Slot, itemSlot, id))
+                using (logger.BeginScope("Character={CharacterSlot} ItemSlot={ItemSlot} ItemId={ItemId}", Slot, itemSlot, id))
                 {
                     if (id == null)
                         return;
@@ -86,13 +89,13 @@ namespace Netsphere.Server.Game
                     var item = inventory[(ulong)id];
                     if (item == null)
                     {
-                        plr.Logger.LogWarning("Character has non-existant item");
+                        logger.LogWarning("Character has non-existant item");
                         return;
                     }
 
                     var error = characterInventory.Add(itemSlot, item);
                     if (error != CharacterInventoryError.OK)
-                        plr.Logger.LogWarning("Unable to equip item Error={Error}", error);
+                        logger.LogWarning("Unable to equip item Error={Error}", error);
                 }
             }
         }

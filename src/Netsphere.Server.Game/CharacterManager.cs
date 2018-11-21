@@ -20,6 +20,7 @@ namespace Netsphere.Server.Game
         private readonly ILogger _logger;
         private readonly IdGeneratorService _idGeneratorService;
         private readonly GameDataService _gameDataService;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly Dictionary<byte, Character> _characters;
         private readonly ConcurrentStack<Character> _charactersToRemove;
         // ReSharper disable once NotAccessedField.Local
@@ -37,22 +38,24 @@ namespace Netsphere.Server.Game
         public Character this[byte slot] => GetCharacter(slot);
 
         public CharacterManager(ILogger<CharacterManager> logger, IdGeneratorService idGeneratorService,
-            GameDataService gameDataService)
+            GameDataService gameDataService, ILoggerFactory loggerFactory)
         {
             _logger = logger;
             _idGeneratorService = idGeneratorService;
             _gameDataService = gameDataService;
+            _loggerFactory = loggerFactory;
             _characters = new Dictionary<byte, Character>();
             _charactersToRemove = new ConcurrentStack<Character>();
         }
 
         internal void Initialize(Player plr, PlayerEntity entity)
         {
-            _scope = _logger.BeginScope("AccountId={AccountId}", plr.Account.Id);
+            _scope = plr.AddContextToLogger(_logger);
             Player = plr;
             CurrentSlot = entity.CurrentCharacterSlot;
 
-            foreach (var @char in entity.Characters.Select(@char => new Character(this, @char, _gameDataService)))
+            foreach (var @char in entity.Characters.Select(@char =>
+                new Character(_loggerFactory.CreateLogger<Character>(), this, @char, _gameDataService)))
             {
                 if (!_characters.TryAdd(@char.Slot, @char))
                     _logger.LogWarning("Multiple characters on slot={Slot}", @char.Slot);

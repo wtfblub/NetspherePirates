@@ -119,7 +119,8 @@ namespace Netsphere.Server.Game
                         .AddHostedServiceEx<ServerlistService>()
                         .AddHostedServiceEx<GameDataService>()
                         .AddHostedServiceEx<ChannelService>()
-                        .AddHostedServiceEx<IpcService>();
+                        .AddHostedServiceEx<IpcService>()
+                        .AddHostedServiceEx<PlayerSaveService>();
                 });
 
             var host = hostBuilder.Build();

@@ -21,6 +21,7 @@ namespace Netsphere.Server.Game
     {
         private static readonly uint[] s_licensesCompleted;
 
+        private readonly ILogger _logger;
         private readonly GameOptions _gameOptions;
         private readonly IDatabaseProvider _databaseProvider;
         private readonly GameDataService _gameDataService;
@@ -32,7 +33,6 @@ namespace Netsphere.Server.Game
         private uint _coins1;
         private uint _coins2;
 
-        public ILogger Logger { get; }
         public Session Session { get; private set; }
         public Account Account { get; private set; }
         public CharacterManager CharacterManager { get; }
@@ -92,7 +92,7 @@ namespace Netsphere.Server.Game
             GameDataService gameDataService,
             CharacterManager characterManager, LicenseManager licenseManager, PlayerInventory inventory)
         {
-            Logger = logger;
+            _logger = logger;
             _gameOptions = gameOptions.Value;
             _databaseProvider = databaseProvider;
             _gameDataService = gameDataService;
@@ -105,8 +105,7 @@ namespace Netsphere.Server.Game
         {
             Session = session;
             Account = account;
-            _scope = Logger.BeginScope("PlayerId={PlayerId} AccountId={AccountId} HostId={HostId} EndPoint={EndPoint}",
-                entity.Id, account.Id, session.HostId, session.RemoteEndPoint);
+            _scope = AddContextToLogger(_logger);
             _tutorialState = entity.TutorialState;
             _totalExperience = (uint)entity.TotalExperience;
             _pen = (uint)entity.PEN;
@@ -201,7 +200,7 @@ namespace Netsphere.Server.Game
 
                     if (itemInfo == null)
                     {
-                        Logger.LogWarning("Cant find ShopItemInfo for Start item {startItemId} - Forgot to reload the cache?",
+                        _logger.LogWarning("Cant find ShopItemInfo for Start item {startItemId} - Forgot to reload the cache?",
                             startItem.Id);
                         continue;
                     }
@@ -209,7 +208,7 @@ namespace Netsphere.Server.Game
                     var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPriceId);
                     if (price == null)
                     {
-                        Logger.LogWarning("Cant find ShopPrice for Start item {startItemId} - Forgot to reload the cache?",
+                        _logger.LogWarning("Cant find ShopPrice for Start item {startItemId} - Forgot to reload the cache?",
                             startItem.Id);
                         continue;
                     }
@@ -217,14 +216,14 @@ namespace Netsphere.Server.Game
                     var color = startItem.Color;
                     if (color > item.ColorGroup)
                     {
-                        Logger.LogWarning("Start item {startItemId} has an invalid color {color}", startItem.Id, color);
+                        _logger.LogWarning("Start item {startItemId} has an invalid color {color}", startItem.Id, color);
                         color = 0;
                     }
 
                     var count = startItem.Count;
                     if (count > 0 && item.ItemNumber.Category <= ItemCategory.Skill)
                     {
-                        Logger.LogWarning("Start item {startItemId} cant have stacks(quantity={count})", startItem.Id, count);
+                        _logger.LogWarning("Start item {startItemId} cant have stacks(quantity={count})", startItem.Id, count);
                         count = 0;
                     }
 
@@ -257,6 +256,12 @@ namespace Netsphere.Server.Game
 
             await CharacterManager.Save(db);
             await LicenseManager.Save(db);
+        }
+
+        public IDisposable AddContextToLogger(ILogger logger)
+        {
+            return logger.BeginScope("AccountId={AccountId} HostId={HostId} EndPoint={EndPoint}",
+                Account.Id, Session.HostId, Session.RemoteEndPoint);
         }
     }
 }

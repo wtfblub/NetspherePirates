@@ -14,10 +14,12 @@ namespace Netsphere.Server.Game.Handlers
     internal class ChannelHandler
         : IHandle<CGetChannelInfoReqMessage>, IHandle<CChannelEnterReqMessage>, IHandle<CChannelLeaveReqMessage>
     {
+        private readonly ILogger _logger;
         private readonly ChannelService _channelService;
 
-        public ChannelHandler(ChannelService channelService)
+        public ChannelHandler(ILogger<ChannelHandler> logger, ChannelService channelService)
         {
+            _logger = logger;
             _channelService = channelService;
         }
 
@@ -44,7 +46,9 @@ namespace Netsphere.Server.Game.Handlers
                     break;
 
                 default:
-                    plr.Logger.LogWarning("Invalid channel info request {Request}", message.Request);
+                    using (plr.AddContextToLogger(_logger))
+                        _logger.LogWarning("Invalid channel info request {Request}", message.Request);
+
                     break;
             }
 

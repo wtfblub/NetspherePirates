@@ -11,21 +11,31 @@ namespace Netsphere.Server.Game.Handlers
     internal class CharacterHandler
         : IHandle<CCreateCharacterReqMessage>, IHandle<CDeleteCharacterReqMessage>, IHandle<CSelectCharacterReqMessage>
     {
+        private readonly ILogger _logger;
+
+        public CharacterHandler(ILogger<CharacterHandler> logger)
+        {
+            _logger = logger;
+        }
+
         [Firewall(typeof(MustBeLoggedIn))]
         public async Task<bool> OnHandle(MessageContext context, CCreateCharacterReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
 
-            plr.Logger.LogInformation("Creating character {@Message}", message.ToJson());
-
-            var (_, result) = plr.CharacterManager.Create(message.Slot, message.Style.Gender,
-                message.Style.Hair, message.Style.Face, message.Style.Shirt, message.Style.Pants, 0, 0);
-
-            if (result != CharacterCreateResult.Success)
+            using (plr.AddContextToLogger(_logger))
             {
-                plr.Logger.LogInformation("Failed to create character result={Result}", result);
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
+                _logger.LogInformation("Creating character {@Message}", message.ToJson());
+
+                var (_, result) = plr.CharacterManager.Create(message.Slot, message.Style.Gender,
+                    message.Style.Hair, message.Style.Face, message.Style.Shirt, message.Style.Pants, 0, 0);
+
+                if (result != CharacterCreateResult.Success)
+                {
+                    _logger.LogInformation("Failed to create character result={Result}", result);
+                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
+                }
             }
 
             return true;

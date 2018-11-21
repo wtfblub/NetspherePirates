@@ -31,13 +31,13 @@ namespace Netsphere.Server.Game.Services
             return Task.CompletedTask;
         }
 
-        private async Task<ChatLoginResponse> OnChatLogin(ChatLoginRequest request)
+        private Task<ChatLoginResponse> OnChatLogin(ChatLoginRequest request)
         {
             var plr = _playerManager[request.AccountId];
             if (plr == null || plr.Session.SessionId != request.SessionId)
-                return new ChatLoginResponse(false);
+                return Task.FromResult(new ChatLoginResponse(false));
 
-            return new ChatLoginResponse(true);
+            return Task.FromResult(new ChatLoginResponse(true));
         }
     }
 }

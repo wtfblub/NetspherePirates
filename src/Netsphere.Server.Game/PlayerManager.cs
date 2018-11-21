@@ -12,6 +12,7 @@ namespace Netsphere.Server.Game
 {
     public class PlayerManager : IReadOnlyCollection<Player>
     {
+        private readonly ILogger _logger;
         private readonly ISessionManager _sessionManager;
         private readonly IDatabaseProvider _databaseProvider;
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
@@ -32,8 +33,9 @@ namespace Netsphere.Server.Game
             PlayerDisconnected?.Invoke(this, new PlayerEventArgs(plr));
         }
 
-        public PlayerManager(ISessionManager sessionManager, IDatabaseProvider databaseProvider)
+        public PlayerManager(ILogger<PlayerManager> logger, ISessionManager sessionManager, IDatabaseProvider databaseProvider)
         {
+            _logger = logger;
             _sessionManager = sessionManager;
             _databaseProvider = databaseProvider;
             _sessionManager.Removed += SessionDisconnected;
@@ -87,7 +89,8 @@ namespace Netsphere.Server.Game
                 var session = (Session)e.Session;
                 if (session.Player != null && Contains(session.Player))
                 {
-                    session.Player.Logger.LogInformation("Disconnected - Saving...");
+                    using (session.Player.AddContextToLogger(_logger))
+                        _logger.LogInformation("Disconnected - Saving...");
 
                     using (var db = _databaseProvider.Open<GameContext>())
                         await session.Player.Save(db);
