@@ -130,9 +130,8 @@ namespace Netsphere.Server.Game
             {
                 var idsToRemove = new List<long>();
                 while (_licensesToRemove.TryPop(out var licenseToRemove))
-                    idsToRemove.Append(licenseToRemove.Id);
+                    idsToRemove.Add(licenseToRemove.Id);
 
-                // TODO Not sure if this actually works
                 await db.LicenseRewards.Where(x => idsToRemove.Contains(x.Id)).DeleteAsync();
             }
 

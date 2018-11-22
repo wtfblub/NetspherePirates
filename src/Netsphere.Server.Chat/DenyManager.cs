@@ -83,9 +83,8 @@ namespace Netsphere.Server.Chat
             {
                 var idsToRemove = new List<long>();
                 while (_deniesToRemove.TryPop(out var denyToRemove))
-                    idsToRemove.Append(denyToRemove.Id);
+                    idsToRemove.Add(denyToRemove.Id);
 
-                // TODO Not sure if this actually works
                 await db.PlayerIgnores.Where(x => idsToRemove.Contains(x.Id)).DeleteAsync();
             }
 

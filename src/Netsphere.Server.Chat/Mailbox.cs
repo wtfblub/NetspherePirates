@@ -151,9 +151,8 @@ namespace Netsphere.Server.Chat
             {
                 var idsToRemove = new List<long>();
                 while (_mailsToDelete.TryPop(out var mailToDelete))
-                    idsToRemove.Append(mailToDelete.Id);
+                    idsToRemove.Add(mailToDelete.Id);
 
-                // TODO Not sure if this actually works
                 await db.PlayerMails.Where(x => idsToRemove.Contains(x.Id)).DeleteAsync();
             }
 

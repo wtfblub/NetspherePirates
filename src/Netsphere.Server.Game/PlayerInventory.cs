@@ -121,9 +121,8 @@ namespace Netsphere.Server.Game
             {
                 var idsToRemove = new List<long>();
                 while (_itemsToRemove.TryPop(out var itemToRemove))
-                    idsToRemove.Append((long)itemToRemove.Id);
+                    idsToRemove.Add((long)itemToRemove.Id);
 
-                // TODO Not sure if this actually works
                 await db.PlayerItems.Where(x => idsToRemove.Contains(x.Id)).DeleteAsync();
             }
 
