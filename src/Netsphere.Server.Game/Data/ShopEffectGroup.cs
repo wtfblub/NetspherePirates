@@ -19,7 +19,12 @@ namespace Netsphere.Server.Game.Data
 
         public ShopEffect GetEffect(int id)
         {
-            return Effects.FirstOrDefault(effect => effect.Id == id);
+            return Effects.FirstOrDefault(x => x.Id == id);
+        }
+
+        public ShopEffect GetEffectByEffect(uint effect)
+        {
+            return Effects.FirstOrDefault(x => x.Effect == effect);
         }
     }
 }

@@ -11,6 +11,8 @@ using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
+using Netsphere.Network.Message.Game;
+using Netsphere.Server.Game.Services;
 
 namespace Netsphere.Server.Game
 {
@@ -18,6 +20,7 @@ namespace Netsphere.Server.Game
     {
         private readonly ILogger _logger;
         private readonly IdGeneratorService _idGeneratorService;
+        private readonly GameDataService _gameDataService;
         private readonly ConcurrentDictionary<ItemLicense, License> _licenses;
         private readonly ConcurrentStack<License> _licensesToRemove;
         // ReSharper disable once NotAccessedField.Local
@@ -31,10 +34,12 @@ namespace Netsphere.Server.Game
         /// </summary>
         public License this[ItemLicense license] => GetLicense(license);
 
-        public LicenseManager(ILogger<LicenseManager> logger, IdGeneratorService idGeneratorService)
+        public LicenseManager(ILogger<LicenseManager> logger, IdGeneratorService idGeneratorService,
+            GameDataService gameDataService)
         {
             _logger = logger;
             _idGeneratorService = idGeneratorService;
+            _gameDataService = gameDataService;
             _licenses = new ConcurrentDictionary<ItemLicense, License>();
             _licensesToRemove = new ConcurrentStack<License>();
         }
@@ -59,20 +64,23 @@ namespace Netsphere.Server.Game
         {
             _logger.LogInformation("Acquiring {License}", itemLicense);
 
-            // var shop = GameServer.Instance.ResourceCache.GetShop();
-            // var licenseReward = shop.Licenses.GetValueOrDefault(itemLicense);
+            var licenseReward = _gameDataService.LicenseRewards.GetValueOrDefault(itemLicense);
 
-            // ToDo Should we require license rewards or no?
+            // TODO Should we require license rewards or no?
             // If no we need some other way to determine if a license is available to be acquired or no
+
             //if (!shop.Licenses.TryGetValue(license, out licenseInfo))
             //throw new LicenseNotFoundException($"License {license} does not exist");
 
             var license = this[itemLicense];
 
             // If this is the first time completing this license
-            // give the player the item reward [TEMP: if available]
-            // if (license == null && licenseReward != null)
-            // _player.Inventory.Create(licenseReward.ShopItemInfo, licenseReward.ShopPrice, licenseReward.Color, 0, 0);
+            // give the player the item reward
+            if (license == null && licenseReward != null)
+            {
+                _player.Inventory.Create(licenseReward.ShopItemInfo, licenseReward.ShopPrice, licenseReward.Color, 0, 0);
+                _player.Session.Send(new SLicensedAckMessage(itemLicense, licenseReward.ItemNumber));
+            }
 
             if (license != null)
             {
