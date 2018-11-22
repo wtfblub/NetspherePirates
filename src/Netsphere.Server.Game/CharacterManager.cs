@@ -259,7 +259,7 @@ namespace Netsphere.Server.Game
             for (var slot = 0; slot < items.Length; ++slot)
             {
                 var item = items[slot];
-                var itemId = item != null ? (int?)item.Id : null;
+                var itemId = item != null ? (long?)item.Id : null;
 
                 switch (slot)
                 {

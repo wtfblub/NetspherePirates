@@ -79,7 +79,7 @@ namespace Netsphere.Server.Game
                 plr.Session.Send(new SUseItemAckMessage(Slot, e.Slot, e.Item.Id, UseItemAction.UnEquip));
             }
 
-            void SetInventoryIfNeeded(int? id, byte itemSlot, CharacterInventory characterInventory)
+            void SetInventoryIfNeeded(long? id, byte itemSlot, CharacterInventory characterInventory)
             {
                 using (logger.BeginScope("Character={CharacterSlot} ItemSlot={ItemSlot} ItemId={ItemId}", Slot, itemSlot, id))
                 {

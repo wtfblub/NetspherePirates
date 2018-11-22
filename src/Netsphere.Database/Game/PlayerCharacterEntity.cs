@@ -30,37 +30,37 @@ namespace Netsphere.Database.Game
         public byte BasicPants { get; set; }
 
         [Column]
-        public int? Weapon1Id { get; set; }
+        public long? Weapon1Id { get; set; }
 
         [Column]
-        public int? Weapon2Id { get; set; }
+        public long? Weapon2Id { get; set; }
 
         [Column]
-        public int? Weapon3Id { get; set; }
+        public long? Weapon3Id { get; set; }
 
         [Column]
-        public int? SkillId { get; set; }
+        public long? SkillId { get; set; }
 
         [Column]
-        public int? HairId { get; set; }
+        public long? HairId { get; set; }
 
         [Column]
-        public int? FaceId { get; set; }
+        public long? FaceId { get; set; }
 
         [Column]
-        public int? ShirtId { get; set; }
+        public long? ShirtId { get; set; }
 
         [Column]
-        public int? PantsId { get; set; }
+        public long? PantsId { get; set; }
 
         [Column]
-        public int? GlovesId { get; set; }
+        public long? GlovesId { get; set; }
 
         [Column]
-        public int? ShoesId { get; set; }
+        public long? ShoesId { get; set; }
 
         [Column]
-        public int? AccessoryId { get; set; }
+        public long? AccessoryId { get; set; }
 
         [Association(CanBeNull = true, ThisKey = "PlayerId", OtherKey = "Id")]
         public PlayerEntity Player { get; set; }

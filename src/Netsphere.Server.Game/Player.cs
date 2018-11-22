@@ -113,9 +113,9 @@ namespace Netsphere.Server.Game
             _ap = (uint)entity.AP;
             _coins1 = (uint)entity.Coins1;
             _coins2 = (uint)entity.Coins2;
-            CharacterManager.Initialize(this, entity);
             LicenseManager.Initialize(this, entity.Licenses);
             Inventory.Initialize(this, entity);
+            CharacterManager.Initialize(this, entity);
         }
 
         public void Disconnect()
@@ -278,9 +278,9 @@ namespace Netsphere.Server.Game
                 SetDirtyState(false);
             }
 
-            await CharacterManager.Save(db);
             await LicenseManager.Save(db);
             await Inventory.Save(db);
+            await CharacterManager.Save(db);
         }
 
         public IDisposable AddContextToLogger(ILogger logger)
