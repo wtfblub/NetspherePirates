@@ -70,6 +70,7 @@ namespace Netsphere.Server.Game
         }
         public Channel Channel { get; internal set; }
         public object Room { get; internal set; }
+        public int Level => _gameDataService.GetLevelFromExperience(_totalExperience).Level;
 
         public event EventHandler<PlayerEventArgs> Disconnected;
 
@@ -172,7 +173,7 @@ namespace Netsphere.Server.Game
             await Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World));
             await Session.SendAsync(new SBeginAccountInfoAckMessage
             {
-                Level = (byte)_gameDataService.GetLevelFromExperience(TotalExperience).Level,
+                Level = (byte)Level,
                 TotalExp = TotalExperience,
                 AP = AP,
                 PEN = PEN,
@@ -235,6 +236,11 @@ namespace Netsphere.Server.Game
             }
         }
 
+        public Task SendMoneyUpdate()
+        {
+            return Session.SendAsync(new SRefreshCashInfoAckMessage(PEN, AP));
+        }
+
         /// <summary>
         /// Sends a message to the game master console
         /// </summary>
@@ -274,6 +280,7 @@ namespace Netsphere.Server.Game
 
             await CharacterManager.Save(db);
             await LicenseManager.Save(db);
+            await Inventory.Save(db);
         }
 
         public IDisposable AddContextToLogger(ILogger logger)

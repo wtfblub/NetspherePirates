@@ -45,7 +45,7 @@ namespace Netsphere.Server.Game.Serializers
                 writer.Write((ushort)item.MasterLevel);
                 writer.Write(0); // RepairCost
                 writer.Write(item.IsOneTimeUse);
-                writer.Write(item.IsDestroyable);
+                writer.Write(!item.IsDestroyable);
 
                 writer.Write(item.ItemInfos.Count);
                 foreach (var info in item.ItemInfos)
