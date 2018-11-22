@@ -860,7 +860,7 @@ namespace Netsphere.Network.Message.Game
 
         public SAdminActionAckMessage(string message)
         {
-            Result = 1;
+            Result = 0;
             Message = message;
         }
     }

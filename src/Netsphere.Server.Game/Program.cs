@@ -15,6 +15,7 @@ using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
+using Netsphere.Server.Game.Commands;
 using Netsphere.Server.Game.Handlers;
 using Netsphere.Server.Game.Serializers;
 using Netsphere.Server.Game.Services;
@@ -115,12 +116,14 @@ namespace Netsphere.Server.Game
                         .AddTransient<CharacterManager>()
                         .AddTransient<PlayerInventory>()
                         .AddSingleton<PlayerManager>()
+                        .AddCommands(typeof(Program).Assembly)
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()
                         .AddHostedServiceEx<GameDataService>()
                         .AddHostedServiceEx<ChannelService>()
                         .AddHostedServiceEx<IpcService>()
-                        .AddHostedServiceEx<PlayerSaveService>();
+                        .AddHostedServiceEx<PlayerSaveService>()
+                        .AddHostedServiceEx<CommandService>();
                 });
 
             var host = hostBuilder.Build();
