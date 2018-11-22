@@ -857,6 +857,12 @@ namespace Netsphere.Network.Message.Game
         {
             Message = "";
         }
+
+        public SAdminActionAckMessage(string message)
+        {
+            Result = 1;
+            Message = message;
+        }
     }
 
     [BlubContract]

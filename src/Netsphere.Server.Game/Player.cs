@@ -235,6 +235,24 @@ namespace Netsphere.Server.Game
             }
         }
 
+        /// <summary>
+        /// Sends a message to the game master console
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        public Task SendConsoleMessage(string message)
+        {
+            return Session.SendAsync(new SAdminActionAckMessage(message));
+        }
+
+        /// <summary>
+        /// Sends a notice message
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        public Task SendNotice(string message)
+        {
+            return Session.SendAsync(new SNoticeMessageAckMessage(message));
+        }
+
         public async Task Save(GameContext db)
         {
             if (IsDirty)
