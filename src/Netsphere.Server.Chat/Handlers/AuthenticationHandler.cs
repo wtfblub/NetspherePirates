@@ -21,19 +21,17 @@ namespace Netsphere.Server.Chat.Handlers
         private readonly IMessageBus _messageBus;
         private readonly ISessionManager _sessionManager;
         private readonly IDatabaseProvider _databaseProvider;
-        private readonly IdGeneratorService _idGeneratorService;
         private readonly IServiceProvider _serviceProvider;
 
         public AuthenticationHandler(ILogger<AuthenticationHandler> logger, IOptions<NetworkOptions> networkOptions,
             IMessageBus messageBus, ISessionManager sessionManager, IDatabaseProvider databaseProvider,
-            IdGeneratorService idGeneratorService, IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider)
         {
             _logger = logger;
             _networkOptions = networkOptions.Value;
             _messageBus = messageBus;
             _sessionManager = sessionManager;
             _databaseProvider = databaseProvider;
-            _idGeneratorService = idGeneratorService;
             _serviceProvider = serviceProvider;
         }
 
@@ -64,29 +62,25 @@ namespace Netsphere.Server.Chat.Handlers
                 }
 
                 using (var db = _databaseProvider.Open<GameContext>())
+                using (var authdb = _databaseProvider.Open<AuthContext>())
                 {
                     var accountId = (int)message.AccountId;
+                    var accountEntity = await authdb.Accounts.FirstOrDefaultAsync(x => x.Id == accountId);
                     var playerEntity = await db.Players
                         .LoadWith(x => x.Ignores)
                         .LoadWith(x => x.Inbox)
                         .LoadWith(x => x.Settings)
                         .FirstOrDefaultAsync(x => x.Id == accountId);
 
-                    if (playerEntity == null)
+                    if (accountEntity == null || playerEntity == null)
                     {
                         _logger.LogWarning("Could not load player from database");
                         await session.SendAsync(new SLoginAckMessage(3));
                         return true;
                     }
 
-                    session.AccountId = message.AccountId;
-                    session.Mailbox = _serviceProvider.GetRequiredService<Mailbox>();
-                    await session.Mailbox.Initialize(session, playerEntity);
-
-                    session.Ignore = _serviceProvider.GetRequiredService<DenyManager>();
-                    await session.Ignore.Initialize(session, playerEntity);
-
-                    session.Settings = new PlayerSettingManager(session, playerEntity, _idGeneratorService);
+                    session.Player = _serviceProvider.GetRequiredService<Player>();
+                    await session.Player.Initialize(session, new Account(accountEntity), playerEntity);
                 }
 
                 await session.SendAsync(new SLoginAckMessage(0));

@@ -84,9 +84,10 @@ namespace Netsphere.Server.Game
 
         private async void SessionDisconnected(object sender, SessionEventArgs e)
         {
+            var session = (Session)e.Session;
+
             try
             {
-                var session = (Session)e.Session;
                 if (session.Player != null && Contains(session.Player))
                 {
                     using (session.Player.AddContextToLogger(_logger))
@@ -97,13 +98,14 @@ namespace Netsphere.Server.Game
 
                     OnPlayerDisconnected(session.Player);
                     session.Player.OnDisconnected();
-                    Remove(session.Player);
                 }
             }
             catch (Exception ex)
             {
                 e.Session.Channel.Pipeline.FireExceptionCaught(ex);
             }
+
+            Remove(session.Player);
         }
 
         public IEnumerator<Player> GetEnumerator()

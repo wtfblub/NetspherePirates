@@ -27,7 +27,7 @@ namespace Netsphere.Server.Chat
         private readonly ConcurrentDictionary<long, Mail> _mails;
         private readonly ConcurrentStack<Mail> _mailsToDelete;
 
-        public Session Session { get; private set; }
+        public Player Player { get; private set; }
         public int Count => _mails.Count;
         public Mail this[long id] => CollectionExtensions.GetValueOrDefault(_mails, id);
 
@@ -42,9 +42,9 @@ namespace Netsphere.Server.Chat
             _mailsToDelete = new ConcurrentStack<Mail>();
         }
 
-        public async Task Initialize(Session session, PlayerEntity entity)
+        public async Task Initialize(Player player, PlayerEntity entity)
         {
-            Session = session;
+            Player = player;
 
             foreach (var mailEntity in entity.Inbox.Where(mailDto => !mailDto.IsMailDeleted))
             {
@@ -53,7 +53,7 @@ namespace Netsphere.Server.Chat
                 var sender = _playerManager[(ulong)mailEntity.SenderPlayerId];
                 if (sender != null)
                 {
-                    senderNickname = sender.Nickname;
+                    senderNickname = sender.Account.Nickname;
                 }
                 else
                 {
@@ -105,7 +105,7 @@ namespace Netsphere.Server.Chat
                 {
                     Id = _idGeneratorService.GetNextId(IdKind.Mail),
                     PlayerId = account.Id,
-                    SenderPlayerId = (int)Session.AccountId,
+                    SenderPlayerId = (int)Player.Account.Id,
                     SentDate = DateTimeOffset.Now.ToUnixTimeSeconds(),
                     Title = title,
                     Message = message,
@@ -142,7 +142,7 @@ namespace Netsphere.Server.Chat
 
         public Task UpdateReminderAsync()
         {
-            return Session.SendAsync(new SNoteReminderInfoAckMessage((byte)this.Count(x => x.IsNew), 0, 0));
+            return Player.Session.SendAsync(new SNoteReminderInfoAckMessage((byte)this.Count(x => x.IsNew), 0, 0));
         }
 
         public async Task Save(GameContext db)

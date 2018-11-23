@@ -6,11 +6,7 @@ namespace Netsphere.Server.Chat
 {
     public class Session : ProudSession
     {
-        public ulong AccountId { get; set; }
-        public string Nickname { get; set; }
-        public Mailbox Mailbox { get; set; }
-        public DenyManager Ignore { get; set; }
-        public PlayerSettingManager Settings { get; set; }
+        public Player Player { get; set; }
 
         public Session(ILogger logger, uint hostId, IChannel channel)
             : base(logger, hostId, channel)

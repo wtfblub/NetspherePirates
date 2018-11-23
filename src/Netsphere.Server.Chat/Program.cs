@@ -92,11 +92,12 @@ namespace Netsphere.Server.Chat
                             Subscriber = x.GetRequiredService<ConnectionMultiplexer>().GetSubscriber(),
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
-                        .AddService<IdGeneratorService>()
-                        .AddHostedServiceEx<ServerlistService>()
+                        .AddTransient<Mailbox>()
+                        .AddTransient<DenyManager>()
+                        .AddTransient<PlayerSettingManager>()
                         .AddSingleton<PlayerManager>()
-                        .AddSingleton<Mailbox>()
-                        .AddSingleton<DenyManager>();
+                        .AddService<IdGeneratorService>()
+                        .AddHostedServiceEx<ServerlistService>();
                 });
 
             var host = hostBuilder.Build();

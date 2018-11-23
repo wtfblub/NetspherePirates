@@ -19,7 +19,7 @@ namespace Netsphere.Server.Chat
         private readonly ConcurrentDictionary<ulong, Deny> _denies;
         private readonly ConcurrentStack<Deny> _deniesToRemove;
 
-        public Session Session { get; private set; }
+        public Player Player { get; private set; }
         public int Count => _denies.Count;
         public Deny this[ulong accountId] => CollectionExtensions.GetValueOrDefault(_denies, accountId);
 
@@ -31,9 +31,9 @@ namespace Netsphere.Server.Chat
             _denies = new ConcurrentDictionary<ulong, Deny>();
         }
 
-        public async Task Initialize(Session session, PlayerEntity entity)
+        public async Task Initialize(Player player, PlayerEntity entity)
         {
-            Session = session;
+            Player = player;
 
             using (var db = _databaseProvider.Open<AuthContext>())
             {
@@ -54,7 +54,7 @@ namespace Netsphere.Server.Chat
             if (_denies.ContainsKey(accountId))
                 return null;
 
-            var deny = new Deny(_idGeneratorService.GetNextId(IdKind.Deny), Session.AccountId, nickname);
+            var deny = new Deny(_idGeneratorService.GetNextId(IdKind.Deny), Player.Account.Id, nickname);
             _denies.TryAdd(deny.DenyId, deny);
             return deny;
         }
@@ -93,7 +93,7 @@ namespace Netsphere.Server.Chat
                 db.Insert(new PlayerDenyEntity
                 {
                     Id = deny.Id,
-                    PlayerId = (int)Session.AccountId,
+                    PlayerId = (int)Player.Account.Id,
                     DenyPlayerId = (int)deny.DenyId
                 });
                 deny.SetExistsState(true);

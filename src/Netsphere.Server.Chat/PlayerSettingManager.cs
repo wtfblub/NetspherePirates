@@ -17,7 +17,7 @@ namespace Netsphere.Server.Chat
         private readonly IdGeneratorService _idGeneratorService;
         private readonly IDictionary<string, Setting> _settings;
 
-        public Session Session { get; }
+        public Player Player { get; private set; }
 
         static PlayerSettingManager()
         {
@@ -29,11 +29,15 @@ namespace Netsphere.Server.Chat
             RegisterConverter(PlayerSetting.AllowInfoRequest, communtiySettingConverter);
         }
 
-        public PlayerSettingManager(Session session, PlayerEntity entity, IdGeneratorService idGeneratorService)
+        public PlayerSettingManager(IdGeneratorService idGeneratorService)
         {
             _idGeneratorService = idGeneratorService;
             _settings = new ConcurrentDictionary<string, Setting>();
-            Session = session;
+        }
+
+        public void Initialize(Player player, PlayerEntity entity)
+        {
+            Player = player;
 
             foreach (var settingEntity in entity.Settings)
             {
@@ -91,7 +95,7 @@ namespace Netsphere.Server.Chat
                     await db.InsertAsync(new PlayerSettingEntity
                     {
                         Id = setting.Id,
-                        PlayerId = (int)Session.AccountId,
+                        PlayerId = (int)Player.Account.Id,
                         Setting = name,
                         Value = GetString(name, setting.Data)
                     });
