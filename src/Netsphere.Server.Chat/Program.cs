@@ -1,5 +1,6 @@
 ﻿using System;
 using DotNetty.Transport.Channels;
+using ExpressMapper;
 using Foundatio.Caching;
 using Foundatio.Messaging;
 using Foundatio.Serializer;
@@ -10,6 +11,7 @@ using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
 using Netsphere.Database;
+using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
 using Netsphere.Server.Chat.Handlers;
 using Netsphere.Server.Chat.Services;
@@ -34,6 +36,7 @@ namespace Netsphere.Server.Chat
 
             Log.Information("Starting...");
 
+            ConfigureMapper();
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
@@ -116,6 +119,16 @@ namespace Netsphere.Server.Chat
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+        }
+
+        private static void ConfigureMapper()
+        {
+            Mapper.Register<Mail, NoteDto>()
+                .Function(dest => dest.ReadCount, src => src.IsNew ? 0 : 1)
+                .Function(dest => dest.DaysLeft,
+                    src => DateTimeOffset.Now < src.Expires ? (src.Expires - DateTimeOffset.Now).TotalDays : 0);
+
+            Mapper.Compile(CompilationTypes.Source);
         }
     }
 }

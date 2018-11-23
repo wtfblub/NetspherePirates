@@ -17,6 +17,7 @@ namespace Netsphere.Server.Chat
         public Mailbox Mailbox { get; set; }
         public DenyManager Ignore { get; set; }
         public PlayerSettingManager Settings { get; set; }
+        public object Channel { get; set; }
 
         public event EventHandler<PlayerEventArgs> Disconnected;
 

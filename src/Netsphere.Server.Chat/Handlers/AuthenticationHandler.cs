@@ -79,6 +79,13 @@ namespace Netsphere.Server.Chat.Handlers
                         return true;
                     }
 
+                    if (!accountEntity.Nickname.Equals(message.Nickname))
+                    {
+                        _logger.LogInformation("Wrongl ogin");
+                        await session.SendAsync(new SLoginAckMessage(4));
+                        return true;
+                    }
+
                     session.Player = _serviceProvider.GetRequiredService<Player>();
                     await session.Player.Initialize(session, new Account(accountEntity), playerEntity);
                 }
