@@ -45,6 +45,7 @@ namespace Netsphere.Server.Chat
         {
             _players.Remove(plr.Account.Id);
             plr.Channel = null;
+            plr.SentPlayerList = false;
             Broadcast(new SChannelLeavePlayerAckMessage(plr.Account.Id));
             OnPlayerLeft(plr);
         }

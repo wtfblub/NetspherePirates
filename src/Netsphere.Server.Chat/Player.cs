@@ -13,13 +13,14 @@ namespace Netsphere.Server.Chat
         private IDisposable _scope;
 
         public Session Session { get; private set; }
-        public Account Account { get; set; }
-        public Mailbox Mailbox { get; set; }
-        public DenyManager Ignore { get; set; }
-        public PlayerSettingManager Settings { get; set; }
-        public uint TotalExperience { get; set; }
-        public Channel Channel { get; set; }
-        public bool IsInRoom { get; set; }
+        public Account Account { get; private set; }
+        public Mailbox Mailbox { get; private set; }
+        public DenyManager Ignore { get; private set; }
+        public PlayerSettingManager Settings { get; private set; }
+        public uint TotalExperience { get; internal set; }
+        public Channel Channel { get; internal set; }
+        public bool IsInRoom { get; internal set; }
+        internal bool SentPlayerList { get; set; }
 
         public event EventHandler<PlayerEventArgs> Disconnected;
 
