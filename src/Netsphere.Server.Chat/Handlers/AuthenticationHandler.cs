@@ -81,7 +81,7 @@ namespace Netsphere.Server.Chat.Handlers
 
                     if (!accountEntity.Nickname.Equals(message.Nickname))
                     {
-                        _logger.LogInformation("Wrongl ogin");
+                        _logger.LogInformation("Wrong login");
                         await session.SendAsync(new SLoginAckMessage(4));
                         return true;
                     }
