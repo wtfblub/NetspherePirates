@@ -34,7 +34,7 @@ namespace Netsphere.Network.Data.Chat
         public byte Unk3 { get; set; } // Gender?
 
         [BlubMember(7)]
-        public uint TotalExp { get; set; }
+        public uint TotalExperience { get; set; }
 
         [BlubMember(8)]
         public TDUserDataDto TDStats { get; set; }

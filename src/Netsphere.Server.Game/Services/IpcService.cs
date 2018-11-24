@@ -11,13 +11,18 @@ namespace Netsphere.Server.Game.Services
     {
         private readonly IMessageBus _messageBus;
         private readonly PlayerManager _playerManager;
+        private readonly ChannelService _channelService;
         private readonly CancellationTokenSource _cts;
 
-        public IpcService(IMessageBus messageBus, PlayerManager playerManager)
+        public IpcService(IMessageBus messageBus, PlayerManager playerManager, ChannelService channelService)
         {
             _messageBus = messageBus;
             _playerManager = playerManager;
+            _channelService = channelService;
             _cts = new CancellationTokenSource();
+
+            _channelService.PlayerJoined += ChannelOnPlayerJoined;
+            _channelService.PlayerLeft += ChannelOnPlayerLeft;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -38,6 +43,16 @@ namespace Netsphere.Server.Game.Services
                 return Task.FromResult(new ChatLoginResponse(false));
 
             return Task.FromResult(new ChatLoginResponse(true));
+        }
+
+        private void ChannelOnPlayerJoined(object sender, ChannelEventArgs e)
+        {
+            _messageBus.PublishAsync(new ChannelPlayerJoinedMessage(e.Player.Account.Id, e.Channel.Id));
+        }
+
+        private void ChannelOnPlayerLeft(object sender, ChannelEventArgs e)
+        {
+            _messageBus.PublishAsync(new ChannelPlayerLeftMessage(e.Player.Account.Id, e.Channel.Id));
         }
     }
 }

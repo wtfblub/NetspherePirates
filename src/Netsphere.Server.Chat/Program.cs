@@ -1,6 +1,7 @@
 ﻿using System;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
+using ExpressMapper.Extensions;
 using Foundatio.Caching;
 using Foundatio.Messaging;
 using Foundatio.Serializer;
@@ -36,10 +37,11 @@ namespace Netsphere.Server.Chat
 
             Log.Information("Starting...");
 
-            ConfigureMapper();
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
+
+            ConfigureMapper(appOptions);
 
             hostBuilder
                 .ConfigureLogging(builder => builder.AddSerilog())
@@ -95,12 +97,14 @@ namespace Netsphere.Server.Chat
                             Subscriber = x.GetRequiredService<ConnectionMultiplexer>().GetSubscriber(),
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
+                        .AddTransient<Player>()
                         .AddTransient<Mailbox>()
                         .AddTransient<DenyManager>()
                         .AddTransient<PlayerSettingManager>()
                         .AddSingleton<PlayerManager>()
                         .AddService<IdGeneratorService>()
-                        .AddHostedServiceEx<ServerlistService>();
+                        .AddHostedServiceEx<ServerlistService>()
+                        .AddHostedServiceEx<ChannelService>();
                 });
 
             var host = hostBuilder.Build();
@@ -121,12 +125,33 @@ namespace Netsphere.Server.Chat
             host.Run();
         }
 
-        private static void ConfigureMapper()
+        private static void ConfigureMapper(AppOptions appOptions)
         {
             Mapper.Register<Mail, NoteDto>()
                 .Function(dest => dest.ReadCount, src => src.IsNew ? 0 : 1)
                 .Function(dest => dest.DaysLeft,
                     src => DateTimeOffset.Now < src.Expires ? (src.Expires - DateTimeOffset.Now).TotalDays : 0);
+
+            Mapper.Register<Mail, NoteContentDto>()
+                .Member(dest => dest.Id, src => src.Id)
+                .Member(dest => dest.Message, src => src.Message);
+
+            Mapper.Register<Deny, DenyDto>()
+                .Member(dest => dest.AccountId, src => src.DenyId)
+                .Member(dest => dest.Nickname, src => src.Nickname);
+
+            Mapper.Register<Player, UserDataDto>()
+                .Member(dest => dest.AccountId, src => src.Account.Id)
+                .Member(dest => dest.ServerId, src => appOptions.ServerList.Id)
+                .Function(dest => dest.ChannelId, src => src.Channel != null ? (short)src.Channel.Id : (short)-1)
+                .Function(dest => dest.RoomId, src => /*src.Room?.Id ??*/ 0xFFFFFFFF) // ToDo: Tutorial, License
+                .Function(dest => dest.Team, src => /*src.RoomInfo?.Team?.Team ??*/ Team.Neutral)
+                .Function(dest => dest.TotalExperience, src => src.TotalExperience);
+
+            Mapper.Register<Player, UserDataWithNickDto>()
+                .Member(dest => dest.AccountId, src => src.Account.Id)
+                .Member(dest => dest.Nickname, src => src.Account.Nickname)
+                .Function(dest => dest.Data, src => src.Map<Player, UserDataDto>());
 
             Mapper.Compile(CompilationTypes.Source);
         }

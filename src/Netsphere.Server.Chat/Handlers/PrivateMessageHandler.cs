@@ -46,6 +46,7 @@ namespace Netsphere.Server.Chat.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeLoggedIn))]
         public async Task<bool> OnHandle(MessageContext context, CReadNoteReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -72,6 +73,7 @@ namespace Netsphere.Server.Chat.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeLoggedIn))]
         public async Task<bool> OnHandle(MessageContext context, CDeleteNoteReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -87,6 +89,7 @@ namespace Netsphere.Server.Chat.Handlers
             return true;
         }
 
+        [Firewall(typeof(MustBeLoggedIn))]
         public async Task<bool> OnHandle(MessageContext context, CSendNoteReqMessage message)
         {
             var session = context.GetSession<Session>();

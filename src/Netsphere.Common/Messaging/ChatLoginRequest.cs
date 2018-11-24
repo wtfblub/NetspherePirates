@@ -19,14 +19,16 @@ namespace Netsphere.Common.Messaging
     public class ChatLoginResponse : MessageWithGuid
     {
         public bool OK { get; set; }
+        public uint TotalExperience { get; set; }
 
         public ChatLoginResponse()
         {
         }
 
-        public ChatLoginResponse(bool ok)
+        public ChatLoginResponse(bool ok, uint totalExperience)
         {
             OK = ok;
+            TotalExperience = totalExperience;
         }
     }
 }

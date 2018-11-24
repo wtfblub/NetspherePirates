@@ -22,10 +22,11 @@ namespace Netsphere.Server.Chat.Handlers
         private readonly ISessionManager _sessionManager;
         private readonly IDatabaseProvider _databaseProvider;
         private readonly IServiceProvider _serviceProvider;
+        private readonly PlayerManager _playerManager;
 
         public AuthenticationHandler(ILogger<AuthenticationHandler> logger, IOptions<NetworkOptions> networkOptions,
             IMessageBus messageBus, ISessionManager sessionManager, IDatabaseProvider databaseProvider,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider, PlayerManager playerManager)
         {
             _logger = logger;
             _networkOptions = networkOptions.Value;
@@ -33,6 +34,7 @@ namespace Netsphere.Server.Chat.Handlers
             _sessionManager = sessionManager;
             _databaseProvider = databaseProvider;
             _serviceProvider = serviceProvider;
+            _playerManager = playerManager;
         }
 
         public async Task<bool> OnHandle(MessageContext context, CLoginReqMessage message)
@@ -88,6 +90,7 @@ namespace Netsphere.Server.Chat.Handlers
 
                     session.Player = _serviceProvider.GetRequiredService<Player>();
                     await session.Player.Initialize(session, new Account(accountEntity), playerEntity);
+                    _playerManager.Add(session.Player);
                 }
 
                 await session.SendAsync(new SLoginAckMessage(0));

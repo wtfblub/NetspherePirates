@@ -17,7 +17,9 @@ namespace Netsphere.Server.Chat
         public Mailbox Mailbox { get; set; }
         public DenyManager Ignore { get; set; }
         public PlayerSettingManager Settings { get; set; }
-        public object Channel { get; set; }
+        public uint TotalExperience { get; set; }
+        public Channel Channel { get; set; }
+        public bool IsInRoom { get; set; }
 
         public event EventHandler<PlayerEventArgs> Disconnected;
 
@@ -38,6 +40,7 @@ namespace Netsphere.Server.Chat
         {
             Session = session;
             Account = account;
+            TotalExperience = (uint)entity.TotalExperience;
             _scope = AddContextToLogger(_logger);
             await Mailbox.Initialize(this, entity);
             await Ignore.Initialize(this, entity);
