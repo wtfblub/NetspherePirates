@@ -44,6 +44,7 @@ namespace Netsphere.Server.Chat
                 {
                     var deny = new Deny(denyEntity.Id, (ulong)denyEntity.DenyPlayerId,
                         accounts.First(x => x.Id == denyEntity.DenyPlayerId).Nickname);
+                    deny.SetExistsState(true);
                     _denies[deny.DenyId] = deny;
                 }
             }
@@ -54,7 +55,7 @@ namespace Netsphere.Server.Chat
             if (_denies.ContainsKey(accountId))
                 return null;
 
-            var deny = new Deny(_idGeneratorService.GetNextId(IdKind.Deny), Player.Account.Id, nickname);
+            var deny = new Deny(_idGeneratorService.GetNextId(IdKind.Deny), accountId, nickname);
             _denies.TryAdd(deny.DenyId, deny);
             return deny;
         }

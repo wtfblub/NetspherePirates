@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using ExpressMapper.Extensions;
 using Foundatio.Messaging;
 using LinqToDB;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +11,7 @@ using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Messaging;
 using Netsphere.Database;
+using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
 using ProudNet;
 
@@ -94,6 +97,8 @@ namespace Netsphere.Server.Chat.Handlers
                 }
 
                 await session.SendAsync(new SLoginAckMessage(0));
+                await session.SendAsync(
+                    new SDenyChatListAckMessage(session.Player.Ignore.Select(x => x.Map<Deny, DenyDto>()).ToArray()));
             }
 
             return true;
