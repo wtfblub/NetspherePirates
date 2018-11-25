@@ -2,8 +2,8 @@
   <Import Project="OSPlatform.targets" />
   <PropertyGroup>
     <SharpLzoVersion>0.1.2</SharpLzoVersion>
-    <PostBuildEvent Condition=" '$(IsWindow)' == 'true' ">del "$(TargetDir)MiniLzo.so" "$(TargetDir)MiniLzo_x86.dll" "$(TargetDir)MiniLzo_x64.dll"</PostBuildEvent>
-    <PostBuildEvent Condition=" '$(IsWindow)' != 'true' ">rm "$(TargetDir)MiniLzo.so" "$(TargetDir)MiniLzo_x86.dll" "$(TargetDir)MiniLzo_x64.dll"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(IsWindows)' == 'true' ">del "$(TargetDir)MiniLzo.so" "$(TargetDir)MiniLzo_x86.dll" "$(TargetDir)MiniLzo_x64.dll"</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(IsWindows)' != 'true' ">rm "$(TargetDir)MiniLzo.so" "$(TargetDir)MiniLzo_x86.dll" "$(TargetDir)MiniLzo_x64.dll"</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SharpLzo" Version="$(SharpLzoVersion)" />

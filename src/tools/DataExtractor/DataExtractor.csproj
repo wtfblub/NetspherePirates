@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>NET471</TargetFramework>
+    <TargetFramework>NET472</TargetFramework>
     <RootNamespace>Netsphere</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="3.1.0" />
-    <PackageReference Include="Fody" Version="3.1.4" />
+    <PackageReference Include="Costura.Fody" Version="3.1.6" />
+    <PackageReference Include="Fody" Version="3.3.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" />
