@@ -39,12 +39,17 @@ if (Test-Path $DotNetGlobalFile) {
     $DotNetVersion = $(Get-Content $DotNetGlobalFile | Out-String | ConvertFrom-Json).sdk.version
 }
 
+$old_ErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = 'SilentlyContinue'
+
 # If dotnet is installed locally, and expected version is not set or installation matches the expected version
 if ((Get-Command "dotnet" -ErrorAction SilentlyContinue) -ne $null -and `
      (!(Test-Path variable:DotNetVersion) -or $(& dotnet --version) -eq $DotNetVersion)) {
+    $ErrorActionPreference = $old_ErrorActionPreference
     $env:DOTNET_EXE = (Get-Command "dotnet").Path
 }
 else {
+    $ErrorActionPreference = $old_ErrorActionPreference
     $DotNetDirectory = "$TempDirectory\dotnet-win"
     $env:DOTNET_EXE = "$DotNetDirectory\dotnet.exe"
 
