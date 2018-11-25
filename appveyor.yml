@@ -7,7 +7,7 @@ build_script:
 - ps: >-
     ./build.ps1 Dist -Configuration Debug
 
-    7z a binaries_debug.zip %APPVEYOR_BUILD_FOLDER%\dist\*
+    7z a binaries_debug.zip $Env:APPVEYOR_BUILD_FOLDER\dist\*
 test: off
 artifacts:
 - path: binaries_debug.zip
