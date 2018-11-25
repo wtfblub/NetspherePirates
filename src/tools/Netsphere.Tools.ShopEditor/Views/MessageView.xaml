@@ -1,0 +1,23 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        HasSystemDecorations="True" ShowInTaskbar="True" SizeToContent="WidthAndHeight"
+        MinHeight="300" MinWidth="500">
+
+  <Grid Width="500" Height="300">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="50" />
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0" Name="Message" Margin="10" TextAlignment="Center" VerticalAlignment="Center"
+               TextWrapping="Wrap" />
+
+    <TextBox Grid.Row="1" Name="Exception" Margin="10,0,10,5" />
+
+    <Button Grid.Row="2" Name="Confirm" Margin="0,0,10,10"
+            HorizontalAlignment="Right" VerticalAlignment="Bottom"
+            Content="OK" />
+  </Grid>
+
+</Window>

@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:Netsphere.Tools.ShopEditor.Converters"
+             Width="500" Height="320">
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <converters:ItemToStringConverter x:Key="ItemToStringConverter" />
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TextBox Grid.Row="0" Text="{Binding Search.Value}" />
+
+    <ListBox Grid.Row="1" Items="{Binding Items,Mode=OneWay}" SelectedItem="{Binding SelectedItem.Value}">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Orientation="Horizontal">
+            <Image Source="{Binding Image.Value}" Height="64" Width="64" Margin="0 0 5 0" />
+            <TextBlock VerticalAlignment="Center" Text="{Binding Converter={StaticResource ItemToStringConverter}}" />
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+      <Button Content="Select" Command="{Binding Select}" />
+      <Button Content="Cancel" Command="{Binding Cancel}" />
+    </StackPanel>
+  </Grid>
+
+</UserControl>

@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Netsphere.Tools.ShopEditor.Views.Controls">
+
+  <DockPanel>
+    <Button DockPanel.Dock="Top" Content="Add price group" Command="{Binding AddPriceGroup}" />
+    <ScrollViewer DockPanel.Dock="Bottom">
+      <ItemsControl Grid.Column="0" Items="{Binding ShopService.PriceGroups,Mode=OneWay}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border BorderThickness="1" BorderBrush="Black" Margin="5">
+              <controls:PriceGroupItem Margin="5" />
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+
+</UserControl>

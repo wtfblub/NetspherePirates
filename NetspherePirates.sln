@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netsphere.Server.Game", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netsphere.Server.Chat", "src\Netsphere.Server.Chat\Netsphere.Server.Chat.csproj", "{50A8B282-973A-46CF-B87E-5929455C3478}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netsphere.Tools.ShopEditor", "src\tools\Netsphere.Tools.ShopEditor\Netsphere.Tools.ShopEditor.csproj", "{757E4816-D4C2-4C7F-AE97-2543AB13A65D}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Netsphere.Server.Relay", "src\Netsphere.Server.Relay\Netsphere.Server.Relay.csproj", "{6DB294F1-ED06-4F0F-8B38-F29C608B2138}"
 EndProject
 Global
@@ -178,6 +180,20 @@ Global
 		{50A8B282-973A-46CF-B87E-5929455C3478}.Release|Any CPU.Build.0 = Release|Any CPU
 		{50A8B282-973A-46CF-B87E-5929455C3478}.ReleaseNoTools|Any CPU.ActiveCfg = Debug|Any CPU
 		{50A8B282-973A-46CF-B87E-5929455C3478}.ReleaseNoTools|Any CPU.Build.0 = Debug|Any CPU
+		{50A8B282-973A-46CF-B87E-5929455C3478}.ReleaseOnlyTools|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A8B282-973A-46CF-B87E-5929455C3478}.ReleaseOnlyTools|Any CPU.Build.0 = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.DebugNoTools|Any CPU.ActiveCfg = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.DebugNoTools|Any CPU.Build.0 = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.DebugOnlyTools|Any CPU.ActiveCfg = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.DebugOnlyTools|Any CPU.Build.0 = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.ReleaseNoTools|Any CPU.ActiveCfg = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.ReleaseNoTools|Any CPU.Build.0 = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.ReleaseOnlyTools|Any CPU.ActiveCfg = Debug|Any CPU
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D}.ReleaseOnlyTools|Any CPU.Build.0 = Debug|Any CPU
 		{50A8B282-973A-46CF-B87E-5929455C3478}.ReleaseOnlyTools|Any CPU.ActiveCfg = Release|Any CPU
 		{6DB294F1-ED06-4F0F-8B38-F29C608B2138}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6DB294F1-ED06-4F0F-8B38-F29C608B2138}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -196,6 +212,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7364B088-32B5-4033-B5A0-5147B8939F6E} = {D196F056-F7FD-4F53-AD64-3D8677631492}
 		{DD2244E5-D1C9-4B39-95C0-2C74B3A3CBA3} = {D196F056-F7FD-4F53-AD64-3D8677631492}
+		{757E4816-D4C2-4C7F-AE97-2543AB13A65D} = {D196F056-F7FD-4F53-AD64-3D8677631492}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01EAF340-829E-4876-AA91-1A8B27DDED00}
