@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="80" />
+    </Grid.ColumnDefinitions>
+
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Column="0" Grid.Row="0" Text="PriceGroup" />
+    <TextBlock Grid.Column="1" Grid.Row="0" Text="EffectGroup" />
+    <TextBlock Grid.Column="2" Grid.Row="0" Text="DiscountPercentage" />
+    <TextBlock Grid.Column="3" Grid.Row="0" Text="IsEnabled" />
+
+    <DropDown Grid.Column="0" Grid.Row="1" Margin="0 0 5 0" Items="{Binding ShopService.PriceGroups,Mode=OneWay}"
+              SelectedItem="{Binding ItemInfo.PriceGroup.Value}" />
+    <DropDown Grid.Column="1" Grid.Row="1" Margin="0 0 5 0" Items="{Binding ShopService.EffectGroups,Mode=OneWay}"
+              SelectedItem="{Binding ItemInfo.EffectGroup.Value}" />
+    <TextBox Grid.Column="2" Grid.Row="1" Margin="0 0 5 0" Text="{Binding ItemInfo.DiscountPercentage.Value}" />
+    <CheckBox Grid.Column="3" Grid.Row="1" Margin="0 0 5 0" IsChecked="{Binding ItemInfo.IsEnabled.Value}" />
+
+    <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
+      <Button Content="Delete" Command="{Binding Delete}" />
+    </WrapPanel>
+  </Grid>
+
+</UserControl>

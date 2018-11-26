@@ -28,5 +28,10 @@ namespace Netsphere.Tools.ShopEditor.Models
             var prices = entity.ShopPrices.Select(priceEntity => new ShopPrice(this, priceEntity));
             Prices = new ReactiveList<ShopPrice>(prices);
         }
+
+        public override string ToString()
+        {
+            return Name.Value;
+        }
     }
 }

@@ -170,7 +170,7 @@ namespace Netsphere.Tools.ShopEditor.Services
                 {
                     Id = itemNumber
                 };
-                itemEntity.Id = await db.InsertWithInt32IdentityAsync(itemEntity);
+                await db.InsertAsync(itemEntity);
                 Items.Add(new ShopItem(itemEntity));
             }
         }

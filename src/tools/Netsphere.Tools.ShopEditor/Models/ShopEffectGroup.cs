@@ -18,5 +18,10 @@ namespace Netsphere.Tools.ShopEditor.Models
             Name = new ReactiveProperty<string>(entity.Name);
             Effects = new ReactiveList<ShopEffect>(entity.ShopEffects.Select(x => new ShopEffect(this, x)));
         }
+
+        public override string ToString()
+        {
+            return Name.Value;
+        }
     }
 }
