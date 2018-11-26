@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Shop Editor"
+        Height="490" Width="940"
+        MinHeight="490" MinWidth="940"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid>
+    <Grid Name="Overlay" ZIndex="1000" IsVisible="False">
+      <Grid.Background>
+        <SolidColorBrush Color="Black" Opacity="0.7" />
+      </Grid.Background>
+
+      <Panel Background="LightGray" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Border BorderBrush="Black" BorderThickness="2">
+          <ContentControl Name="OverlayContent" />
+        </Border>
+      </Panel>
+    </Grid>
+
+    <TabControl Items="{Binding TabPages,Mode=OneWay}" SelectedIndex="{Binding CurrentIndex.Value}" />
+  </Grid>
+
+</Window>

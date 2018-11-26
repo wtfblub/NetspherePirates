@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Netsphere.Tools.ShopEditor.Views.Controls">
+
+  <DockPanel>
+    <Button DockPanel.Dock="Top" Content="Add item" Command="{Binding AddItem}" />
+    <ScrollViewer DockPanel.Dock="Bottom">
+      <ItemsControl Grid.Column="0" Items="{Binding ShopService.Items,Mode=OneWay}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border BorderThickness="1" BorderBrush="Black" Margin="5">
+              <controls:Item Margin="5" />
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+
+</UserControl>

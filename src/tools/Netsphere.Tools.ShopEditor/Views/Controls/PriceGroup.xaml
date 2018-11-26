@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Netsphere.Tools.ShopEditor.Views.Controls">
+
+  <DockPanel>
+    <Grid DockPanel.Dock="Top">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <TextBlock Grid.Column="0" Grid.Row="0" Text="Name" />
+      <TextBlock Grid.Column="1" Grid.Row="0" Text="Price Type" />
+
+      <TextBox Grid.Column="0" Grid.Row="1" Margin="0 0 5 0" Text="{Binding PriceGroup.Name.Value}" />
+      <DropDown Grid.Column="1" Grid.Row="1" Items="{Binding PriceGroup.PriceTypes,Mode=OneWay}"
+                SelectedItem="{Binding PriceGroup.PriceType.Value}" />
+
+      <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
+        <Button Content="Add Price" Command="{Binding AddPrice}" />
+        <Button Content="Delete" Command="{Binding Delete}" />
+      </StackPanel>
+
+    </Grid>
+
+    <ItemsControl DockPanel.Dock="Bottom" Grid.Row="3" Margin="20 10 0 0" Items="{Binding PriceGroup.Prices,Mode=OneWay}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Border BorderThickness="1" BorderBrush="Black" Margin="2">
+            <controls:Price Margin="5" />
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </DockPanel>
+
+</UserControl>

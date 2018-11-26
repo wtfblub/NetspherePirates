@@ -1,0 +1,11 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Styles>
+        <!-- ReSharper disable Xaml.PathError -->
+        <!-- ReSharper disable Xaml.ConstructorWarning -->
+        <StyleInclude Source="resm:Avalonia.Themes.Default.DefaultTheme.xaml?assembly=Avalonia.Themes.Default" />
+        <StyleInclude Source="resm:Avalonia.Themes.Default.Accents.BaseLight.xaml?assembly=Avalonia.Themes.Default" />
+        <!-- ReSharper restore Xaml.ConstructorWarning -->
+        <!-- ReSharper restore Xaml.PathError -->
+    </Application.Styles>
+</Application>

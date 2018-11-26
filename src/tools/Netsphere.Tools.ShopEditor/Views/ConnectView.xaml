@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:Netsphere.Tools.ShopEditor.Converters"
+        Title="Shop Editor - Connect"
+        MinHeight="370" MinWidth="290" MaxHeight="370" MaxWidth="290"
+        CanResize="False" WindowStartupLocation="CenterScreen">
+
+  <Window.Resources>
+    <ResourceDictionary>
+      <converters:NegateBooleanConverter x:Key="NegateBooleanConverter" />
+    </ResourceDictionary>
+  </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+
+        <!-- Database connection settings -->
+        <Grid Grid.Row="0" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="18" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Database settings" FontWeight="Bold" HorizontalAlignment="Left" />
+
+                <StackPanel Grid.Row="1" Margin="0 5 0 0">
+                    <TextBox Name="Host" Margin="0 0 0 5"
+                            Watermark="Host" UseFloatingWatermark="True"
+                            Text="{Binding Host.Value}" />
+
+                    <TextBox Name="Username" Margin="0 0 0 5"
+                            Watermark="Username" UseFloatingWatermark="True"
+                            IsVisible="{Binding ElementName=UseSqlite,Path=IsChecked,Converter={StaticResource NegateBooleanConverter}}"
+                            Text="{Binding Username.Value}" />
+
+                    <TextBox Name="Password" Margin="0 0 0 5"
+                            Watermark="Password" UseFloatingWatermark="True" PasswordChar="*"
+                            IsVisible="{Binding ElementName=UseSqlite,Path=IsChecked,Converter={StaticResource NegateBooleanConverter}}"
+                            Text="{Binding Password.Value}" />
+
+                    <TextBox Name="Database" Margin="0 0 0 5"
+                            Watermark="Database" UseFloatingWatermark="True"
+                            IsVisible="{Binding ElementName=UseSqlite,Path=IsChecked,Converter={StaticResource NegateBooleanConverter}}"
+                            Text="{Binding Database.Value}" />
+
+                    <CheckBox Name="UseSqlite" IsChecked="{Binding UseSqlite.Value}" Content="Use Sqlite" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- S4 League resource settings -->
+        <Grid Grid.Row="1" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="18" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="S4 League resources settings" FontWeight="Bold"
+                          HorizontalAlignment="Left" />
+
+                <StackPanel Grid.Row="1" Margin="0 5 0 0">
+                    <TextBox Name="ResourcePath"
+                            Watermark="Resources path" UseFloatingWatermark="True"
+                            Text="{Binding ResourcePath.Value}" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Connect / Exit buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 0 0 5">
+            <Button Name="Connect" Content="{Binding ConnectText.Value}" Margin="0 0 5 0" Width="100" />
+            <Button Name="Exit" Content="Exit" Margin="0 0 5 0" Width="80" />
+        </StackPanel>
+
+    </Grid>
+
+</Window>
