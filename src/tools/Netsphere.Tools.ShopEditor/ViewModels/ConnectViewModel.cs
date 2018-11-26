@@ -38,19 +38,19 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
 
             UseSqlite = new ReactiveProperty<bool>(false);
 
-            Host = new ReactiveProperty<string>("10.0.0.128:3306").SetValidateNotifyError(x =>
+            Host = new ReactiveProperty<string>("127.0.0.1:3306").SetValidateNotifyError(x =>
                 UseSqlite.Value ? null : ConnectViewModelValidation.Host.Validate(x).ErrorMessages.FirstOrDefault());
 
             Username = new ReactiveProperty<string>("root").SetValidateNotifyError(x =>
                 UseSqlite.Value ? null : ConnectViewModelValidation.Username.Validate(x).ErrorMessages.FirstOrDefault());
 
-            Password = new ReactiveProperty<string>("1234").SetValidateNotifyError(x =>
+            Password = new ReactiveProperty<string>().SetValidateNotifyError(x =>
                 UseSqlite.Value ? null : ConnectViewModelValidation.Password.Validate(x).ErrorMessages.FirstOrDefault());
 
-            Database = new ReactiveProperty<string>("game").SetValidateNotifyError(x =>
+            Database = new ReactiveProperty<string>().SetValidateNotifyError(x =>
                 UseSqlite.Value ? null : ConnectViewModelValidation.Database.Validate(x).ErrorMessages.FirstOrDefault());
 
-            ResourcePath = new ReactiveProperty<string>(@"D:\Games\FumbiClient_NewPatch\resource.s4hd")
+            ResourcePath = new ReactiveProperty<string>()
                 .SetValidateNotifyError(x =>
                     UseSqlite.Value ? null : ConnectViewModelValidation.ResourcePath.Validate(x).ErrorMessages.FirstOrDefault());
 

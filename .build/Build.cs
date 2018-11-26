@@ -111,7 +111,8 @@ internal class Build : NukeBuild
                 ("src/Netsphere.Server.Game", "Game", "netcoreapp2.1", true),
                 ("src/Netsphere.Server.Relay", "Relay", "netcoreapp2.1", true),
                 ("src/tools/DataExtractor", "tools", "net472", false),
-                ("src/tools/NetsphereExplorer", "tools", "net472", false)
+                ("src/tools/NetsphereExplorer", "tools", "net472", false),
+                ("src/tools/Netsphere.Tools.ShopEditor", "tools/ShopEditor", "netcoreapp2.1", true)
             };
 
             var dist = Path.Combine(Solution.Directory, "dist");
