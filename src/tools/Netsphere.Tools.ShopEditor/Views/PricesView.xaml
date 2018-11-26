@@ -9,7 +9,7 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <Border BorderThickness="1" BorderBrush="Black" Margin="5">
-              <controls:PriceGroupItem Margin="5" />
+              <controls:PriceGroup Margin="5" />
             </Border>
           </DataTemplate>
         </ItemsControl.ItemTemplate>

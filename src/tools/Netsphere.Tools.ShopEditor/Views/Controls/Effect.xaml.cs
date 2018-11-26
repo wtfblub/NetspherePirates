@@ -3,17 +3,17 @@ using Netsphere.Tools.ShopEditor.ViewModels.Controls;
 
 namespace Netsphere.Tools.ShopEditor.Views.Controls
 {
-    public sealed class EffectItem : View<EffectItemViewModel>
+    public sealed class Effect : View<EffectViewModel>
     {
-        public EffectItem()
+        public Effect()
             : base(null, true)
         {
         }
 
-        protected override EffectItemViewModel GetViewModelFromDataContext(object dataContext)
+        protected override EffectViewModel GetViewModelFromDataContext(object dataContext)
         {
             if(dataContext is ShopEffect effect)
-                return new EffectItemViewModel(effect);
+                return new EffectViewModel(effect);
 
             return null;
         }

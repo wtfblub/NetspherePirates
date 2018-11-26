@@ -9,13 +9,13 @@ using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class EffectItemViewModel : ReactiveObject
+    public class EffectViewModel : ReactiveObject
     {
         public ShopEffect Effect { get; }
         public ReactiveCommand Change { get; }
         public ReactiveCommand Delete { get; }
 
-        public EffectItemViewModel(ShopEffect effect)
+        public EffectViewModel(ShopEffect effect)
         {
             Effect = effect;
             Change = ReactiveCommand.CreateFromTask(ChangeImpl);

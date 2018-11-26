@@ -9,12 +9,12 @@ using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class PriceItemViewModel : ReactiveObject
+    public class PriceViewModel : ReactiveObject
     {
         public ShopPrice Price { get; }
         public ReactiveCommand Delete { get; }
 
-        public PriceItemViewModel(ShopPrice price)
+        public PriceViewModel(ShopPrice price)
         {
             Price = price;
             Delete = ReactiveCommand.CreateFromTask(DeleteImpl);

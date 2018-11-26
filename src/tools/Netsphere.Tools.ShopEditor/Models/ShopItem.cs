@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Netsphere.Database.Game;
 using Reactive.Bindings;
 using ReactiveUI;
@@ -8,6 +10,11 @@ namespace Netsphere.Tools.ShopEditor.Models
 {
     public class ShopItem : ReactiveObject
     {
+        private static readonly IEnumerable<Gender> s_genders =
+            Enum.GetValues(typeof(Gender)).Cast<Gender>();
+
+        public IEnumerable<Gender> Genders => s_genders;
+
         public long ItemNumber { get; }
         public ReactiveProperty<Gender> RequiredGender { get; }
         public ReactiveProperty<ItemLicense> RequiredLicense { get; }

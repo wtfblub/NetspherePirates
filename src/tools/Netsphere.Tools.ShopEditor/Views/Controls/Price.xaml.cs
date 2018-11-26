@@ -3,17 +3,17 @@ using Netsphere.Tools.ShopEditor.ViewModels.Controls;
 
 namespace Netsphere.Tools.ShopEditor.Views.Controls
 {
-    public sealed class PriceItem : View<PriceItemViewModel>
+    public sealed class Price : View<PriceViewModel>
     {
-        public PriceItem()
+        public Price()
             : base(null, true)
         {
         }
 
-        protected override PriceItemViewModel GetViewModelFromDataContext(object dataContext)
+        protected override PriceViewModel GetViewModelFromDataContext(object dataContext)
         {
             if (dataContext is ShopPrice price)
-                return new PriceItemViewModel(price);
+                return new PriceViewModel(price);
 
             return null;
         }

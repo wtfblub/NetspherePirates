@@ -9,7 +9,7 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <Border BorderThickness="1" BorderBrush="Black" Margin="5">
-              <controls:EffectGroupItem Margin="5" />
+              <controls:EffectGroup Margin="5" />
             </Border>
           </DataTemplate>
         </ItemsControl.ItemTemplate>

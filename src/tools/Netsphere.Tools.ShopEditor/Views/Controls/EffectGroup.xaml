@@ -31,7 +31,7 @@
       <ItemsControl.ItemTemplate>
         <DataTemplate>
           <Border BorderThickness="1" BorderBrush="Black" Margin="2">
-            <controls:EffectItem Margin="5" />
+            <controls:Effect Margin="5" />
           </Border>
         </DataTemplate>
       </ItemsControl.ItemTemplate>

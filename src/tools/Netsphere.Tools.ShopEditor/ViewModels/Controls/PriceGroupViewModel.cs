@@ -5,36 +5,35 @@ using Netsphere.Tools.ShopEditor.Models;
 using Netsphere.Tools.ShopEditor.Services;
 using Netsphere.Tools.ShopEditor.Views;
 using ReactiveUI;
-using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class EffectGroupItemViewModel : ReactiveObject
+    public class PriceGroupViewModel : ReactiveObject
     {
-        public ShopEffectGroup EffectGroup { get; }
-        public ReactiveCommand AddEffect { get; }
+        public ShopPriceGroup PriceGroup { get; }
+        public ReactiveCommand AddPrice { get; }
         public ReactiveCommand Delete { get; }
 
-        public EffectGroupItemViewModel(ShopEffectGroup effectGroup)
+        public PriceGroupViewModel(ShopPriceGroup priceGroup)
         {
-            EffectGroup = effectGroup;
-            AddEffect = ReactiveCommand.CreateFromTask(AddEffectImpl);
+            PriceGroup = priceGroup;
+            AddPrice = ReactiveCommand.CreateFromTask(AddPriceImpl);
             Delete = ReactiveCommand.CreateFromTask(DeleteImpl);
-            EffectGroup.WhenAnyValue(x => x.Name.Value)
+            PriceGroup.WhenAnyValue(x => x.Name.Value, x => x.PriceType.Value)
                 .Throttle(TimeSpan.FromSeconds(2))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateImpl());
         }
 
-        private async Task AddEffectImpl()
+        private async Task AddPriceImpl()
         {
             try
             {
-                await ShopService.Instance.NewEffect(EffectGroup);
+                await ShopService.Instance.NewPrice(PriceGroup);
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to add effect", ex).ShowDialog();
+                await new MessageView("Error", "Unable to add price", ex).ShowDialog();
             }
         }
 
@@ -42,11 +41,11 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
         {
             try
             {
-                await ShopService.Instance.Delete(EffectGroup);
+                await ShopService.Instance.Delete(PriceGroup);
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to delete effect group", ex).ShowDialog();
+                await new MessageView("Error", "Unable to delete price group", ex).ShowDialog();
             }
         }
 
@@ -54,11 +53,11 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
         {
             try
             {
-                await ShopService.Instance.Update(EffectGroup);
+                await ShopService.Instance.Update(PriceGroup);
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to update effect group", ex).ShowDialog();
+                await new MessageView("Error", "Unable to update price group", ex).ShowDialog();
             }
         }
     }
