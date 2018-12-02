@@ -66,33 +66,31 @@ namespace Netsphere.Server.Chat.Handlers
                     return true;
                 }
 
+                if (!response.Account.Nickname.Equals(message.Nickname))
+                {
+                    _logger.LogInformation("Wrong login");
+                    await session.SendAsync(new SLoginAckMessage(3));
+                    return true;
+                }
+
                 using (var db = _databaseProvider.Open<GameContext>())
-                using (var authdb = _databaseProvider.Open<AuthContext>())
                 {
                     var accountId = (int)message.AccountId;
-                    var accountEntity = await authdb.Accounts.FirstOrDefaultAsync(x => x.Id == accountId);
                     var playerEntity = await db.Players
                         .LoadWith(x => x.Ignores)
                         .LoadWith(x => x.Inbox)
                         .LoadWith(x => x.Settings)
                         .FirstOrDefaultAsync(x => x.Id == accountId);
 
-                    if (accountEntity == null || playerEntity == null)
+                    if (playerEntity == null)
                     {
                         _logger.LogWarning("Could not load player from database");
-                        await session.SendAsync(new SLoginAckMessage(3));
-                        return true;
-                    }
-
-                    if (!accountEntity.Nickname.Equals(message.Nickname))
-                    {
-                        _logger.LogInformation("Wrong login");
                         await session.SendAsync(new SLoginAckMessage(4));
                         return true;
                     }
 
                     session.Player = _serviceProvider.GetRequiredService<Player>();
-                    await session.Player.Initialize(session, new Account(accountEntity), playerEntity);
+                    await session.Player.Initialize(session, response.Account, playerEntity);
                     _playerManager.Add(session.Player);
                 }
 

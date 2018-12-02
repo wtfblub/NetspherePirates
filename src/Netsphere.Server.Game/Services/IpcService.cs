@@ -40,9 +40,9 @@ namespace Netsphere.Server.Game.Services
         {
             var plr = _playerManager[request.AccountId];
             if (plr == null || plr.Session.SessionId != request.SessionId)
-                return Task.FromResult(new ChatLoginResponse(false, 0));
+                return Task.FromResult(new ChatLoginResponse(false, null, 0));
 
-            return Task.FromResult(new ChatLoginResponse(true, plr.TotalExperience));
+            return Task.FromResult(new ChatLoginResponse(true, plr.Account, plr.TotalExperience));
         }
 
         private void ChannelOnPlayerJoined(object sender, ChannelEventArgs e)

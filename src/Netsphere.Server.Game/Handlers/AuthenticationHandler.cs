@@ -119,7 +119,9 @@ namespace Netsphere.Server.Game.Handlers
                     return true;
                 }
 
-                var account = new Account(accountEntity);
+                var account = new Account((ulong)accountEntity.Id, accountEntity.Username, accountEntity.Nickname,
+                    (SecurityLevel)accountEntity.SecurityLevel);
+
                 if (message.KickConnection)
                 {
                     var oldPlr = _playerManager[account.Id];

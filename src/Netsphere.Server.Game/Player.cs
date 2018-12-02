@@ -6,6 +6,7 @@ using ExpressMapper.Extensions;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Database;
 using Netsphere.Database.Game;

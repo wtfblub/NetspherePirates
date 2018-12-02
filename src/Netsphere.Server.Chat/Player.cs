@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
@@ -14,9 +15,9 @@ namespace Netsphere.Server.Chat
 
         public Session Session { get; private set; }
         public Account Account { get; private set; }
-        public Mailbox Mailbox { get; private set; }
-        public DenyManager Ignore { get; private set; }
-        public PlayerSettingManager Settings { get; private set; }
+        public Mailbox Mailbox { get; }
+        public DenyManager Ignore { get; }
+        public PlayerSettingManager Settings { get; }
         public uint TotalExperience { get; internal set; }
         public Channel Channel { get; internal set; }
         public bool IsInRoom { get; internal set; }
