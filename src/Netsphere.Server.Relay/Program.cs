@@ -57,6 +57,8 @@ namespace Netsphere.Server.Relay
                         {
                             options.Version = new Guid("{a43a97d1-9ec7-495e-ad5f-8fe45fde1151}");
                             options.TcpListener = appOptions.Network.Listener;
+                            options.UdpAddress = appOptions.Network.Address;
+                            options.UdpListenerPorts = appOptions.Network.UdpPorts;
                         })
                         .UseThreadingConfiguration((context, options) =>
                         {
@@ -102,7 +104,10 @@ namespace Netsphere.Server.Relay
                             Subscriber = x.GetRequiredService<ConnectionMultiplexer>().GetSubscriber(),
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
-                        .AddService<IdGeneratorService>();
+                        .AddService<IdGeneratorService>()
+                        .AddSingleton<PlayerManager>()
+                        .AddTransient<Player>()
+                        .AddSingleton<RoomManager>();
                 });
 
             var host = hostBuilder.Build();

@@ -6,6 +6,8 @@ namespace Netsphere.Server.Relay
 {
     public class Session : ProudSession
     {
+        public Player Player { get; set; }
+
         public Session(ILogger logger, uint hostId, IChannel channel)
             : base(logger, hostId, channel)
         {

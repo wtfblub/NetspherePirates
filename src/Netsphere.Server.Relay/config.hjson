@@ -2,6 +2,8 @@
   Network:
   {
     Listener: 127.0.0.1:28005
+    Address: 127.0.0.1
+    UdpPorts: [29000, 29001]
     WorkerThreads: -1
     MaxSessions: 100
   }
@@ -9,8 +11,8 @@
   {
     ConnectionStrings:
     {
-      redis: 10.0.0.128
-      game: Server=10.0.0.128;Database=game;Uid=root;Pwd=1234;SslMode=None;
+      redis: 127.0.0.1
+      game: Server=127.0.0.1;Database=game;Uid=root;Pwd=1234;SslMode=None;
     }
     RunMigration: true
     UseSqlite: false
