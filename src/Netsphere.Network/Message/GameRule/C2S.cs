@@ -24,7 +24,7 @@ namespace Netsphere.Network.Message.GameRule
     public class CChangeTeamReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
-        public Team Team { get; set; }
+        public TeamId Team { get; set; }
 
         [BlubMember(1)]
         public PlayerGameMode Mode { get; set; }
@@ -52,10 +52,10 @@ namespace Netsphere.Network.Message.GameRule
         public ulong PlayerToReplace { get; set; }
 
         [BlubMember(2)]
-        public Team FromTeam { get; set; }
+        public TeamId FromTeam { get; set; }
 
         [BlubMember(3)]
-        public Team ToTeam { get; set; }
+        public TeamId ToTeam { get; set; }
     }
 
     [BlubContract]

@@ -77,7 +77,7 @@ namespace Netsphere.Network.Message.GameRule
         public ulong AccountId { get; set; }
 
         [BlubMember(1)]
-        public Team Team { get; set; }
+        public TeamId Team { get; set; }
 
         [BlubMember(2)]
         public PlayerGameMode Mode { get; set; }
@@ -86,7 +86,7 @@ namespace Netsphere.Network.Message.GameRule
         {
         }
 
-        public SChangeTeamAckMessage(ulong accountId, Team team, PlayerGameMode mode)
+        public SChangeTeamAckMessage(ulong accountId, TeamId team, PlayerGameMode mode)
         {
             AccountId = accountId;
             Team = team;
@@ -120,16 +120,16 @@ namespace Netsphere.Network.Message.GameRule
         public ulong PlayerToReplace { get; set; }
 
         [BlubMember(2)]
-        public Team FromTeam { get; set; }
+        public TeamId FromTeam { get; set; }
 
         [BlubMember(3)]
-        public Team ToTeam { get; set; }
+        public TeamId ToTeam { get; set; }
 
         public SMixChangeTeamAckMessage()
         {
         }
 
-        public SMixChangeTeamAckMessage(ulong playerToMove, ulong playerToReplace, Team fromTeam, Team toTeam)
+        public SMixChangeTeamAckMessage(ulong playerToMove, ulong playerToReplace, TeamId fromTeam, TeamId toTeam)
         {
             PlayerToMove = playerToMove;
             PlayerToReplace = playerToReplace;

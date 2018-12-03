@@ -145,7 +145,7 @@ namespace Netsphere.Server.Chat
                 .Member(dest => dest.ServerId, src => appOptions.ServerList.Id)
                 .Function(dest => dest.ChannelId, src => src.Channel != null ? (short)src.Channel.Id : (short)-1)
                 .Function(dest => dest.RoomId, src => /*src.Room?.Id ??*/ 0xFFFFFFFF) // ToDo: Tutorial, License
-                .Function(dest => dest.Team, src => /*src.RoomInfo?.Team?.Team ??*/ Team.Neutral)
+                .Function(dest => dest.Team, src => /*src.RoomInfo?.Team?.Team ??*/ TeamId.Neutral)
                 .Function(dest => dest.TotalExperience, src => src.TotalExperience);
 
             Mapper.Register<Player, UserDataWithNickDto>()

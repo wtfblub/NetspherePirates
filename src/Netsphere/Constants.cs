@@ -15,7 +15,7 @@ namespace Netsphere
         Game = 3,
         Chat = 5,
 
-        Relay = 10,
+        Relay = 10
     }
 
     public enum Gender : byte
@@ -45,12 +45,12 @@ namespace Netsphere
         MasterAFK = 2,
         AFK = 3,
         ModeratorKick = 4,
-        VoteKick = 5,
+        VoteKick = 5
     }
 
     public enum MissionRewardType : byte
     {
-        PEN = 1,
+        PEN = 1
     }
 
     [Flags]
@@ -79,7 +79,7 @@ namespace Netsphere
         Weapon1 = 0,
         Weapon2 = 1,
         Weapon3 = 2,
-        None = 3,
+        None = 3
     }
 
     public enum SkillSlot : byte
@@ -93,7 +93,7 @@ namespace Netsphere
         AP = 2,
         Premium = 3,
         None = 4, //?
-        CP = 5,
+        CP = 5
     }
 
     public enum ItemPeriodType : uint
@@ -101,20 +101,20 @@ namespace Netsphere
         None = 1,
         Hours = 2,
         Days = 3,
-        Units = 4, // ?
+        Units = 4 // ?
     }
 
     public enum UseItemAction : byte
     {
         Equip = 1,
         UnEquip = 2,
-        Unk4 = 4,
+        Unk4 = 4
     }
 
     public enum InventoryAction : uint
     {
         Add = 1,
-        Update = 2,
+        Update = 2
     }
 
     public enum ItemBuyResult : byte
@@ -122,7 +122,7 @@ namespace Netsphere
         DBError = 0,
         NotEnoughMoney = 1,
         UnkownItem = 2,
-        OK = 3,
+        OK = 3
     }
 
     public enum ItemRepairResult : byte
@@ -133,7 +133,7 @@ namespace Netsphere
         Error3 = 3,
         NotEnoughMoney = 4,
         OK = 5,
-        Error4 = 6,
+        Error4 = 6
     }
 
     public enum ItemRefundResult : byte
@@ -145,7 +145,7 @@ namespace Netsphere
     public enum CapsuleRewardType : uint
     {
         PEN = 1,
-        Item = 2,
+        Item = 2
     }
 
     public enum GameRule : uint
@@ -159,7 +159,7 @@ namespace Netsphere
         Arcade = 7,
         Chaser = 8,
         BattleRoyal = 9,
-        Captain = 10,
+        Captain = 10
 
         //Siege = 11,
         //Horde = 12,
@@ -178,20 +178,20 @@ namespace Netsphere
     {
         FirstHalf = 1,
         HalfTime = 2,
-        SecondHalf = 3,
+        SecondHalf = 3
     }
 
-    public enum Team : byte
+    public enum TeamId : byte
     {
         Neutral = 0,
         Alpha = 1,
-        Beta = 2,
+        Beta = 2
     }
 
     public enum PlayerGameMode : byte
     {
         Normal = 1,
-        Spectate = 2,
+        Spectate = 2
     }
 
     public enum PlayerState : byte
@@ -200,7 +200,7 @@ namespace Netsphere
         Dead = 1,
         Waiting = 2,
         Spectating = 3,
-        Lobby = 4,
+        Lobby = 4
     }
 
     public enum GameEventMessage : byte
@@ -229,7 +229,7 @@ namespace Netsphere
         UserEntering = 25,
         UserNotReady = 26,
         RoomModeIsChanging = 27,
-        ChaserIn = 28,
+        ChaserIn = 28
     }
 
     //    public enum VoteKickReason : byte
@@ -290,19 +290,19 @@ namespace Netsphere
         Block = 18,
         Bind = 19,
         Metallic = 20,
-        Berserk = 21,
+        Berserk = 21
     }
 
     public enum ChannelCategory : byte
     {
         Speed = 0,
-        Club = 3,
+        Club = 3
     }
 
     public enum DenyAction : uint
     {
         Add = 0,
-        Remove = 1,
+        Remove = 1
     }
 
     public enum ActorState : byte
@@ -459,7 +459,7 @@ namespace Netsphere
         TRAAttack2Right,
         TRBAttack2,
         TrabigExplosion,
-        TeamChange,
+        TeamChange
     }
 
     public enum Condition : uint
@@ -467,7 +467,7 @@ namespace Netsphere
         Blow = 2,
         Push = 4,
         Stun = 8,
-        Bind = 16,
+        Bind = 16
     }
 
     public enum Attribute

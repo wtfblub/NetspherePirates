@@ -13,7 +13,7 @@ namespace Netsphere.Network.Data.P2P
         public LongPeerId Id { get; set; }
 
         [BlubMember(1)]
-        public Team Team { get; set; }
+        public TeamId Team { get; set; }
 
         [BlubMember(2)]
         public Vector3 Position { get; set; }

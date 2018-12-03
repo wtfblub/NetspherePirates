@@ -64,7 +64,7 @@ namespace Netsphere.Network.Data.Chat
         public CommunitySetting AllowInfoRequest { get; set; }
 
         [BlubMember(17)]
-        public Team Team { get; set; }
+        public TeamId Team { get; set; }
 
         [BlubMember(18)]
         public int Unk4 { get; set; }

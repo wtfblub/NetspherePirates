@@ -25,7 +25,7 @@ namespace Netsphere.Server.Relay
             _logger = logger;
         }
 
-        internal async Task Initialize(Session session, Account account)
+        internal void Initialize(Session session, Account account)
         {
             Session = session;
             Account = account;
