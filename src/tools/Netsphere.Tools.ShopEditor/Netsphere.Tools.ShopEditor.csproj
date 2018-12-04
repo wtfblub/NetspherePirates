@@ -17,6 +17,7 @@
     <PackageReference Include="Magick.NET-Q16-HDRI-AnyCPU" Version="7.9.0.2" />
     <!--<PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-27124-01" />-->
     <PackageReference Include="ReactiveProperty" Version="4.2.2" />
+    <PackageReference Include="SharpLzo" Version="0.1.2" />
     <PackageReference Include="Valit" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
@@ -36,6 +37,5 @@
   <!--<ItemGroup Condition=" '$(Configuration)' == 'Debug' ">-->
   <!--<IlcArg Include="&#45;&#45;stacktracedata" />-->
   <!--</ItemGroup>-->
-  <Import Project="..\SharpLzo.targets" />
   <Import Project="..\..\..\Rules.targets" />
 </Project>

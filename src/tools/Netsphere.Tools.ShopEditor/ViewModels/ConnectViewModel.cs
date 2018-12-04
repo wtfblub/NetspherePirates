@@ -44,13 +44,13 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
             Username = new ReactiveProperty<string>("root").SetValidateNotifyError(x =>
                 UseSqlite.Value ? null : ConnectViewModelValidation.Username.Validate(x).ErrorMessages.FirstOrDefault());
 
-            Password = new ReactiveProperty<string>().SetValidateNotifyError(x =>
+            Password = new ReactiveProperty<string>("").SetValidateNotifyError(x =>
                 UseSqlite.Value ? null : ConnectViewModelValidation.Password.Validate(x).ErrorMessages.FirstOrDefault());
 
-            Database = new ReactiveProperty<string>().SetValidateNotifyError(x =>
+            Database = new ReactiveProperty<string>("").SetValidateNotifyError(x =>
                 UseSqlite.Value ? null : ConnectViewModelValidation.Database.Validate(x).ErrorMessages.FirstOrDefault());
 
-            ResourcePath = new ReactiveProperty<string>()
+            ResourcePath = new ReactiveProperty<string>("")
                 .SetValidateNotifyError(x =>
                     UseSqlite.Value ? null : ConnectViewModelValidation.ResourcePath.Validate(x).ErrorMessages.FirstOrDefault());
 
