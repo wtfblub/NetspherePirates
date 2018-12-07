@@ -18,7 +18,7 @@ namespace ProudNet.DotNetty.Handlers
         private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
         private readonly IInternalSessionManager<uint> _udpSessionManager;
 
-        public UdpHandler(ILogger logger, UdpSocket socket, BlubSerializer serializer,
+        public UdpHandler(ILogger<UdpHandler> logger, UdpSocket socket, BlubSerializer serializer,
             ISessionManagerFactory sessionManagerFactory)
         {
             _socket = socket;

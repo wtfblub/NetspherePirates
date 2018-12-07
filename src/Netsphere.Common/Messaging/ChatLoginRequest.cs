@@ -29,7 +29,7 @@ namespace Netsphere.Common.Messaging
         public ChatLoginResponse(bool ok, Account account, uint totalExperience)
         {
             OK = ok;
-            account = account;
+            Account = account;
             TotalExperience = totalExperience;
         }
     }

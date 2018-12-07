@@ -2,7 +2,7 @@ namespace Netsphere.Common
 {
     public class Account
     {
-        public ulong Id { get; }
+        public ulong Id { get; set; }
         public string Username { get; set; }
         public string Nickname { get; set; }
         public SecurityLevel SecurityLevel { get; set; }
