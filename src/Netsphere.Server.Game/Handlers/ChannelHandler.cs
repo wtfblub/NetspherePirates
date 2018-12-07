@@ -88,6 +88,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeInChannel))]
+        [Firewall(typeof(MustBeInRoom), Invert = true)]
         public async Task<bool> OnHandle(MessageContext context, CChannelLeaveReqMessage message)
         {
             var session = context.GetSession<Session>();

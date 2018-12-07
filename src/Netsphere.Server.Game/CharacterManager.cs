@@ -210,7 +210,7 @@ namespace Netsphere.Server.Game
                         BasicPants = character.Pants.Variation
                     };
                     SetDtoItems(character, entity);
-                    db.Insert(entity);
+                    await db.InsertAsync(entity);
                     character.SetExistsState(true);
                 }
                 else
@@ -230,7 +230,7 @@ namespace Netsphere.Server.Game
                         BasicPants = character.Pants.Variation
                     };
                     SetDtoItems(character, entity);
-                    db.Update(entity);
+                    await db.UpdateAsync(entity);
                     character.SetDirtyState(false);
                 }
             }
@@ -251,14 +251,13 @@ namespace Netsphere.Server.Game
             return GetEnumerator();
         }
 
-        private void SetDtoItems(Character character, PlayerCharacterEntity entity)
+        private static void SetDtoItems(Character character, PlayerCharacterEntity entity)
         {
             // Weapons
             var items = character.Weapons.GetItems();
             for (var slot = 0; slot < items.Length; ++slot)
             {
-                var item = items[slot];
-                var itemId = item != null ? (long?)item.Id : null;
+                var itemId = (long?)items[slot]?.Id;
 
                 switch (slot)
                 {
@@ -278,14 +277,13 @@ namespace Netsphere.Server.Game
 
             // Skills
             items = character.Skills.GetItems();
-            entity.SkillId = items[0] != null ? (int?)items[0].Id : null;
+            entity.SkillId = (long?)items[0]?.Id;
 
             // Costumes
             items = character.Costumes.GetItems();
             for (var slot = 0; slot < items.Length; ++slot)
             {
-                var item = items[slot];
-                var itemId = item != null ? (int?)item.Id : null;
+                var itemId = (long?)items[slot]?.Id;
 
                 switch ((CostumeSlot)slot)
                 {

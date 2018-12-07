@@ -91,7 +91,7 @@ namespace Netsphere.Server.Chat
 
             foreach (var deny in _denies.Values.Where(deny => !deny.Exists))
             {
-                db.Insert(new PlayerDenyEntity
+                await db.InsertAsync(new PlayerDenyEntity
                 {
                     Id = deny.Id,
                     PlayerId = (int)Player.Account.Id,
