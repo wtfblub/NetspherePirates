@@ -12,6 +12,7 @@
     Address: 127.0.0.1
     UpdateInterval: 30000
   }
+  RelayEndPoint: 127.0.0.1:28005
   ClientVersions: ["2.8.3.26956"]
   Database:
   {

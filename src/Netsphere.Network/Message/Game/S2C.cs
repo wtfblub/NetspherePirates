@@ -641,9 +641,9 @@ namespace Netsphere.Network.Message.Game
             Rooms = Array.Empty<RoomDto>();
         }
 
-        public SGameRoomListAckMessage(RoomDto[] rooms)
+        public SGameRoomListAckMessage(ChannelInfoRequest listType, RoomDto[] rooms)
         {
-            ListType = ChannelInfoRequest.RoomList;
+            ListType = listType;
             Rooms = rooms;
         }
 
