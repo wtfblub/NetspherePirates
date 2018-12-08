@@ -98,7 +98,8 @@ namespace Netsphere.Server.Relay
                 e.Session.Channel.Pipeline.FireExceptionCaught(ex);
             }
 
-            Remove(session.Player);
+            if (session.Player != null)
+                Remove(session.Player);
         }
 
         public IEnumerator<Player> GetEnumerator()

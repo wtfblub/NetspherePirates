@@ -105,7 +105,8 @@ namespace Netsphere.Server.Chat
                 e.Session.Channel.Pipeline.FireExceptionCaught(ex);
             }
 
-            Remove(session.Player);
+            if (session.Player != null)
+                Remove(session.Player);
         }
 
         public IEnumerator<Player> GetEnumerator()
