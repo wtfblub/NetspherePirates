@@ -34,6 +34,7 @@ namespace ProudNet.Handlers
             session.Logger.LogTrace("Handshake:NotifyCSEncryptedSessionKey");
             var secureKey = _rsa.Decrypt(message.SecureKey, true);
             session.Crypt = new Crypt(secureKey);
+            session.State = SessionState.HandshakeKeyExchanged;
             await session.SendAsync(new NotifyCSSessionKeySuccessMessage());
             return true;
         }
@@ -60,6 +61,7 @@ namespace ProudNet.Handlers
 
             _sessionManager.AddSession(session.HostId, session);
             session.HandhsakeEvent.Set();
+            session.State = SessionState.Connected;
             await session.SendAsync(new NotifyServerConnectSuccessMessage(
                 session.HostId, _networkOptions.Version, session.RemoteEndPoint));
             return true;
