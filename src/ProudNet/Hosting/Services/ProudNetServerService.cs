@@ -31,6 +31,8 @@ namespace ProudNet.Hosting.Services
         private readonly P2PGroupManager _groupManager;
         private readonly UdpSocketManager _udpSocketManager;
         private readonly ISchedulerService _schedulerService;
+        private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
+        private readonly IInternalSessionManager<uint> _udpSessionManager;
         private IEventLoopGroup _listenerThreads;
         private IEventLoopGroup _workerThreads;
 
@@ -100,7 +102,8 @@ namespace ProudNet.Hosting.Services
         public ProudNetServerService(ILogger<ProudNetServerService> logger, ILoggerFactory loggerFactory,
             IServiceProvider serviceProvider,
             IOptions<NetworkOptions> networkOptions, IOptions<ThreadingOptions> threadingOptions,
-            P2PGroupManager groupManager, UdpSocketManager udpSocketManager, ISchedulerService schedulerService)
+            P2PGroupManager groupManager, UdpSocketManager udpSocketManager, ISchedulerService schedulerService,
+            ISessionManagerFactory sessionManagerFactory)
         {
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
@@ -112,6 +115,8 @@ namespace ProudNet.Hosting.Services
             _groupManager = groupManager;
             _udpSocketManager = udpSocketManager;
             _schedulerService = schedulerService;
+            _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
+            _udpSessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.UdpId);
             InternalLoggerFactory.DefaultFactory = loggerFactory;
 
             var sessionManager = _serviceProvider.GetRequiredService<ISessionManager>();
@@ -144,7 +149,6 @@ namespace ProudNet.Hosting.Services
                         var coreMessageHandler = new MessageHandler(_serviceProvider,
                             new DefaultMessageHandlerResolver(
                                 new[] { typeof(AuthenticationHandler).Assembly }, typeof(ICoreMessage)));
-
 
                         var internalRmiMessageHandler = new MessageHandler(_serviceProvider,
                             new DefaultMessageHandlerResolver(new[] { typeof(ReliablePingMessage).Assembly }, typeof(IMessage)));
@@ -217,6 +221,8 @@ namespace ProudNet.Hosting.Services
 
         private void SessionManager_OnRemoved(object sender, SessionEventArgs e)
         {
+            _udpSessionManager.RemoveSession(e.Session.UdpSessionId);
+            _magicNumberSessionManager.RemoveSession(e.Session.HolepunchMagicNumber);
             OnDisconnected(e.Session);
         }
 
@@ -249,10 +255,13 @@ namespace ProudNet.Hosting.Services
                             var diff = now - session.LastUdpPing;
                             if (!session.UdpEnabled)
                             {
+                                _magicNumberSessionManager.RemoveSession(session.HolepunchMagicNumber);
+
                                 session.Logger.LogInformation("Trying to switch to udp relay");
                                 var socket = udpSocketManager.NextSocket();
                                 session.UdpSocket = socket;
                                 session.HolepunchMagicNumber = Guid.NewGuid();
+                                _magicNumberSessionManager.AddSession(session.HolepunchMagicNumber, session);
                                 member.SendAsync(new S2C_RequestCreateUdpSocketMessage(
                                     new IPEndPoint(udpSocketManager.Address,
                                         ((IPEndPoint)socket.Channel.LocalAddress).Port)));

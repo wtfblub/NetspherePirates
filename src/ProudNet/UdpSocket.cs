@@ -2,12 +2,10 @@
 using System.Net;
 using System.Threading.Tasks;
 using BlubLib;
-using BlubLib.Serialization;
 using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 using ProudNet.DotNetty.Codecs;
@@ -48,10 +46,12 @@ namespace ProudNet
                     .Channel<SocketDatagramChannel>()
                     .Handler(new ActionChannelInitializer<IChannel>(ch =>
                     {
+                        var udpHandler = _serviceProvider.GetService<UdpHandler>();
+                        udpHandler.Socket = this;
                         ch.Pipeline
                             .AddLast(new UdpFrameDecoder((int)_options.MessageMaxLength))
                             .AddLast(new UdpFrameEncoder())
-                            .AddLast(_serviceProvider.GetService<UdpHandler>())
+                            .AddLast(udpHandler)
                             .AddLast(_serviceProvider.GetService<ErrorHandler>());
                     }))
                     .BindAsync(endPoint).WaitEx();

@@ -16,11 +16,13 @@ namespace ProudNet.Handlers
           IHandle<C2S_RequestCreateUdpSocketMessage>,
           IHandle<C2S_CreateUdpSocketAckMessage>
     {
+        private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
         private readonly IInternalSessionManager<uint> _sessionManager;
         private readonly UdpSocketManager _udpSocketManager;
 
         public RelayHandler(ISessionManagerFactory sessionManagerFactory, UdpSocketManager udpSocketManager)
         {
+            _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
             _sessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.HostId);
             _udpSocketManager = udpSocketManager;
         }
@@ -37,10 +39,8 @@ namespace ProudNet.Handlers
                     return true;
 
                 var target = _sessionManager.GetSession(destination.HostId);
-                var task = target?.SendAsync(new ReliableRelay2Message(
+                var _ = target?.SendAsync(new ReliableRelay2Message(
                     new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
-                if (task != null)
-                    await task;
             }
 
             return true;
@@ -58,9 +58,7 @@ namespace ProudNet.Handlers
                     return true;
 
                 var target = _sessionManager.GetSession(destination);
-                var task = target?.SendUdpIfAvailableAsync(new UnreliableRelay2Message(session.HostId, message.Data));
-                if (task != null)
-                    await task;
+                var _ = target?.SendUdpIfAvailableAsync(new UnreliableRelay2Message(session.HostId, message.Data));
             }
 
             return true;
@@ -76,9 +74,12 @@ namespace ProudNet.Handlers
             if (!_udpSocketManager.IsRunning)
                 return true;
 
+            _magicNumberSessionManager.RemoveSession(session.HolepunchMagicNumber);
+
             var socket = _udpSocketManager.NextSocket();
             session.UdpSocket = socket;
             session.HolepunchMagicNumber = Guid.NewGuid();
+            _magicNumberSessionManager.AddSession(session.HolepunchMagicNumber, session);
             await session.SendAsync(new S2C_RequestCreateUdpSocketMessage(
                 new IPEndPoint(_udpSocketManager.Address, ((IPEndPoint)socket.Channel.LocalAddress).Port)));
             return true;

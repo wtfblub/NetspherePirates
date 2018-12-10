@@ -12,16 +12,16 @@ namespace ProudNet.DotNetty.Handlers
 {
     internal class UdpHandler : ChannelHandlerAdapter
     {
-        private readonly UdpSocket _socket;
         private readonly BlubSerializer _serializer;
         private readonly ILogger _log;
         private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
         private readonly IInternalSessionManager<uint> _udpSessionManager;
 
-        public UdpHandler(ILogger<UdpHandler> logger, UdpSocket socket, BlubSerializer serializer,
+        internal UdpSocket Socket { get; set; }
+
+        public UdpHandler(ILogger<UdpHandler> logger, BlubSerializer serializer,
             ISessionManagerFactory sessionManagerFactory)
         {
-            _socket = socket;
             _serializer = serializer;
             _log = logger;
             _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
@@ -54,7 +54,7 @@ namespace ProudNet.DotNetty.Handlers
                         return;
                     }
 
-                    if (session.UdpSocket != _socket)
+                    if (session.UdpSocket != Socket)
                     {
                         _log.LogWarning("<{EndPoint}> Client is sending to the wrong udp socket",
                             message.EndPoint.ToString());
@@ -68,7 +68,7 @@ namespace ProudNet.DotNetty.Handlers
                     return;
                 }
 
-                if (session.UdpSocket != _socket)
+                if (session.UdpSocket != Socket)
                 {
                     _log.LogWarning("<{EndPoint}> Client is sending to the wrong udp socket",
                         message.EndPoint.ToString());
@@ -77,9 +77,11 @@ namespace ProudNet.DotNetty.Handlers
 
                 var recvContext = new MessageContext
                 {
+                    Session = session,
                     Message = message.Content.Retain(),
                     UdpEndPoint = message.EndPoint
                 };
+
                 session.Channel.Pipeline.Context<MessageContextDecoder>().FireChannelRead(recvContext);
             }
             finally
