@@ -30,7 +30,8 @@ namespace Netsphere.Server.Relay
             {
                 _logger.LogInformation("Creating p2pgroup for room={RoomId}...", id);
                 var group = _groupManager.Create(true);
-                return new Room(this, id, group);
+                room = new Room(this, id, group);
+                _rooms[id] = room;
             }
 
             return room;
