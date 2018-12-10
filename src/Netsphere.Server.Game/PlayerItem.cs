@@ -2,8 +2,11 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using ExpressMapper.Extensions;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
+using Netsphere.Network.Data.Game;
+using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Data;
 using Netsphere.Server.Game.Services;
 
@@ -105,26 +108,23 @@ namespace Netsphere.Server.Game
             return GetShopItemInfo().PriceGroup.GetPrice(PeriodType, Period);
         }
 
-        public Task LoseDurabilityAsync(int loss)
+        public void LoseDurability(int loss)
         {
-            // TODO Durability loss
+            if (loss < 0)
+                throw new ArgumentOutOfRangeException(nameof(loss));
 
-            // if (loss < 0)
-            //     throw new ArgumentOutOfRangeException(nameof(loss));
-            //
-            // if (Inventory.Player.Room == null)
-            //     throw new InvalidOperationException("Player is not inside a room");
-            //
-            // if (Durability == -1)
-            //     return Task.CompletedTask;
-            //
-            // Durability -= loss;
-            // if (Durability < 0)
-            //     Durability = 0;
-            //
-            // return Inventory.Player.Session.SendAsync(new SItemDurabilityInfoAckMessage(new[]
-            //     { this.Map<PlayerItem, ItemDurabilityInfoDto>() }));
-            return Task.CompletedTask;
+            if (Inventory.Player.Room == null)
+                throw new InvalidOperationException("Player is not inside a room");
+
+            if (Durability == -1)
+                return;
+
+            Durability -= loss;
+            if (Durability < 0)
+                Durability = 0;
+
+            Inventory.Player.Session.Send(new SItemDurabilityInfoAckMessage(
+                new[] { this.Map<PlayerItem, ItemDurabilityInfoDto>() }));
         }
 
         // TODO Calculate refund/repair cost

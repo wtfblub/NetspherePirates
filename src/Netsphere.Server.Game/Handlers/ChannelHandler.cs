@@ -33,7 +33,12 @@ namespace Netsphere.Server.Game.Handlers
             {
                 case ChannelInfoRequest.RoomList:
                 case ChannelInfoRequest.RoomList2:
-                    // TODO Room list
+                    if (plr.Channel != null)
+                    {
+                        var rooms = plr.Channel.RoomManager.Select(x => x.Map<Room, RoomDto>()).ToArray();
+                        await session.SendAsync(new SGameRoomListAckMessage(message.Request, rooms));
+                    }
+
                     break;
 
                 case ChannelInfoRequest.ChannelList:

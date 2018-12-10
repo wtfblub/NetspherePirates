@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
 using Foundatio.Caching;
@@ -12,10 +13,11 @@ using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
 using Netsphere.Database;
 using Netsphere.Network.Data.Game;
+using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
-using Netsphere.Server.Game.Commands;
+using Netsphere.Server.Game.GameRules;
 using Netsphere.Server.Game.Handlers;
 using Netsphere.Server.Game.Serializers;
 using Netsphere.Server.Game.Services;
@@ -82,6 +84,8 @@ namespace Netsphere.Server.Game
                             serializer.AddSerializer(new ShopPriceSerializer());
                             serializer.AddSerializer(new ShopEffectSerializer());
                             serializer.AddSerializer(new ShopItemSerializer());
+                            serializer.AddSerializer(new PeerIdSerializer());
+                            serializer.AddSerializer(new LongPeerIdSerializer());
                         });
                 })
                 .ConfigureServices((context, services) =>
@@ -94,6 +98,9 @@ namespace Netsphere.Server.Game
                         .Configure<ServerListOptions>(context.Configuration.GetSection(nameof(AppOptions.ServerList)))
                         .Configure<DatabaseOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
                         .Configure<GameOptions>(context.Configuration.GetSection(nameof(AppOptions.Game)))
+                        .Configure<DeathmatchOptions>(context.Configuration
+                            .GetSection(nameof(AppOptions.Game))
+                            .GetSection(nameof(AppOptions.Game.Deathmatch)))
                         .Configure<IdGeneratorOptions>(x => x.Id = 0)
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
@@ -116,6 +123,11 @@ namespace Netsphere.Server.Game
                         .AddTransient<CharacterManager>()
                         .AddTransient<PlayerInventory>()
                         .AddSingleton<PlayerManager>()
+                        .AddTransient<RoomManager>()
+                        .AddTransient<Room>()
+                        .AddSingleton<GameRuleManager>()
+                        .AddTransient<GameRuleStateMachine>()
+                        .AddTransient<Deathmatch>()
                         .AddCommands(typeof(Program).Assembly)
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()
@@ -167,6 +179,71 @@ namespace Netsphere.Server.Game
 
             Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
                 .Member(dest => dest.ItemId, src => src.Id);
+
+            Mapper.Register<Room, RoomDto>()
+                .Member(dest => dest.RoomId, src => src.Id)
+                .Member(dest => dest.MatchKey, src => src.Options.MatchKey)
+                .Member(dest => dest.Name, src => src.Options.Name)
+                .Member(dest => dest.HasPassword, src => !string.IsNullOrWhiteSpace(src.Options.Password))
+                .Member(dest => dest.TimeLimit, src => src.Options.TimeLimit.TotalMilliseconds)
+                .Member(dest => dest.ScoreLimit, src => src.Options.ScoreLimit)
+                .Member(dest => dest.IsFriendly, src => src.Options.IsFriendly)
+                .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
+                .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
+                .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
+                .Member(dest => dest.EquipLimit, src => src.Options.ItemLimit)
+                .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
+                .Member(dest => dest.ConnectingCount, src => src.TeamManager.Players.Count())
+                .Member(dest => dest.PlayerCount, src => src.TeamManager.Players.Count())
+                .Function(dest => dest.Latency, src =>
+                {
+                    const int good = 30;
+                    const int bad = 190;
+
+                    var averagePing = src.GetAveragePing();
+
+                    if (averagePing <= good)
+                        return 100;
+
+                    if (averagePing >= bad)
+                        return 0;
+
+                    var result = (uint)(100f * averagePing / bad);
+                    return (byte)(100 - result);
+                })
+                .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState);
+
+            Mapper.Register<Room, EnterRoomInfoDto>()
+                .Member(dest => dest.RoomId, src => src.Id)
+                .Member(dest => dest.MatchKey, src => src.Options.MatchKey)
+                .Member(dest => dest.TimeLimit, src => src.Options.TimeLimit.TotalMilliseconds)
+                .Member(dest => dest.TimeSync, src => src.GameRule.StateMachine.RoundTime.TotalMilliseconds)
+                .Member(dest => dest.ScoreLimit, src => src.Options.ScoreLimit)
+                .Member(dest => dest.IsFriendly, src => src.Options.IsFriendly)
+                .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
+                .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
+                .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
+                .Member(dest => dest.ItemLimit, src => src.Options.ItemLimit)
+                .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
+                .Member(dest => dest.RelayEndPoint, src => src.Options.RelayEndPoint)
+                .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState)
+                .Function(dest => dest.TimeState, src => src.GameRule.StateMachine.TimeState);
+
+            Mapper.Register<Player, RoomPlayerDto>()
+                .Member(dest => dest.AccountId, src => src.Account.Id)
+                .Member(dest => dest.Nickname, src => src.Account.Nickname)
+                .Value(dest => dest.Unk1, (byte)144);
+
+            Mapper.Register<RoomCreationOptions, ChangeRuleDto>()
+                .Member(dest => dest.Name, src => src.Name)
+                .Member(dest => dest.Password, src => src.Password)
+                .Function(dest => dest.MatchKey, src => src.MatchKey)
+                .Member(dest => dest.TimeLimit, src => src.TimeLimit)
+                .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
+                .Member(dest => dest.IsFriendly, src => src.IsFriendly)
+                .Member(dest => dest.IsBalanced, src => src.IsBalanced)
+                .Member(dest => dest.ItemLimit, src => src.ItemLimit)
+                .Member(dest => dest.IsNoIntrusion, src => src.IsNoIntrusion);
 
             Mapper.Compile(CompilationTypes.Source);
         }

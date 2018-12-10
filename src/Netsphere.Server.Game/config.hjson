@@ -36,6 +36,7 @@
   {
     EnableTutorial: true
     EnableLicenseRequirement: true
+    MaxLevel: 100
     StartLevel: 0
     StartPEN: 30000
     StartAP: 0
@@ -48,6 +49,24 @@
       MaxRepeat: 3
       WhitespaceAllowed: false
       AsciiOnly: true
+    }
+    DurabilityLossPerDeath: 0
+    DurabilityLossPerMinute: 0
+    Deathmatch:
+    {
+      ExperienceRates:
+      {
+        ScoreFactor: 0.7
+        FirstPlaceBonus: 50
+        SecondPlaceBonus: 30
+        ThirdPlaceBonus: 10
+        PlayerCountFactor: 0.06
+        ExperiencePerMinute: 20
+      }
+      PointsPerKill: 2
+      PointsPerKillAssist: 1
+      PointsPerHealAssist: 2
+      PointsPerDeath: -1
     }
   }
 }

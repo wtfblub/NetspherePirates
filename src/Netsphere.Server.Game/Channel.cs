@@ -17,6 +17,7 @@ namespace Netsphere.Server.Game
         public int PlayerLimit { get; }
         public byte Type { get; }
         public IReadOnlyDictionary<ulong, Player> Players => (IReadOnlyDictionary<ulong, Player>)_players;
+        public RoomManager RoomManager { get; }
 
         public event EventHandler<ChannelEventArgs> PlayerJoined;
         public event EventHandler<ChannelEventArgs> PlayerLeft;
@@ -31,13 +32,15 @@ namespace Netsphere.Server.Game
             PlayerLeft?.Invoke(this, new ChannelEventArgs(this, plr));
         }
 
-        public Channel(uint id, ChannelCategory category, string name, int playerLimit, byte type)
+        public Channel(uint id, ChannelCategory category, string name, int playerLimit, byte type, RoomManager roomManager)
         {
             Id = id;
             Category = category;
             Name = name;
             PlayerLimit = playerLimit;
             Type = type;
+            RoomManager = roomManager;
+            RoomManager.Initialize(this);
         }
 
         public ChannelJoinError Join(Player plr)
