@@ -64,6 +64,7 @@ namespace Netsphere.Server.Relay.Handlers
                 plr.Initialize(session, response.Account);
                 session.Player = plr;
                 var room = _roomManager.GetOrCreate(message.RoomLocation.RoomId);
+                _playerManager.Add(plr);
                 await room.Join(plr);
                 await session.SendAsync(new SNotifyLoginResultMessage(0));
             }
