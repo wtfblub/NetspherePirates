@@ -19,7 +19,6 @@ namespace ProudNet.DotNetty.Handlers
         private readonly ILogger _logger;
         private readonly IMessageHandlerResolver _messageHandlerResolver;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IDictionary<Type, IFirewallRule> _firewallRules;
         private IReadOnlyDictionary<Type, HandlerInfo[]> _handlerMap;
 
         public event Action<MessageContext> UnhandledMessage;
@@ -34,7 +33,6 @@ namespace ProudNet.DotNetty.Handlers
             _logger = serviceProvider.GetRequiredService<ILogger<MessageHandler>>();
             _messageHandlerResolver = messageHandlerResolver;
             _serviceProvider = serviceProvider;
-            _firewallRules = new Dictionary<Type, IFirewallRule>();
         }
 
         public override async void ChannelRead(IChannelHandlerContext context, object message)
@@ -186,36 +184,30 @@ namespace ProudNet.DotNetty.Handlers
 
         private IFirewallRule GetFirewallRule(Type type, object[] parameters)
         {
-            if (!_firewallRules.TryGetValue(type, out var rule))
+            var ctors = type.GetConstructors();
+            if (ctors.Length != 1)
             {
-                var ctors = type.GetConstructors();
-                if (ctors.Length != 1)
-                {
-                    throw new ProudException(
-                        $"Rule implementation '{type.FullName}' has more than one constructor. Only one constructor is allowed.");
-                }
-
-                var ctor = ctors.Single();
-                var ctorParams = ctor.GetParameters();
-                var paramCount = parameters?.Length ?? 0;
-                var diParamCount = ctorParams.Length - paramCount;
-                var parametersToPass = parameters;
-
-                // Any left over parameters will be resolved via dependency injection
-                if (diParamCount > 0)
-                {
-                    parametersToPass = new object[ctorParams.Length];
-                    Array.Copy(parameters, parametersToPass, paramCount);
-
-                    for (var i = paramCount; i < ctorParams.Length; ++i)
-                        parametersToPass[i] = _serviceProvider.GetRequiredService(ctorParams[i].ParameterType);
-                }
-
-                rule = (IFirewallRule)Activator.CreateInstance(type, parametersToPass);
-                _firewallRules[type] = rule;
+                throw new ProudException(
+                    $"Rule implementation '{type.FullName}' has more than one constructor. Only one constructor is allowed.");
             }
 
-            return rule;
+            var ctor = ctors.Single();
+            var ctorParams = ctor.GetParameters();
+            var paramCount = parameters?.Length ?? 0;
+            var diParamCount = ctorParams.Length - paramCount;
+            var parametersToPass = parameters;
+
+            // Any left over parameters will be resolved via dependency injection
+            if (diParamCount > 0)
+            {
+                parametersToPass = new object[ctorParams.Length];
+                Array.Copy(parameters, parametersToPass, paramCount);
+
+                for (var i = paramCount; i < ctorParams.Length; ++i)
+                    parametersToPass[i] = _serviceProvider.GetRequiredService(ctorParams[i].ParameterType);
+            }
+
+            return (IFirewallRule)Activator.CreateInstance(type, parametersToPass);
         }
 
         private struct HandlerInfo
