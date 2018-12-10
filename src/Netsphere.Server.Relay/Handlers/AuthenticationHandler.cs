@@ -60,11 +60,14 @@ namespace Netsphere.Server.Relay.Handlers
                     return true;
                 }
 
+                var roomId = (uint)((message.RoomLocation.ChannelId << 8) | message.RoomLocation.RoomId);
+
                 var plr = _serviceProvider.GetRequiredService<Player>();
                 plr.Initialize(session, response.Account);
                 session.Player = plr;
-                var room = _roomManager.GetOrCreate(message.RoomLocation.RoomId);
                 _playerManager.Add(plr);
+
+                var room = _roomManager.GetOrCreate(roomId);
                 await room.Join(plr);
                 await session.SendAsync(new SNotifyLoginResultMessage(0));
             }
