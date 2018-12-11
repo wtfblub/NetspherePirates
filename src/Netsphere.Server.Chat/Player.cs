@@ -20,7 +20,8 @@ namespace Netsphere.Server.Chat
         public PlayerSettingManager Settings { get; }
         public uint TotalExperience { get; internal set; }
         public Channel Channel { get; internal set; }
-        public bool IsInRoom { get; internal set; }
+        public uint RoomId { get; internal set; }
+        public TeamId TeamId { get; internal set; }
         internal bool SentPlayerList { get; set; }
 
         public event EventHandler<PlayerEventArgs> Disconnected;

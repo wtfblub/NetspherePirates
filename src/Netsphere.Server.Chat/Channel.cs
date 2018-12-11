@@ -52,7 +52,7 @@ namespace Netsphere.Server.Chat
 
         public void Broadcast(IChatMessage message, bool excludeRooms = false)
         {
-            foreach (var plr in Players.Values.Where(plr => !excludeRooms || !plr.IsInRoom))
+            foreach (var plr in Players.Values.Where(plr => !excludeRooms || plr.RoomId == 0))
                 plr.Session.Send(message);
         }
 

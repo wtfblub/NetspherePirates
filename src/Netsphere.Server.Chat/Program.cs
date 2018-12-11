@@ -102,9 +102,10 @@ namespace Netsphere.Server.Chat
                         .AddTransient<DenyManager>()
                         .AddTransient<PlayerSettingManager>()
                         .AddSingleton<PlayerManager>()
+                        .AddSingleton<ChannelManager>()
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()
-                        .AddHostedServiceEx<ChannelService>();
+                        .AddHostedServiceEx<IpcService>();
                 });
 
             var host = hostBuilder.Build();
@@ -144,8 +145,8 @@ namespace Netsphere.Server.Chat
                 .Member(dest => dest.AccountId, src => src.Account.Id)
                 .Member(dest => dest.ServerId, src => appOptions.ServerList.Id)
                 .Function(dest => dest.ChannelId, src => src.Channel != null ? (short)src.Channel.Id : (short)-1)
-                .Function(dest => dest.RoomId, src => /*src.Room?.Id ??*/ 0xFFFFFFFF) // ToDo: Tutorial, License
-                .Function(dest => dest.Team, src => /*src.RoomInfo?.Team?.Team ??*/ TeamId.Neutral)
+                .Function(dest => dest.RoomId, src => src.RoomId == 0 ? 0xFFFFFFFF : src.RoomId) // ToDo: Tutorial, License
+                .Function(dest => dest.Team, src => src.TeamId)
                 .Function(dest => dest.TotalExperience, src => src.TotalExperience);
 
             Mapper.Register<Player, UserDataWithNickDto>()

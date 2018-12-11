@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using BlubLib.Collections.Concurrent;
 using ExpressMapper.Extensions;
+using Foundatio.Messaging;
 using Microsoft.Extensions.Logging;
 using Netsphere.Common;
-using Netsphere.Network;
+using Netsphere.Common.Messaging;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
@@ -23,6 +24,7 @@ namespace Netsphere.Server.Game
         private readonly GameRuleManager _gameRuleManager;
         private readonly GameDataService _gameDataService;
         private readonly ISchedulerService _schedulerService;
+        private readonly IMessageBus _messageBus;
         private readonly ConcurrentDictionary<ulong, Player> _players;
         private readonly ConcurrentDictionary<ulong, object> _kickedPlayers;
         private readonly CounterRecycler _idRecycler;
@@ -43,41 +45,36 @@ namespace Netsphere.Server.Game
         public event EventHandler<RoomPlayerEventArgs> PlayerJoining;
         public event EventHandler<RoomPlayerEventArgs> PlayerJoined;
         public event EventHandler<RoomPlayerEventArgs> PlayerLeft;
-        public event EventHandler<RoomEventArgs> StateChanged;
 
         protected virtual void OnPlayerJoining(Player plr)
         {
             PlayerJoining?.Invoke(this, new RoomPlayerEventArgs(this, plr));
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
-            // RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            _messageBus.PublishAsync(new PlayerUpdateMessage(plr.Account.Id, plr.TotalExperience, Id, TeamId.Neutral));
         }
 
         internal virtual void OnPlayerJoined(Player plr)
         {
             PlayerJoined?.Invoke(this, new RoomPlayerEventArgs(this, plr));
-            // RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
+            _messageBus.PublishAsync(new PlayerUpdateMessage(
+                plr.Account.Id, plr.TotalExperience, Id, plr.Team?.Id ?? TeamId.Neutral));
         }
 
         protected virtual void OnPlayerLeft(Player plr)
         {
             PlayerLeft?.Invoke(this, new RoomPlayerEventArgs(this, plr));
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
-            // RoomManager.Channel.Broadcast(new SUserDataAckMessage(e.Player.Map<Player, UserDataDto>()));
-        }
-
-        protected virtual void OnStateChanged()
-        {
-            StateChanged?.Invoke(this, new RoomEventArgs(this));
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            _messageBus.PublishAsync(new PlayerUpdateMessage(plr.Account.Id, plr.TotalExperience, 0, TeamId.Neutral));
         }
 
         public Room(ILogger<Room> logger, GameRuleManager gameRuleManager, GameDataService gameDataService,
-            ISchedulerService schedulerService)
+            ISchedulerService schedulerService, IMessageBus messageBus)
         {
             _logger = logger;
             _gameRuleManager = gameRuleManager;
             _gameDataService = gameDataService;
             _schedulerService = schedulerService;
+            _messageBus = messageBus;
             TimeCreated = DateTime.Now;
             _players = new ConcurrentDictionary<ulong, Player>();
             _kickedPlayers = new ConcurrentDictionary<ulong, object>();
@@ -93,6 +90,8 @@ namespace Netsphere.Server.Game
             Map = _gameDataService.Maps.First(x => x.Id == options.MatchKey.Map);
             GameRule = _gameRuleManager.GetGameRule(options.MatchKey.GameRule, this);
             GameRule.Initialize(this);
+            GameRule.StateMachine.GameStateChanged += OnGameStateChanged;
+            TeamManager.PlayerTeamChanged += OnPlayerTeamChanged;
 
             _scope = _logger.BeginScope("Channel={ChannelId} RoomId={RoomId}", RoomManager.Channel.Id, Id);
         }
@@ -270,6 +269,26 @@ namespace Netsphere.Server.Game
                         : lowestPlayer);
         }
 
+        private void OnGameStateChanged(object sender, EventArgs e)
+        {
+            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            if (GameRule.StateMachine.GameState == GameState.Result)
+            {
+                foreach (var plr in Players.Values)
+                {
+                    _messageBus.PublishAsync(new PlayerUpdateMessage(
+                        plr.Account.Id, plr.TotalExperience, Id, plr.Team?.Id ?? TeamId.Neutral));
+                }
+            }
+        }
+
+        private void OnPlayerTeamChanged(object sender, PlayerTeamChangedEventArgs e)
+        {
+            var plr = e.Player;
+            _messageBus.PublishAsync(new PlayerUpdateMessage(
+                plr.Account.Id, plr.TotalExperience, Id, plr.Team?.Id ?? TeamId.Neutral));
+        }
+
         private static void OnChangeRules(object This, object _)
         {
             var room = (Room)This;
@@ -278,8 +297,8 @@ namespace Netsphere.Server.Game
 
             room.Map = room._gameDataService.Maps[room.Options.MatchKey.Map];
             room.GameRule = room._gameRuleManager.GetGameRule(room.Options.MatchKey.GameRule, room);
-
             room.GameRule.Initialize(room);
+            room.GameRule.StateMachine.GameStateChanged += room.OnGameStateChanged;
 
             room.Broadcast(new SChangeRuleAckMessage(room.Options.Map<RoomCreationOptions, ChangeRuleDto>()));
             room.IsChangingRules = false;

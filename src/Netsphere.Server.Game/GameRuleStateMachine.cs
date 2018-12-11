@@ -24,6 +24,19 @@ namespace Netsphere.Server.Game
         private DateTimeOffset _gameStartTime;
         private DateTimeOffset _roundStartTime;
 
+        public event EventHandler GameStateChanged;
+        public event EventHandler TimeStateChanged;
+
+        protected virtual void OnGameStateChanged()
+        {
+            GameStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnTimeStateChanged()
+        {
+            TimeStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         public GameState GameState => GetGameState();
         public GameTimeState TimeState => GetTimeState();
         public TimeSpan GameTime => _gameStartTime == default ? TimeSpan.Zero : DateTimeOffset.Now - _gameStartTime;
@@ -140,6 +153,7 @@ namespace Netsphere.Server.Game
                 case GameRuleState.EnteringHalfTime:
                     ScheduleTrigger(GameRuleStateTrigger.StartHalfTime, s_preHalfTimeWaitTime);
                     AnnounceHalfTime();
+                    OnTimeStateChanged();
                     break;
 
                 case GameRuleState.EnteringResult:
@@ -177,6 +191,8 @@ namespace Netsphere.Server.Game
                         ? TimeSpan.FromMinutes(room.Options.TimeLimit.TotalMinutes / 2)
                         : room.Options.TimeLimit;
                     ScheduleTrigger(_hasHalfTime ? GameRuleStateTrigger.StartHalfTime : GameRuleStateTrigger.StartResult, delay);
+                    OnTimeStateChanged();
+                    OnGameStateChanged();
                     break;
 
                 case GameRuleState.HalfTime:
@@ -188,6 +204,7 @@ namespace Netsphere.Server.Game
                     ScheduleTrigger(GameRuleStateTrigger.StartResult,
                         TimeSpan.FromMinutes(room.Options.TimeLimit.TotalMinutes / 2));
                     room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.SecondHalf));
+                    OnTimeStateChanged();
                     break;
 
                 case GameRuleState.Result:
@@ -198,6 +215,7 @@ namespace Netsphere.Server.Game
 
                     room.Broadcast(new SChangeStateAckMessage(GameState.Result));
                     _gameRule.OnResult();
+                    OnGameStateChanged();
                     break;
 
                 case GameRuleState.Waiting:
@@ -206,6 +224,7 @@ namespace Netsphere.Server.Game
 
                     room.Broadcast(new SChangeStateAckMessage(GameState.Waiting));
                     room.BroadcastBriefing();
+                    OnGameStateChanged();
                     break;
             }
         }
