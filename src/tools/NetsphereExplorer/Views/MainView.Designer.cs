@@ -57,28 +57,28 @@
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.vistaMenu)).BeginInit();
             this.SuspendLayout();
-            // 
+            //
             // mainMenu
-            // 
+            //
             this.mainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.menuItem1,
             this.menuItem2});
-            // 
+            //
             // menuItem1
-            // 
+            //
             this.menuItem1.Index = 0;
             this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.miOpen});
             this.menuItem1.Text = "File";
-            // 
+            //
             // miOpen
-            // 
+            //
             this.vistaMenu.SetImage(this.miOpen, global::NetsphereExplorer.Properties.Resources.folder_open);
             this.miOpen.Index = 0;
             this.miOpen.Text = "Open...";
-            // 
+            //
             // tvFolders
-            // 
+            //
             this.tvFolders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tvFolders.FullRowSelect = true;
             this.tvFolders.HideSelection = false;
@@ -90,15 +90,15 @@
             this.tvFolders.ShowLines = false;
             this.tvFolders.Size = new System.Drawing.Size(175, 357);
             this.tvFolders.TabIndex = 0;
-            // 
+            //
             // imageList
-            // 
+            //
             this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
             this.imageList.ImageSize = new System.Drawing.Size(16, 16);
             this.imageList.TransparentColor = System.Drawing.Color.Transparent;
-            // 
+            //
             // lvExplorer
-            // 
+            //
             this.lvExplorer.AllowDrop = true;
             this.lvExplorer.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.chName,
@@ -115,113 +115,113 @@
             this.lvExplorer.TabIndex = 1;
             this.lvExplorer.UseCompatibleStateImageBehavior = false;
             this.lvExplorer.View = System.Windows.Forms.View.Details;
-            // 
+            //
             // chName
-            // 
+            //
             this.chName.Text = "Name";
             this.chName.Width = 298;
-            // 
+            //
             // chSize
-            // 
+            //
             this.chSize.Text = "Size";
             this.chSize.Width = 91;
-            // 
+            //
             // splitContainer1
-            // 
+            //
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
             this.splitContainer1.Name = "splitContainer1";
-            // 
+            //
             // splitContainer1.Panel1
-            // 
+            //
             this.splitContainer1.Panel1.Controls.Add(this.tvFolders);
             this.splitContainer1.Panel1MinSize = 170;
-            // 
+            //
             // splitContainer1.Panel2
-            // 
+            //
             this.splitContainer1.Panel2.Controls.Add(this.lvExplorer);
             this.splitContainer1.Size = new System.Drawing.Size(593, 357);
             this.splitContainer1.SplitterDistance = 175;
             this.splitContainer1.SplitterWidth = 2;
             this.splitContainer1.TabIndex = 0;
-            // 
+            //
             // vistaMenu
-            // 
+            //
             this.vistaMenu.ContainerControl = this;
-            // 
+            //
             // miRemoveFolder
-            // 
+            //
             this.vistaMenu.SetImage(this.miRemoveFolder, global::NetsphereExplorer.Properties.Resources.bin);
             this.miRemoveFolder.Index = 2;
             this.miRemoveFolder.Text = "Delete";
-            // 
+            //
             // miAddToFolder
-            // 
+            //
             this.vistaMenu.SetImage(this.miAddToFolder, global::NetsphereExplorer.Properties.Resources.document__plus);
             this.miAddToFolder.Index = 1;
             this.miAddToFolder.Text = "Add files...";
-            // 
+            //
             // miExtractFolder
-            // 
+            //
             this.vistaMenu.SetImage(this.miExtractFolder, global::NetsphereExplorer.Properties.Resources.folders);
             this.miExtractFolder.Index = 0;
             this.miExtractFolder.Text = "Extract to...";
-            // 
+            //
             // miExtractItems
-            // 
+            //
             this.vistaMenu.SetImage(this.miExtractItems, global::NetsphereExplorer.Properties.Resources.folders);
             this.miExtractItems.Index = 0;
             this.miExtractItems.Text = "Extract to...";
-            // 
+            //
             // miRemoveItems
-            // 
+            //
             this.vistaMenu.SetImage(this.miRemoveItems, global::NetsphereExplorer.Properties.Resources.bin);
             this.miRemoveItems.Index = 1;
             this.miRemoveItems.Text = "Delete";
-            // 
+            //
             // miAddFiles
-            // 
+            //
             this.vistaMenu.SetImage(this.miAddFiles, global::NetsphereExplorer.Properties.Resources.document__plus);
             this.miAddFiles.Index = 0;
             this.miAddFiles.Text = "Add files...";
-            // 
+            //
             // cmFolders
-            // 
+            //
             this.cmFolders.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.miExtractFolder,
             this.miAddToFolder,
             this.miRemoveFolder});
-            // 
+            //
             // cmExplorerSelection
-            // 
+            //
             this.cmExplorerSelection.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.miExtractItems,
             this.miRemoveItems});
-            // 
+            //
             // cmExplorer
-            // 
+            //
             this.cmExplorer.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.miAddFiles});
-            // 
+            //
             // overlay
-            // 
+            //
             this.overlay.Owner = this;
             this.overlay.View = null;
-            // 
+            //
             // menuItem2
-            // 
+            //
             this.menuItem2.Index = 1;
             this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.miCleaner});
             this.menuItem2.Text = "Tools";
-            // 
+            //
             // miCleaner
-            // 
+            //
             this.miCleaner.Index = 0;
             this.miCleaner.Text = "Cleaner";
-            // 
+            //
             // MainView
-            // 
+            //
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -268,4 +268,3 @@
         private System.Windows.Forms.MenuItem miCleaner;
     }
 }
-

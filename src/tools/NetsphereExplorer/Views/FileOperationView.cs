@@ -201,7 +201,7 @@ namespace NetsphereExplorer.Views
             var view = new FileOperationView(filesystem);
             overlay.Show(view);
             await Task.Run(() => view.ViewModel.StartAdd(folder, s_fileBrowser.FileNames));
-            return true; 
+            return true;
         }
 
         public static Task Add(IWin32Window window, Overlay overlay, IFilesystem filesystem, IFolder folder, string[] files)

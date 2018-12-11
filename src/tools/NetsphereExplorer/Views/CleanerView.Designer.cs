@@ -4,12 +4,12 @@ namespace NetsphereExplorer.Views
 {
     partial class CleanerView
     {
-        /// <summary> 
+        /// <summary>
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -24,8 +24,8 @@ namespace NetsphereExplorer.Views
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
+        /// <summary>
+        /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
@@ -36,10 +36,10 @@ namespace NetsphereExplorer.Views
             this.lblProgress = new BlubLib.GUI.Controls.Extended.LabelEx();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // flowLayoutPanel1
-            // 
-            this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            //
+            this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.flowLayoutPanel1.Controls.Add(this.lblTitle);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
@@ -48,9 +48,9 @@ namespace NetsphereExplorer.Views
             this.flowLayoutPanel1.Size = new System.Drawing.Size(349, 27);
             this.flowLayoutPanel1.TabIndex = 1;
             this.flowLayoutPanel1.WrapContents = false;
-            // 
+            //
             // lblTitle
-            // 
+            //
             this.lblTitle.AutoSize = true;
             this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblTitle.ForeColor = System.Drawing.Color.Black;
@@ -63,10 +63,10 @@ namespace NetsphereExplorer.Views
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Title...";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
+            //
             // pbProgress
-            // 
-            this.pbProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            //
+            this.pbProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pbProgress.Location = new System.Drawing.Point(9, 70);
             this.pbProgress.Name = "pbProgress";
@@ -75,9 +75,9 @@ namespace NetsphereExplorer.Views
             this.pbProgress.SmoothReverse = false;
             this.pbProgress.State = BlubLib.WinAPI.ProgressBarState.Normal;
             this.pbProgress.TabIndex = 4;
-            // 
+            //
             // lblProgress
-            // 
+            //
             this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblProgress.AutoSize = true;
             this.lblProgress.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -91,9 +91,9 @@ namespace NetsphereExplorer.Views
             this.lblProgress.TabIndex = 3;
             this.lblProgress.Text = "10% complete";
             this.lblProgress.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
+            //
             // CleanerView
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;

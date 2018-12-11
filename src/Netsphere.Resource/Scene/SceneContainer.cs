@@ -23,7 +23,7 @@ namespace Netsphere.Resource.Scene
         }
 
         #region ReadFrom
-        
+
         public static SceneContainer ReadFrom(string fileName)
         {
             using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))

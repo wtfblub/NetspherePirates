@@ -2,12 +2,12 @@
 {
     partial class FileOperationView
     {
-        /// <summary> 
+        /// <summary>
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -22,8 +22,8 @@
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
+        /// <summary>
+        /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
@@ -39,9 +39,9 @@
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // lblTitle
-            // 
+            //
             this.lblTitle.AutoSize = true;
             this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.lblTitle.ForeColor = System.Drawing.Color.Black;
@@ -54,10 +54,10 @@
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Copying 0 items to";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
+            //
             // flowLayoutPanel1
-            // 
-            this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            //
+            this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.flowLayoutPanel1.Controls.Add(this.lblTitle);
             this.flowLayoutPanel1.Controls.Add(this.lblDestination);
@@ -67,9 +67,9 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(349, 27);
             this.flowLayoutPanel1.TabIndex = 0;
             this.flowLayoutPanel1.WrapContents = false;
-            // 
+            //
             // lblDestination
-            // 
+            //
             this.lblDestination.ActiveLinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(153)))), ((int)(((byte)(255)))));
             this.lblDestination.AutoSize = true;
             this.lblDestination.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(102)))), ((int)(((byte)(204)))));
@@ -86,9 +86,9 @@
             this.lblDestination.TabStop = true;
             this.lblDestination.Text = "Desktop";
             this.lblDestination.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
+            //
             // lblProgress
-            // 
+            //
             this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblProgress.AutoSize = true;
             this.lblProgress.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
@@ -102,19 +102,19 @@
             this.lblProgress.TabIndex = 1;
             this.lblProgress.Text = "10% complete";
             this.lblProgress.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
+            //
             // pbProgress
-            // 
-            this.pbProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            //
+            this.pbProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pbProgress.Location = new System.Drawing.Point(9, 70);
             this.pbProgress.Name = "pbProgress";
             this.pbProgress.Size = new System.Drawing.Size(333, 17);
             this.pbProgress.State = BlubLib.WinAPI.ProgressBarState.Normal;
             this.pbProgress.TabIndex = 2;
-            // 
+            //
             // btnPause
-            // 
+            //
             this.btnPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnPause.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.btnPause.Cursor = System.Windows.Forms.Cursors.Default;
@@ -124,9 +124,9 @@
             this.btnPause.Name = "btnPause";
             this.btnPause.Size = new System.Drawing.Size(24, 24);
             this.btnPause.TabIndex = 1;
-            // 
+            //
             // btnCancel
-            // 
+            //
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.btnCancel.Cursor = System.Windows.Forms.Cursors.Default;
@@ -136,9 +136,9 @@
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(24, 24);
             this.btnCancel.TabIndex = 2;
-            // 
+            //
             // ExtractProgressView
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;

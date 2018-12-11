@@ -27,8 +27,8 @@ namespace Netsphere.Resource.Scene.Chunks
             Unk6 = 0;
             Unk7 = new []
             {
-                new Vector3(1, 0, 0), 
-                new Vector3(0, 1, 0), 
+                new Vector3(1, 0, 0),
+                new Vector3(0, 1, 0),
                 new Vector3(0, 0, 1)
             };
             Size = new Vector3();
