@@ -29,9 +29,10 @@ namespace Netsphere.Server.Game.Services
             _shutdown = new CancellationTokenSource();
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            await _schedulerService.ScheduleAsync(OnSave, null, null, _appOptions.SaveInterval, _shutdown.Token);
+            _schedulerService.ScheduleAsync(OnSave, null, null, _appOptions.SaveInterval, _shutdown.Token);
+            return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
