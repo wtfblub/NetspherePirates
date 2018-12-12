@@ -112,7 +112,7 @@ namespace Netsphere.Server.Game.GameRules
             var experienceGained = (uint)(plr.Score.GetTotalScore() * experienceRates.ScoreFactor +
                                           rankingBonus +
                                           plrs.Length * experienceRates.PlayerCountFactor +
-                                          (plr.GetCurrentPlayTime().TotalMinutes * experienceRates.ExperiencePerMinute));
+                                          plr.GetCurrentPlayTime().TotalMinutes * experienceRates.ExperiencePerMinute);
 
             return (experienceGained, 0);
         }

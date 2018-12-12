@@ -26,7 +26,7 @@ namespace Netsphere.Server.Game
         {
         }
 
-        protected internal virtual void OnScoreFumbi(Player plr)
+        protected internal virtual void OnScoreFumbi(Player newPlr, Player oldPlr)
         {
         }
 

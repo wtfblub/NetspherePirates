@@ -101,6 +101,9 @@ namespace Netsphere.Server.Game
                         .Configure<DeathmatchOptions>(context.Configuration
                             .GetSection(nameof(AppOptions.Game))
                             .GetSection(nameof(AppOptions.Game.Deathmatch)))
+                        .Configure<TouchdownOptions>(context.Configuration
+                            .GetSection(nameof(AppOptions.Game))
+                            .GetSection(nameof(AppOptions.Game.Touchdown)))
                         .Configure<IdGeneratorOptions>(x => x.Id = 0)
                         .AddSingleton<IDatabaseProvider, DatabaseProvider>()
                         .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
@@ -128,6 +131,7 @@ namespace Netsphere.Server.Game
                         .AddSingleton<GameRuleManager>()
                         .AddTransient<GameRuleStateMachine>()
                         .AddTransient<Deathmatch>()
+                        .AddTransient<Touchdown>()
                         .AddCommands(typeof(Program).Assembly)
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()

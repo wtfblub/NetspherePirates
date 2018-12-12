@@ -14,11 +14,28 @@
         public int DurabilityLossPerDeath { get; set; }
         public int DurabilityLossPerMinute { get; set; }
         public DeathmatchOptions Deathmatch { get; set; }
+        public TouchdownOptions Touchdown { get; set; }
     }
 
     public class DeathmatchOptions
     {
         public ExperienceRateOptions ExperienceRates { get; set; }
+        public int PointsPerKill { get; set; }
+        public int PointsPerKillAssist { get; set; }
+        public int PointsPerHealAssist { get; set; }
+        public int PointsPerDeath { get; set; }
+    }
+
+    public class TouchdownOptions
+    {
+        public ExperienceRateOptions ExperienceRates { get; set; }
+        public int PointsPerGoal { get; set; }
+        public int PointsPerGoalAssist { get; set; }
+        public int PointsPerOffense { get; set; }
+        public int PointsPerOffenseAssist { get; set; }
+        public int PointsPerDefense { get; set; }
+        public int PointsPerDefenseAssist { get; set; }
+        public int PointsPerFumbi { get; set; }
         public int PointsPerKill { get; set; }
         public int PointsPerKillAssist { get; set; }
         public int PointsPerHealAssist { get; set; }

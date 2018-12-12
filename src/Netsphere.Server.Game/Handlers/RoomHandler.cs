@@ -527,7 +527,15 @@ namespace Netsphere.Server.Game.Handlers
             var room = plr.Room;
 
             var newPlr = room.Players.GetValueOrDefault(message.NewId.AccountId);
-            room.GameRule.OnScoreFumbi(newPlr);
+            var oldPlr = room.Players.GetValueOrDefault(message.OldId.AccountId);
+
+            if (newPlr != null)
+                newPlr.PeerId = message.NewId;
+
+            if (oldPlr != null)
+                oldPlr.PeerId = message.OldId;
+
+            room.GameRule.OnScoreFumbi(newPlr, oldPlr);
             return Task.FromResult(true);
         }
 

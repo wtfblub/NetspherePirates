@@ -66,7 +66,30 @@
       PointsPerKill: 2
       PointsPerKillAssist: 1
       PointsPerHealAssist: 2
-      PointsPerDeath: -1
+      PointsPerDeath: 0
+    }
+    Touchdown:
+    {
+      ExperienceRates:
+      {
+        ScoreFactor: 0.7
+        FirstPlaceBonus: 50
+        SecondPlaceBonus: 30
+        ThirdPlaceBonus: 10
+        PlayerCountFactor: 0.06
+        ExperiencePerMinute: 20
+      }
+      PointsPerGoal: 10
+      PointsPerGoalAssist: 5
+      PointsPerOffense: 4
+      PointsPerOffenseAssist: 2
+      PointsPerDefense: 4
+      PointsPerDefenseAssist: 2
+      PointsPerFumbi: 2
+      PointsPerKill: 2
+      PointsPerKillAssist: 1
+      PointsPerHealAssist: 2
+      PointsPerDeath: 0
     }
   }
 }

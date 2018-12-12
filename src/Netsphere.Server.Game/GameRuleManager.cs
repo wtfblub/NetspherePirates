@@ -17,7 +17,8 @@ namespace Netsphere.Server.Game
             _serviceProvider = serviceProvider;
             _gameRuleLookup = new Dictionary<GameRule, Type>
             {
-                [GameRule.Deathmatch] = typeof(Deathmatch)
+                [GameRule.Deathmatch] = typeof(Deathmatch),
+                [GameRule.Touchdown] = typeof(Touchdown)
             };
         }
 
