@@ -63,7 +63,7 @@ namespace ProudNet.Handlers
                 return true;
 
             await session.SendUdpAsync(
-                new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, target.UdpEndPoint, target.HostId));
+                new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, session.UdpEndPoint, target.HostId));
             return true;
         }
 
