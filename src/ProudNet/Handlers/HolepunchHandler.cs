@@ -86,12 +86,12 @@ namespace ProudNet.Handlers
                 await remotePeer.SendAsync(new RequestP2PHolepunchMessage(
                     message.HostId,
                     connectionStateB.LocalEndPoint,
-                    connectionState.EndPoint));
+                    connectionStateB.EndPoint));
 
                 await connectionState.RemotePeer.SendAsync(new RequestP2PHolepunchMessage(
                     session.HostId,
                     connectionState.LocalEndPoint,
-                    connectionStateB.EndPoint));
+                    connectionState.EndPoint));
             }
 
             return true;

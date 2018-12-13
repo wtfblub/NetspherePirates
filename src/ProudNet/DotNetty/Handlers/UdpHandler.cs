@@ -75,6 +75,7 @@ namespace ProudNet.DotNetty.Handlers
                     return;
                 }
 
+                session.UdpEndPoint = message.EndPoint;
                 var recvContext = new MessageContext
                 {
                     Session = session,
