@@ -13,6 +13,7 @@ namespace Netsphere.Server.Game
         public DatabaseOptions Database { get; set; }
         public LoggerOptions Logging { get; set; }
         public TimeSpan SaveInterval { get; set; }
+        public string PluginDirectory { get; set; }
         public GameOptions Game { get; set; }
     }
 }

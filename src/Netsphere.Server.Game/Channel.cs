@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Netsphere.Network;
 using Netsphere.Network.Message.Game;
 
 namespace Netsphere.Server.Game

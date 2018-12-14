@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
@@ -19,6 +20,7 @@ using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
 using Netsphere.Server.Game.GameRules;
 using Netsphere.Server.Game.Handlers;
+using Netsphere.Server.Game.Plugins;
 using Netsphere.Server.Game.Serializers;
 using Netsphere.Server.Game.Services;
 using Newtonsoft.Json;
@@ -42,10 +44,14 @@ namespace Netsphere.Server.Game
 
             Log.Information("Starting...");
 
-            ConfigureMapper();
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
+
+            IPluginHost pluginHost = new MefPluginHost();
+            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, appOptions.PluginDirectory));
+
+            ConfigureMapper();
 
             hostBuilder
                 .ConfigureLogging(builder => builder.AddSerilog())
@@ -140,6 +146,8 @@ namespace Netsphere.Server.Game
                         .AddHostedServiceEx<IpcService>()
                         .AddHostedServiceEx<PlayerSaveService>()
                         .AddHostedServiceEx<CommandService>();
+
+                    pluginHost.OnConfigure(services);
                 });
 
             var host = hostBuilder.Build();
@@ -158,6 +166,7 @@ namespace Netsphere.Server.Game
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+            pluginHost.Dispose();
         }
 
         private static void ConfigureMapper()
