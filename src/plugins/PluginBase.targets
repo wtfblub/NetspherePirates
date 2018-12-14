@@ -1,0 +1,22 @@
+<!-- Workaround for sdk bug https://github.com/dotnet/sdk/issues/1366 -->
+<Project>
+  <ItemGroup>
+    <PackageReference Include="Expressmapper" Version="1.9.1" Private="False" />
+    <PackageReference Include="Foundatio" Version="7.1.1845" Private="False" />
+    <PackageReference Include="Foundatio.JsonNet" Version="7.1.1845" Private="False" />
+    <PackageReference Include="Foundatio.Redis" Version="7.0.1584" Private="False" />
+    <PackageReference Include="Microsoft.Composition" Version="1.0.31" Private="False" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" Private="False" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" Private="False" />
+    <PackageReference Include="Stateless" Version="4.2.1" Private="False" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Netsphere.Common\Netsphere.Common.csproj" Private="False" />
+    <ProjectReference Include="..\..\Netsphere.Database\Netsphere.Database.csproj" Private="False" />
+    <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" Private="False" />
+    <ProjectReference Include="..\..\Netsphere\Netsphere.csproj" Private="False" />
+    <ProjectReference Include="..\..\Netsphere.Network\Netsphere.Network.csproj" Private="False" />
+    <ProjectReference Include="..\..\ProudNet\ProudNet.csproj" Private="False" />
+    <ProjectReference Include="..\..\Netsphere.Server.Game\Netsphere.Server.Game.csproj" Private="False" />
+  </ItemGroup>
+</Project>
