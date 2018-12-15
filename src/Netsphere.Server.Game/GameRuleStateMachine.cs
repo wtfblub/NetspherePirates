@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Extensions.Options;
-using Netsphere.Common.Configuration;
 using Netsphere.Network.Message.GameRule;
 using ProudNet.Hosting.Services;
 using Stateless;
@@ -18,6 +16,7 @@ namespace Netsphere.Server.Game
 
         private readonly ISchedulerService _schedulerService;
         private readonly StateMachine<GameRuleState, GameRuleStateTrigger> _stateMachine;
+        private readonly EventPipeline<ScheduleTriggerHookEventArgs> _scheduleTriggerHook;
         private GameRuleBase _gameRule;
         private Func<bool> _canStartGame;
         private bool _hasHalfTime;
@@ -26,6 +25,11 @@ namespace Netsphere.Server.Game
 
         public event EventHandler GameStateChanged;
         public event EventHandler TimeStateChanged;
+        public event EventPipeline<ScheduleTriggerHookEventArgs>.SubscriberDelegate ScheduleTriggerHook
+        {
+            add => _scheduleTriggerHook.Subscribe(value);
+            remove => _scheduleTriggerHook.Unsubscribe(value);
+        }
 
         protected virtual void OnGameStateChanged()
         {
@@ -47,6 +51,7 @@ namespace Netsphere.Server.Game
             _schedulerService = schedulerService;
             _stateMachine = new StateMachine<GameRuleState, GameRuleStateTrigger>(GameRuleState.Waiting);
             _stateMachine.OnTransitioned(OnTransition);
+            _scheduleTriggerHook = new EventPipeline<ScheduleTriggerHookEventArgs>();
         }
 
         public void Initialize(GameRuleBase gameRule, Func<bool> canStartGame, bool hasHalfTime)
@@ -188,7 +193,7 @@ namespace Netsphere.Server.Game
                     room.Broadcast(new SChangeStateAckMessage(GameState.Playing));
                     room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
                     var delay = _hasHalfTime
-                        ? TimeSpan.FromMinutes(room.Options.TimeLimit.TotalMinutes / 2)
+                        ? TimeSpan.FromSeconds(room.Options.TimeLimit.TotalSeconds / 2)
                         : room.Options.TimeLimit;
                     ScheduleTrigger(_hasHalfTime ? GameRuleStateTrigger.StartHalfTime : GameRuleStateTrigger.StartResult, delay);
                     OnTimeStateChanged();
@@ -231,6 +236,14 @@ namespace Netsphere.Server.Game
 
         private void ScheduleTrigger(GameRuleStateTrigger trigger, TimeSpan delay)
         {
+            var eventArgs = new ScheduleTriggerHookEventArgs(trigger, delay);
+            _scheduleTriggerHook.Invoke(eventArgs);
+            if (eventArgs.Cancel)
+                return;
+
+            trigger = eventArgs.Trigger;
+            delay = eventArgs.Delay;
+
             _schedulerService.ScheduleAsync((ctx, state) =>
             {
                 var This = (GameRuleStateMachine)ctx;

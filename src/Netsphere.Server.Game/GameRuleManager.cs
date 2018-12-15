@@ -27,7 +27,7 @@ namespace Netsphere.Server.Game
             return _gameRuleLookup.ContainsKey(gameRule);
         }
 
-        public GameRuleBase GetGameRule(GameRule gameRule, Room room)
+        public GameRuleBase GetGameRule(GameRule gameRule)
         {
             return _gameRuleLookup.TryGetValue(gameRule, out var type)
                 ? (GameRuleBase)_serviceProvider.GetRequiredService(type)

@@ -45,6 +45,7 @@ namespace Netsphere.Server.Game
         public event EventHandler<RoomPlayerEventArgs> PlayerJoining;
         public event EventHandler<RoomPlayerEventArgs> PlayerJoined;
         public event EventHandler<RoomPlayerEventArgs> PlayerLeft;
+        public event EventHandler<RoomEventArgs> OptionsChanged;
 
         protected virtual void OnPlayerJoining(Player plr)
         {
@@ -65,6 +66,12 @@ namespace Netsphere.Server.Game
             PlayerLeft?.Invoke(this, new RoomPlayerEventArgs(this, plr));
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
             _messageBus.PublishAsync(new PlayerUpdateMessage(plr.Account.Id, plr.TotalExperience, 0, TeamId.Neutral));
+        }
+
+        protected virtual void OnOptionsChanged()
+        {
+            OptionsChanged?.Invoke(this, new RoomEventArgs(this));
+            Broadcast(new SChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
         }
 
         public Room(ILogger<Room> logger, GameRuleManager gameRuleManager, GameDataService gameDataService,
@@ -88,7 +95,7 @@ namespace Netsphere.Server.Game
             Id = id;
             Options = options;
             Map = _gameDataService.Maps.First(x => x.Id == options.MatchKey.Map);
-            GameRule = _gameRuleManager.GetGameRule(options.MatchKey.GameRule, this);
+            GameRule = Options.GameRuleResolver.Resolve(this);
             GameRule.Initialize(this);
             GameRule.StateMachine.GameStateChanged += OnGameStateChanged;
             TeamManager.PlayerTeamChanged += OnPlayerTeamChanged;
@@ -296,12 +303,12 @@ namespace Netsphere.Server.Game
             room.GameRule.Cleanup();
 
             room.Map = room._gameDataService.Maps[room.Options.MatchKey.Map];
-            room.GameRule = room._gameRuleManager.GetGameRule(room.Options.MatchKey.GameRule, room);
+            room.GameRule = room.Options.GameRuleResolver.Resolve(room);
             room.GameRule.Initialize(room);
             room.GameRule.StateMachine.GameStateChanged += room.OnGameStateChanged;
 
-            room.Broadcast(new SChangeRuleAckMessage(room.Options.Map<RoomCreationOptions, ChangeRuleDto>()));
             room.IsChangingRules = false;
+            room.OnOptionsChanged();
         }
     }
 }

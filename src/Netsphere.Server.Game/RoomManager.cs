@@ -16,6 +16,27 @@ namespace Netsphere.Server.Game
 {
     public class RoomManager : IReadOnlyCollection<Room>
     {
+        private static readonly EventPipeline<RoomCreateHookEventArgs>
+            s_preCreateRoomEvent = new EventPipeline<RoomCreateHookEventArgs>();
+
+        public static event EventPipeline<RoomCreateHookEventArgs>.SubscriberDelegate RoomCreateHook
+        {
+            add => s_preCreateRoomEvent.Subscribe(value);
+            remove => s_preCreateRoomEvent.Unsubscribe(value);
+        }
+        public static event EventHandler<RoomEventArgs> RoomCreated;
+        public static event EventHandler<RoomEventArgs> RoomRemoved;
+
+        private static void OnRoomCreated(RoomManager roomManager, Room room)
+        {
+            RoomCreated?.Invoke(roomManager, new RoomEventArgs(room));
+        }
+
+        private static void OnRoomRemoved(RoomManager roomManager, Room room)
+        {
+            RoomRemoved?.Invoke(roomManager, new RoomEventArgs(room));
+        }
+
         private readonly IServiceProvider _serviceProvider;
         private readonly GameDataService _gameDataService;
         private readonly GameRuleManager _gameRuleManager;
@@ -47,6 +68,11 @@ namespace Netsphere.Server.Game
 
         public (Room, RoomCreateError) Create(RoomCreationOptions options)
         {
+            var eventArgs = new RoomCreateHookEventArgs(this, options);
+            s_preCreateRoomEvent.Invoke(eventArgs);
+            if (eventArgs.Error != RoomCreateError.OK)
+                return (null, eventArgs.Error);
+
             if (!_gameRuleManager.HasGameRule(options.MatchKey.GameRule))
                 return (null, RoomCreateError.InvalidGameRule);
 
@@ -61,6 +87,7 @@ namespace Netsphere.Server.Game
             room.Initialize(this, _idRecycler.GetId(), options);
             _rooms.TryAdd(room.Id, room);
             Channel.Broadcast(new SDeployGameRoomAckMessage(room.Map<Room, RoomDto>()));
+            OnRoomCreated(this, room);
             return (room, RoomCreateError.OK);
         }
 
@@ -72,6 +99,7 @@ namespace Netsphere.Server.Game
             _rooms.Remove(room.Id);
             _idRecycler.Return(room.Id);
             Channel.Broadcast(new SDisposeGameRoomAckMessage(room.Id));
+            OnRoomRemoved(this, room);
             return true;
         }
 
@@ -104,5 +132,7 @@ namespace Netsphere.Server.Game
         public byte ItemLimit { get; set; }
         public bool IsNoIntrusion { get; set; }
         public IPEndPoint RelayEndPoint { get; set; }
+
+        public IGameRuleResolver GameRuleResolver { get; set; }
     }
 }

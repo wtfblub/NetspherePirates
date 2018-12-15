@@ -9,6 +9,8 @@ namespace Netsphere.Server.Game
     public abstract partial class GameRuleBase
     {
         private readonly GameOptions _gameOptions;
+        private readonly EventPipeline<CanStartGameHookEventArgs> _preCanStartGameHook;
+        private readonly EventPipeline<HasEnoughPlayersHookEventArgs> _preHasEnoughPlayersHook;
 
         public abstract GameRule GameRule { get; }
         protected abstract bool HasHalfTime { get; }
@@ -17,16 +19,29 @@ namespace Netsphere.Server.Game
         public TeamManager TeamManager => Room.TeamManager;
         public GameRuleStateMachine StateMachine { get; }
 
+        public event EventPipeline<CanStartGameHookEventArgs>.SubscriberDelegate CanStartGameHook
+        {
+            add => _preCanStartGameHook.Subscribe(value);
+            remove => _preCanStartGameHook.Unsubscribe(value);
+        }
+        public event EventPipeline<HasEnoughPlayersHookEventArgs>.SubscriberDelegate HasEnoughPlayersHook
+        {
+            add => _preHasEnoughPlayersHook.Subscribe(value);
+            remove => _preHasEnoughPlayersHook.Unsubscribe(value);
+        }
+
         protected GameRuleBase(GameRuleStateMachine stateMachine, IOptions<GameOptions> gameOptions)
         {
             StateMachine = stateMachine;
             _gameOptions = gameOptions.Value;
+            _preCanStartGameHook = new EventPipeline<CanStartGameHookEventArgs>();
+            _preHasEnoughPlayersHook = new EventPipeline<HasEnoughPlayersHookEventArgs>();
         }
 
         public virtual void Initialize(Room room)
         {
             Room = room;
-            StateMachine.Initialize(this, CanStartGame, HasHalfTime);
+            StateMachine.Initialize(this, _CanStartGame, HasHalfTime);
             Room.PlayerJoining += OnPlayerJoining;
             Room.PlayerLeft += OnPlayerLeft;
 
@@ -144,6 +159,20 @@ namespace Netsphere.Server.Game
 
         protected abstract (uint baseGain, uint bonusGain) CalculatePENGained(Player plr);
 
+        private bool _CanStartGame()
+        {
+            var eventArgs = new CanStartGameHookEventArgs(this);
+            _preCanStartGameHook.Invoke(eventArgs);
+            return eventArgs.Result ?? CanStartGame();
+        }
+
+        private bool _HasEnoughPlayers()
+        {
+            var eventArgs = new HasEnoughPlayersHookEventArgs(this);
+            _preHasEnoughPlayersHook.Invoke(eventArgs);
+            return eventArgs.Result ?? HasEnoughPlayers();
+        }
+
         private void OnPlayerJoining(object _, RoomPlayerEventArgs e)
         {
             e.Player.Score = CreateScore();
@@ -151,7 +180,7 @@ namespace Netsphere.Server.Game
 
         private void OnPlayerLeft(object _, RoomPlayerEventArgs e)
         {
-            if (StateMachine.GameState == GameState.Playing && !HasEnoughPlayers())
+            if (StateMachine.GameState == GameState.Playing && !_HasEnoughPlayers())
                 StateMachine.StartResult();
         }
     }

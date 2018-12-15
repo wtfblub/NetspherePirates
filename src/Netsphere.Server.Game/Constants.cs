@@ -82,7 +82,7 @@ namespace Netsphere.Server.Game
         PlayerLimitTooLow
     }
 
-    internal enum GameRuleState
+    public enum GameRuleState
     {
         Waiting,
         Playing,
@@ -95,7 +95,7 @@ namespace Netsphere.Server.Game
         SecondHalf
     }
 
-    internal enum GameRuleStateTrigger
+    public enum GameRuleStateTrigger
     {
         StartGame,
         EndGame,

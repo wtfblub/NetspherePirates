@@ -8,6 +8,9 @@ namespace Netsphere.Server.Game
 {
     public class Channel
     {
+        private static readonly EventPipeline<ChannelJoinHookEventArgs> s_JoinHook =
+            new EventPipeline<ChannelJoinHookEventArgs>();
+
         private readonly IDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
 
         public uint Id { get; }
@@ -20,6 +23,11 @@ namespace Netsphere.Server.Game
 
         public event EventHandler<ChannelEventArgs> PlayerJoined;
         public event EventHandler<ChannelEventArgs> PlayerLeft;
+        public static event EventPipeline<ChannelJoinHookEventArgs>.SubscriberDelegate JoinHook
+        {
+            add => s_JoinHook.Subscribe(value);
+            remove => s_JoinHook.Unsubscribe(value);
+        }
 
         protected virtual void OnPlayerJoined(Player plr)
         {
@@ -44,6 +52,11 @@ namespace Netsphere.Server.Game
 
         public ChannelJoinError Join(Player plr)
         {
+            var eventArs = new ChannelJoinHookEventArgs(this, plr);
+            s_JoinHook.Invoke(eventArs);
+            if (eventArs.Error != ChannelJoinError.OK)
+                return eventArs.Error;
+
             if (plr.Channel != null)
                 return ChannelJoinError.AlreadyInChannel;
 

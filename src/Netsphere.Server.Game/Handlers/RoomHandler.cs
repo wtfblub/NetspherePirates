@@ -25,10 +25,12 @@ namespace Netsphere.Server.Game.Handlers
     {
         private readonly ILogger<RoomHandler> _logger;
         private readonly AppOptions _appOptions;
+        private readonly GameRuleManager _gameRuleManager;
 
-        public RoomHandler(ILogger<RoomHandler> logger, IOptions<AppOptions> appOptions)
+        public RoomHandler(ILogger<RoomHandler> logger, IOptions<AppOptions> appOptions, GameRuleManager gameRuleManager)
         {
             _logger = logger;
+            _gameRuleManager = gameRuleManager;
             _appOptions = appOptions.Value;
         }
 
@@ -76,7 +78,8 @@ namespace Netsphere.Server.Game.Handlers
                     MaxLevel = message.Room.MaxLevel,
                     ItemLimit = message.Room.EquipLimit,
                     IsNoIntrusion = message.Room.IsNoIntrusion,
-                    RelayEndPoint = _appOptions.RelayEndPoint
+                    RelayEndPoint = _appOptions.RelayEndPoint,
+                    GameRuleResolver = new DefaultGameRuleResolver(_gameRuleManager)
                 });
 
                 switch (createError)
@@ -100,18 +103,7 @@ namespace Netsphere.Server.Game.Handlers
                         return true;
                 }
 
-                var error = room.Join(plr);
-                switch (error)
-                {
-                    case RoomJoinError.AlreadyInRoom:
-                    case RoomJoinError.RoomFull:
-                    case RoomJoinError.KickedPreviously:
-                        await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
-                        break;
-                    case RoomJoinError.ChangingRules:
-                        await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
-                        break;
-                }
+                room.Join(plr);
             }
 
             return true;

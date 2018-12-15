@@ -112,6 +112,10 @@ internal class Build : NukeBuild
                 ("src/tools/DataExtractor", "tools", "net472", false, null),
                 ("src/tools/NetsphereExplorer", "tools", "net472", false, null),
                 ("src/tools/Netsphere.Tools.ShopEditor", "tools/ShopEditor", "netcoreapp2.1", true, null),
+                ("src/plugins/ExamplePlugin", "plugins/ExamplePlugin", "netcoreapp2.1", true, new[]
+                {
+                    "ExamplePlugin.deps.json", "ExamplePlugin.dll", "ExamplePlugin.pdb"
+                }),
                 ("src/plugins/WebApi", "plugins/WebApi", "netcoreapp2.1", true, new[]
                 {
                     "WebApi.deps.json", "WebApi.dll", "WebApi.pdb", "webapi.hjson",
