@@ -1,5 +1,5 @@
-using System.Globalization;
 using System.IO;
+using System.Linq;
 using Nuke.Common;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
@@ -19,6 +19,7 @@ internal class Build : NukeBuild
     public readonly Solution Solution;
 
     public Target Clean => _ => _
+        .Before(Restore, Compile, Publish, Tools, Dist)
         .Executes(() =>
         {
             DotNetClean(x => x.SetWorkingDirectory(Solution.Directory)
@@ -29,7 +30,6 @@ internal class Build : NukeBuild
         });
 
     public Target Restore => _ => _
-        .DependsOn(Clean)
         .Executes(() =>
         {
             DotNetRestore(x => x.SetWorkingDirectory(Solution.Directory)
@@ -100,19 +100,24 @@ internal class Build : NukeBuild
         });
 
     public Target Dist => _ => _
-        .DependsOn(Publish)
-        .DependsOn(Tools)
+        .DependsOn(Clean, Tools, Publish)
         .Executes(() =>
         {
-            var projects = new (string ProjectPath, string Output, string Framework, bool publish)[]
+            var projects = new (string ProjectPath, string Output, string Framework, bool publish, string[] filesToCopy)[]
             {
-                ("src/Netsphere.Server.Auth", "Auth", "netcoreapp2.1", true),
-                ("src/Netsphere.Server.Chat", "Chat", "netcoreapp2.1", true),
-                ("src/Netsphere.Server.Game", "Game", "netcoreapp2.1", true),
-                ("src/Netsphere.Server.Relay", "Relay", "netcoreapp2.1", true),
-                ("src/tools/DataExtractor", "tools", "net472", false),
-                ("src/tools/NetsphereExplorer", "tools", "net472", false),
-                ("src/tools/Netsphere.Tools.ShopEditor", "tools/ShopEditor", "netcoreapp2.1", true)
+                ("src/Netsphere.Server.Auth", "Auth", "netcoreapp2.1", true, null),
+                ("src/Netsphere.Server.Chat", "Chat", "netcoreapp2.1", true, null),
+                ("src/Netsphere.Server.Game", "Game", "netcoreapp2.1", true, null),
+                ("src/Netsphere.Server.Relay", "Relay", "netcoreapp2.1", true, null),
+                ("src/tools/DataExtractor", "tools", "net472", false, null),
+                ("src/tools/NetsphereExplorer", "tools", "net472", false, null),
+                ("src/tools/Netsphere.Tools.ShopEditor", "tools/ShopEditor", "netcoreapp2.1", true, null),
+                ("src/plugins/WebApi", "plugins/WebApi", "netcoreapp2.1", true, new[]
+                {
+                    "WebApi.deps.json", "WebApi.dll", "WebApi.pdb", "webapi.hjson",
+                    "Unosquare.Swan.Lite.dll",
+                    "Unosquare.Labs.EmbedIO.dll"
+                })
             };
 
             var dist = Path.Combine(Solution.Directory, "dist");
@@ -129,12 +134,26 @@ internal class Build : NukeBuild
                 if (!Directory.Exists(output))
                     Directory.CreateDirectory(output);
 
-                foreach (var file in Directory.EnumerateFiles(build, "*", SearchOption.TopDirectoryOnly))
-                    File.Copy(file, Path.Combine(output, Path.GetFileName(file)));
+                if (project.filesToCopy != null)
+                {
+                    foreach (var file in project.filesToCopy)
+                        File.Copy(Path.Combine(build, file), Path.Combine(output, file));
+                }
+                else
+                {
+                    foreach (var file in Directory.EnumerateFiles(build, "*", SearchOption.TopDirectoryOnly))
+                        File.Copy(file, Path.Combine(output, Path.GetFileName(file)));
 
-                var buildDir = new DirectoryInfo(build);
-                foreach (var dir in buildDir.EnumerateDirectories("*", SearchOption.TopDirectoryOnly))
-                    dir.MoveTo(Path.Combine(output, dir.Name));
+                    var buildDir = new DirectoryInfo(build);
+                    foreach (var dir in buildDir.EnumerateDirectories("*", SearchOption.TopDirectoryOnly))
+                        dir.MoveTo(Path.Combine(output, dir.Name));
+                }
             }
+
+            File.WriteAllText(Path.Combine(dist, "tools", "ShopEditor.bat"),
+                "dotnet ShopEditor\\Netsphere.Tools.ShopEditor.dll");
+
+            File.WriteAllText(Path.Combine(dist, "tools", "ShopEditor.sh"),
+                "#!/bin/sh\ndotnet ShopEditor/Netsphere.Tools.ShopEditor.dll");
         });
 }
