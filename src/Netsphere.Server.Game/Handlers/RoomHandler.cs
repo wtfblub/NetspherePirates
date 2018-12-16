@@ -119,6 +119,13 @@ namespace Netsphere.Server.Game.Handlers
             var roomMgr = channel.RoomManager;
             var room = roomMgr[message.RoomId];
 
+            if (room == null)
+            {
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
+                await session.SendAsync(new SDisposeGameRoomAckMessage(message.RoomId));
+                return true;
+            }
+
             if (!string.IsNullOrWhiteSpace(room.Options.Password) &&
                 !room.Options.Password.Equals(message.Password))
             {

@@ -9,6 +9,7 @@ using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.DotNetty.Handlers
 {
@@ -39,13 +40,14 @@ namespace ProudNet.DotNetty.Handlers
         {
             var messageContext = (MessageContext)message;
             messageContext.ChannelHandlerContext = context;
+            var messageType = messageContext.Message.GetType();
 
             if (_handlerMap == null)
                 InitializeHandlers();
 
             try
             {
-                if (_handlerMap.TryGetValue(messageContext.Message.GetType(), out var handlerInfos))
+                if (_handlerMap.TryGetValue(messageType, out var handlerInfos))
                 {
                     foreach (var handlerInfo in handlerInfos)
                     {
@@ -94,7 +96,10 @@ namespace ProudNet.DotNetty.Handlers
             }
             finally
             {
-                ReferenceCountUtil.Release(messageContext.Message);
+                if (messageType != typeof(RmiMessage))
+                    context.Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).Read();
+
+                ReferenceCountUtil.Release(message);
             }
         }
 

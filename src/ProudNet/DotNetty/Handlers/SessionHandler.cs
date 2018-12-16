@@ -62,6 +62,7 @@ namespace ProudNet.DotNetty.Handlers
                 EmergencyLogLineCount = _networkOptions.EmergencyLogLineCount
             };
             await session.SendAsync(new NotifyServerConnectionHintMessage(config, _rsa.ExportParameters(false)));
+            context.Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).Read();
 
             using (var cts = new CancellationTokenSource(_networkOptions.ConnectTimeout))
             {
@@ -74,7 +75,8 @@ namespace ProudNet.DotNetty.Handlers
                     if (!session.IsConnected)
                         return;
 
-                    _log.LogDebug("Client({HostId} - {EndPoint}) handshake timeout", hostId, context.Channel.RemoteAddress.ToString());
+                    _log.LogDebug("Client({HostId} - {EndPoint}) handshake timeout", hostId,
+                        context.Channel.RemoteAddress.ToString());
                     await session.SendAsync(new ConnectServerTimedoutMessage());
                     await session.CloseAsync();
                     return;

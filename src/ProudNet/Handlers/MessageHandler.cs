@@ -24,7 +24,9 @@ namespace ProudNet.Handlers
 
             if (isInternal)
             {
-                context.ChannelHandlerContext.FireChannelRead(context);
+                context.ChannelHandlerContext.Channel.Pipeline
+                    .Context<SendContextEncoder>()
+                    .FireChannelRead(context);
             }
             else
             {

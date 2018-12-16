@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.Collections.Concurrent;
 using DotNetty.Common.Internal.Logging;
+using DotNetty.Handlers.Flow;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -165,6 +166,7 @@ namespace ProudNet.Hosting.Services
                             .AddLast(_serviceProvider.GetRequiredService<MessageContextDecoder>())
                             .AddLast(_serviceProvider.GetRequiredService<CoreMessageDecoder>())
                             .AddLast(_serviceProvider.GetRequiredService<CoreMessageEncoder>())
+                            .AddLast(new FlowControlHandler(false))
                             .AddLast(Constants.Pipeline.CoreMessageHandlerName, coreMessageHandler)
                             .AddLast(_serviceProvider.GetRequiredService<SendContextEncoder>())
                             .AddLast(_serviceProvider.GetRequiredService<MessageDecoder>())
@@ -178,6 +180,7 @@ namespace ProudNet.Hosting.Services
                             .AddLast(_serviceProvider.GetRequiredService<ErrorHandler>());
                     }))
                     .ChildOption(ChannelOption.TcpNodelay, !_networkOptions.EnableNagleAlgorithm)
+                    .ChildOption(ChannelOption.AutoRead, false)
                     .ChildAttribute(ChannelAttributes.ServiceProvider, _serviceProvider)
                     .ChildAttribute(ChannelAttributes.Session, default(ProudSession))
                     .BindAsync(_networkOptions.TcpListener);
