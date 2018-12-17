@@ -126,6 +126,7 @@ namespace Netsphere.Server.Game
             _players.TryAdd(plr.Account.Id, plr);
             plr.Room = this;
             plr.IsConnectingToRoom = true;
+            plr.PeerId = null;
 
             if (Master == null)
             {
@@ -159,6 +160,7 @@ namespace Netsphere.Server.Game
             _players.Remove(plr.Account.Id);
             _idRecycler.Return(plr.Slot);
             plr.Room = null;
+            plr.PeerId = null;
             plr.Session.Send(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(plr);

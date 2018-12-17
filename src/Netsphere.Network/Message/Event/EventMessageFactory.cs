@@ -11,6 +11,7 @@ namespace Netsphere.Network.Message.Event
         public EventMessageFactory()
         {
             Register<ChatMessage>(EventOpCode.Chat);
+            Register<UnkMessage>(EventOpCode.Unk);
             Register<EventMessageMessage>(EventOpCode.EventMessage);
             Register<ChangeTargetMessage>(EventOpCode.ChangeTarget);
             Register<ArcadeSyncMessage>(EventOpCode.ArcadeSync);

@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundatio.Messaging;
@@ -34,6 +35,7 @@ namespace Netsphere.Server.Game.Services
         {
             await _messageBus.SubscribeToRequestAsync<ChatLoginRequest, ChatLoginResponse>(OnChatLogin, _cts.Token);
             await _messageBus.SubscribeToRequestAsync<RelayLoginRequest, RelayLoginResponse>(OnRelayLogin, _cts.Token);
+            await _messageBus.SubscribeAsync<PlayerPeerIdMessage>(OnPlayerPeerId);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -63,6 +65,15 @@ namespace Netsphere.Server.Game.Services
             }
 
             return Task.FromResult(new RelayLoginResponse(true, plr.Account));
+        }
+
+        private Task OnPlayerPeerId(PlayerPeerIdMessage message)
+        {
+            var plr = _playerManager[message.AccountId];
+            if (plr.PeerId == null)
+                plr.PeerId = new LongPeerId(message.AccountId, message.PeerId);
+
+            return Task.CompletedTask;
         }
 
         private void ChannelOnPlayerJoined(object sender, ChannelEventArgs e)

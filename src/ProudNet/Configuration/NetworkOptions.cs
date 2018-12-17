@@ -45,7 +45,7 @@ namespace ProudNet.Configuration
             OverSendSuspectingThresholdInBytes = 15360;
             EnableNagleAlgorithm = true;
             EncryptedMessageKeyLength = 128;
-            AllowServerAsP2PGroupMember = false;
+            AllowServerAsP2PGroupMember = true;
             EnableP2PEncryptedMessaging = false;
             UpnpDetectNatDevice = true;
             UpnpTcpAddrPortMapping = true;

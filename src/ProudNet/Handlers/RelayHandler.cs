@@ -17,51 +17,47 @@ namespace ProudNet.Handlers
           IHandle<C2S_CreateUdpSocketAckMessage>
     {
         private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
-        private readonly IInternalSessionManager<uint> _sessionManager;
         private readonly UdpSocketManager _udpSocketManager;
 
         public RelayHandler(ISessionManagerFactory sessionManagerFactory, UdpSocketManager udpSocketManager)
         {
             _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
-            _sessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.HostId);
             _udpSocketManager = udpSocketManager;
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
-        public async Task<bool> OnHandle(MessageContext context, ReliableRelay1Message message)
+        public Task<bool> OnHandle(MessageContext context, ReliableRelay1Message message)
         {
             var session = context.Session;
 
             foreach (var destination in message.Destination.Where(x => x.HostId != session.HostId))
             {
-                // TODO Hack for race condition
-                if (session.P2PGroup?.GetMember(destination.HostId) == null)
-                    return true;
+                var target = session.P2PGroup?.GetMemberInternal(destination.HostId);
+                if (target == null)
+                    return Task.FromResult(true);
 
-                var target = _sessionManager.GetSession(destination.HostId);
-                var _ = target?.SendAsync(new ReliableRelay2Message(
-                    new RelayDestinationDto(session.HostId, destination.FrameNumber), message.Data));
+                target.Send(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber),
+                    message.Data));
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
-        public async Task<bool> OnHandle(MessageContext context, UnreliableRelay1Message message)
+        public Task<bool> OnHandle(MessageContext context, UnreliableRelay1Message message)
         {
             var session = context.Session;
 
             foreach (var destination in message.Destination.Where(id => id != session.HostId))
             {
-                // TODO Hack for race condition
-                if (session.P2PGroup?.GetMember(destination) == null)
-                    return true;
+                var target = session.P2PGroup?.GetMemberInternal(destination);
+                if (target == null)
+                    return Task.FromResult(true);
 
-                var target = _sessionManager.GetSession(destination);
-                var _ = target?.SendUdpIfAvailableAsync(new UnreliableRelay2Message(session.HostId, message.Data));
+                target.Send(new UnreliableRelay2Message(session.HostId, message.Data), true);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]

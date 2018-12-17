@@ -33,7 +33,8 @@ namespace Netsphere.Common
                     new IPEndPointConverter(),
                     new DnsEndPointConverter(),
                     new TimeSpanConverter(),
-                    new VersionConverter()
+                    new VersionConverter(),
+                    new PeerIdConverter()
                 }
             };
 
@@ -106,7 +107,8 @@ namespace Netsphere.Common
                 _consoleFormatter = (ITextFormatter)Activator.CreateInstance(type, theme,
                     "[{Level} {SourceContext}] {Message:lj}{NewLine}{Exception}", default(IFormatProvider));
                 _consoleFormatterWithScope = (ITextFormatter)Activator.CreateInstance(type, theme,
-                    "[{Level} {SourceContext}] {Message:lj}{NewLine}    {Scope:l} {NewLine}{Exception}", default(IFormatProvider));
+                    "[{Level} {SourceContext}] {Message:lj}{NewLine}    {Scope:l} {NewLine}{Exception}",
+                    default(IFormatProvider));
             }
 
             public void Format(LogEvent logEvent, TextWriter output)

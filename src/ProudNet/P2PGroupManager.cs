@@ -11,16 +11,16 @@ namespace ProudNet
     public class P2PGroupManager : IReadOnlyDictionary<uint, P2PGroup>
     {
         private readonly ConcurrentDictionary<uint, P2PGroup> _groups = new ConcurrentDictionary<uint, P2PGroup>();
-        private readonly ILogger _log;
+        private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly NetworkOptions _options;
         private readonly IHostIdFactory _hostIdFactory;
         private readonly ISessionManager _sessionManager;
 
-        public P2PGroupManager(ILogger<P2PGroupManager> log, ILoggerFactory loggerFactory,
+        public P2PGroupManager(ILogger<P2PGroupManager> logger, ILoggerFactory loggerFactory,
             IOptions<NetworkOptions> options, IHostIdFactory hostIdFactory, ISessionManager sessionManager)
         {
-            _log = log;
+            _logger = logger;
             _loggerFactory = loggerFactory;
             _options = options.Value;
             _hostIdFactory = hostIdFactory;
@@ -32,7 +32,7 @@ namespace ProudNet
             var group = new P2PGroup(_loggerFactory.CreateLogger<P2PGroup>(), _hostIdFactory.New(),
                 _options, _sessionManager, allowDirectP2P);
             _groups.TryAdd(group.HostId, group);
-            _log.LogDebug("Created P2PGroup({HostId}) DirectP2P={AllowDirectP2P}", group.HostId, allowDirectP2P);
+            _logger.LogDebug("Created P2PGroup({HostId}) DirectP2P={AllowDirectP2P}", group.HostId, allowDirectP2P);
             return group;
         }
 
@@ -46,7 +46,7 @@ namespace ProudNet
                 _hostIdFactory.Free(groupHostId);
             }
 
-            _log.LogDebug("Removed P2PGroup({HostId})", group.HostId);
+            _logger.LogDebug("Removed P2PGroup({HostId})", group.HostId);
         }
 
         public void Remove(P2PGroup group)

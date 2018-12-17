@@ -69,7 +69,7 @@ namespace ProudNet.Handlers
 
         [Firewall(typeof(MustBeInP2PGroup))]
         [Firewall(typeof(MustBeUdpRelay))]
-        public async Task<bool> OnHandle(MessageContext context, PeerUdp_NotifyHolepunchSuccessMessage message)
+        public Task<bool> OnHandle(MessageContext context, PeerUdp_NotifyHolepunchSuccessMessage message)
         {
             var session = context.Session;
 
@@ -83,40 +83,40 @@ namespace ProudNet.Handlers
             var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
             if (connectionStateB.PeerUdpHolepunchSuccess)
             {
-                await remotePeer.SendAsync(new RequestP2PHolepunchMessage(
+                remotePeer.Send(new RequestP2PHolepunchMessage(
                     message.HostId,
                     connectionStateB.LocalEndPoint,
                     connectionStateB.EndPoint));
 
-                await connectionState.RemotePeer.SendAsync(new RequestP2PHolepunchMessage(
+                connectionState.RemotePeer.Send(new RequestP2PHolepunchMessage(
                     session.HostId,
                     connectionState.LocalEndPoint,
                     connectionState.EndPoint));
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
         [Firewall(typeof(MustBeUdpRelay))]
-        public async Task<bool> OnHandle(MessageContext context, NotifyP2PHolepunchSuccessMessage message)
+        public Task<bool> OnHandle(MessageContext context, NotifyP2PHolepunchSuccessMessage message)
         {
             var session = context.Session;
 
             session.Logger.LogDebug("NotifyP2PHolepunchSuccess {@Message}", message);
             var group = session.P2PGroup;
             if (session.HostId != message.A && session.HostId != message.B)
-                return true;
+                return Task.FromResult(true);
 
             var remotePeerA = group.GetMemberInternal(message.A);
             var remotePeerB = group.GetMemberInternal(message.B);
             if (remotePeerA == null || remotePeerB == null)
-                return true;
+                return Task.FromResult(true);
 
             var stateA = remotePeerA.ConnectionStates.GetValueOrDefault(remotePeerB.HostId);
             var stateB = remotePeerB.ConnectionStates.GetValueOrDefault(remotePeerA.HostId);
             if (stateA == null || stateB == null)
-                return true;
+                return Task.FromResult(true);
 
             if (session.HostId == remotePeerA.HostId)
                 stateA.HolepunchSuccess = true;
@@ -129,16 +129,16 @@ namespace ProudNet.Handlers
                     message.ABRecvAddr,
                     message.BASendAddr, message.BARecvAddr);
 
-                await remotePeerA.SendAsync(notify);
-                await remotePeerB.SendAsync(notify);
+                remotePeerA.Send(notify);
+                remotePeerB.Send(notify);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
         [Firewall(typeof(MustBeUdpRelay))]
-        public async Task<bool> OnHandle(MessageContext context, NotifyJitDirectP2PTriggeredMessage message)
+        public Task<bool> OnHandle(MessageContext context, NotifyJitDirectP2PTriggeredMessage message)
         {
             var session = context.Session;
 
@@ -148,12 +148,12 @@ namespace ProudNet.Handlers
             var remotePeerB = group.GetMemberInternal(message.HostId);
 
             if (remotePeerA == null || remotePeerB == null)
-                return true;
+                return Task.FromResult(true);
 
             var stateA = remotePeerA.ConnectionStates.GetValueOrDefault(remotePeerB.HostId);
             var stateB = remotePeerB.ConnectionStates.GetValueOrDefault(remotePeerA.HostId);
             if (stateA == null || stateB == null)
-                return true;
+                return Task.FromResult(true);
 
             if (session.HostId == remotePeerA.HostId)
                 stateA.JitTriggered = true;
@@ -162,11 +162,11 @@ namespace ProudNet.Handlers
 
             if (stateA.JitTriggered && stateB.JitTriggered)
             {
-                await remotePeerA.SendAsync(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
-                await remotePeerB.SendAsync(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
+                remotePeerA.Send(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
+                remotePeerB.Send(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
             }
 
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

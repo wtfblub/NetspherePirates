@@ -361,7 +361,7 @@
     {
         Chat = 12001,
 
-        // 20001 ??? no string inside clietn
+        Unk = 20001,
         EventMessage = 20002,
 
         ChangeTarget = 20003,

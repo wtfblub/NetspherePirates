@@ -116,11 +116,6 @@ namespace ProudNet
         S2C_CreateUdpSocketAck = 64519,
     }
 
-    public enum HostId : uint
-    {
-        Server = 0
-    }
-
     public enum EncryptMode : byte
     {
         None = 0,
@@ -167,6 +162,7 @@ namespace ProudNet
         public const short NetMagic = 0x5713;
         public static readonly Encoding Encoding = CodePagesEncodingProvider.Instance.GetEncoding(1252);
         public static readonly IPEndPoint EmptyIPEndPoint = new IPEndPoint(0, 0);
+        public const uint HostIdServer = 1;
 
         public static class Pipeline
         {

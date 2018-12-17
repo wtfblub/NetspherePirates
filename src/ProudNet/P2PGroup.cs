@@ -14,7 +14,8 @@ namespace ProudNet
     /// </summary>
     public class P2PGroup : IEnumerable<IP2PMember>
     {
-        private readonly ConcurrentDictionary<uint, IP2PMemberInternal> _members = new ConcurrentDictionary<uint, IP2PMemberInternal>();
+        private readonly ConcurrentDictionary<uint, IP2PMemberInternal> _members =
+            new ConcurrentDictionary<uint, IP2PMemberInternal>();
         private readonly ILogger _log;
         private readonly NetworkOptions _options;
         private readonly ISessionManager _sessionManager;
@@ -71,43 +72,6 @@ namespace ProudNet
             return _members.GetValueOrDefault(hostId);
         }
 
-        public void JoinServer()
-        {
-            var encrypted = _options.EnableP2PEncryptedMessaging;
-            Crypt crypt = null;
-            if (encrypted)
-                crypt = new Crypt(_options.EncryptedMessageKeyLength);
-
-            var memberToJoin = new ServerP2PMember(this, crypt);
-            if (!_members.TryAdd(memberToJoin.HostId, memberToJoin))
-                throw new ProudException($"Server is already in P2PGroup {HostId}");
-
-            _log.LogDebug("Server joined P2PGroup({GroupHostId})", HostId);
-
-            foreach (var member in _members.Values.Where(member => member.HostId != memberToJoin.HostId))
-            {
-                var memberSession = _sessionManager.GetSession(member.HostId);
-                if (encrypted)
-                    memberSession.SendAsync(new P2PGroup_MemberJoinMessage(HostId, memberToJoin.HostId, 0, crypt.AES.Key, AllowDirectP2P));
-                else
-                    memberSession.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, memberToJoin.HostId, 0, AllowDirectP2P));
-            }
-        }
-
-        public void LeaveServer()
-        {
-            const uint hostId = (uint)ProudNet.HostId.Server;
-            if (!_members.TryRemove(hostId, out var memberToLeave))
-                return;
-
-            _log.LogDebug("Server left P2PGroup({GroupHostId})", HostId);
-            foreach (var member in _members.Values.Where(entry => entry.HostId != hostId))
-            {
-                var memberSession = _sessionManager.GetSession(member.HostId);
-                memberSession?.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
-            }
-        }
-
         public void Join(uint hostId)
         {
             var encrypted = _options.EnableP2PEncryptedMessaging;
@@ -131,7 +95,6 @@ namespace ProudNet
 
             foreach (var member in _members.Values.Where(member => member.HostId != hostId))
             {
-                var memberSession = _sessionManager.GetSession(member.HostId);
                 var stateA = new P2PConnectionState(member);
                 var stateB = new P2PConnectionState(sessionToJoin);
 
@@ -139,15 +102,20 @@ namespace ProudNet
                 member.ConnectionStates[memberToJoin.HostId] = stateB;
                 if (encrypted)
                 {
-                    memberSession.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.AES.Key, AllowDirectP2P));
-                    sessionToJoin.SendAsync(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId, crypt.AES.Key, AllowDirectP2P));
+                    member.Send(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.AES.Key, AllowDirectP2P));
+                    sessionToJoin.SendAsync(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId,
+                        crypt.AES.Key, AllowDirectP2P));
                 }
                 else
                 {
-                    memberSession.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, stateB.EventId, AllowDirectP2P));
-                    sessionToJoin.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, member.HostId, stateA.EventId, AllowDirectP2P));
+                    member.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, stateB.EventId, AllowDirectP2P));
+                    sessionToJoin.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, member.HostId, stateA.EventId,
+                        AllowDirectP2P));
                 }
             }
+
+            if (_options.AllowServerAsP2PGroupMember)
+                sessionToJoin.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, Constants.HostIdServer, 0, false));
         }
 
         public void Leave(uint hostId)
@@ -163,13 +131,12 @@ namespace ProudNet
                 session.Crypt = null;
             }
 
-            memberToLeave.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
+            memberToLeave.Send(new P2PGroup_MemberLeaveMessage(hostId, HostId));
             memberToLeave.ConnectionStates.Clear();
             foreach (var member in _members.Values.Where(entry => entry.HostId != hostId))
             {
-                var memberSession = _sessionManager.GetSession(member.HostId);
-                memberSession?.SendAsync(new P2PGroup_MemberLeaveMessage(hostId, HostId));
-                memberToLeave.SendAsync(new P2PGroup_MemberLeaveMessage(member.HostId, HostId));
+                member?.Send(new P2PGroup_MemberLeaveMessage(hostId, HostId));
+                memberToLeave.Send(new P2PGroup_MemberLeaveMessage(member.HostId, HostId));
                 member.ConnectionStates.Remove(hostId);
             }
         }

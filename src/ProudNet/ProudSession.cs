@@ -132,6 +132,19 @@ namespace ProudNet
             return UdpSocket.SendAsync(message, UdpEndPoint);
         }
 
+        void IP2PMemberInternal.Send(ICoreMessage message, bool udp)
+        {
+            if (udp)
+                SendUdpIfAvailableAsync(message);
+            else
+                SendAsync(message);
+        }
+
+        void IP2PMemberInternal.Send(IMessage message)
+        {
+            SendAsync(message);
+        }
+
         private void SetLoggingScope()
         {
             _logScope?.Dispose();

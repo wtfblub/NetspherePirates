@@ -11,6 +11,8 @@ using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
 using Netsphere.Database;
+using Netsphere.Network.Message.Event;
+using Netsphere.Network.Message.P2P;
 using Netsphere.Network.Message.Relay;
 using Netsphere.Network.Serializers;
 using Newtonsoft.Json;
@@ -46,12 +48,13 @@ namespace Netsphere.Server.Relay
                 .UseProudNetServer(builder =>
                 {
                     var messageHandlerResolver = new DefaultMessageHandlerResolver(
-                        new[] { typeof(Program).Assembly }, typeof(IRelayMessage));
+                        new[] { typeof(Program).Assembly }, typeof(IRelayMessage), typeof(IEventMessage), typeof(IP2PMessage));
 
                     builder
                         .UseHostIdFactory<HostIdFactory>()
                         .UseSessionFactory<SessionFactory>()
                         .AddMessageFactory<RelayMessageFactory>()
+                        .AddMessageFactory<EventMessageFactory>()
                         .UseMessageHandlerResolver(messageHandlerResolver)
                         .UseNetworkConfiguration((context, options) =>
                         {

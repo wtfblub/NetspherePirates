@@ -1,6 +1,7 @@
 using System;
 using BlubLib.Serialization;
 using BlubLib.Serialization.Serializers;
+using ProudNet.Serialization.Serializers;
 
 namespace Netsphere.Network.Message.Event
 {
@@ -9,6 +10,14 @@ namespace Netsphere.Network.Message.Event
     {
         [BlubMember(0)]
         public string Message { get; set; }
+    }
+
+    [BlubContract]
+    public class UnkMessage : IEventMessage
+    {
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ReadToEndSerializer))]
+        public byte[] Message { get; set; }
     }
 
     [BlubContract]

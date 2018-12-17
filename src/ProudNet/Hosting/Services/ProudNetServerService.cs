@@ -95,7 +95,6 @@ namespace ProudNet.Hosting.Services
 
         protected virtual void OnUnhandledRmi(MessageContext context)
         {
-            context.Session.Logger.LogDebug("Unhandled rmi message {@Message}", context.Message);
             UnhandledRmi?.Invoke(this, new UnhandledRmiEventArgs(context.Session, context.Message));
         }
         #endregion
@@ -265,7 +264,7 @@ namespace ProudNet.Hosting.Services
                                 session.UdpSocket = socket;
                                 session.HolepunchMagicNumber = Guid.NewGuid();
                                 _magicNumberSessionManager.AddSession(session.HolepunchMagicNumber, session);
-                                member.SendAsync(new S2C_RequestCreateUdpSocketMessage(
+                                member.Send(new S2C_RequestCreateUdpSocketMessage(
                                     new IPEndPoint(udpSocketManager.Address,
                                         ((IPEndPoint)socket.Channel.LocalAddress).Port)));
                             }
@@ -275,7 +274,7 @@ namespace ProudNet.Hosting.Services
 
                                 //member.Session.UdpEnabled = false;
                                 //server.SessionsByUdpId.Remove(member.Session.UdpSessionId);
-                                member.SendAsync(new NotifyUdpToTcpFallbackByServerMessage());
+                                member.Send(new NotifyUdpToTcpFallbackByServerMessage());
                             }
                         }
 
@@ -313,8 +312,8 @@ namespace ProudNet.Hosting.Services
                                 sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", member.HostId);
                                 stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
                                 stateA.IsInitialized = stateB.IsInitialized = true;
-                                member.SendAsync(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
-                                stateA.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(member.HostId));
+                                member.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
+                                stateA.RemotePeer.Send(new P2PRecycleCompleteMessage(member.HostId));
                             }
                         }
                     }

@@ -31,8 +31,7 @@ namespace ProudNet.Handlers
                 session.Logger.LogInformation("P2P to {TargetHostId} disconnected with {Reason}",
                     message.RemotePeerHostId, message.Reason);
                 stateA.HolepunchSuccess = false;
-                await stateA.RemotePeer.SendAsync(
-                    new P2P_NotifyDirectP2PDisconnected2Message(session.HostId, message.Reason));
+                stateA.RemotePeer.Send(new P2P_NotifyDirectP2PDisconnected2Message(session.HostId, message.Reason));
             }
 
             if (stateB?.HolepunchSuccess == true)
