@@ -135,10 +135,17 @@ namespace Netsphere.Server.Game.GameRules
             return (0, 0);
         }
 
-        protected internal override void OnScoreKill(Player killer, Player assist, Player target, AttackAttribute attackAttribute)
+        protected internal override void OnScoreKill(ScoreContext killer, ScoreContext assist, ScoreContext target,
+            AttackAttribute attackAttribute)
         {
             if (IsInTouchdown)
                 return;
+
+            if (target.IsSentry)
+            {
+                SendScoreKill(killer, assist, target, attackAttribute);
+                return;
+            }
 
             killer.Score.Kills++;
             target.Score.Deaths++;
@@ -149,11 +156,17 @@ namespace Netsphere.Server.Game.GameRules
             SendScoreKill(killer, assist, target, attackAttribute);
         }
 
-        protected internal override void OnScoreOffense(Player killer, Player assist, Player target,
+        protected internal override void OnScoreOffense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
             if (IsInTouchdown)
                 return;
+
+            if (target.IsSentry)
+            {
+                SendScoreOffense(killer, assist, target, attackAttribute);
+                return;
+            }
 
             GetScore(killer).OffenseScore++;
             target.Score.Deaths++;
@@ -164,11 +177,17 @@ namespace Netsphere.Server.Game.GameRules
             SendScoreOffense(killer, assist, target, attackAttribute);
         }
 
-        protected internal override void OnScoreDefense(Player killer, Player assist, Player target,
+        protected internal override void OnScoreDefense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
             if (IsInTouchdown)
                 return;
+
+            if (target.IsSentry)
+            {
+                SendScoreDefense(killer, assist, target, attackAttribute);
+                return;
+            }
 
             GetScore(killer).DefenseScore++;
             target.Score.Deaths++;
@@ -243,12 +262,15 @@ namespace Netsphere.Server.Game.GameRules
             SendScoreSuicide(plr);
         }
 
-        protected internal override void OnScoreTeamKill(Player killer, Player target, AttackAttribute attackAttribute)
+        protected internal override void OnScoreTeamKill(ScoreContext killer, ScoreContext target,
+            AttackAttribute attackAttribute)
         {
             if (IsInTouchdown)
                 return;
 
-            target.Score.Deaths++;
+            if (!target.IsSentry)
+                target.Score.Deaths++;
+
             SendScoreTeamKill(killer, target, attackAttribute);
         }
 
@@ -282,6 +304,11 @@ namespace Netsphere.Server.Game.GameRules
         }
 
         private static TouchdownPlayerScore GetScore(Player plr)
+        {
+            return (TouchdownPlayerScore)plr.Score;
+        }
+
+        private static TouchdownPlayerScore GetScore(ScoreContext plr)
         {
             return (TouchdownPlayerScore)plr.Score;
         }

@@ -5,24 +5,31 @@ namespace Netsphere.Server.Game
 {
     public abstract partial class GameRuleBase
     {
-        public void SendScoreKill(Player killer, Player assist, Player target, AttackAttribute attackAttribute)
+        public void SendScoreKill(ScoreContext killer, ScoreContext assist, ScoreContext target, AttackAttribute attackAttribute)
         {
             if (assist != null)
             {
                 Room.Broadcast(new SScoreKillAssistAckMessage(
-                    new ScoreAssistDto(killer.PeerId, assist.PeerId, target.PeerId, attackAttribute)));
+                    new ScoreAssistDto(
+                        killer.SentryId ?? killer.Player.PeerId,
+                        assist.SentryId ?? assist.Player.PeerId,
+                        target.SentryId ?? target.Player.PeerId, attackAttribute)));
             }
             else
             {
                 Room.Broadcast(new SScoreKillAckMessage(
-                    new ScoreDto(killer.PeerId, target.PeerId, attackAttribute)));
+                    new ScoreDto(
+                        killer.SentryId ?? killer.Player.PeerId,
+                        target.SentryId ?? target.Player.PeerId, attackAttribute)));
             }
         }
 
-        public void SendScoreTeamKill(Player killer, Player target, AttackAttribute attackAttribute)
+        public void SendScoreTeamKill(ScoreContext killer, ScoreContext target, AttackAttribute attackAttribute)
         {
             Room.Broadcast(new SScoreTeamKillAckMessage(
-                new Score2Dto(killer.PeerId, target.PeerId, attackAttribute)));
+                new Score2Dto(
+                    killer.SentryId ?? killer.Player.PeerId,
+                    target.SentryId ?? target.Player.PeerId, attackAttribute)));
         }
 
         public void SendScoreHeal(Player plr)
@@ -48,33 +55,43 @@ namespace Netsphere.Server.Game
             Room.Broadcast(new SScoreReboundAckMessage(newPlayer?.PeerId ?? 0, oldPlayer?.PeerId ?? 0));
         }
 
-        public void SendScoreOffense(Player killer, Player assist, Player target,
+        public void SendScoreOffense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
             if (assist != null)
             {
                 Room.Broadcast(new SScoreOffenseAssistAckMessage(
-                    new ScoreAssistDto(killer.PeerId, assist.PeerId, target.PeerId, attackAttribute)));
+                    new ScoreAssistDto(
+                        killer.SentryId ?? killer.Player.PeerId,
+                        assist.SentryId ?? assist.Player.PeerId,
+                        target.SentryId ?? target.Player.PeerId, attackAttribute)));
             }
             else
             {
                 Room.Broadcast(new SScoreOffenseAckMessage(
-                    new ScoreDto(killer.PeerId, target.PeerId, attackAttribute)));
+                    new ScoreDto(
+                        killer.SentryId ?? killer.Player.PeerId,
+                        target.SentryId ?? target.Player.PeerId, attackAttribute)));
             }
         }
 
-        public void SendScoreDefense(Player killer, Player assist, Player target,
+        public void SendScoreDefense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
             if (assist != null)
             {
                 Room.Broadcast(new SScoreDefenseAssistAckMessage(
-                    new ScoreAssistDto(killer.PeerId, assist.PeerId, target.PeerId, attackAttribute)));
+                    new ScoreAssistDto(
+                        killer.SentryId ?? killer.Player.PeerId,
+                        assist.SentryId ?? assist.Player.PeerId,
+                        target.SentryId ?? target.Player.PeerId, attackAttribute)));
             }
             else
             {
                 Room.Broadcast(new SScoreDefenseAckMessage(
-                    new ScoreDto(killer.PeerId, target.PeerId, attackAttribute)));
+                    new ScoreDto(
+                        killer.SentryId ?? killer.Player.PeerId,
+                        target.SentryId ?? target.Player.PeerId, attackAttribute)));
             }
         }
     }

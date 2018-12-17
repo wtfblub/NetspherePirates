@@ -122,8 +122,15 @@ namespace Netsphere.Server.Game.GameRules
             return (0, 0);
         }
 
-        protected internal override void OnScoreKill(Player killer, Player assist, Player target, AttackAttribute attackAttribute)
+        protected internal override void OnScoreKill(ScoreContext killer, ScoreContext assist, ScoreContext target,
+            AttackAttribute attackAttribute)
         {
+            if (target.IsSentry)
+            {
+                SendScoreKill(killer, assist, target, attackAttribute);
+                return;
+            }
+
             killer.Score.Kills++;
             target.Score.Deaths++;
 
@@ -132,10 +139,10 @@ namespace Netsphere.Server.Game.GameRules
 
             SendScoreKill(killer, assist, target, attackAttribute);
 
-            killer.Team.Score++;
-            if (killer.Team.Score == Room.Options.ScoreLimit / 2)
+            killer.Player.Team.Score++;
+            if (killer.Player.Team.Score == Room.Options.ScoreLimit / 2)
                 StateMachine.StartHalfTime();
-            else if (killer.Team.Score == Room.Options.ScoreLimit)
+            else if (killer.Player.Team.Score == Room.Options.ScoreLimit)
                 StateMachine.StartResult();
         }
 
@@ -146,9 +153,12 @@ namespace Netsphere.Server.Game.GameRules
             SendScoreSuicide(plr);
         }
 
-        protected internal override void OnScoreTeamKill(Player killer, Player target, AttackAttribute attackAttribute)
+        protected internal override void OnScoreTeamKill(ScoreContext killer, ScoreContext target,
+            AttackAttribute attackAttribute)
         {
-            target.Score.Deaths++;
+            if (!target.IsSentry)
+                target.Score.Deaths++;
+
             SendScoreTeamKill(killer, target, attackAttribute);
         }
 

@@ -6,11 +6,13 @@ namespace Netsphere.Server.Game
         {
         }
 
-        protected internal virtual void OnScoreKill(Player killer, Player assist, Player target, AttackAttribute attackAttribute)
+        protected internal virtual void OnScoreKill(ScoreContext killer, ScoreContext assist, ScoreContext target,
+            AttackAttribute attackAttribute)
         {
         }
 
-        protected internal virtual void OnScoreTeamKill(Player killer, Player target, AttackAttribute attackAttribute)
+        protected internal virtual void OnScoreTeamKill(ScoreContext killer, ScoreContext target,
+            AttackAttribute attackAttribute)
         {
         }
 
@@ -30,12 +32,12 @@ namespace Netsphere.Server.Game
         {
         }
 
-        protected internal virtual void OnScoreOffense(Player killer, Player assist, Player target,
+        protected internal virtual void OnScoreOffense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
         }
 
-        protected internal virtual void OnScoreDefense(Player killer, Player assist, Player target,
+        protected internal virtual void OnScoreDefense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
         }

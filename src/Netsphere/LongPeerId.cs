@@ -88,7 +88,7 @@ namespace Netsphere
     {
         public byte Id { get; set; }
         public byte Slot { get; set; }
-        public byte Unk { get; set; } // maybe source - player,sentry,senti
+        public byte ObjectType { get; set; } // maybe source - player,sentry,senti
 
         public ushort Value => GetValue();
 
@@ -96,14 +96,14 @@ namespace Netsphere
         {
             Id = (byte)(value >> 8);
             Slot = (byte)((value >> 3) & 31);
-            Unk = (byte)(value & 7);
+            ObjectType = (byte)(value & 7);
         }
 
-        public PeerId(byte id, byte slot, byte unk)
+        public PeerId(byte id, byte slot, byte objectType)
         {
             Id = id;
             Slot = slot;
-            Unk = unk;
+            ObjectType = objectType;
         }
 
         public override bool Equals(object obj)
@@ -123,12 +123,12 @@ namespace Netsphere
 
         public override string ToString()
         {
-            return $"Id:{Id}, Slot:{Slot}, Unk:{Unk}";
+            return $"Id:{Id}, Slot:{Slot}, Unk:{ObjectType}";
         }
 
         private ushort GetValue()
         {
-            var value = (ushort)(Unk & 7);
+            var value = (ushort)(ObjectType & 7);
             value = (ushort)(8 * (Slot & 31) | value);
             value = (ushort)(Id << 8 | value);
             return value;

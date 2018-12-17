@@ -409,14 +409,15 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Score.Target;
-
             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return Task.FromResult(true);
 
-            killer.PeerId = message.Score.Killer;
-            room.GameRule.OnScoreKill(killer, null, plr, message.Score.Weapon);
+            room.GameRule.OnScoreKill(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                null,
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
             return Task.FromResult(true);
         }
 
@@ -431,8 +432,6 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Score.Target;
-
             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return Task.FromResult(true);
@@ -441,10 +440,11 @@ namespace Netsphere.Server.Game.Handlers
             if (assist == null)
                 return Task.FromResult(true);
 
-            killer.PeerId = message.Score.Killer;
-            assist.PeerId = message.Score.Assist;
-
-            room.GameRule.OnScoreKill(killer, assist, plr, message.Score.Weapon);
+            room.GameRule.OnScoreKill(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
             return Task.FromResult(true);
         }
 
@@ -459,15 +459,14 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Score.Target;
-
             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return Task.FromResult(true);
 
-            killer.PeerId = message.Score.Killer;
-
-            room.GameRule.OnScoreTeamKill(killer, plr, message.Score.Weapon);
+            room.GameRule.OnScoreTeamKill(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
             return Task.FromResult(true);
         }
 
@@ -482,7 +481,6 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Id;
             room.GameRule.OnScoreHeal(plr);
             return Task.FromResult(true);
         }
@@ -498,7 +496,6 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Id;
             room.GameRule.OnScoreSuicide(plr);
             return Task.FromResult(true);
         }
@@ -527,13 +524,6 @@ namespace Netsphere.Server.Game.Handlers
 
             var newPlr = room.Players.GetValueOrDefault(message.NewId.AccountId);
             var oldPlr = room.Players.GetValueOrDefault(message.OldId.AccountId);
-
-            if (newPlr != null)
-                newPlr.PeerId = message.NewId;
-
-            if (oldPlr != null)
-                oldPlr.PeerId = message.OldId;
-
             room.GameRule.OnScoreFumbi(newPlr, oldPlr);
             return Task.FromResult(true);
         }
@@ -549,14 +539,15 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Score.Target;
-
             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return Task.FromResult(true);
 
-            killer.PeerId = message.Score.Killer;
-            room.GameRule.OnScoreOffense(killer, null, plr, message.Score.Weapon);
+            room.GameRule.OnScoreOffense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                null,
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
             return Task.FromResult(true);
         }
 
@@ -571,8 +562,6 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Score.Target;
-
             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return Task.FromResult(true);
@@ -581,10 +570,11 @@ namespace Netsphere.Server.Game.Handlers
             if (assist == null)
                 return Task.FromResult(true);
 
-            killer.PeerId = message.Score.Killer;
-            assist.PeerId = message.Score.Assist;
-
-            room.GameRule.OnScoreOffense(killer, assist, plr, message.Score.Weapon);
+            room.GameRule.OnScoreOffense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
             return Task.FromResult(true);
         }
 
@@ -599,14 +589,15 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Score.Target;
-
             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return Task.FromResult(true);
 
-            killer.PeerId = message.Score.Killer;
-            room.GameRule.OnScoreDefense(killer, null, plr, message.Score.Weapon);
+            room.GameRule.OnScoreDefense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                null,
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
             return Task.FromResult(true);
         }
 
@@ -621,8 +612,6 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.State != PlayerState.Alive)
                 return Task.FromResult(true);
 
-            plr.PeerId = message.Score.Target;
-
             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
             if (killer == null)
                 return Task.FromResult(true);
@@ -631,10 +620,11 @@ namespace Netsphere.Server.Game.Handlers
             if (assist == null)
                 return Task.FromResult(true);
 
-            killer.PeerId = message.Score.Killer;
-            assist.PeerId = message.Score.Assist;
-
-            room.GameRule.OnScoreDefense(killer, assist, plr, message.Score.Weapon);
+            room.GameRule.OnScoreDefense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
             return Task.FromResult(true);
         }
     }
