@@ -3,18 +3,33 @@ using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Options;
 using Netsphere.Common.Configuration;
+using Netsphere.Network.Message.GameRule;
 
 namespace Netsphere.Server.Game.GameRules
 {
-    public class Deathmatch : GameRuleBase
+    public class BattleRoyal : GameRuleBase
     {
-        private readonly DeathmatchOptions _options;
+        private readonly BattleRoyalOptions _options;
+        private Player _firstPlace;
 
-        public override GameRule GameRule => GameRule.Deathmatch;
-        public override bool HasHalfTime => true;
+        public override GameRule GameRule => GameRule.BattleRoyal;
+        public override bool HasHalfTime => false;
+        public Player FirstPlace
+        {
+            get => _firstPlace;
+            protected set
+            {
+                if (_firstPlace == value)
+                    return;
 
-        public Deathmatch(GameRuleStateMachine stateMachine, IOptions<GameOptions> gameOptions,
-            IOptions<DeathmatchOptions> options)
+                _firstPlace = value;
+                if (StateMachine.GameState == GameState.Playing)
+                    Room.Broadcast(new SGameRuleChangeTheFirstAckMessage(_firstPlace?.Account.Id ?? 0));
+            }
+        }
+
+        public BattleRoyal(GameRuleStateMachine stateMachine, IOptions<GameOptions> gameOptions,
+            IOptions<BattleRoyalOptions> options)
             : base(stateMachine, gameOptions)
         {
             _options = options.Value;
@@ -24,10 +39,9 @@ namespace Netsphere.Server.Game.GameRules
         {
             base.Initialize(room);
 
-            var playersPerTeam = Room.Options.MatchKey.PlayerLimit / 2;
-            var spectatorsPerTeam = Room.Options.MatchKey.SpectatorLimit / 2;
+            var playersPerTeam = Room.Options.MatchKey.PlayerLimit;
+            var spectatorsPerTeam = Room.Options.MatchKey.SpectatorLimit;
             Room.TeamManager.Add(TeamId.Alpha, playersPerTeam, spectatorsPerTeam);
-            Room.TeamManager.Add(TeamId.Beta, playersPerTeam, spectatorsPerTeam);
         }
 
         public override void Cleanup()
@@ -35,7 +49,6 @@ namespace Netsphere.Server.Game.GameRules
             base.Cleanup();
 
             Room.TeamManager.Remove(TeamId.Alpha);
-            Room.TeamManager.Remove(TeamId.Beta);
         }
 
         protected override bool CanStartGame()
@@ -43,19 +56,25 @@ namespace Netsphere.Server.Game.GameRules
             if (StateMachine.GameState != GameState.Waiting)
                 return false;
 
-            // Is atleast one player per team ready?
+            // Is atleast one player ready?
             var teams = TeamManager.Values;
-            return teams.All(team => team.Players.Any(plr => plr.IsReady || Room.Master == plr));
+            return teams.Sum(team => team.Players.Count(plr => plr.IsReady)) > 0;
         }
 
         protected override bool HasEnoughPlayers()
         {
-            return TeamManager.Values.All(team => team.PlayersPlaying.Any());
+            // We need at least 2 players
+            return TeamManager.Values.Sum(team => team.PlayersPlaying.Count()) > 1;
+        }
+
+        protected internal override Team GetWinnerTeam()
+        {
+            return TeamManager.Values.First();
         }
 
         protected override PlayerScore CreateScore()
         {
-            return new DeathmatchPlayerScore(_options);
+            return new BattleRoyalPlayerScore(_options);
         }
 
         protected internal override BriefingTeam[] CreateBriefingTeams()
@@ -71,7 +90,7 @@ namespace Netsphere.Server.Game.GameRules
 
         protected override BriefingPlayer CreateBriefingPlayer(Player plr)
         {
-            return new BriefingPlayerDeathmatch(plr);
+            return new BriefingPlayerBattleRoyal(plr);
         }
 
         protected override (uint baseGain, uint bonusGain) CalculateExperienceGained(Player plr)
@@ -131,18 +150,24 @@ namespace Netsphere.Server.Game.GameRules
                 return;
             }
 
-            killer.Score.Kills++;
+            if (target.Player == FirstPlace)
+            {
+                GetScore(killer).BonusKills++;
+                if (assist != null)
+                    GetScore(assist).BonusKillAssists++;
+            }
+            else
+            {
+                killer.Score.Kills++;
+                if (assist != null)
+                    assist.Score.KillAssists++;
+            }
+
             target.Score.Deaths++;
-
-            if (assist != null)
-                assist.Score.KillAssists++;
-
             SendScoreKill(killer, assist, target, attackAttribute);
+            FirstPlace = GetFirstPlace();
 
-            killer.Player.Team.Score++;
-            if (killer.Player.Team.Score == Room.Options.ScoreLimit / 2)
-                StateMachine.StartHalfTime();
-            else if (killer.Player.Team.Score == Room.Options.ScoreLimit)
+            if (FirstPlace.Score.GetTotalScore() >= Room.Options.ScoreLimit)
                 StateMachine.StartResult();
         }
 
@@ -153,26 +178,25 @@ namespace Netsphere.Server.Game.GameRules
             SendScoreSuicide(plr);
         }
 
-        protected internal override void OnScoreTeamKill(ScoreContext killer, ScoreContext target,
-            AttackAttribute attackAttribute)
+        private Player GetFirstPlace()
         {
-            if (!target.IsSentry)
-                target.Score.Deaths++;
-
-            SendScoreTeamKill(killer, target, attackAttribute);
+            return TeamManager.PlayersPlaying
+                .Aggregate((highestPlayer, player) =>
+                    highestPlayer == null || player.Score.GetTotalScore() > highestPlayer.Score.GetTotalScore()
+                        ? player
+                        : highestPlayer);
         }
 
-        protected internal override void OnScoreHeal(Player plr)
+        private static BattleRoyalPlayerScore GetScore(ScoreContext plr)
         {
-            plr.Score.HealAssists++;
-            SendScoreHeal(plr);
+            return (BattleRoyalPlayerScore)plr.Score;
         }
 
-        private class BriefingPlayerDeathmatch : BriefingPlayer
+        private class BriefingPlayerBattleRoyal : BriefingPlayer
         {
             private readonly Player _player;
 
-            public BriefingPlayerDeathmatch(Player plr)
+            public BriefingPlayerBattleRoyal(Player plr)
             {
                 _player = plr;
 
@@ -189,10 +213,15 @@ namespace Netsphere.Server.Game.GameRules
             {
                 base.Serialize(w);
 
-                w.Write(_player.Score.Kills);
-                w.Write(_player.Score.KillAssists);
-                w.Write(_player.Score.HealAssists);
-                w.Write(_player.Score.Deaths);
+                var score = (BattleRoyalPlayerScore)_player.Score;
+                w.Write(score.Kills);
+                w.Write(score.KillAssists);
+                w.Write(score.BonusKills);
+                w.Write(score.BonusKillAssists);
+                w.Write(0);
+                w.Write(0);
+                w.Write(0);
+                w.Write(0);
                 w.Write(0);
                 w.Write(0);
                 w.Write(0);
@@ -200,11 +229,14 @@ namespace Netsphere.Server.Game.GameRules
         }
     }
 
-    public class DeathmatchPlayerScore : PlayerScore
+    public class BattleRoyalPlayerScore : PlayerScore
     {
-        private readonly DeathmatchOptions _options;
+        private readonly BattleRoyalOptions _options;
 
-        public DeathmatchPlayerScore(DeathmatchOptions options)
+        public uint BonusKills { get; set; }
+        public uint BonusKillAssists { get; set; }
+
+        public BattleRoyalPlayerScore(BattleRoyalOptions options)
         {
             _options = options;
         }
@@ -213,7 +245,8 @@ namespace Netsphere.Server.Game.GameRules
         {
             return (uint)(Kills * _options.PointsPerKill +
                           KillAssists * _options.PointsPerKillAssist +
-                          HealAssists * _options.PointsPerHealAssist +
+                          BonusKills * _options.PointsPerBonusKill +
+                          BonusKillAssists * _options.PointsPerBonusAssist +
                           Deaths * _options.PointsPerDeath);
         }
     }

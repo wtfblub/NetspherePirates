@@ -18,7 +18,8 @@ namespace Netsphere.Server.Game
             _gameRuleLookup = new Dictionary<GameRule, Type>
             {
                 [GameRule.Deathmatch] = typeof(Deathmatch),
-                [GameRule.Touchdown] = typeof(Touchdown)
+                [GameRule.Touchdown] = typeof(Touchdown),
+                [GameRule.BattleRoyal] = typeof(BattleRoyal)
             };
         }
 

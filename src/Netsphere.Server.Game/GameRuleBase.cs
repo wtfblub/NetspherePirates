@@ -13,7 +13,7 @@ namespace Netsphere.Server.Game
         private readonly EventPipeline<HasEnoughPlayersHookEventArgs> _preHasEnoughPlayersHook;
 
         public abstract GameRule GameRule { get; }
-        protected abstract bool HasHalfTime { get; }
+        public abstract bool HasHalfTime { get; }
 
         public Room Room { get; private set; }
         public TeamManager TeamManager => Room.TeamManager;

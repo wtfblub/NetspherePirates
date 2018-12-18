@@ -106,7 +106,7 @@ namespace Netsphere.Server.Auth
                 migrator.MigrateTo();
             else if (migrator.HasMigrationsToApply())
                 throw new DatabaseVersionMismatchException();
-            
+
             host.Services
                 .GetRequiredService<IProudNetServerService>()
                 .UnhandledRmi += (s, e) => Log.Debug("Unhandled Message={@Message} HostId={HostId}", e.Message, e.Session.HostId);

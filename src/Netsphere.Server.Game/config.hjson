@@ -92,5 +92,22 @@
       PointsPerHealAssist: 2
       PointsPerDeath: 0
     }
+    BattleRoyal:
+    {
+      ExperienceRates:
+      {
+        ScoreFactor: 0.7
+        FirstPlaceBonus: 50
+        SecondPlaceBonus: 30
+        ThirdPlaceBonus: 10
+        PlayerCountFactor: 0.06
+        ExperiencePerMinute: 20
+      }
+      PointsPerKill: 2
+      PointsPerKillAssist: 1
+      PointsPerBonusKill: 5
+      PointsPerBonusAssist: 1
+      PointsPerDeath: 0
+    }
   }
 }

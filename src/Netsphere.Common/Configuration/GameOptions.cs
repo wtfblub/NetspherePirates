@@ -15,6 +15,7 @@
         public int DurabilityLossPerMinute { get; set; }
         public DeathmatchOptions Deathmatch { get; set; }
         public TouchdownOptions Touchdown { get; set; }
+        public BattleRoyalOptions BattleRoyal { get; set; }
     }
 
     public class DeathmatchOptions
@@ -39,6 +40,16 @@
         public int PointsPerKill { get; set; }
         public int PointsPerKillAssist { get; set; }
         public int PointsPerHealAssist { get; set; }
+        public int PointsPerDeath { get; set; }
+    }
+
+    public class BattleRoyalOptions
+    {
+        public ExperienceRateOptions ExperienceRates { get; set; }
+        public int PointsPerKill { get; set; }
+        public int PointsPerKillAssist { get; set; }
+        public int PointsPerBonusKill { get; set; }
+        public int PointsPerBonusAssist { get; set; }
         public int PointsPerDeath { get; set; }
     }
 
