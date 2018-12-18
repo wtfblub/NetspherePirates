@@ -235,7 +235,7 @@ namespace Netsphere.Server.Game
         /// </summary>
         /// <param name="attribute">The attribute to retrieve</param>
         /// <returns></returns>
-        public int GetAttributeValue(Attribute attribute)
+        public float GetAttributeValue(Attribute attribute)
         {
             if (CharacterManager.CurrentCharacter == null)
                 return 0;
@@ -427,7 +427,7 @@ namespace Netsphere.Server.Game
                 Account.Id, Session.HostId, Session.RemoteEndPoint);
         }
 
-        private static int GetAttributeValueFromItems(Attribute attribute, IEnumerable<PlayerItem> items)
+        private static float GetAttributeValueFromItems(Attribute attribute, IEnumerable<PlayerItem> items)
         {
             return items.Where(item => item != null)
                 .Select(item => item.GetItemEffect())

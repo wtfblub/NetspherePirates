@@ -22,7 +22,7 @@ namespace Netsphere.Server.Game.Data
     public class ItemEffectAttribute
     {
         public Attribute Attribute { get; set; }
-        public int Value { get; set; }
+        public float Value { get; set; }
         public float Rate { get; set; }
     }
 }

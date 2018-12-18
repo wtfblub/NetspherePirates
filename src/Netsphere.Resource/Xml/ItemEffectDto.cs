@@ -53,10 +53,10 @@ namespace Netsphere.Resource.xml
         public string effect { get; set; }
 
         [XmlAttribute]
-        public int graph_value { get; set; }
+        public string graph_value { get; set; }
 
         [XmlAttribute]
-        public int value { get; set; }
+        public string value { get; set; }
 
         [XmlAttribute]
         public string rate { get; set; }

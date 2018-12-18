@@ -150,12 +150,18 @@ namespace Netsphere.Server.Game.Services
                         }
                     }
 
-                    var name = stringTable.@string.First(s =>
+                    var name = stringTable.@string.FirstOrDefault(s =>
                         s.key.Equals(mapDto.map_name_key, StringComparison.InvariantCultureIgnoreCase));
-                    if (string.IsNullOrWhiteSpace(name.eng))
-                        throw new Exception("Missing english translation for " + mapDto.map_name_key);
+                    if (string.IsNullOrWhiteSpace(name?.eng))
+                    {
+                        _logger.LogWarning("Missing english translation for {MapKey}", mapDto.map_name_key);
+                        map.Name = mapDto.map_name_key;
+                    }
+                    else
+                    {
+                        map.Name = name.eng;
+                    }
 
-                    map.Name = name.eng;
                     yield return map;
                 }
             }
@@ -183,7 +189,7 @@ namespace Netsphere.Server.Game.Services
                         itemEffect.Attributes.Add(new ItemEffectAttribute
                         {
                             Attribute = (Attribute)Enum.Parse(typeof(Attribute), attributeDto.effect.Replace("_", ""), true),
-                            Value = attributeDto.value,
+                            Value = float.Parse(attributeDto.value, CultureInfo.InvariantCulture),
                             Rate = float.Parse(attributeDto.rate, CultureInfo.InvariantCulture)
                         });
                     }
