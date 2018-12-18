@@ -752,6 +752,16 @@ namespace Netsphere.Network.Message.GameRule
 
         [BlubMember(1)]
         public byte Unk2 { get; set; }
+
+        public SArcadeBeginRoundAckMessage()
+        {
+        }
+
+        public SArcadeBeginRoundAckMessage(byte unk1, byte unk2)
+        {
+            Unk1 = unk1;
+            Unk2 = unk2;
+        }
     }
 
     [BlubContract]
@@ -777,6 +787,15 @@ namespace Netsphere.Network.Message.GameRule
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
+
+        public SArcadeEnablePlayeTimeAckMessage()
+        {
+        }
+
+        public SArcadeEnablePlayeTimeAckMessage(byte unk)
+        {
+            Unk = unk;
+        }
     }
 
     [BlubContract]
@@ -787,6 +806,16 @@ namespace Netsphere.Network.Message.GameRule
 
         [BlubMember(1)]
         public int Unk2 { get; set; }
+
+        public SArcadeStageInfoAckMessage()
+        {
+        }
+
+        public SArcadeStageInfoAckMessage(byte unk1, int unk2)
+        {
+            Unk1 = unk1;
+            Unk2 = unk2;
+        }
     }
 
     [BlubContract]

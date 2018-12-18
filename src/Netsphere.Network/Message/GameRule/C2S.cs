@@ -336,7 +336,7 @@ namespace Netsphere.Network.Message.GameRule
     public class CArcadeStageSelectReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
-        public byte Unk1 { get; set; }
+        public byte Stage { get; set; }
 
         [BlubMember(1)]
         public byte Unk2 { get; set; }

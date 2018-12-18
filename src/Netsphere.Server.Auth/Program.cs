@@ -16,6 +16,7 @@ using Netsphere.Server.Auth.Services;
 using Newtonsoft.Json;
 using ProudNet;
 using ProudNet.Hosting;
+using ProudNet.Hosting.Services;
 using Serilog;
 using StackExchange.Redis;
 
@@ -105,6 +106,10 @@ namespace Netsphere.Server.Auth
                 migrator.MigrateTo();
             else if (migrator.HasMigrationsToApply())
                 throw new DatabaseVersionMismatchException();
+            
+            host.Services
+                .GetRequiredService<IProudNetServerService>()
+                .UnhandledRmi += (s, e) => Log.Debug("Unhandled Message={@Message} HostId={HostId}", e.Message, e.Session.HostId);
 
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
