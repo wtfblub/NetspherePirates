@@ -190,7 +190,7 @@ namespace Netsphere.Server.Game
             // Did we level up?
             // Using a loop for multiple level ups
             while (levelInfo.ExperienceToNextLevel != 0 &&
-                levelInfo.ExperienceToNextLevel <= (int)(TotalExperience - levelInfo.TotalExperience))
+                   levelInfo.ExperienceToNextLevel <= (int)(TotalExperience - levelInfo.TotalExperience))
             {
                 var newLevel = Level + 1;
                 levelInfo = levels.GetValueOrDefault(newLevel);
@@ -231,6 +231,15 @@ namespace Netsphere.Server.Game
         }
 
         /// <summary>
+        /// Gets the maximum hp for the current character
+        /// </summary>
+        public float GetMaxHP()
+        {
+            return _gameDataService.GameTempos["GAMETEMPO_FREE"].ActorDefaultHPMax +
+                   GetAttributeValue(Attribute.HP);
+        }
+
+        /// <summary>
         /// Gets the total attribute value for the current character
         /// </summary>
         /// <param name="attribute">The attribute to retrieve</param>
@@ -240,10 +249,10 @@ namespace Netsphere.Server.Game
             if (CharacterManager.CurrentCharacter == null)
                 return 0;
 
-            var @char = CharacterManager.CurrentCharacter;
-            var value = GetAttributeValueFromItems(attribute, @char.Weapons.GetItems());
-            value += GetAttributeValueFromItems(attribute, @char.Skills.GetItems());
-            value += GetAttributeValueFromItems(attribute, @char.Costumes.GetItems());
+            var character = CharacterManager.CurrentCharacter;
+            var value = GetAttributeValueFromItems(attribute, character.Weapons.GetItems());
+            value += GetAttributeValueFromItems(attribute, character.Skills.GetItems());
+            value += GetAttributeValueFromItems(attribute, character.Costumes.GetItems());
 
             return value;
         }
@@ -258,10 +267,10 @@ namespace Netsphere.Server.Game
             if (CharacterManager.CurrentCharacter == null)
                 return 0;
 
-            var @char = CharacterManager.CurrentCharacter;
-            var value = GetAttributeRateFromItems(attribute, @char.Weapons.GetItems());
-            value += GetAttributeRateFromItems(attribute, @char.Skills.GetItems());
-            value += GetAttributeRateFromItems(attribute, @char.Costumes.GetItems());
+            var character = CharacterManager.CurrentCharacter;
+            var value = GetAttributeRateFromItems(attribute, character.Weapons.GetItems());
+            value += GetAttributeRateFromItems(attribute, character.Skills.GetItems());
+            value += GetAttributeRateFromItems(attribute, character.Costumes.GetItems());
 
             return value;
         }

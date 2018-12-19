@@ -529,5 +529,33 @@ namespace Netsphere.Server.Game.Services
                 _logger.LogInformation("Loaded shop version {Version}", ShopVersion);
             }
         }
+
+        public void LoadGameTempos()
+        {
+            _logger.LogInformation("Loading default game tempos...");
+            var dto = Deserialize<ConstantInfoDto>("xml/constant_info.x7");
+            GameTempos = Transform().ToImmutableDictionary(x => x.Name, x => x);
+            _logger.LogInformation("Loaded {Count} game tempos", GameTempos.Count);
+
+            IEnumerable<GameTempo> Transform()
+            {
+                foreach (var gameTempoDto in dto.GAMEINFOLIST)
+                {
+                    var gameTempo = new GameTempo
+                    {
+                        Name = gameTempoDto.TEMPVALUE.value
+                    };
+
+                    var values = gameTempoDto.GAMETEPMO_COMMON_TOTAL_VALUE;
+                    gameTempo.ActorDefaultHPMax =
+                        float.Parse(values.GAMETEMPO_actor_default_hp_max, CultureInfo.InvariantCulture);
+                    gameTempo.ActorDefaultMPMax =
+                        float.Parse(values.GAMETEMPO_actor_default_mp_max, CultureInfo.InvariantCulture);
+                    gameTempo.ActorDefaultMoveSpeed = values.GAMETEMPO_fastrun_required_mp;
+
+                    yield return gameTempo;
+                }
+            }
+        }
     }
 }

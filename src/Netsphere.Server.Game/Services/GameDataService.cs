@@ -24,6 +24,7 @@ namespace Netsphere.Server.Game.Services
         public ImmutableDictionary<uint, ItemEffect> Effects { get; private set; }
         public ImmutableDictionary<ItemNumber, ItemInfo> Items { get; private set; }
         public ImmutableArray<DefaultItem> DefaultItems { get; private set; }
+        public ImmutableDictionary<string, GameTempo> GameTempos { get; private set; }
 
         // Shop data
         public ImmutableDictionary<ItemNumber, ShopItem> ShopItems { get; private set; }
@@ -75,6 +76,7 @@ namespace Netsphere.Server.Game.Services
             LoadEffects();
             LoadItems();
             LoadDefaultItems();
+            LoadGameTempos();
             await LoadShop();
         }
 
