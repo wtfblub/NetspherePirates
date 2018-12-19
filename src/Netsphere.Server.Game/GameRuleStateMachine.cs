@@ -171,7 +171,7 @@ namespace Netsphere.Server.Game
                     foreach (var team in room.TeamManager.Values)
                         team.Score = 0;
 
-                    foreach (var plr in room.TeamManager.Players)
+                    foreach (var plr in room.TeamManager.SelectMany(x => x.Value.Values))
                     {
                         if (!plr.IsReady && plr != room.Master)
                             continue;
