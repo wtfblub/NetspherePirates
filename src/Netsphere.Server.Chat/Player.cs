@@ -28,6 +28,8 @@ namespace Netsphere.Server.Chat
 
         internal void OnDisconnected()
         {
+            Channel?.Leave(this);
+
             Disconnected?.Invoke(this, new PlayerEventArgs(this));
         }
 
