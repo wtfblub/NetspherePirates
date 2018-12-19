@@ -59,14 +59,13 @@ namespace Netsphere.Server.Game.Handlers
             var session = context.GetSession<Session>();
             var plr = session.Player;
 
-            // TODO Need room implementation first
             // Prevents player from changing characters while playing
-            /*if (plr.Room != null && plr.RoomInfo.State != PlayerState.Lobby &&
-                !plr.Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.HalfTime))
+            if (plr.Room != null && plr.State != PlayerState.Lobby &&
+                plr.Room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime)
             {
-                session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
-                return;
-            }*/
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                return true;
+            }
 
             if (!plr.CharacterManager.Select(message.Slot))
                 await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));

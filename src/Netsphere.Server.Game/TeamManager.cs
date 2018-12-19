@@ -95,8 +95,8 @@ namespace Netsphere.Server.Game
             if (plr.Room != Room)
                 return TeamChangeError.WrongRoom;
 
-            // if (Room.GameRuleManager.GameRule.StateMachine.IsInState(GameRuleState.Playing))
-            // return TeamChangeError.GameIsRunning;
+            if (Room.GameRule.StateMachine.GameState != GameState.Waiting)
+                return TeamChangeError.GameIsRunning;
 
             if (plr.Team == null)
                 return TeamChangeError.NotInTeam;
