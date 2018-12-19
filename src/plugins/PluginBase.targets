@@ -11,12 +11,12 @@
     <PackageReference Include="Stateless" Version="4.2.1" Private="False" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Netsphere.Common\Netsphere.Common.csproj" Private="False" />
-    <ProjectReference Include="..\..\Netsphere.Database\Netsphere.Database.csproj" Private="False" />
-    <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" Private="False" />
-    <ProjectReference Include="..\..\Netsphere\Netsphere.csproj" Private="False" />
-    <ProjectReference Include="..\..\Netsphere.Network\Netsphere.Network.csproj" Private="False" />
-    <ProjectReference Include="..\..\ProudNet\ProudNet.csproj" Private="False" />
-    <ProjectReference Include="..\..\Netsphere.Server.Game\Netsphere.Server.Game.csproj" Private="False" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Netsphere.Common\Netsphere.Common.csproj" Private="False" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Netsphere.Database\Netsphere.Database.csproj" Private="False" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Netsphere.Resource\Netsphere.Resource.csproj" Private="False" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Netsphere\Netsphere.csproj" Private="False" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Netsphere.Network\Netsphere.Network.csproj" Private="False" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\ProudNet\ProudNet.csproj" Private="False" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Netsphere.Server.Game\Netsphere.Server.Game.csproj" Private="False" />
   </ItemGroup>
 </Project>
