@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundatio.Messaging;
@@ -66,7 +67,7 @@ namespace Netsphere.Server.Game.Services
                     Name = _serverOptions.Name,
                     Online = (ushort)_sessionManager.Sessions.Count,
                     Limit = (ushort)_networkOptions.MaxSessions,
-                    EndPoint = _networkOptions.Listener
+                    EndPoint = new IPEndPoint(IPAddress.Parse(_serverOptions.Address), _networkOptions.Listener.Port)
                 });
                 await _scheduler.ScheduleAsync(Update, _serverOptions.UpdateInterval);
             }
