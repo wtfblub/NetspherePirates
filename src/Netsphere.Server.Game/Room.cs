@@ -108,7 +108,7 @@ namespace Netsphere.Server.Game
             if (plr.Room != null)
                 return RoomJoinError.AlreadyInRoom;
 
-            if (_players.Count >= Options.MatchKey.PlayerLimit)
+            if (_players.Count >= Options.MatchKey.PlayerLimit + Options.MatchKey.SpectatorLimit)
                 return RoomJoinError.RoomFull;
 
             if (_kickedPlayers.ContainsKey(plr.Account.Id))
@@ -119,9 +119,22 @@ namespace Netsphere.Server.Game
 
             plr.Slot = (byte)_idRecycler.GetId();
             plr.State = PlayerState.Lobby;
-            plr.Mode = PlayerGameMode.Normal;
             plr.IsReady = false;
-            TeamManager.Join(plr);
+
+            if (TeamManager.Any(x => x.Value.Players.Count() < x.Value.PlayerLimit))
+            {
+                plr.Mode = PlayerGameMode.Normal;
+            }
+            else
+            {
+                if (TeamManager.Any(x => x.Value.Spectators.Count() < x.Value.SpectatorLimit))
+                    plr.Mode = PlayerGameMode.Spectate;
+                else
+                    return RoomJoinError.RoomFull;
+            }
+
+            if (TeamManager.Join(plr) != TeamJoinError.OK)
+                return RoomJoinError.RoomFull;
 
             _players.TryAdd(plr.Account.Id, plr);
             plr.Room = this;

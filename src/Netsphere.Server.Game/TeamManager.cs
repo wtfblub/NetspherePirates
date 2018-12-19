@@ -77,17 +77,26 @@ namespace Netsphere.Server.Game
 
         public TeamJoinError Join(Player plr)
         {
-            // Get teams with space
-            var teams = _teams.Values.Where(x => x.PlayerLimit > 0 && x.Players.Count() < x.PlayerLimit);
+            IEnumerable<Team> teams;
+            if (plr.Mode == PlayerGameMode.Spectate)
+            {
+                teams = _teams.Values.Where(x => x.SpectatorLimit > 0 && x.Spectators.Count() < x.SpectatorLimit);
+            }
+            else
+            {
+                teams = _teams.Values.Where(x => x.PlayerLimit > 0 && x.Players.Count() < x.PlayerLimit);
 
-            // sort by player count(lowest first)
-            teams = teams.OrderBy(x => x.Count);
+                var minCount = teams.Min(x => x.Count);
+                teams = teams.Where(x => x.Players.Count() == minCount);
 
-            // sort by score(lowest first)
-            teams = teams.OrderBy(x => x.Score);
+                var minScore = teams.Min(x => x.Score);
+                teams = teams.Where(x => x.Score == minScore);
 
-            var team = teams.FirstOrDefault();
-            return team?.Join(plr) ?? TeamJoinError.TeamFull;
+                var minTotalScore = teams.Min(x => x.Players.Sum(_ => _.Score.GetTotalScore()));
+                teams = teams.Where(x => x.Players.Sum(_ => _.Score.GetTotalScore()) == minTotalScore);
+            }
+
+            return teams.FirstOrDefault()?.Join(plr) ?? TeamJoinError.TeamFull;
         }
 
         public TeamChangeError ChangeTeam(Player plr, TeamId teamId)
