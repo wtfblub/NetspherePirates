@@ -8,6 +8,7 @@ namespace ProudNet.Configuration
         public IPEndPoint TcpListener { get; set; }
         public IPAddress UdpAddress { get; set; }
         public ushort[] UdpListenerPorts { get; set; }
+        public bool ServerAsP2PGroupMemberHack { get; set; }
 
         public Guid Version { get; set; }
         public TimeSpan ConnectTimeout { get; set; }
@@ -36,6 +37,7 @@ namespace ProudNet.Configuration
             HolepunchTimeout = TimeSpan.FromSeconds(30);
             // Client sends a ping every 10 seconds
             PingTimeout = TimeSpan.FromSeconds(20);
+            ServerAsP2PGroupMemberHack = false;
 
             EnableServerLog = false;
             FallbackMethod = FallbackMethod.None;
@@ -45,7 +47,7 @@ namespace ProudNet.Configuration
             OverSendSuspectingThresholdInBytes = 15360;
             EnableNagleAlgorithm = true;
             EncryptedMessageKeyLength = 128;
-            AllowServerAsP2PGroupMember = true;
+            AllowServerAsP2PGroupMember = false;
             EnableP2PEncryptedMessaging = false;
             UpnpDetectNatDevice = true;
             UpnpTcpAddrPortMapping = true;

@@ -18,6 +18,7 @@ using Netsphere.Network.Serializers;
 using Newtonsoft.Json;
 using ProudNet;
 using ProudNet.Hosting;
+using ProudNet.Hosting.Services;
 using Serilog;
 using StackExchange.Redis;
 
@@ -62,6 +63,7 @@ namespace Netsphere.Server.Relay
                             options.TcpListener = appOptions.Network.Listener;
                             options.UdpAddress = appOptions.Network.Address;
                             options.UdpListenerPorts = appOptions.Network.UdpPorts;
+                            options.ServerAsP2PGroupMemberHack = true;
                         })
                         .UseThreadingConfiguration((context, options) =>
                         {

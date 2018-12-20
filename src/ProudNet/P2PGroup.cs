@@ -116,6 +116,9 @@ namespace ProudNet
 
             if (_options.AllowServerAsP2PGroupMember)
                 sessionToJoin.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, Constants.HostIdServer, 0, false));
+
+            if (_options.ServerAsP2PGroupMemberHack)
+                sessionToJoin.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, Constants.HostIdServerHack, 0, false));
         }
 
         public void Leave(uint hostId)

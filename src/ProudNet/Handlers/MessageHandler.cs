@@ -24,6 +24,10 @@ namespace ProudNet.Handlers
 
             if (isInternal)
             {
+                // Drop internal P2P messages
+                if (opCode >= 65000)
+                    return Task.FromResult(true);
+
                 context.ChannelHandlerContext.Channel.Pipeline
                     .Context<SendContextEncoder>()
                     .FireChannelRead(context);

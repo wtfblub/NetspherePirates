@@ -15,7 +15,8 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            if (message.AddedMemberHostId == Constants.HostIdServer)
+            if (message.AddedMemberHostId == Constants.HostIdServer ||
+                message.AddedMemberHostId == Constants.HostIdServerHack)
                 return Task.FromResult(true);
 
             session.Logger.LogDebug("P2PGroupMemberJoinAck {@Message}", message);

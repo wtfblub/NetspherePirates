@@ -2,7 +2,10 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using BlubLib.Serialization;
+using DotNetty.Buffers;
 using Microsoft.Extensions.Logging;
+using ProudNet.DotNetty.Codecs;
 using ProudNet.Firewall;
 using ProudNet.Serialization;
 using ProudNet.Serialization.Messages;
@@ -11,18 +14,36 @@ using ProudNet.Serialization.Messages.Core;
 namespace ProudNet.Handlers
 {
     internal class RelayHandler
-        : IHandle<ReliableRelay1Message>,
+        : IHandle<ReliableUdp_FrameMessage>,
+          IHandle<ReliableRelay1Message>,
           IHandle<UnreliableRelay1Message>,
           IHandle<C2S_RequestCreateUdpSocketMessage>,
           IHandle<C2S_CreateUdpSocketAckMessage>
     {
         private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
         private readonly UdpSocketManager _udpSocketManager;
+        private readonly BlubSerializer _serializer;
 
-        public RelayHandler(ISessionManagerFactory sessionManagerFactory, UdpSocketManager udpSocketManager)
+        public RelayHandler(ISessionManagerFactory sessionManagerFactory, UdpSocketManager udpSocketManager,
+            BlubSerializer serializer)
         {
             _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
             _udpSocketManager = udpSocketManager;
+            _serializer = serializer;
+        }
+
+        [Firewall(typeof(MustBeInP2PGroup))]
+        public Task<bool> OnHandle(MessageContext context, ReliableUdp_FrameMessage message)
+        {
+            var decodedMessage = CoreMessageDecoder.Decode(_serializer, Unpooled.WrappedBuffer(message.Data));
+            context.ChannelHandlerContext.Handler.ChannelRead(context.ChannelHandlerContext, new MessageContext
+            {
+                ChannelHandlerContext = context.ChannelHandlerContext,
+                Session = context.Session,
+                Message = decodedMessage,
+                UdpEndPoint = context.UdpEndPoint
+            });
+            return Task.FromResult(true);
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
@@ -32,11 +53,21 @@ namespace ProudNet.Handlers
 
             foreach (var destination in message.Destination.Where(x => x.HostId != session.HostId))
             {
-                var target = session.P2PGroup?.GetMemberInternal(destination.HostId);
-                if (target == null)
-                    return Task.FromResult(true);
+                if (destination.HostId == Constants.HostIdServerHack)
+                {
+                    var decodedMessage = CoreMessageDecoder.Decode(_serializer, Unpooled.WrappedBuffer(message.Data));
+                    context.ChannelHandlerContext.Handler.ChannelRead(context.ChannelHandlerContext, new MessageContext
+                    {
+                        ChannelHandlerContext = context.ChannelHandlerContext,
+                        Session = context.Session,
+                        Message = decodedMessage,
+                        UdpEndPoint = context.UdpEndPoint
+                    });
+                    continue;
+                }
 
-                target.Send(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber),
+                var target = session.P2PGroup?.GetMemberInternal(destination.HostId);
+                target?.Send(new ReliableRelay2Message(new RelayDestinationDto(session.HostId, destination.FrameNumber),
                     message.Data));
             }
 
@@ -50,11 +81,21 @@ namespace ProudNet.Handlers
 
             foreach (var destination in message.Destination.Where(id => id != session.HostId))
             {
-                var target = session.P2PGroup?.GetMemberInternal(destination);
-                if (target == null)
-                    return Task.FromResult(true);
+                if (destination == Constants.HostIdServerHack)
+                {
+                    var decodedMessage = CoreMessageDecoder.Decode(_serializer, Unpooled.WrappedBuffer(message.Data));
+                    context.ChannelHandlerContext.Handler.ChannelRead(context.ChannelHandlerContext, new MessageContext
+                    {
+                        ChannelHandlerContext = context.ChannelHandlerContext,
+                        Session = context.Session,
+                        Message = decodedMessage,
+                        UdpEndPoint = context.UdpEndPoint
+                    });
+                    continue;
+                }
 
-                target.Send(new UnreliableRelay2Message(session.HostId, message.Data), true);
+                var target = session.P2PGroup?.GetMemberInternal(destination);
+                target?.Send(new UnreliableRelay2Message(session.HostId, message.Data), true);
             }
 
             return Task.FromResult(true);

@@ -156,6 +156,12 @@ namespace ProudNet.Hosting.Services
                         var rmiMessageHandler = new MessageHandler(_serviceProvider,
                             _serviceProvider.GetRequiredService<IMessageHandlerResolver>());
 
+                        coreMessageHandler.UnhandledMessage +=
+                            ctx => ctx.Session.Logger.LogDebug("Unhandled core message={@Message}", ctx.Message);
+
+                        internalRmiMessageHandler.UnhandledMessage +=
+                            ctx => ctx.Session.Logger.LogDebug("Unhandled internal rmi message={@Message}", ctx.Message);
+
                         rmiMessageHandler.UnhandledMessage += OnUnhandledRmi;
 
                         ch.Pipeline

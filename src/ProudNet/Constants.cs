@@ -156,15 +156,16 @@ namespace ProudNet
         HolepunchFreqFail
     }
 
-    internal static class Constants
+    public static class Constants
     {
         public const uint NetVersion = 196977;
         public const short NetMagic = 0x5713;
         public static readonly Encoding Encoding = CodePagesEncodingProvider.Instance.GetEncoding(1252);
         public static readonly IPEndPoint EmptyIPEndPoint = new IPEndPoint(0, 0);
         public const uint HostIdServer = 1;
+        public const uint HostIdServerHack = 2;
 
-        public static class Pipeline
+        internal static class Pipeline
         {
             public const string CoreMessageHandlerName = "CoreMessageHandler";
             public const string InternalMessageHandlerName = "InternalMessageHandler";
