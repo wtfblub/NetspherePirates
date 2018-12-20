@@ -4,14 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.Collections.Concurrent;
-using DotNetty.Common.Internal.Logging;
 using DotNetty.Handlers.Flow;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 using ProudNet.DotNetty.Codecs;
@@ -25,7 +24,7 @@ namespace ProudNet.Hosting.Services
 {
     internal class ProudNetServerService : IHostedService, IProudNetServerService
     {
-        private readonly ILogger _log;
+        private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly NetworkOptions _networkOptions;
         private readonly ThreadingOptions _threadingOptions;
@@ -83,8 +82,8 @@ namespace ProudNet.Hosting.Services
 
         protected virtual void OnError(ErrorEventArgs e)
         {
-            var log = e.Session?.Logger ?? _log;
-            log.LogError(e.Exception, "Unhandled server exception");
+            var log = e.Session?.Logger ?? _logger;
+            log.Error(e.Exception, "Unhandled server exception");
             Error?.Invoke(this, e);
         }
 
@@ -99,8 +98,7 @@ namespace ProudNet.Hosting.Services
         }
         #endregion
 
-        public ProudNetServerService(ILogger<ProudNetServerService> logger, ILoggerFactory loggerFactory,
-            IServiceProvider serviceProvider,
+        public ProudNetServerService(ILogger<ProudNetServerService> logger, IServiceProvider serviceProvider,
             IOptions<NetworkOptions> networkOptions, IOptions<ThreadingOptions> threadingOptions,
             P2PGroupManager groupManager, UdpSocketManager udpSocketManager, ISchedulerService schedulerService,
             ISessionManagerFactory sessionManagerFactory)
@@ -108,7 +106,7 @@ namespace ProudNet.Hosting.Services
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
-            _log = logger;
+            _logger = logger;
             _serviceProvider = serviceProvider;
             _networkOptions = networkOptions.Value;
             _threadingOptions = threadingOptions.Value;
@@ -117,7 +115,7 @@ namespace ProudNet.Hosting.Services
             _schedulerService = schedulerService;
             _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
             _udpSessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.UdpId);
-            InternalLoggerFactory.DefaultFactory = loggerFactory;
+            // InternalLoggerFactory.DefaultFactory = loggerFactory;
 
             var sessionManager = _serviceProvider.GetRequiredService<ISessionManager>();
             sessionManager.Added += SessionManager_OnAdded;
@@ -132,7 +130,7 @@ namespace ProudNet.Hosting.Services
             var tcpListener = _networkOptions.TcpListener;
             var udpAddress = _networkOptions.UdpAddress;
             var udpListenerPorts = _networkOptions.UdpListenerPorts;
-            _log.LogInformation("Starting - tcp={TcpEndPoint} udp={UdpAddress} udp-port={UdpPorts}",
+            _logger.Information("Starting - tcp={TcpEndPoint} udp={UdpAddress} udp-port={UdpPorts}",
                 tcpListener, udpAddress, udpListenerPorts);
 
             try
@@ -157,10 +155,10 @@ namespace ProudNet.Hosting.Services
                             _serviceProvider.GetRequiredService<IMessageHandlerResolver>());
 
                         coreMessageHandler.UnhandledMessage +=
-                            ctx => ctx.Session.Logger.LogDebug("Unhandled core message={@Message}", ctx.Message);
+                            ctx => ctx.Session.Logger.Debug("Unhandled core message={@Message}", ctx.Message);
 
                         internalRmiMessageHandler.UnhandledMessage +=
-                            ctx => ctx.Session.Logger.LogDebug("Unhandled internal rmi message={@Message}", ctx.Message);
+                            ctx => ctx.Session.Logger.Debug("Unhandled internal rmi message={@Message}", ctx.Message);
 
                         rmiMessageHandler.UnhandledMessage += OnUnhandledRmi;
 
@@ -195,7 +193,7 @@ namespace ProudNet.Hosting.Services
             }
             catch (Exception ex)
             {
-                _log.LogError(ex, "Unable to start server - tcp={TcpEndPoint} udp={UdpAddress} udp-port={UdpPorts}",
+                _logger.Error(ex, "Unable to start server - tcp={TcpEndPoint} udp={UdpAddress} udp-port={UdpPorts}",
                     tcpListener, udpAddress, udpListenerPorts);
                 await ShutdownThreads();
                 ex.Rethrow();
@@ -211,7 +209,7 @@ namespace ProudNet.Hosting.Services
             if (IsShuttingDown || !IsRunning)
                 throw new InvalidOperationException("Server is already stopped");
 
-            _log.LogInformation("Shutting down...");
+            _logger.Information("Shutting down...");
             IsShuttingDown = true;
             OnStopping();
             _udpSocketManager.Dispose();
@@ -241,14 +239,14 @@ namespace ProudNet.Hosting.Services
                 var server = (ProudNetServerService)context;
                 try
                 {
-                    var log = server._log;
+                    var log = server._logger;
                     var groupManager = server._groupManager;
                     var udpSocketManager = server._udpSocketManager;
                     var configuration = server._networkOptions;
                     if (!udpSocketManager.IsRunning || server.IsShuttingDown || !server.IsRunning)
                         return;
 
-                    log.LogDebug("RetryUdpOrHolepunchIfRequired");
+                    log.Debug("RetryUdpOrHolepunchIfRequired");
                     foreach (var group in groupManager.Values)
                     {
                         var now = DateTimeOffset.Now;
@@ -267,7 +265,7 @@ namespace ProudNet.Hosting.Services
                                 {
                                     _magicNumberSessionManager.RemoveSession(session.HolepunchMagicNumber);
 
-                                    session.Logger.LogInformation("Trying to switch to udp relay");
+                                    session.Logger.Information("Trying to switch to udp relay");
                                     var socket = udpSocketManager.NextSocket();
                                     session.UdpSocket = socket;
                                     session.HolepunchMagicNumber = Guid.NewGuid();
@@ -278,7 +276,7 @@ namespace ProudNet.Hosting.Services
                                 }
                                 else if (diff >= configuration.PingTimeout)
                                 {
-                                    session.Logger.LogInformation("Fallback to tcp relay by server");
+                                    session.Logger.Information("Fallback to tcp relay by server");
 
                                     //member.Session.UdpEnabled = false;
                                     //server.SessionsByUdpId.Remove(member.Session.UdpSessionId);
@@ -305,9 +303,9 @@ namespace ProudNet.Hosting.Services
                                         var diff = now - stateA.LastHolepunch;
                                         if (!stateA.HolepunchSuccess && diff >= configuration.HolepunchTimeout)
                                         {
-                                            session.Logger?.LogInformation("Trying to reconnect P2P to {TargetHostId}",
+                                            session.Logger?.Information("Trying to reconnect P2P to {TargetHostId}",
                                                 stateA.RemotePeer.HostId);
-                                            sessionA.Logger?.LogInformation("Trying to reconnect P2P to {TargetHostId}",
+                                            sessionA.Logger?.Information("Trying to reconnect P2P to {TargetHostId}",
                                                 member.HostId);
                                             stateA.JitTriggered = stateB.JitTriggered = false;
                                             stateA.PeerUdpHolepunchSuccess = stateB.PeerUdpHolepunchSuccess = false;
@@ -318,8 +316,8 @@ namespace ProudNet.Hosting.Services
                                     }
                                     else
                                     {
-                                        session.Logger.LogDebug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
-                                        sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", member.HostId);
+                                        session.Logger.Debug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                                        sessionA.Logger.Debug("Initialize P2P with {TargetHostId}", member.HostId);
                                         stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
                                         stateA.IsInitialized = stateB.IsInitialized = true;
                                         member.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
@@ -332,7 +330,7 @@ namespace ProudNet.Hosting.Services
                 }
                 catch (Exception ex)
                 {
-                    _log.LogError(ex, "RetryUdpOrHolepunchIfRequired exception");
+                    _logger.Error(ex, "RetryUdpOrHolepunchIfRequired exception");
                 }
                 finally
                 {

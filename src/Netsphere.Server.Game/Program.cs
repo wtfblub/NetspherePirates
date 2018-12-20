@@ -55,7 +55,6 @@ namespace Netsphere.Server.Game
             ConfigureMapper();
 
             hostBuilder
-                .ConfigureLogging(builder => builder.AddSerilog())
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
                 .ConfigureAppConfiguration(builder => builder.AddConfiguration(configuration))
                 .UseProudNetServer(builder =>

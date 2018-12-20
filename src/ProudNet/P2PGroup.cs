@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BlubLib.Collections.Concurrent;
 using BlubLib.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Logging;
 using ProudNet.Configuration;
 using ProudNet.Serialization.Messages;
 
@@ -85,7 +85,7 @@ namespace ProudNet
             if (!_members.TryAdd(hostId, sessionToJoin))
                 throw new ProudException($"Member {hostId} is already in P2PGroup {HostId}");
 
-            _log.LogDebug("Client({HostId}) joined P2PGroup({GroupHostId})", hostId, HostId);
+            _log.Debug("Client({HostId}) joined P2PGroup({GroupHostId})", hostId, HostId);
             sessionToJoin.P2PGroup = this;
             memberToJoin.Crypt = crypt;
 
@@ -128,7 +128,7 @@ namespace ProudNet
             if (!_members.TryRemove(hostId, out var memberToLeave))
                 return;
 
-            _log.LogDebug("Client({HostId}) left P2PGroup({GroupHostId})", hostId, HostId);
+            _log.Debug("Client({HostId}) left P2PGroup({GroupHostId})", hostId, HostId);
             if (memberToLeave is ProudSession session)
             {
                 session.P2PGroup = null;

@@ -2,18 +2,11 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Foundatio.Messaging;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Netsphere.Common.Messaging;
 
 namespace Netsphere.Server.Chat
 {
     public class ChannelManager : IReadOnlyCollection<Channel>
     {
-        private readonly ILogger _logger;
         private readonly IDictionary<uint, Channel> _channels;
 
         public Channel this[uint id] => GetChannel(id);
@@ -31,9 +24,8 @@ namespace Netsphere.Server.Chat
             PlayerLeft?.Invoke(this, new ChannelEventArgs(channel, plr));
         }
 
-        public ChannelManager(ILogger<ChannelManager> logger)
+        public ChannelManager()
         {
-            _logger = logger;
             _channels = new ConcurrentDictionary<uint, Channel>();
         }
 

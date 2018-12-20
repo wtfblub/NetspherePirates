@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Foundatio.Caching;
 using LinqToDB;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Common.Cryptography;
 using Netsphere.Database;
 using Netsphere.Database.Auth;
@@ -38,62 +38,62 @@ namespace Netsphere.Server.Auth.Handlers
             var session = context.GetSession<Session>();
             var remoteAddress = session.RemoteEndPoint.Address.ToString();
 
-            using (_logger.BeginScope("RemoteEndPoint={RemoteEndPoint} Username={Username}",
-                session.RemoteEndPoint.ToString(), message.Username))
+            var logger = _logger.ForContext(
+                ("RemoteEndPoint", session.RemoteEndPoint.ToString()),
+                ("Username", message.Username));
+
+            logger.Debug("Login from {RemoteEndPoint} with username {Username}");
+
+            AccountEntity account;
+            using (var db = _databaseProvider.Open<AuthContext>())
             {
-                _logger.LogDebug("Login from {RemoteEndPoint} with username {Username}");
+                var username = message.Username.ToLower();
+                account = await db.Accounts
+                    .LoadWith(x => x.Bans)
+                    .FirstOrDefaultAsync(x => x.Username == username);
 
-                AccountEntity account;
-                using (var db = _databaseProvider.Open<AuthContext>())
+                if (account == null)
                 {
-                    var username = message.Username.ToLower();
-                    account = await db.Accounts
-                        .LoadWith(x => x.Bans)
-                        .FirstOrDefaultAsync(x => x.Username == username);
-
-                    if (account == null)
-                    {
-                        _logger.LogInformation("Wrong login");
-                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
-                        return true;
-                    }
-
-                    if (!PasswordHasher.IsPasswordValid(message.Password, account.Password, account.Salt))
-                    {
-                        _logger.LogInformation("Wrong login");
-                        await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
-                        return true;
-                    }
-
-                    var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-                    var ban = account.Bans.FirstOrDefault(x => x.Duration == null || x.Date + x.Duration > now);
-
-                    if (ban != null)
-                    {
-                        var unbanDate = DateTimeOffset.MinValue;
-                        if (ban.Duration != null)
-                            unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
-
-                        _logger.LogInformation("Account is banned until {UnbanDate}", unbanDate);
-                        await session.SendAsync(new SAuthInEuAckMessage(unbanDate));
-                        return true;
-                    }
-
-                    await db.InsertAsync(new LoginHistoryEntity
-                    {
-                        AccountId = account.Id,
-                        Date = now,
-                        IP = remoteAddress
-                    });
+                    logger.Information("Wrong login");
+                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
+                    return true;
                 }
 
-                _logger.LogInformation("Login success");
+                if (!PasswordHasher.IsPasswordValid(message.Password, account.Password, account.Salt))
+                {
+                    logger.Information("Wrong login");
+                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
+                    return true;
+                }
 
-                var sessionId = NewSessionId();
-                await _cacheClient.SetAsync(Constants.Cache.SessionKey(account.Id), sessionId, TimeSpan.FromMinutes(30));
-                session.Authenticated = true;
-                session.Send(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var ban = account.Bans.FirstOrDefault(x => x.Duration == null || x.Date + x.Duration > now);
+
+                if (ban != null)
+                {
+                    var unbanDate = DateTimeOffset.MinValue;
+                    if (ban.Duration != null)
+                        unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
+
+                    logger.Information("Account is banned until {UnbanDate}", unbanDate);
+                    await session.SendAsync(new SAuthInEuAckMessage(unbanDate));
+                    return true;
+                }
+
+                await db.InsertAsync(new LoginHistoryEntity
+                {
+                    AccountId = account.Id,
+                    Date = now,
+                    IP = remoteAddress
+                });
             }
+
+            logger.Information("Login success");
+
+            var sessionId = NewSessionId();
+            await _cacheClient.SetAsync(Constants.Cache.SessionKey(account.Id), sessionId, TimeSpan.FromMinutes(30));
+            session.Authenticated = true;
+            session.Send(new SAuthInEuAckMessage(AuthLoginResult.OK, (ulong)account.Id, sessionId));
 
             return true;
         }

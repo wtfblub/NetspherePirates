@@ -6,8 +6,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using BlubLib;
+using Logging;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Netsphere.Server.Game.Services
 {
@@ -62,7 +62,7 @@ namespace Netsphere.Server.Game.Services
                 }
             }
 
-            _logger.LogInformation("Executing command={CommandName} player={PlayerId}",
+            _logger.Information("Executing command={CommandName} player={PlayerId}",
                 command.Name, plr?.Account.Id.ToString() ?? "console");
 
             var result = await command.Execute(command.CommandHandler, plr, args.Skip(1).ToArray());
@@ -88,7 +88,7 @@ namespace Netsphere.Server.Game.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unable to execute command");
+                    _logger.Error(ex, "Unable to execute command");
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace Netsphere.Server.Game.Services
 
         private void LoadCommands()
         {
-            _logger.LogInformation("Loading commands...");
+            _logger.Information("Loading commands...");
 
             var commands = new List<Command>();
 
@@ -137,7 +137,7 @@ namespace Netsphere.Server.Game.Services
             }
 
             _commands = commands.ToArray();
-            _logger.LogInformation("Loaded {Count} commands", commands.Count);
+            _logger.Information("Loaded {Count} commands", commands.Count);
         }
 
         private class Command

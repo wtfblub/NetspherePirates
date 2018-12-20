@@ -66,7 +66,6 @@ namespace Netsphere.Server.Auth
                         .AddSingleton<ServerlistService>()
                         .AddSingleton<IHostedService>(x => x.GetRequiredService<ServerlistService>());
                 })
-                .ConfigureLogging(builder => builder.AddSerilog())
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
                 .ConfigureAppConfiguration(builder => builder.AddConfiguration(configuration))
                 .UseProudNetServer(builder =>

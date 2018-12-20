@@ -2,8 +2,7 @@
 using System.Security.Cryptography;
 using System.Threading;
 using DotNetty.Transport.Channels;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 using ProudNet.Serialization;
@@ -13,36 +12,36 @@ namespace ProudNet.DotNetty.Handlers
 {
     internal class SessionHandler : ChannelHandlerAdapter
     {
-        private readonly ILogger _log;
+        private readonly ILogger _logger;
         private readonly NetworkOptions _networkOptions;
         private readonly RSACryptoServiceProvider _rsa;
         private readonly IHostIdFactory _hostIdFactory;
         private readonly ISessionFactory _sessionFactory;
         private readonly IInternalSessionManager<uint> _sessionManager;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ILoggerFactory _loggerFactory;
 
         public SessionHandler(ILogger<SessionHandler> logger, IOptions<NetworkOptions> networkOptions,
             RSACryptoServiceProvider rsa, IHostIdFactory hostIdFactory,
             ISessionFactory sessionFactory, ISessionManagerFactory sessionManagerFactory,
-            IServiceProvider serviceProvider)
+            ILoggerFactory loggerFactory)
         {
-            _log = logger;
+            _logger = logger;
             _networkOptions = networkOptions.Value;
             _rsa = rsa;
             _hostIdFactory = hostIdFactory;
             _sessionFactory = sessionFactory;
             _sessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.HostId);
-            _serviceProvider = serviceProvider;
+            _loggerFactory = loggerFactory;
         }
 
         public override async void ChannelActive(IChannelHandlerContext context)
         {
             var hostId = _hostIdFactory.New();
-            var session = _sessionFactory.Create(_serviceProvider.GetService<ILogger<ProudSession>>(), hostId, context.Channel);
+            var session = _sessionFactory.Create(_loggerFactory.CreateLogger<ProudSession>(), hostId, context.Channel);
             session.State = SessionState.Handshake;
             context.Channel.GetAttribute(ChannelAttributes.Session).Set(session);
 
-            _log?.LogDebug("New incoming client({HostId}) on {EndPoint}", hostId, context.Channel.RemoteAddress.ToString());
+            _logger?.Debug("New incoming client({HostId}) on {EndPoint}", hostId, context.Channel.RemoteAddress.ToString());
 
             var config = new NetConfigDto
             {
@@ -75,7 +74,7 @@ namespace ProudNet.DotNetty.Handlers
                     if (!session.IsConnected)
                         return;
 
-                    _log.LogDebug("Client({HostId} - {EndPoint}) handshake timeout", hostId,
+                    _logger.Debug("Client({HostId} - {EndPoint}) handshake timeout", hostId,
                         context.Channel.RemoteAddress.ToString());
                     await session.SendAsync(new ConnectServerTimedoutMessage());
                     await session.CloseAsync();
@@ -89,7 +88,7 @@ namespace ProudNet.DotNetty.Handlers
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
-            _log.LogDebug("Client({HostId} - {EndPoint}) disconnected", session.HostId, context.Channel.RemoteAddress.ToString());
+            _logger.Debug("Client({HostId} - {EndPoint}) disconnected", session.HostId, context.Channel.RemoteAddress.ToString());
 
             session.Dispose();
             _sessionManager.RemoveSession(session.HostId);

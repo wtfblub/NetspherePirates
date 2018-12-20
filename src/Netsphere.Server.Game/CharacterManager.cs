@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LinqToDB;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -17,14 +17,13 @@ namespace Netsphere.Server.Game
 {
     public class CharacterManager : ISaveable, IReadOnlyCollection<Character>
     {
-        private readonly ILogger _logger;
+        private ILogger _logger;
         private readonly IdGeneratorService _idGeneratorService;
         private readonly GameDataService _gameDataService;
         private readonly ILoggerFactory _loggerFactory;
         private readonly Dictionary<byte, Character> _characters;
         private readonly ConcurrentStack<Character> _charactersToRemove;
         // ReSharper disable once NotAccessedField.Local
-        private IDisposable _scope;
 
         public Player Player { get; private set; }
         public Character CurrentCharacter => GetCharacter(CurrentSlot);
@@ -50,7 +49,7 @@ namespace Netsphere.Server.Game
 
         internal void Initialize(Player plr, PlayerEntity entity)
         {
-            _scope = plr.AddContextToLogger(_logger);
+            _logger = plr.AddContextToLogger(_logger);
             Player = plr;
             CurrentSlot = entity.CurrentCharacterSlot;
 
@@ -58,7 +57,7 @@ namespace Netsphere.Server.Game
                 new Character(_loggerFactory.CreateLogger<Character>(), this, @char, _gameDataService)))
             {
                 if (!_characters.TryAdd(@char.Slot, @char))
-                    _logger.LogWarning("Multiple characters on slot={Slot}", @char.Slot);
+                    _logger.Warning("Multiple characters on slot={Slot}", @char.Slot);
             }
         }
 
@@ -77,69 +76,75 @@ namespace Netsphere.Server.Game
         public (Character character, CharacterCreateResult result) Create(byte slot, CharacterGender gender,
             byte hair, byte face, byte shirt, byte pants, byte gloves, byte shoes)
         {
-            using (_logger.BeginScope(
-                "Method=Create Slot={Slot} Gender={Gender} Hair={Hair} Face={Face} Shirt={Shirt} Pants={Pants} Gloves={Gloves} Shoes={Shoes}",
-                slot, gender, hair, face, shirt, pants, gloves, shoes))
+            var logger = _logger.ForContext(
+                ("Method", "Create"),
+                ("Slot", slot),
+                ("Gender", gender),
+                ("Hair", hair),
+                ("Face", face),
+                ("Shirt", shirt),
+                ("Pants", pants),
+                ("Gloves", gloves),
+                ("Shoes", shoes));
+
+            if (Count >= 3)
+                return (null, CharacterCreateResult.LimitReached);
+
+            if (_characters.ContainsKey(slot))
+                return (null, CharacterCreateResult.SlotInUse);
+
+            var defaultHair = _gameDataService.GetDefaultItem(gender, CostumeSlot.Hair, hair);
+            if (defaultHair == null)
             {
-                if (Count >= 3)
-                    return (null, CharacterCreateResult.LimitReached);
-
-                if (_characters.ContainsKey(slot))
-                    return (null, CharacterCreateResult.SlotInUse);
-
-                var defaultHair = _gameDataService.GetDefaultItem(gender, CostumeSlot.Hair, hair);
-                if (defaultHair == null)
-                {
-                    _logger.LogWarning("Invalid hair");
-                    return (null, CharacterCreateResult.InvalidDefaultItem);
-                }
-
-                var defaultFace = _gameDataService.GetDefaultItem(gender, CostumeSlot.Face, face);
-                if (defaultFace == null)
-                {
-                    _logger.LogWarning("Invalid face");
-                    return (null, CharacterCreateResult.InvalidDefaultItem);
-                }
-
-                var defaultShirt = _gameDataService.GetDefaultItem(gender, CostumeSlot.Shirt, shirt);
-                if (defaultShirt == null)
-                {
-                    _logger.LogWarning("Invalid shirt");
-                    return (null, CharacterCreateResult.InvalidDefaultItem);
-                }
-
-                var defaultPants = _gameDataService.GetDefaultItem(gender, CostumeSlot.Pants, pants);
-                if (defaultPants == null)
-                {
-                    _logger.LogWarning("Invalid pants");
-                    return (null, CharacterCreateResult.InvalidDefaultItem);
-                }
-
-                var defaultGloves = _gameDataService.GetDefaultItem(gender, CostumeSlot.Gloves, gloves);
-                if (defaultGloves == null)
-                {
-                    _logger.LogWarning("Invalid gloves");
-                    return (null, CharacterCreateResult.InvalidDefaultItem);
-                }
-
-                var defaultShoes = _gameDataService.GetDefaultItem(gender, CostumeSlot.Shoes, shoes);
-                if (defaultShoes == null)
-                {
-                    _logger.LogWarning("Invalid shoes");
-                    return (null, CharacterCreateResult.InvalidDefaultItem);
-                }
-
-                var character = new Character(this, _idGeneratorService.GetNextId(IdKind.Character),
-                    slot, gender, defaultHair, defaultFace, defaultShirt, defaultPants, defaultGloves, defaultShoes);
-                _characters.Add(slot, character);
-
-                var charStyle = new CharacterStyle(character.Gender, character.Slot,
-                    character.Hair.Variation, character.Face.Variation,
-                    character.Shirt.Variation, character.Pants.Variation);
-                Player.Session.SendAsync(new SSuccessCreateCharacterAckMessage(character.Slot, charStyle));
-
-                return (character, CharacterCreateResult.Success);
+                logger.Warning("Invalid hair");
+                return (null, CharacterCreateResult.InvalidDefaultItem);
             }
+
+            var defaultFace = _gameDataService.GetDefaultItem(gender, CostumeSlot.Face, face);
+            if (defaultFace == null)
+            {
+                logger.Warning("Invalid face");
+                return (null, CharacterCreateResult.InvalidDefaultItem);
+            }
+
+            var defaultShirt = _gameDataService.GetDefaultItem(gender, CostumeSlot.Shirt, shirt);
+            if (defaultShirt == null)
+            {
+                logger.Warning("Invalid shirt");
+                return (null, CharacterCreateResult.InvalidDefaultItem);
+            }
+
+            var defaultPants = _gameDataService.GetDefaultItem(gender, CostumeSlot.Pants, pants);
+            if (defaultPants == null)
+            {
+                logger.Warning("Invalid pants");
+                return (null, CharacterCreateResult.InvalidDefaultItem);
+            }
+
+            var defaultGloves = _gameDataService.GetDefaultItem(gender, CostumeSlot.Gloves, gloves);
+            if (defaultGloves == null)
+            {
+                logger.Warning("Invalid gloves");
+                return (null, CharacterCreateResult.InvalidDefaultItem);
+            }
+
+            var defaultShoes = _gameDataService.GetDefaultItem(gender, CostumeSlot.Shoes, shoes);
+            if (defaultShoes == null)
+            {
+                logger.Warning("Invalid shoes");
+                return (null, CharacterCreateResult.InvalidDefaultItem);
+            }
+
+            var character = new Character(this, _idGeneratorService.GetNextId(IdKind.Character),
+                slot, gender, defaultHair, defaultFace, defaultShirt, defaultPants, defaultGloves, defaultShoes);
+            _characters.Add(slot, character);
+
+            var charStyle = new CharacterStyle(character.Gender, character.Slot,
+                character.Hair.Variation, character.Face.Variation,
+                character.Shirt.Variation, character.Pants.Variation);
+            Player.Session.SendAsync(new SSuccessCreateCharacterAckMessage(character.Slot, charStyle));
+
+            return (character, CharacterCreateResult.Success);
         }
 
         /// <summary>

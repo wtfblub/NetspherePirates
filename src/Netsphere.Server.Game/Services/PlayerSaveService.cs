@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Logging;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Netsphere.Database;
 using ProudNet.Hosting.Services;
@@ -57,13 +57,13 @@ namespace Netsphere.Server.Game.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unable to schedule next save");
+                _logger.Error(ex, "Unable to schedule next save");
             }
         }
 
         private async Task SavePlayers()
         {
-            _logger.LogInformation("Saving players...");
+            _logger.Information("Saving players...");
             using (var db = _databaseProvider.Open<GameContext>())
             {
                 foreach (var plr in _playerManager)
@@ -75,8 +75,7 @@ namespace Netsphere.Server.Game.Services
                     }
                     catch (Exception ex)
                     {
-                        using (plr.AddContextToLogger(_logger))
-                            _logger.LogError(ex, "Unable to save player");
+                        plr.AddContextToLogger(_logger).Error(ex, "Unable to save player");
                     }
                 }
             }

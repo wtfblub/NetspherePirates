@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using BlubLib.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Database;
 using ProudNet;
 
@@ -85,19 +85,19 @@ namespace Netsphere.Server.Game
         private async void SessionDisconnected(object sender, SessionEventArgs e)
         {
             var session = (Session)e.Session;
+            var plr = session.Player;
 
             try
             {
-                if (session.Player != null && Contains(session.Player))
+                if (plr != null && Contains(plr))
                 {
-                    using (session.Player.AddContextToLogger(_logger))
-                        _logger.LogInformation("Disconnected - Saving...");
+                    plr.AddContextToLogger(_logger).Information("Disconnected - Saving...");
 
                     using (var db = _databaseProvider.Open<GameContext>())
-                        await session.Player.Save(db);
+                        await plr.Save(db);
 
-                    OnPlayerDisconnected(session.Player);
-                    session.Player.OnDisconnected();
+                    OnPlayerDisconnected(plr);
+                    plr.OnDisconnected();
                 }
             }
             catch (Exception ex)
@@ -105,8 +105,8 @@ namespace Netsphere.Server.Game
                 e.Session.Channel.Pipeline.FireExceptionCaught(ex);
             }
 
-            if (session.Player != null)
-                Remove(session.Player);
+            if (plr != null)
+                Remove(plr);
         }
 
         public IEnumerator<Player> GetEnumerator()

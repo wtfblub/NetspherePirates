@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using Microsoft.Extensions.Logging;
+using Logging;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
 
@@ -20,7 +20,6 @@ namespace ProudNet
         private volatile bool _isDisposing;
         private IPEndPoint _udpEndPoint;
         private IPEndPoint _udpLocalEndPoint;
-        private IDisposable _logScope;
 
         public ISocketChannel Channel { get; }
         public bool IsConnected => Channel.Active;
@@ -50,7 +49,7 @@ namespace ProudNet
             }
         }
 
-        internal ILogger Logger { get; }
+        internal ILogger Logger { get; private set; }
         internal bool UdpEnabled { get; set; }
         internal ushort UdpSessionId { get; set; }
         internal Crypt Crypt { get; set; }
@@ -84,31 +83,26 @@ namespace ProudNet
 
         public void Send(object message)
         {
-            Logger.LogTrace("Sending message {MessageType}", message.GetType().Name);
             SendAsync(message, SendOptions.ReliableSecure);
         }
 
         public Task SendAsync(object message)
         {
-            Logger.LogTrace("Sending message {MessageType}", message.GetType().Name);
             return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.ReliableSecure);
         }
 
         public Task SendAsync(object message, SendOptions options)
         {
-            Logger.LogTrace("Sending message {MessageType} using options={@Options}", message.GetType().Name, options);
             return _disposed ? Task.CompletedTask : Channel.WriteAndFlushAsync(new SendContext(message, options));
         }
 
         internal Task SendAsync(IMessage message)
         {
-            Logger.LogTrace("Sending message {MessageType}", message.GetType().Name);
             return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.Reliable);
         }
 
         internal Task SendAsync(ICoreMessage message)
         {
-            Logger.LogTrace("Sending core message {MessageType}", message.GetType().Name);
             return _disposed
                 ? Task.CompletedTask
                 : Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).WriteAndFlushAsync(message);
@@ -118,17 +112,14 @@ namespace ProudNet
         {
             if (UdpEnabled)
             {
-                Logger.LogTrace("Sending core message {MessageType} using udp", message.GetType().Name);
                 return UdpSocket.SendAsync(message, UdpEndPoint);
             }
 
-            Logger.LogTrace("Sending core message {MessageType} using tcp", message.GetType().Name);
             return SendAsync(message);
         }
 
         internal Task SendUdpAsync(ICoreMessage message)
         {
-            Logger.LogTrace("Sending core message {MessageType} using udp", message.GetType().Name);
             return UdpSocket.SendAsync(message, UdpEndPoint);
         }
 
@@ -147,10 +138,12 @@ namespace ProudNet
 
         private void SetLoggingScope()
         {
-            _logScope?.Dispose();
-            _logScope = Logger
-                .BeginScope("HostId={HostId} EndPoint={EndPoint} UdpEndPoint={UdpEndPoint} UdpLocalEndPoint={UdpLocalEndPoint}",
-                    HostId, RemoteEndPoint.ToString(), UdpEndPoint?.ToString(), UdpLocalEndPoint?.ToString());
+            Logger = Logger.ForContext(
+                ("HostId", HostId),
+                ("EndPoint", RemoteEndPoint?.ToString()),
+                ("UdpEndPoint", UdpEndPoint?.ToString()),
+                ("UdpLocalEndPoint", UdpLocalEndPoint?.ToString())
+            );
         }
 
         protected virtual Task CloseInternalAsync()
@@ -173,10 +166,9 @@ namespace ProudNet
             }
 
             await CloseInternalAsync();
-            Logger.LogDebug("Closing...");
+            Logger.Debug("Closing...");
 
             Crypt?.Dispose();
-            _logScope.Dispose();
 
             lock (_disposeMutex)
             {

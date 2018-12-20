@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ExpressMapper.Extensions;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Network;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
@@ -51,8 +51,7 @@ namespace Netsphere.Server.Game.Handlers
                     break;
 
                 default:
-                    using (plr.AddContextToLogger(_logger))
-                        _logger.LogWarning("Invalid channel info request {Request}", message.Request);
+                    plr.AddContextToLogger(_logger).Warning("Invalid channel info request {Request}", message.Request);
 
                     break;
             }

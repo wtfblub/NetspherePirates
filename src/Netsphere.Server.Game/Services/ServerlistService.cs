@@ -3,8 +3,8 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundatio.Messaging;
+using Logging;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Messaging;
@@ -36,14 +36,14 @@ namespace Netsphere.Server.Game.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting...");
+            _logger.Information("Starting...");
             _scheduler.ScheduleAsync(Update, _serverOptions.UpdateInterval);
             return Task.CompletedTask;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Stopping...");
+            _logger.Information("Stopping...");
             await _messageBus.PublishAsync(new ServerShutdownMessage
             {
                 Id = _serverOptions.Id,
@@ -59,7 +59,7 @@ namespace Netsphere.Server.Game.Services
 
             try
             {
-                _logger.LogDebug("Updating serverlist...");
+                _logger.Debug("Updating serverlist...");
                 await _messageBus.PublishAsync(new ServerUpdateMessage
                 {
                     Id = _serverOptions.Id,
@@ -73,7 +73,7 @@ namespace Netsphere.Server.Game.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to update serverlist");
+                _logger.Error(ex, "Failed to update serverlist");
             }
         }
     }

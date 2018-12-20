@@ -2,11 +2,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Foundatio.Messaging;
+using Logging;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Netsphere.Common;
-using Netsphere.Common.Configuration;
 using Netsphere.Common.Messaging;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
@@ -49,7 +46,7 @@ namespace Netsphere.Server.Chat.Services
             var plr = _playerManager[message.AccountId];
             if (plr == null)
             {
-                _logger.LogWarning("<OnPlayerJoinedChannel> Cant find player={Id}", message.AccountId);
+                _logger.Warning("<OnPlayerJoinedChannel> Cant find player={Id}", message.AccountId);
                 return Task.CompletedTask;
             }
 
@@ -63,14 +60,14 @@ namespace Netsphere.Server.Chat.Services
             var plr = _playerManager[message.AccountId];
             if (plr == null)
             {
-                _logger.LogWarning("<OnPlayerLeftChannel> Cant find player={Id}", message.AccountId);
+                _logger.Warning("<OnPlayerLeftChannel> Cant find player={Id}", message.AccountId);
                 return Task.CompletedTask;
             }
 
             var channel = _channelManager.GetChannel(message.ChannelId);
             if (channel == null)
             {
-                _logger.LogWarning("<OnPlayerLeftChannel> Cant find channel={Id}", message.ChannelId);
+                _logger.Warning("<OnPlayerLeftChannel> Cant find channel={Id}", message.ChannelId);
                 return Task.CompletedTask;
             }
 
@@ -83,7 +80,7 @@ namespace Netsphere.Server.Chat.Services
             var plr = _playerManager[message.AccountId];
             if (plr == null)
             {
-                _logger.LogWarning("<OnPlayerUpdate> Cant find player={Id}", message.AccountId);
+                _logger.Warning("<OnPlayerUpdate> Cant find player={Id}", message.AccountId);
                 return Task.CompletedTask;
             }
 

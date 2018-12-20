@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using LinqToDB;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -18,13 +18,12 @@ namespace Netsphere.Server.Game
 {
     public class LicenseManager : ISaveable, IReadOnlyCollection<License>
     {
-        private readonly ILogger _logger;
+        private ILogger _logger;
         private readonly IdGeneratorService _idGeneratorService;
         private readonly GameDataService _gameDataService;
         private readonly ConcurrentDictionary<ItemLicense, License> _licenses;
         private readonly ConcurrentStack<License> _licensesToRemove;
         // ReSharper disable once NotAccessedField.Local
-        private IDisposable _scope;
         private Player _player;
 
         public int Count => _licenses.Count;
@@ -46,7 +45,7 @@ namespace Netsphere.Server.Game
 
         internal void Initialize(Player plr, IEnumerable<PlayerLicenseEntity> entities)
         {
-            _scope = _logger.BeginScope("AccountId={AccountId}", plr.Account.Id);
+            _logger = plr.AddContextToLogger(_logger);
             _player = plr;
             foreach (var license in entities.Select(x => new License(x)))
                 _licenses.TryAdd(license.ItemLicense, license);
@@ -62,7 +61,7 @@ namespace Netsphere.Server.Game
 
         public License Acquire(ItemLicense itemLicense)
         {
-            _logger.LogInformation("Acquiring {License}", itemLicense);
+            _logger.Information("Acquiring {License}", itemLicense);
 
             var licenseReward = _gameDataService.LicenseRewards.GetValueOrDefault(itemLicense);
 
@@ -92,7 +91,7 @@ namespace Netsphere.Server.Game
                 _licenses.TryAdd(itemLicense, license);
                 // _player.Session.SendAsync(new SLicensedAckMessage(itemLicense, licenseReward?.ItemNumber ?? 0));
 
-                _logger.LogInformation("Acquired {License}", itemLicense);
+                _logger.Information("Acquired {License}", itemLicense);
             }
 
             return license;

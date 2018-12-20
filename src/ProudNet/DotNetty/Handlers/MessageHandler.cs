@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using BlubLib.Collections.Generic;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
+using Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.DotNetty.Handlers
@@ -70,7 +70,7 @@ namespace ProudNet.DotNetty.Handlers
 
                         if (!isAllowed)
                         {
-                            _logger.LogDebug("Message {Message} blocked by rule {Rule}(Invert={Invert}) for handler={Handler}",
+                            _logger.Debug("Message {Message} blocked by rule {Rule}(Invert={Invert}) for handler={Handler}",
                                 messageContext.Message.GetType().FullName,
                                 ruleThatBlocked.Rule.GetType().FullName, ruleThatBlocked.Invert,
                                 handlerInfo.Type.FullName);
@@ -79,7 +79,7 @@ namespace ProudNet.DotNetty.Handlers
 
                         if (!await handlerInfo.Func(handlerInfo.Instance, messageContext, messageContext.Message))
                         {
-                            _logger.LogDebug("Execution cancelled by {HandlerType}", handlerInfo.Type.FullName);
+                            _logger.Debug("Execution cancelled by {HandlerType}", handlerInfo.Type.FullName);
                             break;
                         }
                     }
@@ -105,7 +105,7 @@ namespace ProudNet.DotNetty.Handlers
 
         private void InitializeHandlers()
         {
-            _logger.LogInformation("Initializing handlers...");
+            _logger.Information("Initializing handlers...");
 
             var map = new Dictionary<Type, List<HandlerInfo>>();
             var handlerTypes = _messageHandlerResolver.GetImplementations();

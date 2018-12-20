@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using BlubLib.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
+using Logging;
 using ProudNet;
 
 namespace Netsphere.Server.Relay
@@ -28,7 +28,7 @@ namespace Netsphere.Server.Relay
             var room = _rooms.GetValueOrDefault(id);
             if (room == null)
             {
-                _logger.LogInformation("Creating p2pgroup for room={RoomId}...", id);
+                _logger.Information("Creating p2pgroup for room={RoomId}...", id);
                 var group = _groupManager.Create(true);
                 room = new Room(this, id, group);
                 _rooms[id] = room;
@@ -39,7 +39,7 @@ namespace Netsphere.Server.Relay
 
         internal bool Remove(Room room)
         {
-            _logger.LogInformation("Removing p2pgroup for room={RoomId}...", room.Id);
+            _logger.Information("Removing p2pgroup for room={RoomId}...", room.Id);
             _groupManager.Remove(room.Group);
             return _rooms.Remove(room.Id);
         }

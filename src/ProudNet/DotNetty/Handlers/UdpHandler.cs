@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.Serialization;
 using DotNetty.Transport.Channels;
-using Microsoft.Extensions.Logging;
+using Logging;
 using ProudNet.DotNetty.Codecs;
 using ProudNet.Serialization.Messages.Core;
 
@@ -13,7 +13,7 @@ namespace ProudNet.DotNetty.Handlers
     internal class UdpHandler : ChannelHandlerAdapter
     {
         private readonly BlubSerializer _serializer;
-        private readonly ILogger _log;
+        private readonly ILogger _logger;
         private readonly IInternalSessionManager<Guid> _magicNumberSessionManager;
         private readonly IInternalSessionManager<uint> _udpSessionManager;
 
@@ -23,7 +23,7 @@ namespace ProudNet.DotNetty.Handlers
             ISessionManagerFactory sessionManagerFactory)
         {
             _serializer = serializer;
-            _log = logger;
+            _logger = logger;
             _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
             _udpSessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.UdpId);
         }
@@ -40,7 +40,7 @@ namespace ProudNet.DotNetty.Handlers
                 {
                     if (message.Content.GetByte(0) != (byte)ProudCoreOpCode.ServerHolepunch)
                     {
-                        _log.LogWarning("<{EndPoint}> Expected ServerHolepunch as first udp message but got {MessageType}",
+                        _logger.Warning("<{EndPoint}> Expected ServerHolepunch as first udp message but got {MessageType}",
                             message.EndPoint.ToString(), (ProudCoreOpCode)message.Content.GetByte(0));
                         return;
                     }
@@ -49,14 +49,14 @@ namespace ProudNet.DotNetty.Handlers
                     session = _magicNumberSessionManager.GetSession(holepunch.MagicNumber);
                     if (session == null)
                     {
-                        _log.LogWarning("<{EndPoint}> Invalid holepunch magic number={MagicNumber}",
+                        _logger.Warning("<{EndPoint}> Invalid holepunch magic number={MagicNumber}",
                             message.EndPoint.ToString(), holepunch.MagicNumber);
                         return;
                     }
 
                     if (session.UdpSocket != Socket)
                     {
-                        _log.LogWarning("<{EndPoint}> Client is sending to the wrong udp socket",
+                        _logger.Warning("<{EndPoint}> Client is sending to the wrong udp socket",
                             message.EndPoint.ToString());
                         return;
                     }
@@ -70,7 +70,7 @@ namespace ProudNet.DotNetty.Handlers
 
                 if (session.UdpSocket != Socket)
                 {
-                    _log.LogWarning("<{EndPoint}> Client is sending to the wrong udp socket",
+                    _logger.Warning("<{EndPoint}> Client is sending to the wrong udp socket",
                         message.EndPoint.ToString());
                     return;
                 }

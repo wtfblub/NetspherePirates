@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Logging;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Netsphere.Database;
 using Netsphere.Server.Game.Data;
 

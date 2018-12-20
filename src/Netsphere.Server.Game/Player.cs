@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ExpressMapper.Extensions;
 using LinqToDB;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Microsoft.Extensions.Options;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
@@ -14,7 +14,6 @@ using Netsphere.Database.Helpers;
 using Netsphere.Network;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
-using Netsphere.Network.Message.GameRule;
 using Netsphere.Server.Game.Services;
 
 namespace Netsphere.Server.Game
@@ -23,11 +22,10 @@ namespace Netsphere.Server.Game
     {
         private static readonly uint[] s_licensesCompleted;
 
-        private readonly ILogger _logger;
+        private ILogger _logger;
         private readonly GameOptions _gameOptions;
         private readonly IDatabaseProvider _databaseProvider;
         private readonly GameDataService _gameDataService;
-        private IDisposable _scope;
         private byte _tutorialState;
         private uint _totalExperience;
         private uint _pen;
@@ -35,8 +33,6 @@ namespace Netsphere.Server.Game
         private uint _coins1;
         private uint _coins2;
         private PlayerState _state;
-
-        public SItemsChangeAckMessage Test { get; set; }
 
         public Session Session { get; private set; }
         public Account Account { get; private set; }
@@ -108,7 +104,6 @@ namespace Netsphere.Server.Game
             Channel?.Leave(this);
 
             Disconnected?.Invoke(this, new PlayerEventArgs(this));
-            _scope.Dispose();
         }
 
         protected virtual void OnStateChanged()
@@ -141,7 +136,7 @@ namespace Netsphere.Server.Game
         {
             Session = session;
             Account = account;
-            _scope = AddContextToLogger(_logger);
+            _logger = AddContextToLogger(_logger);
             _tutorialState = entity.TutorialState;
             _totalExperience = (uint)entity.TotalExperience;
             _pen = (uint)entity.PEN;
@@ -170,13 +165,13 @@ namespace Netsphere.Server.Game
         /// <returns>true if the player leveled up</returns>
         public bool GainExperience(uint amount)
         {
-            _logger.LogDebug("Gained {Amount} experience", amount);
+            _logger.Debug("Gained {Amount} experience", amount);
 
             var levels = _gameDataService.Levels;
             var levelInfo = levels.GetValueOrDefault(Level);
             if (levelInfo == null)
             {
-                _logger.LogWarning("Level={Level} not found", Level);
+                _logger.Warning("Level={Level} not found", Level);
                 return false;
             }
 
@@ -197,11 +192,11 @@ namespace Netsphere.Server.Game
 
                 if (levelInfo == null)
                 {
-                    _logger.LogWarning("Can't level up because level={Level} not found", newLevel);
+                    _logger.Warning("Can't level up because level={Level} not found", newLevel);
                     break;
                 }
 
-                _logger.LogDebug("Leveled up to {Level}", newLevel);
+                _logger.Debug("Leveled up to {Level}", newLevel);
 
                 // TODO level rewards
                 leveledUp = true;
@@ -348,7 +343,7 @@ namespace Netsphere.Server.Game
 
                     if (itemInfo == null)
                     {
-                        _logger.LogWarning("Cant find ShopItemInfo for Start item {startItemId} - Forgot to reload the cache?",
+                        _logger.Warning("Cant find ShopItemInfo for Start item {startItemId} - Forgot to reload the cache?",
                             startItem.Id);
                         continue;
                     }
@@ -356,7 +351,7 @@ namespace Netsphere.Server.Game
                     var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPriceId);
                     if (price == null)
                     {
-                        _logger.LogWarning("Cant find ShopPrice for Start item {startItemId} - Forgot to reload the cache?",
+                        _logger.Warning("Cant find ShopPrice for Start item {startItemId} - Forgot to reload the cache?",
                             startItem.Id);
                         continue;
                     }
@@ -364,14 +359,14 @@ namespace Netsphere.Server.Game
                     var color = startItem.Color;
                     if (color > item.ColorGroup)
                     {
-                        _logger.LogWarning("Start item {startItemId} has an invalid color {color}", startItem.Id, color);
+                        _logger.Warning("Start item {startItemId} has an invalid color {color}", startItem.Id, color);
                         color = 0;
                     }
 
                     var count = startItem.Count;
                     if (count > 0 && item.ItemNumber.Category <= ItemCategory.Skill)
                     {
-                        _logger.LogWarning("Start item {startItemId} cant have stacks(quantity={count})", startItem.Id, count);
+                        _logger.Warning("Start item {startItemId} cant have stacks(quantity={count})", startItem.Id, count);
                         count = 0;
                     }
 
@@ -430,10 +425,12 @@ namespace Netsphere.Server.Game
             await CharacterManager.Save(db);
         }
 
-        public IDisposable AddContextToLogger(ILogger logger)
+        public ILogger AddContextToLogger(ILogger logger)
         {
-            return logger.BeginScope("AccountId={AccountId} HostId={HostId} EndPoint={EndPoint}",
-                Account.Id, Session.HostId, Session.RemoteEndPoint);
+            return logger.ForContext(
+                ("AccountId", Account.Id),
+                ("HostId", Session.HostId),
+                ("EndPoint", Session.RemoteEndPoint.ToString()));
         }
 
         private static float GetAttributeValueFromItems(Attribute attribute, IEnumerable<PlayerItem> items)

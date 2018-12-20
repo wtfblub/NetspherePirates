@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
+using Serilog.Parsing;
 using Serilog.Sinks.SystemConsole.Themes;
 using TimeSpanConverter = Netsphere.Common.Converters.Json.TimeSpanConverter;
 
@@ -95,7 +97,9 @@ namespace Netsphere.Common
         private class ConditionalTemplateRenderer : ITextFormatter
         {
             private readonly ITextFormatter _consoleFormatter;
-            private readonly ITextFormatter _consoleFormatterWithScope;
+            private readonly ITextFormatter _consoleFormatterWithProperties;
+            private readonly Func<MessageTemplate, PropertyToken[]> _namedProperties;
+            private readonly Func<MessageTemplate, PropertyToken[]> _positionalProperties;
 
             public ConditionalTemplateRenderer()
             {
@@ -104,27 +108,40 @@ namespace Netsphere.Common
                     ? ConsoleTheme.None
                     : AnsiConsoleTheme.Literate;
                 var type = assembly.GetType("Serilog.Sinks.SystemConsole.Output.OutputTemplateRenderer");
+
                 _consoleFormatter = (ITextFormatter)Activator.CreateInstance(type, theme,
                     "[{Level} {SourceContext}] {Message:lj}{NewLine}{Exception}", default(IFormatProvider));
-                _consoleFormatterWithScope = (ITextFormatter)Activator.CreateInstance(type, theme,
-                    "[{Level} {SourceContext}] {Message:lj}{NewLine}    {Scope:l} {NewLine}{Exception}",
+
+                _consoleFormatterWithProperties = (ITextFormatter)Activator.CreateInstance(type, theme,
+                    "[{Level} {SourceContext}] {Message:lj}{NewLine}    {Properties:l} {NewLine}{Exception}",
                     default(IFormatProvider));
+
+                var namedPropertiesProp = typeof(MessageTemplate)
+                    .GetProperty("NamedProperties", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                var positionalPropertiesProp = typeof(MessageTemplate)
+                    .GetProperty("PositionalProperties", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                var parameter = Expression.Parameter(typeof(MessageTemplate));
+                _namedProperties = Expression.Lambda<Func<MessageTemplate, PropertyToken[]>>(
+                        Expression.Property(parameter, namedPropertiesProp), parameter)
+                    .Compile();
+
+                _positionalProperties = Expression.Lambda<Func<MessageTemplate, PropertyToken[]>>(
+                        Expression.Property(parameter, positionalPropertiesProp), parameter)
+                    .Compile();
             }
 
             public void Format(LogEvent logEvent, TextWriter output)
             {
-                if (logEvent.Properties.TryGetValue("Scope", out var scope))
-                {
-                    var value = (SequenceValue)scope;
-                    if (value.Elements.Count == 0)
-                        _consoleFormatter.Format(logEvent, output);
-                    else
-                        _consoleFormatterWithScope.Format(logEvent, output);
-                }
+                var propCount = logEvent.Properties.Count -
+                                _namedProperties(logEvent.MessageTemplate)?.Length ?? 0 +
+                                _positionalProperties(logEvent.MessageTemplate)?.Length ?? 0;
+
+                if (propCount > 1)
+                    _consoleFormatterWithProperties.Format(logEvent, output);
                 else
-                {
                     _consoleFormatter.Format(logEvent, output);
-                }
             }
         }
     }

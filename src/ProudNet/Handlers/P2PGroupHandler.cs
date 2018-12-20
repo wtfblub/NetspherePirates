@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
 using ProudNet.Firewall;
 using ProudNet.Serialization.Messages;
 
@@ -19,7 +18,7 @@ namespace ProudNet.Handlers
                 message.AddedMemberHostId == Constants.HostIdServerHack)
                 return true;
 
-            session.Logger.LogDebug("P2PGroupMemberJoinAck {@Message}", message);
+            session.Logger.Debug("P2PGroupMemberJoinAck {@Message}", message);
             if (session.HostId == message.AddedMemberHostId)
                 return true;
 
@@ -42,8 +41,8 @@ namespace ProudNet.Handlers
                         !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
                         return true;
 
-                    session.Logger.LogDebug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
-                    sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", session.HostId);
+                    session.Logger.Debug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                    sessionA.Logger.Debug("Initialize P2P with {TargetHostId}", session.HostId);
                     stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
                     stateA.IsInitialized = stateB.IsInitialized = true;
                     remotePeer.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));

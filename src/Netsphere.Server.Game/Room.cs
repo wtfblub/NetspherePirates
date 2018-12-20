@@ -5,7 +5,7 @@ using System.Linq;
 using BlubLib.Collections.Concurrent;
 using ExpressMapper.Extensions;
 using Foundatio.Messaging;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Common;
 using Netsphere.Common.Messaging;
 using Netsphere.Network.Data.Game;
@@ -20,7 +20,7 @@ namespace Netsphere.Server.Game
 {
     public class Room
     {
-        private readonly ILogger _logger;
+        private ILogger _logger;
         private readonly GameRuleManager _gameRuleManager;
         private readonly GameDataService _gameDataService;
         private readonly ISchedulerService _schedulerService;
@@ -28,7 +28,6 @@ namespace Netsphere.Server.Game
         private readonly ConcurrentDictionary<ulong, Player> _players;
         private readonly ConcurrentDictionary<ulong, object> _kickedPlayers;
         private readonly CounterRecycler _idRecycler;
-        private IDisposable _scope;
 
         public RoomManager RoomManager { get; internal set; }
         public IReadOnlyDictionary<ulong, Player> Players => _players;
@@ -100,7 +99,9 @@ namespace Netsphere.Server.Game
             GameRule.StateMachine.GameStateChanged += OnGameStateChanged;
             TeamManager.PlayerTeamChanged += OnPlayerTeamChanged;
 
-            _scope = _logger.BeginScope("Channel={ChannelId} RoomId={RoomId}", RoomManager.Channel.Id, Id);
+            _logger = _logger.ForContext(
+                ("ChannelId", RoomManager.Channel.Id),
+                ("RoomId", Id));
         }
 
         public RoomJoinError Join(Player plr)
@@ -211,7 +212,7 @@ namespace Netsphere.Server.Game
             if (plr.Room != this || Host == plr)
                 return;
 
-            _logger.LogDebug("Changing host to {Nickname} - Ping:{Ping} ms", plr.Account.Nickname, plr.Session.UnreliablePing);
+            _logger.Debug("Changing host to {Nickname} - Ping:{Ping} ms", plr.Account.Nickname, plr.Session.UnreliablePing);
             Host = plr;
             Broadcast(new SChangeRefeReeAckMessage(Host.Account.Id));
         }

@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -10,9 +10,6 @@ namespace Netsphere.Server.Chat
 {
     public class Player : ISaveable
     {
-        private readonly ILogger _logger;
-        private IDisposable _scope;
-
         public Session Session { get; private set; }
         public Account Account { get; private set; }
         public Mailbox Mailbox { get; }
@@ -33,9 +30,8 @@ namespace Netsphere.Server.Chat
             Disconnected?.Invoke(this, new PlayerEventArgs(this));
         }
 
-        public Player(ILogger<Player> logger, Mailbox mailbox, DenyManager denyManager, PlayerSettingManager settings)
+        public Player(Mailbox mailbox, DenyManager denyManager, PlayerSettingManager settings)
         {
-            _logger = logger;
             Mailbox = mailbox;
             Ignore = denyManager;
             Settings = settings;
@@ -46,7 +42,6 @@ namespace Netsphere.Server.Chat
             Session = session;
             Account = account;
             TotalExperience = (uint)entity.TotalExperience;
-            _scope = AddContextToLogger(_logger);
             await Mailbox.Initialize(this, entity);
             await Ignore.Initialize(this, entity);
             Settings.Initialize(this, entity);
@@ -69,10 +64,13 @@ namespace Netsphere.Server.Chat
             await Settings.Save(db);
         }
 
-        public IDisposable AddContextToLogger(ILogger logger)
+        public ILogger AddContextToLogger(ILogger logger)
         {
-            return logger.BeginScope("AccountId={AccountId} HostId={HostId} EndPoint={EndPoint}",
-                Account.Id, Session.HostId, Session.RemoteEndPoint);
+            return logger.ForContext(
+                ("AccountId", Account.Id),
+                ("HostId", Session.HostId),
+                ("EndPoint", Session.RemoteEndPoint)
+            );
         }
     }
 }

@@ -45,7 +45,6 @@ namespace Netsphere.Server.Chat
             ConfigureMapper(appOptions);
 
             hostBuilder
-                .ConfigureLogging(builder => builder.AddSerilog())
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
                 .ConfigureAppConfiguration(builder => builder.AddConfiguration(configuration))
                 .UseProudNetServer(builder =>

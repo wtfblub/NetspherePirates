@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Common;
 using Netsphere.Network;
 using Netsphere.Network.Message.Game;
@@ -23,19 +23,17 @@ namespace Netsphere.Server.Game.Handlers
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
+            var logger = plr.AddContextToLogger(_logger);
 
-            using (plr.AddContextToLogger(_logger))
+            logger.Information("Creating character {@Message}", message.ToJson());
+
+            var (_, result) = plr.CharacterManager.Create(message.Slot, message.Style.Gender,
+                message.Style.Hair, message.Style.Face, message.Style.Shirt, message.Style.Pants, 0, 0);
+
+            if (result != CharacterCreateResult.Success)
             {
-                _logger.LogInformation("Creating character {@Message}", message.ToJson());
-
-                var (_, result) = plr.CharacterManager.Create(message.Slot, message.Style.Gender,
-                    message.Style.Hair, message.Style.Face, message.Style.Shirt, message.Style.Pants, 0, 0);
-
-                if (result != CharacterCreateResult.Success)
-                {
-                    _logger.LogInformation("Failed to create character result={Result}", result);
-                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
-                }
+                logger.Information("Failed to create character result={Result}", result);
+                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
             }
 
             return true;

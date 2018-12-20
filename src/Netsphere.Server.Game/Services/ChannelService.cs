@@ -5,9 +5,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Netsphere.Server.Game.Services
 {
@@ -48,7 +48,7 @@ namespace Netsphere.Server.Game.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Creating channels...");
+            _logger.Information("Creating channels...");
 
             _channels = _gameDataService.Channels.Select(x =>
             {

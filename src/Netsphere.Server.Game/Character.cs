@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
 using Netsphere.Network.Message.Game;
@@ -81,22 +81,24 @@ namespace Netsphere.Server.Game
 
             void SetInventoryIfNeeded(long? id, byte itemSlot, CharacterInventory characterInventory)
             {
-                using (logger.BeginScope("Character={CharacterSlot} ItemSlot={ItemSlot} ItemId={ItemId}", Slot, itemSlot, id))
+                var log = logger.ForContext(
+                    ("CharacterSlot", Slot),
+                    ("ItemSlot", itemSlot),
+                    ("ItemId", id));
+
+                if (id == null)
+                    return;
+
+                var item = inventory[(ulong)id];
+                if (item == null)
                 {
-                    if (id == null)
-                        return;
-
-                    var item = inventory[(ulong)id];
-                    if (item == null)
-                    {
-                        logger.LogWarning("Character has non-existant item");
-                        return;
-                    }
-
-                    var error = characterInventory.Add(itemSlot, item);
-                    if (error != CharacterInventoryError.OK)
-                        logger.LogWarning("Unable to equip item Error={Error}", error);
+                    log.Warning("Character has non-existant item");
+                    return;
                 }
+
+                var error = characterInventory.Add(itemSlot, item);
+                if (error != CharacterInventoryError.OK)
+                    log.Warning("Unable to equip item Error={Error}", error);
             }
         }
 

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using LinqToDB;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Auth;
@@ -20,7 +20,7 @@ namespace Netsphere.Server.Chat
     {
         public const int ItemsPerPage = 10;
 
-        private readonly ILogger _logger;
+        private ILogger _logger;
         private readonly IDatabaseProvider _databaseProvider;
         private readonly IdGeneratorService _idGeneratorService;
         private readonly PlayerManager _playerManager;
@@ -45,6 +45,7 @@ namespace Netsphere.Server.Chat
         public async Task Initialize(Player player, PlayerEntity entity)
         {
             Player = player;
+            _logger = Player.AddContextToLogger(_logger);
 
             foreach (var mailEntity in entity.Inbox.Where(mailDto => !mailDto.IsMailDeleted))
             {
@@ -62,7 +63,7 @@ namespace Netsphere.Server.Chat
                         var account = await db.Accounts.FirstOrDefaultAsync(x => x.Id == mailEntity.SenderPlayerId);
                         if (account == null)
                         {
-                            _logger.LogWarning("Player={AccountId} has mail={MailId} with non-existant sender={SenderAccountId}",
+                            _logger.Warning("Player={AccountId} has mail={MailId} with non-existant sender={SenderAccountId}",
                                 mailEntity.PlayerId, mailEntity.Id, mailEntity.SenderPlayerId);
                             continue;
                         }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using DotNetty.Transport.Channels;
-using Microsoft.Extensions.Logging;
+using Logging;
 using ProudNet.Hosting.Services;
 
 namespace ProudNet.DotNetty.Handlers
@@ -25,7 +25,7 @@ namespace ProudNet.DotNetty.Handlers
                     return;
             }
 
-            _logger.LogError(exception, "Unhandled exception");
+            _logger.Error(exception, "Unhandled exception");
             var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
             _server.RaiseError(new ErrorEventArgs(session, exception));
             session?.CloseAsync();

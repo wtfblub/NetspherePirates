@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Configuration;
 using LinqToDB;
-using Microsoft.Extensions.Logging;
 using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Resource.xml;
@@ -20,10 +19,10 @@ namespace Netsphere.Server.Game.Services
     {
         public void LoadLevels()
         {
-            _logger.LogInformation("Loading levels...");
+            _logger.Information("Loading levels...");
             var dto = Deserialize<ExperienceDto>("xml/experience.x7");
             Levels = Transform().ToImmutableDictionary(x => x.Level, x => x);
-            _logger.LogInformation("Loaded {Count} levels", Levels.Count);
+            _logger.Information("Loaded {Count} levels", Levels.Count);
 
             IEnumerable<LevelInfo> Transform()
             {
@@ -41,11 +40,11 @@ namespace Netsphere.Server.Game.Services
 
         public void LoadChannels()
         {
-            _logger.LogInformation("Loading channels...");
+            _logger.Information("Loading channels...");
             var dto = Deserialize<ChannelSettingDto>("xml/_eu_channel_setting.x7");
             var stringTable = Deserialize<StringTableDto>("language/xml/channel_setting_string_table.x7");
             Channels = Transform().ToImmutableArray();
-            _logger.LogInformation("Loaded {Count} channels", Channels.Length);
+            _logger.Information("Loaded {Count} channels", Channels.Length);
 
             IEnumerable<ChannelInfo> Transform()
             {
@@ -72,11 +71,11 @@ namespace Netsphere.Server.Game.Services
 
         public void LoadMaps()
         {
-            _logger.LogInformation("Loading maps...");
+            _logger.Information("Loading maps...");
             var dto = Deserialize<GameInfoDto>("xml/_eu_gameinfo.x7");
             var stringTable = Deserialize<StringTableDto>("language/xml/gameinfo_string_table.x7");
             Maps = Transform().ToImmutableArray();
-            _logger.LogInformation("Loaded {Count} maps", Maps.Length);
+            _logger.Information("Loaded {Count} maps", Maps.Length);
 
             IEnumerable<MapInfo> Transform()
             {
@@ -95,7 +94,7 @@ namespace Netsphere.Server.Game.Services
                     var data = GetBytes(mapDto.bginfo_path);
                     if (data == null)
                     {
-                        _logger.LogWarning("bginfo_path:{biginfo} not found", mapDto.bginfo_path);
+                        _logger.Warning("bginfo_path:{biginfo} not found", mapDto.bginfo_path);
                         continue;
                     }
 
@@ -154,7 +153,7 @@ namespace Netsphere.Server.Game.Services
                         s.key.Equals(mapDto.map_name_key, StringComparison.InvariantCultureIgnoreCase));
                     if (string.IsNullOrWhiteSpace(name?.eng))
                     {
-                        _logger.LogWarning("Missing english translation for {MapKey}", mapDto.map_name_key);
+                        _logger.Warning("Missing english translation for {MapKey}", mapDto.map_name_key);
                         map.Name = mapDto.map_name_key;
                     }
                     else
@@ -169,11 +168,11 @@ namespace Netsphere.Server.Game.Services
 
         public void LoadEffects()
         {
-            _logger.LogInformation("Loading effects...");
+            _logger.Information("Loading effects...");
             var dto = Deserialize<ItemEffectDto>("xml/item_effect.x7");
             var stringTable = Deserialize<StringTableDto>("language/xml/item_effect_string_table.x7");
             Effects = Transform().ToImmutableDictionary(x => x.Id, x => x);
-            _logger.LogInformation("Loaded {Count} effects", Effects.Count);
+            _logger.Information("Loaded {Count} effects", Effects.Count);
 
             IEnumerable<ItemEffect> Transform()
             {
@@ -198,7 +197,7 @@ namespace Netsphere.Server.Game.Services
                         s.key.Equals(itemEffectDto.text_key, StringComparison.InvariantCultureIgnoreCase));
                     if (string.IsNullOrWhiteSpace(name.eng))
                     {
-                        _logger.LogWarning("Missing english translation for item effect {textKey}", itemEffectDto.text_key);
+                        _logger.Warning("Missing english translation for item effect {textKey}", itemEffectDto.text_key);
                         name.eng = itemEffectDto.NAME;
                     }
 
@@ -210,11 +209,11 @@ namespace Netsphere.Server.Game.Services
 
         public void LoadItems()
         {
-            _logger.LogInformation("Loading items...");
+            _logger.Information("Loading items...");
             var dto = Deserialize<ItemInfoDto>("xml/iteminfo.x7");
             var stringTable = Deserialize<StringTableDto>("language/xml/iteminfo_string_table.x7");
             Items = Transform().ToImmutableDictionary(x => x.ItemNumber, x => x);
-            _logger.LogInformation("Loaded {Count} items", Items.Count);
+            _logger.Information("Loaded {Count} items", Items.Count);
 
             IEnumerable<ItemInfo> Transform()
             {
@@ -255,7 +254,7 @@ namespace Netsphere.Server.Game.Services
                                 s.key.Equals(itemDto.@base.base_info.name_key, StringComparison.InvariantCultureIgnoreCase));
                             if (string.IsNullOrWhiteSpace(name?.eng))
                             {
-                                _logger.LogWarning("Missing english translation for {id}",
+                                _logger.Warning("Missing english translation for {id}",
                                     name != null ? itemDto.@base.base_info.name_key : id.ToString());
                                 item.Name = name != null ? name.key : itemDto.NAME;
                             }
@@ -395,7 +394,7 @@ namespace Netsphere.Server.Game.Services
             {
                 if (itemDto.action == null)
                 {
-                    _logger.LogWarning("Missing action for item {id}", id);
+                    _logger.Warning("Missing action for item {id}", id);
                     return new ItemInfoAction();
                 }
 
@@ -422,7 +421,7 @@ namespace Netsphere.Server.Game.Services
             {
                 if (itemDto.weapon == null)
                 {
-                    _logger.LogWarning("Missing weapon for item {id}", id);
+                    _logger.Warning("Missing weapon for item {id}", id);
                     return new ItemInfoWeapon();
                 }
 
@@ -463,10 +462,10 @@ namespace Netsphere.Server.Game.Services
 
         public void LoadDefaultItems()
         {
-            _logger.LogInformation("Loading default items...");
+            _logger.Information("Loading default items...");
             var dto = Deserialize<DefaultItemDto>("xml/default_item.x7");
             DefaultItems = Transform().ToImmutableArray();
-            _logger.LogInformation("Loaded {Count} default items", DefaultItems.Length);
+            _logger.Information("Loaded {Count} default items", DefaultItems.Length);
 
             IEnumerable<DefaultItem> Transform()
             {
@@ -498,44 +497,44 @@ namespace Netsphere.Server.Game.Services
         {
             using (var db = _databaseProvider.Open<GameContext>())
             {
-                _logger.LogInformation("Loading effect groups...");
+                _logger.Information("Loading effect groups...");
                 var effects = await db.EffectGroups.LoadWith(x => x.ShopEffects).ToArrayAsync();
                 ShopEffects = effects.ToImmutableDictionary(x => x.Id, x => new ShopEffectGroup(x));
-                _logger.LogInformation("Loaded {Count} effect groups", ShopEffects.Count);
+                _logger.Information("Loaded {Count} effect groups", ShopEffects.Count);
 
-                _logger.LogInformation("Loading price groups...");
+                _logger.Information("Loading price groups...");
                 var prices = await db.PriceGroups.LoadWith(x => x.ShopPrices).ToArrayAsync();
                 ShopPrices = prices.ToImmutableDictionary(x => x.Id, x => new ShopPriceGroup(x));
-                _logger.LogInformation("Loaded {Count} price groups", ShopPrices.Count);
+                _logger.Information("Loaded {Count} price groups", ShopPrices.Count);
 
-                _logger.LogInformation("Loading shop items...");
+                _logger.Information("Loading shop items...");
                 var items = await db.Items.LoadWith(x => x.ItemInfos).ToArrayAsync();
                 ShopItems = items.ToImmutableDictionary(x => (ItemNumber)x.Id, x => new ShopItem(x, this));
-                _logger.LogInformation("Loaded {Count} shop items", ShopItems.Count);
+                _logger.Information("Loaded {Count} shop items", ShopItems.Count);
 
-                _logger.LogInformation("Loading license rewards...");
+                _logger.Information("Loading license rewards...");
                 var licenseRewards = await db.LicenseRewards.ToArrayAsync();
                 LicenseRewards = licenseRewards.ToImmutableDictionary(x => (ItemLicense)x.Id, x => new LicenseReward(x, this));
-                _logger.LogInformation("Loaded {Count} license rewards", LicenseRewards.Count);
+                _logger.Information("Loaded {Count} license rewards", LicenseRewards.Count);
 
                 var version = await db.ShopVersion.FirstOrDefaultAsync();
                 if (version == null)
                 {
-                    _logger.LogWarning("No shop version found in database! Using current timestamp");
+                    _logger.Warning("No shop version found in database! Using current timestamp");
                     version = new ShopVersionEntity { Version = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString() };
                 }
 
                 ShopVersion = version.Version;
-                _logger.LogInformation("Loaded shop version {Version}", ShopVersion);
+                _logger.Information("Loaded shop version {Version}", ShopVersion);
             }
         }
 
         public void LoadGameTempos()
         {
-            _logger.LogInformation("Loading default game tempos...");
+            _logger.Information("Loading default game tempos...");
             var dto = Deserialize<ConstantInfoDto>("xml/constant_info.x7");
             GameTempos = Transform().ToImmutableDictionary(x => x.Name, x => x);
-            _logger.LogInformation("Loaded {Count} game tempos", GameTempos.Count);
+            _logger.Information("Loaded {Count} game tempos", GameTempos.Count);
 
             IEnumerable<GameTempo> Transform()
             {

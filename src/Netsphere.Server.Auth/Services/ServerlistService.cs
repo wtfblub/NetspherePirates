@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundatio.Messaging;
+using Logging;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Netsphere.Common;
 using Netsphere.Common.Messaging;
@@ -35,14 +35,14 @@ namespace Netsphere.Server.Auth.Services
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting...");
+            _logger.Information("Starting...");
             await _messageBus.SubscribeAsync((Action<ServerUpdateMessage>)OnServerUpdate, _shutdown.Token);
             await _messageBus.SubscribeAsync((Action<ServerShutdownMessage>)OnServerShutdown, _shutdown.Token);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Stopping...");
+            _logger.Information("Stopping...");
             _shutdown.Cancel();
             return Task.CompletedTask;
         }
@@ -64,57 +64,53 @@ namespace Netsphere.Server.Auth.Services
 
         private void OnServerUpdate(ServerUpdateMessage message)
         {
-            using (_logger.BeginScope("Message={Message}", message.ToJson()))
-            {
-                _mutex.EnterWriteLock();
+            var logger = _logger.ForContext("Message", message.ToJson());
+            _mutex.EnterWriteLock();
 
-                try
+            try
+            {
+                logger.Debug("Updating...");
+                var id = (uint)(message.Id << 8 | (byte)message.ServerType);
+                _servers[id] = new ServerInfo(new ServerInfoDto
                 {
-                    _logger.LogDebug("Updating...");
-                    var id = (uint)(message.Id << 8 | (byte)message.ServerType);
-                    _servers[id] = new ServerInfo(new ServerInfoDto
-                    {
-                        Id = id,
-                        GroupId = message.Id,
-                        Type = message.ServerType,
-                        Name = message.Name,
-                        PlayerLimit = message.Limit,
-                        PlayerOnline = message.Online,
-                        EndPoint = message.EndPoint,
-                        IsEnabled = true
-                    }, DateTimeOffset.Now);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unable to update server");
-                }
-                finally
-                {
-                    _mutex.ExitWriteLock();
-                }
+                    Id = id,
+                    GroupId = message.Id,
+                    Type = message.ServerType,
+                    Name = message.Name,
+                    PlayerLimit = message.Limit,
+                    PlayerOnline = message.Online,
+                    EndPoint = message.EndPoint,
+                    IsEnabled = true
+                }, DateTimeOffset.Now);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Unable to update server");
+            }
+            finally
+            {
+                _mutex.ExitWriteLock();
             }
         }
 
         private void OnServerShutdown(ServerShutdownMessage message)
         {
-            using (_logger.BeginScope("Message={Message}", message.ToJson()))
-            {
-                _mutex.EnterWriteLock();
+            var logger = _logger.ForContext("Message", message.ToJson());
+            _mutex.EnterWriteLock();
 
-                try
-                {
-                    _logger.LogDebug("Removing...");
-                    var id = (uint)(message.Id << 8 | (byte)message.ServerType);
-                    _servers.Remove(id);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unable to remove server");
-                }
-                finally
-                {
-                    _mutex.ExitWriteLock();
-                }
+            try
+            {
+                logger.Debug("Removing...");
+                var id = (uint)(message.Id << 8 | (byte)message.ServerType);
+                _servers.Remove(id);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Unable to remove server");
+            }
+            finally
+            {
+                _mutex.ExitWriteLock();
             }
         }
 
@@ -130,13 +126,13 @@ namespace Netsphere.Server.Auth.Services
                 if (!IsNeeded())
                     return;
 
-                _logger.LogInformation("Checking for server timeout...");
+                _logger.Information("Checking for server timeout...");
                 var now = DateTimeOffset.Now;
                 foreach (var pair in _servers.Reverse())
                 {
                     if (now - pair.Value.LastUpdate > _options.ServerlistTimeout)
                     {
-                        _logger.LogInformation("Server timeout {Name}({Id}-{Type})",
+                        _logger.Information("Server timeout {Name}({Id}-{Type})",
                             pair.Value.Server.Name, pair.Value.Server.Id, pair.Value.Server.Type);
                         _servers.Remove(pair.Key);
                     }

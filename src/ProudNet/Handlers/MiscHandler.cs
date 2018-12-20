@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Logging;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
 
@@ -57,7 +57,7 @@ namespace ProudNet.Handlers
 
         public Task<bool> OnHandle(MessageContext context, NotifyLogMessage message)
         {
-            _logger.LogDebug("NotifyLog {@Message}", message);
+            _logger.Debug("NotifyLog {@Message}", message);
             return Task.FromResult(true);
         }
 

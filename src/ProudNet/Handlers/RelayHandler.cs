@@ -4,7 +4,6 @@ using System.Net;
 using System.Threading.Tasks;
 using BlubLib.Serialization;
 using DotNetty.Buffers;
-using Microsoft.Extensions.Logging;
 using ProudNet.DotNetty.Codecs;
 using ProudNet.Firewall;
 using ProudNet.Serialization;
@@ -107,7 +106,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("C2S_RequestCreateUdpSocketMessage {@Message}", message);
+            session.Logger.Debug("C2S_RequestCreateUdpSocketMessage {@Message}", message);
             if (!_udpSocketManager.IsRunning)
                 return true;
 
@@ -128,7 +127,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("C2S_CreateUdpSocketAckMessage {@Message}", message);
+            session.Logger.Debug("C2S_CreateUdpSocketAckMessage {@Message}", message);
             if (!_udpSocketManager.IsRunning)
                 return true;
 

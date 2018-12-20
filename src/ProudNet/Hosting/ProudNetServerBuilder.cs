@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using BlubLib.Serialization;
+using Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProudNet.Configuration;
@@ -43,7 +44,11 @@ namespace ProudNet.Hosting
 
                 collection
                     .AddOptions()
-                    .AddLogging()
+
+                    // Logging
+                    .AddSingleton<ILoggerFactory, LoggerFactory>()
+                    .AddTransient<ILogger, Logger>()
+                    .AddTransient(typeof(ILogger<>), typeof(Logger<>))
 
                     // Hosted services
                     .AddSingleton<ISchedulerService, SchedulerService>()

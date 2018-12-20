@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
 using ProudNet.Firewall;
 using ProudNet.Serialization.Messages;
 
@@ -22,13 +21,13 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("P2P_NotifyDirectP2PDisconnected {@Message}", message);
+            session.Logger.Debug("P2P_NotifyDirectP2PDisconnected {@Message}", message);
             var remotePeer = session.P2PGroup.GetMemberInternal(session.HostId);
             var stateA = remotePeer?.ConnectionStates.GetValueOrDefault(message.RemotePeerHostId);
             var stateB = stateA?.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
             if (stateA?.HolepunchSuccess == true)
             {
-                session.Logger.LogInformation("P2P to {TargetHostId} disconnected with {Reason}",
+                session.Logger.Information("P2P to {TargetHostId} disconnected with {Reason}",
                     message.RemotePeerHostId, message.Reason);
                 stateA.HolepunchSuccess = false;
                 stateA.RemotePeer.Send(new P2P_NotifyDirectP2PDisconnected2Message(session.HostId, message.Reason));
@@ -45,7 +44,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("Fallback to tcp relay by client");
+            session.Logger.Debug("Fallback to tcp relay by client");
             session.UdpEnabled = false;
             _udpSessionManager.RemoveSession(session.UdpSessionId);
             return Task.FromResult(true);

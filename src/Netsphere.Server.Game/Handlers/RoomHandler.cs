@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using BlubLib.Collections.Generic;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Microsoft.Extensions.Options;
 using Netsphere.Common;
 using Netsphere.Network;
@@ -61,50 +61,47 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
             var channel = plr.Channel;
             var roomMgr = channel.RoomManager;
+            var logger = plr.AddContextToLogger(_logger).ForContext("Message", message.ToJson());
 
-            using (plr.AddContextToLogger(_logger))
-            using (_logger.BeginScope("Message={@Message}", message.ToJson()))
+            var (room, createError) = roomMgr.Create(new RoomCreationOptions
             {
-                var (room, createError) = roomMgr.Create(new RoomCreationOptions
-                {
-                    Name = message.Room.Name,
-                    MatchKey = message.Room.MatchKey,
-                    TimeLimit = TimeSpan.FromMinutes(message.Room.TimeLimit),
-                    ScoreLimit = message.Room.ScoreLimit,
-                    Password = message.Room.Password,
-                    IsFriendly = message.Room.IsFriendly,
-                    IsBalanced = message.Room.IsBalanced,
-                    MinLevel = message.Room.MinLevel,
-                    MaxLevel = message.Room.MaxLevel,
-                    ItemLimit = message.Room.EquipLimit,
-                    IsNoIntrusion = message.Room.IsNoIntrusion,
-                    RelayEndPoint = _appOptions.RelayEndPoint,
-                    GameRuleResolver = new DefaultGameRuleResolver(_gameRuleManager)
-                });
+                Name = message.Room.Name,
+                MatchKey = message.Room.MatchKey,
+                TimeLimit = TimeSpan.FromMinutes(message.Room.TimeLimit),
+                ScoreLimit = message.Room.ScoreLimit,
+                Password = message.Room.Password,
+                IsFriendly = message.Room.IsFriendly,
+                IsBalanced = message.Room.IsBalanced,
+                MinLevel = message.Room.MinLevel,
+                MaxLevel = message.Room.MaxLevel,
+                ItemLimit = message.Room.EquipLimit,
+                IsNoIntrusion = message.Room.IsNoIntrusion,
+                RelayEndPoint = _appOptions.RelayEndPoint,
+                GameRuleResolver = new DefaultGameRuleResolver(_gameRuleManager)
+            });
 
-                switch (createError)
-                {
-                    case RoomCreateError.OK:
-                        break;
+            switch (createError)
+            {
+                case RoomCreateError.OK:
+                    break;
 
-                    case RoomCreateError.InvalidGameRule:
-                        _logger.LogWarning("Trying to create room with invalid gamerule");
-                        await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
-                        return true;
+                case RoomCreateError.InvalidGameRule:
+                    logger.Warning("Trying to create room with invalid gamerule");
+                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                    return true;
 
-                    case RoomCreateError.InvalidMap:
-                        _logger.LogWarning("Trying to create room with invalid map");
-                        await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
-                        return true;
+                case RoomCreateError.InvalidMap:
+                    logger.Warning("Trying to create room with invalid map");
+                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                    return true;
 
-                    default:
-                        _logger.LogWarning("Unknown error={Error} when creating room", createError);
-                        await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
-                        return true;
-                }
-
-                room.Join(plr);
+                default:
+                    logger.Warning("Unknown error={Error} when creating room", createError);
+                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                    return true;
             }
+
+            room.Join(plr);
 
             return true;
         }
@@ -311,16 +308,12 @@ namespace Netsphere.Server.Game.Handlers
             var session = context.GetSession<Session>();
             var plr = session.Player;
             var room = plr.Room;
+            var logger = plr.AddContextToLogger(_logger);
 
-            using (plr.AddContextToLogger(_logger))
-            {
-                _logger.LogDebug("Item sync unk1={Unk1}", message.Unk1);
+            logger.Debug("Item sync unk1={Unk1}", message.Unk1);
 
-                if (message.Unk2.Length > 0)
-                    _logger.LogWarning("Item sync unk2={Unk2}", (object)message.Unk2);
-            }
-
-            plr.Test = new SItemsChangeAckMessage(message.Unk1, message.Unk2);
+            if (message.Unk2.Length > 0)
+                logger.Warning("Item sync unk2={Unk2}", (object)message.Unk2);
 
             room.Broadcast(new SItemsChangeAckMessage(message.Unk1, message.Unk2));
             return Task.FromResult(true);
@@ -333,14 +326,12 @@ namespace Netsphere.Server.Game.Handlers
             var session = context.GetSession<Session>();
             var plr = session.Player;
             var room = plr.Room;
+            var logger = plr.AddContextToLogger(_logger);
 
-            using (plr.AddContextToLogger(_logger))
-            {
-                _logger.LogDebug("Avatar sync unk1={Unk1}", message.Unk1);
+            logger.Debug("Avatar sync unk1={Unk1}", message.Unk1);
 
-                if (message.Unk2.Length > 0)
-                    _logger.LogWarning("Avatar sync unk2={Unk2}", (object)message.Unk2);
-            }
+            if (message.Unk2.Length > 0)
+                logger.Warning("Avatar sync unk2={Unk2}", (object)message.Unk2);
 
             room.Broadcast(new SAvatarChangeAckMessage(message.Unk1, message.Unk2));
             return Task.FromResult(true);

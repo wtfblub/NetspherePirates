@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
 using ProudNet.Firewall;
 using ProudNet.Serialization.Messages;
 using ProudNet.Serialization.Messages.Core;
@@ -28,7 +27,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("ServerHolepunch={@Message}", message);
+            session.Logger.Debug("ServerHolepunch={@Message}", message);
             if (!_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return true;
 
@@ -41,7 +40,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("NotifyHolepunchSuccess={@Message}", message);
+            session.Logger.Debug("NotifyHolepunchSuccess={@Message}", message);
             if (!_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return true;
 
@@ -58,7 +57,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("PeerUdp_ServerHolepunch={@Message}", message);
+            session.Logger.Debug("PeerUdp_ServerHolepunch={@Message}", message);
             if (!(session.P2PGroup.GetMember(message.HostId) is ProudSession target) || !target.UdpEnabled)
                 return true;
 
@@ -73,7 +72,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("PeerUdp_NotifyHolepunchSuccess={@Message}", message);
+            session.Logger.Debug("PeerUdp_NotifyHolepunchSuccess={@Message}", message);
             var remotePeer = session.P2PGroup.GetMemberInternal(session.HostId);
             var connectionState = remotePeer.ConnectionStates.GetValueOrDefault(message.HostId);
 
@@ -106,7 +105,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("NotifyP2PHolepunchSuccess {@Message}", message);
+            session.Logger.Debug("NotifyP2PHolepunchSuccess {@Message}", message);
             var group = session.P2PGroup;
             if (session.HostId != message.A && session.HostId != message.B)
                 return true;
@@ -148,7 +147,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogDebug("NotifyJitDirectP2PTriggered {@Message}", message);
+            session.Logger.Debug("NotifyJitDirectP2PTriggered {@Message}", message);
             var group = session.P2PGroup;
             var remotePeerA = group.GetMemberInternal(session.HostId);
             var remotePeerB = group.GetMemberInternal(message.HostId);

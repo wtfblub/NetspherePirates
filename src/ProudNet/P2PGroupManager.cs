@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using BlubLib.Collections.Generic;
-using Microsoft.Extensions.Logging;
+using Logging;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 
@@ -32,7 +32,7 @@ namespace ProudNet
             var group = new P2PGroup(_loggerFactory.CreateLogger<P2PGroup>(), _hostIdFactory.New(),
                 _options, _sessionManager, allowDirectP2P);
             _groups.TryAdd(group.HostId, group);
-            _logger.LogDebug("Created P2PGroup({HostId}) DirectP2P={AllowDirectP2P}", group.HostId, allowDirectP2P);
+            _logger.Debug("Created P2PGroup({HostId}) DirectP2P={AllowDirectP2P}", group.HostId, allowDirectP2P);
             return group;
         }
 
@@ -46,7 +46,7 @@ namespace ProudNet
                 _hostIdFactory.Free(groupHostId);
             }
 
-            _logger.LogDebug("Removed P2PGroup({HostId})", group.HostId);
+            _logger.Debug("Removed P2PGroup({HostId})", group.HostId);
         }
 
         public void Remove(P2PGroup group)

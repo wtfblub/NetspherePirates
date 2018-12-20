@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Foundatio.Messaging;
+using Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Netsphere.Common;
 using Netsphere.Common.Messaging;
 using Netsphere.Network.Message.Relay;
@@ -31,46 +31,45 @@ namespace Netsphere.Server.Relay.Handlers
         public async Task<bool> OnHandle(MessageContext context, CRequestLoginMessage message)
         {
             var session = context.GetSession<Session>();
+            var logger = _logger.ForContext(
+                ("RemoteEndPoint", session.RemoteEndPoint.ToString()),
+                ("Message", message.ToJson()));
 
-            using (_logger.BeginScope("RemoteEndPoint={RemoteEndPoint} Message={@Message}",
-                session.RemoteEndPoint.ToString(), message.ToJson()))
+            logger.Debug("Login from {RemoteEndPoint}");
+
+            var response = await _messageBus.PublishRequestAsync<RelayLoginRequest, RelayLoginResponse>(new RelayLoginRequest
             {
-                _logger.LogDebug("Login from {RemoteEndPoint}");
+                AccountId = message.AccountId,
+                Nickname = message.Nickname,
+                Address = session.RemoteEndPoint.Address,
+                ServerId = message.RoomLocation.ServerId,
+                ChannelId = message.RoomLocation.ChannelId,
+                RoomId = message.RoomLocation.RoomId
+            });
 
-                var response = await _messageBus.PublishRequestAsync<RelayLoginRequest, RelayLoginResponse>(new RelayLoginRequest
-                {
-                    AccountId = message.AccountId,
-                    Nickname = message.Nickname,
-                    Address = session.RemoteEndPoint.Address,
-                    ServerId = message.RoomLocation.ServerId,
-                    ChannelId = message.RoomLocation.ChannelId,
-                    RoomId = message.RoomLocation.RoomId
-                });
-
-                if (!response.OK)
-                {
-                    await session.SendAsync(new SNotifyLoginResultMessage(1));
-                    return true;
-                }
-
-                if (_playerManager[message.AccountId] != null)
-                {
-                    _logger.LogInformation("Already logged in");
-                    await session.SendAsync(new SNotifyLoginResultMessage(2));
-                    return true;
-                }
-
-                var roomId = (uint)((message.RoomLocation.ChannelId << 8) | message.RoomLocation.RoomId);
-
-                var plr = _serviceProvider.GetRequiredService<Player>();
-                plr.Initialize(session, response.Account);
-                session.Player = plr;
-                _playerManager.Add(plr);
-
-                var room = _roomManager.GetOrCreate(roomId);
-                await room.Join(plr);
-                await session.SendAsync(new SNotifyLoginResultMessage(0));
+            if (!response.OK)
+            {
+                await session.SendAsync(new SNotifyLoginResultMessage(1));
+                return true;
             }
+
+            if (_playerManager[message.AccountId] != null)
+            {
+                logger.Information("Already logged in");
+                await session.SendAsync(new SNotifyLoginResultMessage(2));
+                return true;
+            }
+
+            var roomId = (uint)((message.RoomLocation.ChannelId << 8) | message.RoomLocation.RoomId);
+
+            var plr = _serviceProvider.GetRequiredService<Player>();
+            plr.Initialize(session, response.Account);
+            session.Player = plr;
+            _playerManager.Add(plr);
+
+            var room = _roomManager.GetOrCreate(roomId);
+            await room.Join(plr);
+            await session.SendAsync(new SNotifyLoginResultMessage(0));
 
             return true;
         }

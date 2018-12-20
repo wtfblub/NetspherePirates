@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 using ProudNet.Firewall;
@@ -31,7 +30,7 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogTrace("Handshake:NotifyCSEncryptedSessionKey");
+            session.Logger.Verbose("Handshake:NotifyCSEncryptedSessionKey");
             var secureKey = _rsa.Decrypt(message.SecureKey, true);
             session.Crypt = new Crypt(secureKey);
             session.State = SessionState.HandshakeKeyExchanged;
@@ -44,12 +43,12 @@ namespace ProudNet.Handlers
         {
             var session = context.Session;
 
-            session.Logger.LogTrace("Handshake:NotifyServerConnectionRequestData");
+            session.Logger.Verbose("Handshake:NotifyServerConnectionRequestData");
             if (message.InternalNetVersion != Constants.NetVersion ||
                 message.Version != _networkOptions.Version)
             {
                 // ReSharper disable RedundantAnonymousTypePropertyName
-                session.Logger.LogWarning(
+                session.Logger.Warning(
                     "Protocol version mismatch - Client={@ClientVersion} Server={@ServerVersion}",
                     new { NetVersion = message.InternalNetVersion, Version = message.Version },
                     new { NetVersion = Constants.NetVersion, Version = _networkOptions.Version });

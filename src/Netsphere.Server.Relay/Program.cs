@@ -43,7 +43,6 @@ namespace Netsphere.Server.Relay
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
             hostBuilder
-                .ConfigureLogging(builder => builder.AddSerilog())
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
                 .ConfigureAppConfiguration(builder => builder.AddConfiguration(configuration))
                 .UseProudNetServer(builder =>
