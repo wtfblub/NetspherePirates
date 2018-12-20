@@ -116,6 +116,25 @@ namespace Netsphere.Server.Game
             Pants = pants;
             Gloves = gloves;
             Shoes = shoes;
+
+            Weapons.ItemAdded += SendEquip;
+            Weapons.ItemRemoved += SendUnEquip;
+
+            Costumes.ItemAdded += SendEquip;
+            Costumes.ItemRemoved += SendUnEquip;
+
+            Skills.ItemAdded += SendEquip;
+            Skills.ItemRemoved += SendUnEquip;
+
+            void SendEquip(object _, CharacterInventoryEventArgs e)
+            {
+                CharacterManager.Player.Session.Send(new SUseItemAckMessage(Slot, e.Slot, e.Item.Id, UseItemAction.Equip));
+            }
+
+            void SendUnEquip(object _, CharacterInventoryEventArgs e)
+            {
+                CharacterManager.Player.Session.Send(new SUseItemAckMessage(Slot, e.Slot, e.Item.Id, UseItemAction.UnEquip));
+            }
         }
 
         public CharacterInventoryError Equip(PlayerItem item, byte slot)

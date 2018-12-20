@@ -24,7 +24,7 @@ namespace Netsphere.Server.Game.Handlers
             var character = plr.CharacterManager[message.CharacterSlot];
             var item = plr.Inventory[message.ItemId];
 
-            if (character == null || item == null || (plr.Room != null /*&& plr.RoomInfo.State != PlayerState.Lobby*/))
+            if (character == null || item == null || plr.Room != null && plr.State != PlayerState.Lobby)
             {
                 await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                 return true;
