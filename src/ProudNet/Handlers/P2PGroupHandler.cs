@@ -11,44 +11,47 @@ namespace ProudNet.Handlers
         : IHandle<P2PGroup_MemberJoin_AckMessage>
     {
         [Firewall(typeof(MustBeInP2PGroup))]
-        public Task<bool> OnHandle(MessageContext context, P2PGroup_MemberJoin_AckMessage message)
+        public async Task<bool> OnHandle(MessageContext context, P2PGroup_MemberJoin_AckMessage message)
         {
             var session = context.Session;
 
             if (message.AddedMemberHostId == Constants.HostIdServer ||
                 message.AddedMemberHostId == Constants.HostIdServerHack)
-                return Task.FromResult(true);
+                return true;
 
             session.Logger.LogDebug("P2PGroupMemberJoinAck {@Message}", message);
             if (session.HostId == message.AddedMemberHostId)
-                return Task.FromResult(true);
+                return true;
 
-            var remotePeer = session.P2PGroup?.GetMemberInternal(session.HostId);
-            var stateA = remotePeer?.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
+            var remotePeer = session.P2PGroup.GetMemberInternal(session.HostId);
+            var stateA = remotePeer.ConnectionStates.GetValueOrDefault(message.AddedMemberHostId);
             if (stateA?.EventId != message.EventId)
-                return Task.FromResult(true);
+                return true;
 
-            stateA.IsJoined = true;
-            var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
-            if (stateB?.IsJoined == true)
+            using (await stateA.Mutex.LockAsync())
             {
-                if (!session.P2PGroup.AllowDirectP2P)
-                    return Task.FromResult(true);
+                stateA.IsJoined = true;
+                var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
+                if (stateB?.IsJoined == true)
+                {
+                    if (!session.P2PGroup.AllowDirectP2P)
+                        return true;
 
-                // Do not try p2p when the udp relay is not used by one of the clients
-                if (!(stateA.RemotePeer is ProudSession sessionA) || !sessionA.UdpEnabled ||
-                    !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
-                    return Task.FromResult(true);
+                    // Do not try p2p when the udp relay is not used by one of the clients
+                    if (!(stateA.RemotePeer is ProudSession sessionA) || !sessionA.UdpEnabled ||
+                        !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
+                        return true;
 
-                session.Logger.LogDebug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
-                sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", session.HostId);
-                stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
-                stateA.IsInitialized = stateB.IsInitialized = true;
-                remotePeer.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
-                stateA.RemotePeer.Send(new P2PRecycleCompleteMessage(session.HostId));
+                    session.Logger.LogDebug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                    sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", session.HostId);
+                    stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
+                    stateA.IsInitialized = stateB.IsInitialized = true;
+                    remotePeer.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
+                    stateA.RemotePeer.Send(new P2PRecycleCompleteMessage(session.HostId));
+                }
             }
 
-            return Task.FromResult(true);
+            return true;
         }
     }
 }

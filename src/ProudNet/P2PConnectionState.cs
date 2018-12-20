@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using BlubLib.Threading.Tasks;
 
 namespace ProudNet
 {
@@ -16,11 +17,13 @@ namespace ProudNet
 
         public IPEndPoint EndPoint { get; set; }
         public IPEndPoint LocalEndPoint { get; set; }
+        internal AsyncLock Mutex { get; }
 
-        public P2PConnectionState(IP2PMemberInternal remotePeer)
+        public P2PConnectionState(IP2PMemberInternal remotePeer, AsyncLock mutex)
         {
             RemotePeer = remotePeer;
             EventId = (uint)Guid.NewGuid().GetHashCode();
+            Mutex = mutex;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using BlubLib.Collections.Concurrent;
+using BlubLib.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ProudNet.Configuration;
 using ProudNet.Serialization.Messages;
@@ -95,8 +96,9 @@ namespace ProudNet
 
             foreach (var member in _members.Values.Where(member => member.HostId != hostId))
             {
-                var stateA = new P2PConnectionState(member);
-                var stateB = new P2PConnectionState(sessionToJoin);
+                var sharedMutex = new AsyncLock();
+                var stateA = new P2PConnectionState(member, sharedMutex);
+                var stateB = new P2PConnectionState(sessionToJoin, sharedMutex);
 
                 memberToJoin.ConnectionStates[member.HostId] = stateA;
                 member.ConnectionStates[memberToJoin.HostId] = stateB;

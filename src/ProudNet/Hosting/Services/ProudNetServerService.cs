@@ -239,97 +239,109 @@ namespace ProudNet.Hosting.Services
             void RetryUdpOrHolepunchIfRequired(object context, object state)
             {
                 var server = (ProudNetServerService)context;
-                var log = server._log;
-                var groupManager = server._groupManager;
-                var udpSocketManager = server._udpSocketManager;
-                var configuration = server._networkOptions;
-                if (!udpSocketManager.IsRunning || server.IsShuttingDown || !server.IsRunning)
-                    return;
-
-                log.LogDebug("RetryUdpOrHolepunchIfRequired");
-                foreach (var group in groupManager.Values)
+                try
                 {
-                    var now = DateTimeOffset.Now;
+                    var log = server._log;
+                    var groupManager = server._groupManager;
+                    var udpSocketManager = server._udpSocketManager;
+                    var configuration = server._networkOptions;
+                    if (!udpSocketManager.IsRunning || server.IsShuttingDown || !server.IsRunning)
+                        return;
 
-                    // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
-                    foreach (IP2PMemberInternal member in group)
+                    log.LogDebug("RetryUdpOrHolepunchIfRequired");
+                    foreach (var group in groupManager.Values)
                     {
-                        if (!(member is ProudSession session))
-                            continue;
+                        var now = DateTimeOffset.Now;
 
-                        // Retry udp relay
-                        if (session.UdpSocket != null)
+                        // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
+                        foreach (IP2PMemberInternal member in group)
                         {
-                            var diff = now - session.LastUdpPing;
-                            if (!session.UdpEnabled)
+                            if (!(member is ProudSession session))
+                                continue;
+
+                            // Retry udp relay
+                            if (session.UdpSocket != null)
                             {
-                                _magicNumberSessionManager.RemoveSession(session.HolepunchMagicNumber);
-
-                                session.Logger.LogInformation("Trying to switch to udp relay");
-                                var socket = udpSocketManager.NextSocket();
-                                session.UdpSocket = socket;
-                                session.HolepunchMagicNumber = Guid.NewGuid();
-                                _magicNumberSessionManager.AddSession(session.HolepunchMagicNumber, session);
-                                member.Send(new S2C_RequestCreateUdpSocketMessage(
-                                    new IPEndPoint(udpSocketManager.Address,
-                                        ((IPEndPoint)socket.Channel.LocalAddress).Port)));
-                            }
-                            else if (diff >= configuration.PingTimeout)
-                            {
-                                session.Logger.LogInformation("Fallback to tcp relay by server");
-
-                                //member.Session.UdpEnabled = false;
-                                //server.SessionsByUdpId.Remove(member.Session.UdpSessionId);
-                                member.Send(new NotifyUdpToTcpFallbackByServerMessage());
-                            }
-                        }
-
-                        // Skip p2p stuff when not enabled
-                        if (!group.AllowDirectP2P)
-                            continue;
-
-                        // Retry p2p holepunch
-                        foreach (var stateA in member.ConnectionStates.Values)
-                        {
-                            var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(member.HostId);
-                            if (!(stateA.RemotePeer is ProudSession sessionA) || !sessionA.UdpEnabled ||
-                                !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
-                                return;
-
-                            if (stateA.IsInitialized)
-                            {
-                                var diff = now - stateA.LastHolepunch;
-                                if (!stateA.HolepunchSuccess && diff >= configuration.HolepunchTimeout)
+                                var diff = now - session.LastUdpPing;
+                                if (!session.UdpEnabled)
                                 {
-                                    //member.Session.Logger?.Information("Trying to reconnect P2P to {TargetHostId}", stateA.RemotePeer.HostId);
-                                    //stateA.RemotePeer.Session.Logger?.Information("Trying to reconnect P2P to {TargetHostId}", member.HostId);
-                                    //stateA.JitTriggered = stateB.JitTriggered = false;
-                                    //stateA.PeerUdpHolepunchSuccess = stateB.PeerUdpHolepunchSuccess = false;
-                                    //stateA.LastHolepunch = stateB.LastHolepunch = now;
-                                    //member.SendAsync(new RenewP2PConnectionStateMessage(stateA.RemotePeer.HostId));
-                                    //stateA.RemotePeer.SendAsync(new RenewP2PConnectionStateMessage(member.HostId));
-                                    //member.SendAsync(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
-                                    //stateA.RemotePeer.SendAsync(new P2PRecycleCompleteMessage(member.HostId));
+                                    _magicNumberSessionManager.RemoveSession(session.HolepunchMagicNumber);
+
+                                    session.Logger.LogInformation("Trying to switch to udp relay");
+                                    var socket = udpSocketManager.NextSocket();
+                                    session.UdpSocket = socket;
+                                    session.HolepunchMagicNumber = Guid.NewGuid();
+                                    _magicNumberSessionManager.AddSession(session.HolepunchMagicNumber, session);
+                                    member.Send(new S2C_RequestCreateUdpSocketMessage(
+                                        new IPEndPoint(udpSocketManager.Address,
+                                            ((IPEndPoint)socket.Channel.LocalAddress).Port)));
+                                }
+                                else if (diff >= configuration.PingTimeout)
+                                {
+                                    session.Logger.LogInformation("Fallback to tcp relay by server");
+
+                                    //member.Session.UdpEnabled = false;
+                                    //server.SessionsByUdpId.Remove(member.Session.UdpSessionId);
+                                    member.Send(new NotifyUdpToTcpFallbackByServerMessage());
                                 }
                             }
-                            else
+
+                            // Skip p2p stuff when not enabled
+                            if (!group.AllowDirectP2P)
+                                continue;
+
+                            // Retry p2p holepunch
+                            foreach (var stateA in member.ConnectionStates.Values)
                             {
-                                session.Logger.LogDebug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
-                                sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", member.HostId);
-                                stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
-                                stateA.IsInitialized = stateB.IsInitialized = true;
-                                member.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
-                                stateA.RemotePeer.Send(new P2PRecycleCompleteMessage(member.HostId));
+                                var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(member.HostId);
+                                if (!(stateA.RemotePeer is ProudSession sessionA) || !sessionA.UdpEnabled ||
+                                    !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
+                                    continue;
+
+                                using (stateA.Mutex.Lock())
+                                {
+                                    if (stateA.IsInitialized)
+                                    {
+                                        var diff = now - stateA.LastHolepunch;
+                                        if (!stateA.HolepunchSuccess && diff >= configuration.HolepunchTimeout)
+                                        {
+                                            session.Logger?.LogInformation("Trying to reconnect P2P to {TargetHostId}",
+                                                stateA.RemotePeer.HostId);
+                                            sessionA.Logger?.LogInformation("Trying to reconnect P2P to {TargetHostId}",
+                                                member.HostId);
+                                            stateA.JitTriggered = stateB.JitTriggered = false;
+                                            stateA.PeerUdpHolepunchSuccess = stateB.PeerUdpHolepunchSuccess = false;
+                                            stateA.LastHolepunch = stateB.LastHolepunch = now;
+                                            member.Send(new RenewP2PConnectionStateMessage(stateA.RemotePeer.HostId));
+                                            stateA.RemotePeer.Send(new RenewP2PConnectionStateMessage(member.HostId));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        session.Logger.LogDebug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                                        sessionA.Logger.LogDebug("Initialize P2P with {TargetHostId}", member.HostId);
+                                        stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
+                                        stateA.IsInitialized = stateB.IsInitialized = true;
+                                        member.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
+                                        stateA.RemotePeer.Send(new P2PRecycleCompleteMessage(member.HostId));
+                                    }
+                                }
                             }
                         }
                     }
                 }
-
-                server.ScheduleRetryUdpOrHolepunchIfRequired();
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "RetryUdpOrHolepunchIfRequired exception");
+                }
+                finally
+                {
+                    server.ScheduleRetryUdpOrHolepunchIfRequired();
+                }
             }
 
             if (!IsShuttingDown && IsRunning)
-                _schedulerService.ScheduleAsync(RetryUdpOrHolepunchIfRequired, this, null, TimeSpan.FromSeconds(10));
+                _schedulerService.ScheduleAsync(RetryUdpOrHolepunchIfRequired, this, null, TimeSpan.FromSeconds(5));
         }
 
         private Task ShutdownThreads()

@@ -97,7 +97,7 @@ namespace ProudNet.DotNetty.Handlers
             finally
             {
                 if (messageType != typeof(RmiMessage))
-                    context.Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).Read();
+                    context.Channel?.Pipeline?.Context(Constants.Pipeline.CoreMessageHandlerName)?.Read();
 
                 ReferenceCountUtil.Release(message);
             }
