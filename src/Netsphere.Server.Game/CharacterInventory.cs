@@ -85,6 +85,19 @@ namespace Netsphere.Server.Game
             return _items.Any(x => x.ItemNumber == item.ItemNumber);
         }
 
+        public void Clear()
+        {
+            for (var i = 0; i < _items.Length; i++)
+            {
+                var item = _items[i];
+                if (item != null)
+                {
+                    item.CharacterInventory = null;
+                    _items[i] = null;
+                }
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsSlotValid(byte slot)
         {

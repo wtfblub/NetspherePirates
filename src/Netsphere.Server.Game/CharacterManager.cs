@@ -180,6 +180,9 @@ namespace Netsphere.Server.Game
             if (character.Exists)
                 _charactersToRemove.Push(character);
 
+            character.Weapons.Clear();
+            character.Skills.Clear();
+            character.Costumes.Clear();
             Player.Session.Send(new SSuccessDeleteCharacterAckMessage(slot));
             return true;
         }
