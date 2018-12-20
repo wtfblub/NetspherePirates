@@ -133,8 +133,9 @@ namespace Netsphere.Server.Game
                     slot, gender, defaultHair, defaultFace, defaultShirt, defaultPants, defaultGloves, defaultShoes);
                 _characters.Add(slot, character);
 
-                var charStyle = new CharacterStyle(character.Gender, character.Hair.Variation,
-                    character.Face.Variation, character.Shirt.Variation, character.Pants.Variation, character.Slot);
+                var charStyle = new CharacterStyle(character.Gender, character.Slot,
+                    character.Hair.Variation, character.Face.Variation,
+                    character.Shirt.Variation, character.Pants.Variation);
                 Player.Session.SendAsync(new SSuccessCreateCharacterAckMessage(character.Slot, charStyle));
 
                 return (character, CharacterCreateResult.Success);

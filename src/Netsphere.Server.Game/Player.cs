@@ -299,9 +299,9 @@ namespace Netsphere.Server.Game
                 await Session.SendAsync(new SOpenCharacterInfoAckMessage
                 {
                     Slot = character.Slot,
-                    Style = new CharacterStyle(character.Gender, character.Hair.Variation, character.Face.Variation,
-                        character.Shirt.Variation,
-                        character.Pants.Variation, character.Slot)
+                    Style = new CharacterStyle(character.Gender, character.Slot,
+                        character.Hair.Variation, character.Face.Variation,
+                        character.Shirt.Variation, character.Pants.Variation)
                 });
 
                 var message = new SCharacterEquipInfoAckMessage
