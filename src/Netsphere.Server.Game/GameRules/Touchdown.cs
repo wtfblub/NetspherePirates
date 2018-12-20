@@ -409,5 +409,17 @@ namespace Netsphere.Server.Game.GameRules
                           HealAssists * _options.PointsPerHealAssist +
                           FumbiScore * _options.PointsPerFumbi);
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            GoalScore = 0;
+            GoalAssistScore = 0;
+            OffenseScore = 0;
+            OffenseAssistScore = 0;
+            DefenseScore = 0;
+            DefenseAssistScore = 0;
+            FumbiScore = 0;
+        }
     }
 }

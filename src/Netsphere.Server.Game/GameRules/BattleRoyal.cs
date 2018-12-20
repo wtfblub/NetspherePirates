@@ -249,5 +249,12 @@ namespace Netsphere.Server.Game.GameRules
                           BonusKillAssists * _options.PointsPerBonusAssist +
                           Deaths * _options.PointsPerDeath);
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            BonusKills = 0;
+            BonusKillAssists = 0;
+        }
     }
 }
