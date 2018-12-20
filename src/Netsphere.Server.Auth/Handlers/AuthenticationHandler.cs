@@ -13,6 +13,7 @@ using Netsphere.Network;
 using Netsphere.Network.Message.Auth;
 using Netsphere.Server.Auth.Rules;
 using ProudNet;
+using Constants = Netsphere.Common.Constants;
 
 namespace Netsphere.Server.Auth.Handlers
 {
