@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace Netsphere.Server.Game.Plugins
+namespace Netsphere.Common.Plugins
 {
     public class MefPluginHost : IPluginHost
     {

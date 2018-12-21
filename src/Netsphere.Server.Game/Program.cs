@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
+using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Data.GameRule;
@@ -19,8 +20,6 @@ using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
 using Netsphere.Server.Game.GameRules;
-using Netsphere.Server.Game.Handlers;
-using Netsphere.Server.Game.Plugins;
 using Netsphere.Server.Game.Serializers;
 using Netsphere.Server.Game.Services;
 using Newtonsoft.Json;
@@ -60,7 +59,7 @@ namespace Netsphere.Server.Game
                 .UseProudNetServer(builder =>
                 {
                     var messageHandlerResolver = new DefaultMessageHandlerResolver(
-                        new[] { typeof(AuthenticationHandler).Assembly }, typeof(IGameMessage), typeof(IGameRuleMessage));
+                        AppDomain.CurrentDomain.GetAssemblies(), typeof(IGameMessage), typeof(IGameRuleMessage));
 
                     builder
                         .UseHostIdFactory<HostIdFactory>()

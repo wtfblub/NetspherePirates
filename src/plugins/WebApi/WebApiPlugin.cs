@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Netsphere.Common;
 using Netsphere.Common.Configuration.Hjson;
-using Netsphere.Server.Game.Plugins;
+using Netsphere.Common.Plugins;
 
 namespace WebApi
 {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
 using Foundatio.Caching;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
+using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Message.Event;
 using Netsphere.Network.Message.P2P;
@@ -18,7 +20,6 @@ using Netsphere.Network.Serializers;
 using Newtonsoft.Json;
 using ProudNet;
 using ProudNet.Hosting;
-using ProudNet.Hosting.Services;
 using Serilog;
 using StackExchange.Redis;
 
@@ -37,10 +38,14 @@ namespace Netsphere.Server.Relay
 
             Log.Information("Starting...");
 
-            ConfigureMapper();
             var appOptions = configuration.Get<AppOptions>();
             var hostBuilder = new HostBuilder();
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
+
+            IPluginHost pluginHost = new MefPluginHost();
+            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, appOptions.PluginDirectory));
+
+            ConfigureMapper();
 
             hostBuilder
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
@@ -48,7 +53,8 @@ namespace Netsphere.Server.Relay
                 .UseProudNetServer(builder =>
                 {
                     var messageHandlerResolver = new DefaultMessageHandlerResolver(
-                        new[] { typeof(Program).Assembly }, typeof(IRelayMessage), typeof(IEventMessage), typeof(IP2PMessage));
+                        AppDomain.CurrentDomain.GetAssemblies(),
+                        typeof(IRelayMessage), typeof(IEventMessage), typeof(IP2PMessage));
 
                     builder
                         .UseHostIdFactory<HostIdFactory>()
@@ -112,6 +118,8 @@ namespace Netsphere.Server.Relay
                         .AddSingleton<PlayerManager>()
                         .AddTransient<Player>()
                         .AddSingleton<RoomManager>();
+
+                    pluginHost.OnConfigure(services);
                 });
 
             var host = hostBuilder.Build();
@@ -130,6 +138,7 @@ namespace Netsphere.Server.Relay
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+            pluginHost.Dispose();
         }
 
         private static void ConfigureMapper()

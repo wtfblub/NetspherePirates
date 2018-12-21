@@ -8,5 +8,6 @@ namespace Netsphere.Server.Chat
         public ServerListOptions ServerList { get; set; }
         public DatabaseOptions Database { get; set; }
         public LoggerOptions Logging { get; set; }
+        public string PluginDirectory { get; set; }
     }
 }

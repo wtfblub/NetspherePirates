@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using DotNetty.Transport.Channels;
 using Foundatio.Caching;
 using Foundatio.Messaging;
@@ -9,9 +10,9 @@ using Microsoft.Extensions.Hosting;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
+using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Message.Auth;
-using Netsphere.Server.Auth.Handlers;
 using Netsphere.Server.Auth.Services;
 using Newtonsoft.Json;
 using ProudNet;
@@ -39,6 +40,9 @@ namespace Netsphere.Server.Auth
             var hostBuilder = new HostBuilder();
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
+            IPluginHost pluginHost = new MefPluginHost();
+            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, appOptions.PluginDirectory));
+
             hostBuilder
                 .ConfigureServices((context, services) =>
                 {
@@ -65,13 +69,15 @@ namespace Netsphere.Server.Auth
                         })
                         .AddSingleton<ServerlistService>()
                         .AddSingleton<IHostedService>(x => x.GetRequiredService<ServerlistService>());
+
+                    pluginHost.OnConfigure(services);
                 })
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
                 .ConfigureAppConfiguration(builder => builder.AddConfiguration(configuration))
                 .UseProudNetServer(builder =>
                 {
                     var messageHandlerResolver = new DefaultMessageHandlerResolver(
-                        new[] { typeof(AuthenticationHandler).Assembly }, typeof(IAuthMessage));
+                        AppDomain.CurrentDomain.GetAssemblies(), typeof(IAuthMessage));
 
                     builder
                         .UseHostIdFactory<HostIdFactory>()
@@ -113,6 +119,7 @@ namespace Netsphere.Server.Auth
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+            pluginHost.Dispose();
         }
     }
 }

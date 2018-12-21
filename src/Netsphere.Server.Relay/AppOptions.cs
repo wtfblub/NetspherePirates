@@ -7,5 +7,6 @@ namespace Netsphere.Server.Relay
         public NetworkOptions Network { get; set; }
         public DatabaseOptions Database { get; set; }
         public LoggerOptions Logging { get; set; }
+        public string PluginDirectory { get; set; }
     }
 }

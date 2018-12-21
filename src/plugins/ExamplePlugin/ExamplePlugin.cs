@@ -7,9 +7,9 @@ using Microsoft.Extensions.Options;
 using Netsphere;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
+using Netsphere.Common.Plugins;
 using Netsphere.Server.Game;
 using Netsphere.Server.Game.GameRules;
-using Netsphere.Server.Game.Plugins;
 using ProudNet.Hosting.Services;
 
 namespace ExamplePlugin

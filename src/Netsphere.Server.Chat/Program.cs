@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
 using ExpressMapper.Extensions;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
 using Netsphere.Common.Hosting;
+using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
@@ -42,6 +44,9 @@ namespace Netsphere.Server.Chat
             var hostBuilder = new HostBuilder();
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
+            IPluginHost pluginHost = new MefPluginHost();
+            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, appOptions.PluginDirectory));
+
             ConfigureMapper(appOptions);
 
             hostBuilder
@@ -50,7 +55,7 @@ namespace Netsphere.Server.Chat
                 .UseProudNetServer(builder =>
                 {
                     var messageHandlerResolver = new DefaultMessageHandlerResolver(
-                        new[] { typeof(AuthenticationHandler).Assembly }, typeof(IChatMessage));
+                        AppDomain.CurrentDomain.GetAssemblies(), typeof(IChatMessage));
 
                     builder
                         .UseHostIdFactory<HostIdFactory>()
@@ -106,6 +111,8 @@ namespace Netsphere.Server.Chat
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()
                         .AddHostedServiceEx<IpcService>();
+
+                    pluginHost.OnConfigure(services);
                 });
 
             var host = hostBuilder.Build();
@@ -128,6 +135,7 @@ namespace Netsphere.Server.Chat
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+            pluginHost.Dispose();
         }
 
         private static void ConfigureMapper(AppOptions appOptions)

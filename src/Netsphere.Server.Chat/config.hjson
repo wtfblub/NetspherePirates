@@ -29,4 +29,5 @@
     Directory: logs
     Level: Debug
   }
+  PluginDirectory: plugins
 }

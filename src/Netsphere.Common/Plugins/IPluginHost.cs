@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Netsphere.Server.Game.Plugins
+namespace Netsphere.Common.Plugins
 {
     public interface IPluginHost : IDisposable
     {
