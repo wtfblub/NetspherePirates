@@ -46,7 +46,7 @@ namespace Netsphere.Server.Game
             Room.PlayerLeft += OnPlayerLeft;
 
             foreach (var plr in Room.Players.Values)
-                plr.Score = CreateScore();
+                plr.Score = CreateScore(plr);
         }
 
         public virtual void Cleanup()
@@ -149,7 +149,7 @@ namespace Netsphere.Server.Game
 
         protected abstract bool HasEnoughPlayers();
 
-        protected abstract PlayerScore CreateScore();
+        protected abstract PlayerScore CreateScore(Player plr);
 
         protected internal abstract BriefingTeam[] CreateBriefingTeams();
 
@@ -175,7 +175,7 @@ namespace Netsphere.Server.Game
 
         private void OnPlayerJoining(object _, RoomPlayerEventArgs e)
         {
-            e.Player.Score = CreateScore();
+            e.Player.Score = CreateScore(e.Player);
         }
 
         private void OnPlayerLeft(object _, RoomPlayerEventArgs e)

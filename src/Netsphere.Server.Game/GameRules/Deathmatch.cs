@@ -53,7 +53,7 @@ namespace Netsphere.Server.Game.GameRules
             return TeamManager.Values.All(team => team.PlayersPlaying.Any());
         }
 
-        protected override PlayerScore CreateScore()
+        protected override PlayerScore CreateScore(Player plr)
         {
             return new DeathmatchPlayerScore(_options);
         }

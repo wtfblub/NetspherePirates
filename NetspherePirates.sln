@@ -51,6 +51,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Netsphere.Server.Relay", "src\Netsphere.Server.Relay\Netsphere.Server.Relay.csproj", "{6DB294F1-ED06-4F0F-8B38-F29C608B2138}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{D424D367-0496-41AD-A1DB-41F80E5950CA}"
+ProjectSection(SolutionItems) = preProject
+	src\plugins\GamePluginBase.targets = src\plugins\GamePluginBase.targets
+EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "src\plugins\WebApi\WebApi.csproj", "{98A91E11-7BBB-4202-AF53-70BE92023B64}"
 EndProject

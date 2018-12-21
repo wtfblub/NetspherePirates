@@ -72,7 +72,7 @@ namespace Netsphere.Server.Game.GameRules
             return TeamManager.Values.First();
         }
 
-        protected override PlayerScore CreateScore()
+        protected override PlayerScore CreateScore(Player plr)
         {
             return new BattleRoyalPlayerScore(_options);
         }

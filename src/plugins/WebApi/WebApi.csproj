@@ -10,5 +10,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <Import Project="..\PluginBase.targets" />
+  <Import Project="..\GamePluginBase.targets" />
 </Project>
