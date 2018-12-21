@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using Netsphere.Network.Message.GameRule;
 using ProudNet.Hosting.Services;
 using Stateless;
@@ -22,6 +23,7 @@ namespace Netsphere.Server.Game
         private bool _hasHalfTime;
         private DateTimeOffset _gameStartTime;
         private DateTimeOffset _roundStartTime;
+        private CancellationTokenSource _gameEnded;
 
         public event EventHandler GameStateChanged;
         public event EventHandler TimeStateChanged;
@@ -167,6 +169,7 @@ namespace Netsphere.Server.Game
                     break;
 
                 case GameRuleState.FirstHalf:
+                    _gameEnded = new CancellationTokenSource();
                     _gameStartTime = DateTimeOffset.Now;
                     foreach (var team in room.TeamManager.Values)
                         team.Score = 0;
@@ -226,6 +229,7 @@ namespace Netsphere.Server.Game
                     break;
 
                 case GameRuleState.Waiting:
+                    _gameEnded.Cancel();
                     foreach (var plr in room.TeamManager.Players.Where(plr => plr.State != PlayerState.Lobby))
                         plr.State = PlayerState.Lobby;
 
@@ -253,7 +257,7 @@ namespace Netsphere.Server.Game
 
                 if (This._stateMachine.CanFire(parameter))
                     This._stateMachine.Fire(parameter);
-            }, this, trigger, delay);
+            }, this, trigger, delay, _gameEnded.Token);
         }
 
         private void AnnounceHalfTime(bool isFirst = true)
