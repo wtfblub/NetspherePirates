@@ -1,5 +1,6 @@
 ﻿using System;
 using BlubLib.Serialization;
+using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Serializers;
 
@@ -622,7 +623,7 @@ namespace Netsphere.Network.Message.GameRule
         public LongPeerId Id { get; set; }
 
         [BlubMember(1)]
-        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        [BlubSerializer(typeof(EnumSerializer), typeof(int))]
         public AttackAttribute Icon { get; set; }
 
         public SScoreSuicideAckMessage()
