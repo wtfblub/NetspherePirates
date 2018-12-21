@@ -167,36 +167,42 @@ namespace Netsphere.Server.Game.GameRules
             plr.Score.HealAssists++;
             SendScoreHeal(plr);
         }
+    }
 
-        private class BriefingPlayerDeathmatch : BriefingPlayer
+    public class BriefingPlayerDeathmatch : BriefingPlayer
+    {
+        public uint Kills { get; set; }
+        public uint KillAssists { get; set; }
+        public uint HealAssists { get; set; }
+        public uint Death { get; set; }
+
+        public BriefingPlayerDeathmatch(Player plr)
         {
-            private readonly Player _player;
+            AccountId = plr.Account.Id;
+            Experience = plr.TotalExperience;
+            TeamId = plr.Team.Id;
+            State = plr.State;
+            Mode = plr.Mode;
+            IsReady = plr.IsReady;
+            TotalScore = plr.Score.GetTotalScore();
 
-            public BriefingPlayerDeathmatch(Player plr)
-            {
-                _player = plr;
+            Kills = plr.Score.Kills;
+            KillAssists = plr.Score.KillAssists;
+            HealAssists = plr.Score.HealAssists;
+            Death = plr.Score.Deaths;
+        }
 
-                AccountId = plr.Account.Id;
-                Experience = plr.TotalExperience;
-                TeamId = plr.Team.Id;
-                State = plr.State;
-                Mode = plr.Mode;
-                IsReady = plr.IsReady;
-                TotalScore = plr.Score.GetTotalScore();
-            }
+        public override void Serialize(BinaryWriter w)
+        {
+            base.Serialize(w);
 
-            public override void Serialize(BinaryWriter w)
-            {
-                base.Serialize(w);
-
-                w.Write(_player.Score.Kills);
-                w.Write(_player.Score.KillAssists);
-                w.Write(_player.Score.HealAssists);
-                w.Write(_player.Score.Deaths);
-                w.Write(0);
-                w.Write(0);
-                w.Write(0);
-            }
+            w.Write(Kills);
+            w.Write(KillAssists);
+            w.Write(HealAssists);
+            w.Write(Deaths);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
         }
     }
 

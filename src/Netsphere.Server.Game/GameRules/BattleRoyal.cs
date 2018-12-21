@@ -191,41 +191,47 @@ namespace Netsphere.Server.Game.GameRules
         {
             return (BattleRoyalPlayerScore)plr.Score;
         }
+    }
 
-        private class BriefingPlayerBattleRoyal : BriefingPlayer
+    public class BriefingPlayerBattleRoyal : BriefingPlayer
+    {
+        public uint Kills { get; set; }
+        public uint KillAssists { get; set; }
+        public uint BonusKills { get; set; }
+        public uint BonusKillAssists { get; set; }
+
+        public BriefingPlayerBattleRoyal(Player plr)
         {
-            private readonly Player _player;
+            AccountId = plr.Account.Id;
+            Experience = plr.TotalExperience;
+            TeamId = plr.Team.Id;
+            State = plr.State;
+            Mode = plr.Mode;
+            IsReady = plr.IsReady;
+            TotalScore = plr.Score.GetTotalScore();
 
-            public BriefingPlayerBattleRoyal(Player plr)
-            {
-                _player = plr;
+            var score = (BattleRoyalPlayerScore)plr.Score;
+            Kills = score.Kills;
+            KillAssists = score.KillAssists;
+            BonusKills = score.BonusKills;
+            BonusKillAssists = score.BonusKillAssists;
+        }
 
-                AccountId = plr.Account.Id;
-                Experience = plr.TotalExperience;
-                TeamId = plr.Team.Id;
-                State = plr.State;
-                Mode = plr.Mode;
-                IsReady = plr.IsReady;
-                TotalScore = plr.Score.GetTotalScore();
-            }
+        public override void Serialize(BinaryWriter w)
+        {
+            base.Serialize(w);
 
-            public override void Serialize(BinaryWriter w)
-            {
-                base.Serialize(w);
-
-                var score = (BattleRoyalPlayerScore)_player.Score;
-                w.Write(score.Kills);
-                w.Write(score.KillAssists);
-                w.Write(score.BonusKills);
-                w.Write(score.BonusKillAssists);
-                w.Write(0);
-                w.Write(0);
-                w.Write(0);
-                w.Write(0);
-                w.Write(0);
-                w.Write(0);
-                w.Write(0);
-            }
+            w.Write(Kills);
+            w.Write(KillAssists);
+            w.Write(BonusKills);
+            w.Write(BonusKillAssists);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
         }
     }
 

@@ -313,46 +313,6 @@ namespace Netsphere.Server.Game.GameRules
             return (TouchdownPlayerScore)plr.Score;
         }
 
-        private class BriefingPlayerTouchdown : BriefingPlayer
-        {
-            private readonly Player _player;
-
-            public BriefingPlayerTouchdown(Player plr)
-            {
-                _player = plr;
-
-                AccountId = plr.Account.Id;
-                Experience = plr.TotalExperience;
-                TeamId = plr.Team.Id;
-                State = plr.State;
-                Mode = plr.Mode;
-                IsReady = plr.IsReady;
-                TotalScore = plr.Score.GetTotalScore();
-            }
-
-            public override void Serialize(BinaryWriter w)
-            {
-                base.Serialize(w);
-
-                var score = (TouchdownPlayerScore)_player.Score;
-                w.Write(score.GoalScore);
-                w.Write(score.GoalAssistScore);
-                w.Write(score.Kills);
-                w.Write(score.KillAssists);
-                w.Write(score.OffenseScore);
-                w.Write(score.OffenseAssistScore);
-                w.Write(score.DefenseScore);
-                w.Write(score.DefenseAssistScore);
-                w.Write(score.HealAssists);
-                w.Write(0);
-                w.Write(0);
-                w.Write(0);
-                w.Write(score.FumbiScore);
-                w.Write(0);
-                w.Write(0);
-            }
-        }
-
         private class TouchdownAssistHelper
         {
             private static readonly TimeSpan s_touchdownAssistTimer = TimeSpan.FromSeconds(10);
@@ -376,6 +336,64 @@ namespace Netsphere.Server.Game.GameRules
 
                 return DateTime.Now - LastTime < s_touchdownAssistTimer;
             }
+        }
+    }
+
+    public class BriefingPlayerTouchdown : BriefingPlayer
+    {
+        public uint Kills { get; set; }
+        public uint KillAssists { get; set; }
+        public uint HealAssists { get; set; }
+        public uint GoalScore { get; set; }
+        public uint GoalAssistScore { get; set; }
+        public uint OffenseScore { get; set; }
+        public uint OffenseAssistScore { get; set; }
+        public uint DefenseScore { get; set; }
+        public uint DefenseAssistScore { get; set; }
+        public uint FumbiScore { get; set; }
+
+        public BriefingPlayerTouchdown(Player plr)
+        {
+            AccountId = plr.Account.Id;
+            Experience = plr.TotalExperience;
+            TeamId = plr.Team.Id;
+            State = plr.State;
+            Mode = plr.Mode;
+            IsReady = plr.IsReady;
+            TotalScore = plr.Score.GetTotalScore();
+
+            var score = (TouchdownPlayerScore)plr.Score;
+            Kills = score.Kills;
+            KillAssists = score.KillAssists;
+            HealAssists = score.HealAssists;
+            GoalScore = score.GoalScore;
+            GoalAssistScore = score.GoalAssistScore;
+            OffenseScore = score.OffenseScore;
+            OffenseAssistScore = score.OffenseAssistScore;
+            DefenseScore = score.DefenseScore;
+            DefenseAssistScore = score.DefenseAssistScore;
+            FumbiScore = score.FumbiScore;
+        }
+
+        public override void Serialize(BinaryWriter w)
+        {
+            base.Serialize(w);
+
+            w.Write(GoalScore);
+            w.Write(GoalAssistScore);
+            w.Write(Kills);
+            w.Write(KillAssists);
+            w.Write(OffenseScore);
+            w.Write(OffenseAssistScore);
+            w.Write(DefenseScore);
+            w.Write(DefenseAssistScore);
+            w.Write(HealAssists);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
+            w.Write(FumbiScore);
+            w.Write(0);
+            w.Write(0);
         }
     }
 
