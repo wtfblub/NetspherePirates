@@ -174,7 +174,7 @@ namespace Netsphere.Server.Game.GameRules
         public uint Kills { get; set; }
         public uint KillAssists { get; set; }
         public uint HealAssists { get; set; }
-        public uint Death { get; set; }
+        public uint Deaths { get; set; }
 
         public BriefingPlayerDeathmatch(Player plr)
         {
@@ -189,7 +189,7 @@ namespace Netsphere.Server.Game.GameRules
             Kills = plr.Score.Kills;
             KillAssists = plr.Score.KillAssists;
             HealAssists = plr.Score.HealAssists;
-            Death = plr.Score.Deaths;
+            Deaths = plr.Score.Deaths;
         }
 
         public override void Serialize(BinaryWriter w)
