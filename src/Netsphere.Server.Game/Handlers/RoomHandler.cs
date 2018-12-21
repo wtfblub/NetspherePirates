@@ -500,7 +500,11 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
             var room = plr.Room;
 
-            room.GameRule.OnScoreTouchdown(plr);
+            var td = room.Players.GetValueOrDefault(message.PeerId.AccountId);
+            if (td == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreTouchdown(td);
             return Task.FromResult(true);
         }
 

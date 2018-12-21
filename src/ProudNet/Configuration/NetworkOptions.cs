@@ -34,7 +34,7 @@ namespace ProudNet.Configuration
         public NetworkOptions()
         {
             ConnectTimeout = TimeSpan.FromSeconds(10);
-            HolepunchTimeout = TimeSpan.FromSeconds(30);
+            HolepunchTimeout = TimeSpan.FromSeconds(10);
             // Client sends a ping every 10 seconds
             PingTimeout = TimeSpan.FromSeconds(20);
             ServerAsP2PGroupMemberHack = false;

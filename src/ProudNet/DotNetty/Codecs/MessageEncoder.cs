@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BlubLib.DotNetty;
 using BlubLib.IO;
@@ -37,7 +38,14 @@ namespace ProudNet.DotNetty.Codecs
             using (var w = new WriteOnlyByteBufferStream(buffer, false).ToBinaryWriter(false))
             {
                 w.Write(opCode);
-                _serializer.Serialize(w, message.Message);
+                try
+                {
+                    _serializer.Serialize(w, message.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Unable to serialize {message.Message.GetType().FullName}", ex);
+                }
             }
 
             message.Message = buffer;
