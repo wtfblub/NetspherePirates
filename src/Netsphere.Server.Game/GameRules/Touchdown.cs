@@ -236,7 +236,8 @@ namespace Netsphere.Server.Game.GameRules
                 return;
             }
 
-            if (plr.Team.Score == Room.Options.ScoreLimit / 2)
+            if (StateMachine.TimeState == GameTimeState.FirstHalf &&
+                plr.Team.Score == Room.Options.ScoreLimit / 2)
             {
                 StateMachine.StartHalfTime();
                 return;
