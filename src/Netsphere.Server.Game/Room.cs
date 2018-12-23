@@ -118,6 +118,9 @@ namespace Netsphere.Server.Game
             if (IsChangingRules)
                 return RoomJoinError.ChangingRules;
 
+            if (Options.IsNoIntrusion && GameRule.StateMachine.GameState == GameState.Playing)
+                return RoomJoinError.NoIntrusion;
+
             plr.Slot = (byte)_idRecycler.GetId();
             plr.State = PlayerState.Lobby;
             plr.IsReady = false;

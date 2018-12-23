@@ -136,6 +136,7 @@ namespace Netsphere.Server.Game.Handlers
                 case RoomJoinError.AlreadyInRoom:
                 case RoomJoinError.RoomFull:
                 case RoomJoinError.KickedPreviously:
+                case RoomJoinError.NoIntrusion:
                     await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
                     break;
 

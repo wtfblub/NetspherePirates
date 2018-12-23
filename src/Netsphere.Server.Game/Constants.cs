@@ -32,7 +32,8 @@ namespace Netsphere.Server.Game
         AlreadyInRoom,
         RoomFull,
         KickedPreviously,
-        ChangingRules
+        ChangingRules,
+        NoIntrusion
     }
 
     public enum TeamJoinError
