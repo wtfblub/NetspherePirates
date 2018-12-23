@@ -32,7 +32,6 @@
     Level: Debug
   }
   SaveInterval: 30000
-  PluginDirectory: plugins
   Game:
   {
     EnableTutorial: true

@@ -41,7 +41,7 @@ namespace Netsphere.Server.Auth
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
             IPluginHost pluginHost = new MefPluginHost();
-            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, appOptions.PluginDirectory));
+            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, "plugins"));
 
             hostBuilder
                 .ConfigureServices((context, services) =>

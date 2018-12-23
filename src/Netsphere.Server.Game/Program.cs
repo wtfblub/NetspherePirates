@@ -33,13 +33,15 @@ namespace Netsphere.Server.Game
 {
     internal static class Program
     {
+        public static string BaseDirectory { get; private set; }
+
         private static void Main()
         {
-            var baseDirectory = Environment.GetEnvironmentVariable("NETSPHEREPIRATES_BASEDIR_GAME");
-            if (string.IsNullOrWhiteSpace(baseDirectory))
-                baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            BaseDirectory = Environment.GetEnvironmentVariable("NETSPHEREPIRATES_BASEDIR_GAME");
+            if (string.IsNullOrWhiteSpace(BaseDirectory))
+                BaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            var configuration = Startup.Initialize(baseDirectory, "config.hjson",
+            var configuration = Startup.Initialize(BaseDirectory, "config.hjson",
                 x => x.GetSection(nameof(AppOptions.Logging)).Get<LoggerOptions>());
 
             Log.Information("Starting...");
@@ -49,7 +51,7 @@ namespace Netsphere.Server.Game
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
             IPluginHost pluginHost = new MefPluginHost();
-            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, appOptions.PluginDirectory));
+            pluginHost.Initialize(configuration, Path.Combine(BaseDirectory, "plugins"));
 
             ConfigureMapper();
 

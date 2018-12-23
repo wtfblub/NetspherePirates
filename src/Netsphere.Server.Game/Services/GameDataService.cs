@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -37,7 +36,7 @@ namespace Netsphere.Server.Game.Services
         {
             _logger = logger;
             _databaseProvider = databaseProvider;
-            _resourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
+            _resourcePath = Path.Combine(Program.BaseDirectory, "data");
         }
 
         public DefaultItem GetDefaultItem(CharacterGender gender, CostumeSlot slot, byte variation)

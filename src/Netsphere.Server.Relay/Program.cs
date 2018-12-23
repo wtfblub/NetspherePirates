@@ -43,7 +43,7 @@ namespace Netsphere.Server.Relay
             var redisConnectionMultiplexer = ConnectionMultiplexer.Connect(appOptions.Database.ConnectionStrings.Redis);
 
             IPluginHost pluginHost = new MefPluginHost();
-            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, appOptions.PluginDirectory));
+            pluginHost.Initialize(configuration, Path.Combine(baseDirectory, "plugins"));
 
             ConfigureMapper();
 

@@ -11,6 +11,5 @@ namespace Netsphere.Server.Auth
         public TimeSpan ServerlistTimeout { get; set; }
         public DatabaseOptions Database { get; set; }
         public LoggerOptions Logging { get; set; }
-        public string PluginDirectory { get; set; }
     }
 }
