@@ -71,6 +71,7 @@ namespace Netsphere.Server.Game
         {
             OptionsChanged?.Invoke(this, new RoomEventArgs(this));
             Broadcast(new SChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
+            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
         }
 
         public Room(ILogger<Room> logger, GameRuleManager gameRuleManager, GameDataService gameDataService,
@@ -235,7 +236,7 @@ namespace Netsphere.Server.Game
             if (!map.GameRules.Contains(options.MatchKey.GameRule))
                 return RoomChangeRulesError.InvalidGameRule;
 
-            if (options.MatchKey.PlayerLimit < Players.Count)
+            if (options.MatchKey.PlayerLimit + options.MatchKey.SpectatorLimit < Players.Count)
                 return RoomChangeRulesError.PlayerLimitTooLow;
 
             IsChangingRules = true;
@@ -321,10 +322,41 @@ namespace Netsphere.Server.Game
 
             room.GameRule.Cleanup();
 
-            room.Map = room._gameDataService.Maps[room.Options.MatchKey.Map];
+            room.Map = room._gameDataService.Maps.First(x => x.Id == room.Options.MatchKey.Map);
             room.GameRule = room.Options.GameRuleResolver.Resolve(room);
             room.GameRule.Initialize(room);
             room.GameRule.StateMachine.GameStateChanged += room.OnGameStateChanged;
+
+            foreach (var plr in room.Players.Values)
+            {
+                // Move spectators to normal when spectators are disabled
+                if (plr.Mode == PlayerGameMode.Spectate && !room.Options.MatchKey.IsObserveEnabled)
+                    plr.Mode = PlayerGameMode.Normal;
+
+                // Try to rejoin the old team first then fallback to default join
+                var team = room.TeamManager[plr.Team.Id];
+                TeamJoinError error;
+                if (team != null)
+                {
+                    error = team.Join(plr);
+                    if (error == TeamJoinError.OK)
+                        continue;
+
+                }
+
+                // Original team was full
+                // Fallback to default join and try to join another team
+                error = room.TeamManager.Join(plr);
+                if (error != TeamJoinError.OK && plr.Mode == PlayerGameMode.Spectate)
+                {
+                    // Should only happen when the spectator limit got reduced
+                    // Move spectators to normal when spectator slots are filled
+                    plr.Mode = PlayerGameMode.Normal;
+                    room.TeamManager.Join(plr);
+                }
+            }
+
+            room.BroadcastBriefing();
 
             room.IsChangingRules = false;
             room.OnOptionsChanged();
