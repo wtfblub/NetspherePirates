@@ -121,6 +121,14 @@ internal class Build : NukeBuild
                     "WebApi.deps.json", "WebApi.dll", "WebApi.pdb", "webapi.hjson",
                     "Unosquare.Swan.Lite.dll",
                     "Unosquare.Labs.EmbedIO.dll"
+                }),
+                ("src/plugins/NoPity", "plugins/NoPity", "netcoreapp2.1", true, new[]
+                {
+                    "NoPity.deps.json", "NoPity.dll", "NoPity.pdb", "nopity.hjson"
+                }),
+                ("src/plugins/SoloMode", "plugins/SoloMode", "netcoreapp2.1", true, new[]
+                {
+                    "SoloMode.deps.json", "SoloMode.dll", "SoloMode.pdb", "solomode.hjson"
                 })
             };
 

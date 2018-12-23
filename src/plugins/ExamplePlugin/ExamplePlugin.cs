@@ -46,8 +46,9 @@ namespace ExamplePlugin
         public Task StartAsync(CancellationToken cancellationToken)
         {
             RoomManager.RoomCreateHook += OnRoomCreateHook;
-            RoomManager.RoomCreated += OnRoomCreated;
             Channel.JoinHook += OnChannelJoinHook;
+            GameRuleBase.CanStartGameHook += OnCanStartGameHook;
+            GameRuleBase.HasEnoughPlayersHook += OnHasEnoughPlayersHook;
             return Task.CompletedTask;
         }
 
@@ -62,13 +63,6 @@ namespace ExamplePlugin
             return true;
         }
 
-        private void OnRoomCreated(object sender, RoomEventArgs e)
-        {
-            e.Room.OptionsChanged += OnRoomOptionsChanged;
-            e.Room.GameRule.CanStartGameHook += OnCanStartGameHook;
-            e.Room.GameRule.HasEnoughPlayersHook += OnHasEnoughPlayersHook;
-        }
-
         private bool OnChannelJoinHook(ChannelJoinHookEventArgs e)
         {
             if (e.Channel.Id == 4)
@@ -76,12 +70,6 @@ namespace ExamplePlugin
 
             e.Error = ChannelJoinError.AlreadyInChannel;
             return false;
-        }
-
-        private void OnRoomOptionsChanged(object sender, RoomEventArgs e)
-        {
-            e.Room.GameRule.CanStartGameHook += OnCanStartGameHook;
-            e.Room.GameRule.HasEnoughPlayersHook += OnHasEnoughPlayersHook;
         }
 
         private bool OnCanStartGameHook(CanStartGameHookEventArgs e)
@@ -114,7 +102,13 @@ namespace ExamplePlugin
             IOptions<TouchdownOptions> options, ISchedulerService schedulerService)
             : base(stateMachine, gameOptions, options, schedulerService)
         {
-            stateMachine.ScheduleTriggerHook += ScheduleTriggerHook;
+            GameRuleStateMachine.ScheduleTriggerHook += ScheduleTriggerHook;
+        }
+
+        public override void Cleanup()
+        {
+            base.Cleanup();
+            GameRuleStateMachine.ScheduleTriggerHook -= ScheduleTriggerHook;
         }
 
         protected override bool CanStartGame()
@@ -129,7 +123,9 @@ namespace ExamplePlugin
 
         private bool ScheduleTriggerHook(ScheduleTriggerHookEventArgs e)
         {
-            e.Cancel = true;
+            if (e.StateMachine == StateMachine)
+                e.Cancel = true;
+
             return true;
         }
     }

@@ -14,10 +14,11 @@ namespace Netsphere.Server.Game
         private static readonly TimeSpan s_preResultWaitTime = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan s_halfTimeWaitTime = TimeSpan.FromSeconds(25);
         private static readonly TimeSpan s_resultWaitTime = TimeSpan.FromSeconds(15);
+        private static readonly EventPipeline<ScheduleTriggerHookEventArgs> s_scheduleTriggerHook =
+            new EventPipeline<ScheduleTriggerHookEventArgs>();
 
         private readonly ISchedulerService _schedulerService;
         private readonly StateMachine<GameRuleState, GameRuleStateTrigger> _stateMachine;
-        private readonly EventPipeline<ScheduleTriggerHookEventArgs> _scheduleTriggerHook;
         private GameRuleBase _gameRule;
         private Func<bool> _canStartGame;
         private bool _hasHalfTime;
@@ -27,10 +28,10 @@ namespace Netsphere.Server.Game
 
         public event EventHandler GameStateChanged;
         public event EventHandler TimeStateChanged;
-        public event EventPipeline<ScheduleTriggerHookEventArgs>.SubscriberDelegate ScheduleTriggerHook
+        public static event EventPipeline<ScheduleTriggerHookEventArgs>.SubscriberDelegate ScheduleTriggerHook
         {
-            add => _scheduleTriggerHook.Subscribe(value);
-            remove => _scheduleTriggerHook.Unsubscribe(value);
+            add => s_scheduleTriggerHook.Subscribe(value);
+            remove => s_scheduleTriggerHook.Unsubscribe(value);
         }
 
         protected virtual void OnGameStateChanged()
@@ -53,7 +54,6 @@ namespace Netsphere.Server.Game
             _schedulerService = schedulerService;
             _stateMachine = new StateMachine<GameRuleState, GameRuleStateTrigger>(GameRuleState.Waiting);
             _stateMachine.OnTransitioned(OnTransition);
-            _scheduleTriggerHook = new EventPipeline<ScheduleTriggerHookEventArgs>();
         }
 
         public void Initialize(GameRuleBase gameRule, Func<bool> canStartGame, bool hasHalfTime)
@@ -242,8 +242,8 @@ namespace Netsphere.Server.Game
 
         private void ScheduleTrigger(GameRuleStateTrigger trigger, TimeSpan delay)
         {
-            var eventArgs = new ScheduleTriggerHookEventArgs(trigger, delay);
-            _scheduleTriggerHook.Invoke(eventArgs);
+            var eventArgs = new ScheduleTriggerHookEventArgs(this, trigger, delay);
+            s_scheduleTriggerHook.Invoke(eventArgs);
             if (eventArgs.Cancel)
                 return;
 

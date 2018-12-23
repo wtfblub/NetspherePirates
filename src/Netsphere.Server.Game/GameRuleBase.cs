@@ -8,9 +8,12 @@ namespace Netsphere.Server.Game
 {
     public abstract partial class GameRuleBase
     {
+        private static readonly EventPipeline<CanStartGameHookEventArgs> s_preCanStartGameHook =
+            new EventPipeline<CanStartGameHookEventArgs>();
+        private static readonly EventPipeline<HasEnoughPlayersHookEventArgs> s_preHasEnoughPlayersHook =
+            new EventPipeline<HasEnoughPlayersHookEventArgs>();
+
         private readonly GameOptions _gameOptions;
-        private readonly EventPipeline<CanStartGameHookEventArgs> _preCanStartGameHook;
-        private readonly EventPipeline<HasEnoughPlayersHookEventArgs> _preHasEnoughPlayersHook;
 
         public abstract GameRule GameRule { get; }
         public abstract bool HasHalfTime { get; }
@@ -19,23 +22,21 @@ namespace Netsphere.Server.Game
         public TeamManager TeamManager => Room.TeamManager;
         public GameRuleStateMachine StateMachine { get; }
 
-        public event EventPipeline<CanStartGameHookEventArgs>.SubscriberDelegate CanStartGameHook
+        public static event EventPipeline<CanStartGameHookEventArgs>.SubscriberDelegate CanStartGameHook
         {
-            add => _preCanStartGameHook.Subscribe(value);
-            remove => _preCanStartGameHook.Unsubscribe(value);
+            add => s_preCanStartGameHook.Subscribe(value);
+            remove => s_preCanStartGameHook.Unsubscribe(value);
         }
-        public event EventPipeline<HasEnoughPlayersHookEventArgs>.SubscriberDelegate HasEnoughPlayersHook
+        public static event EventPipeline<HasEnoughPlayersHookEventArgs>.SubscriberDelegate HasEnoughPlayersHook
         {
-            add => _preHasEnoughPlayersHook.Subscribe(value);
-            remove => _preHasEnoughPlayersHook.Unsubscribe(value);
+            add => s_preHasEnoughPlayersHook.Subscribe(value);
+            remove => s_preHasEnoughPlayersHook.Unsubscribe(value);
         }
 
         protected GameRuleBase(GameRuleStateMachine stateMachine, IOptions<GameOptions> gameOptions)
         {
             StateMachine = stateMachine;
             _gameOptions = gameOptions.Value;
-            _preCanStartGameHook = new EventPipeline<CanStartGameHookEventArgs>();
-            _preHasEnoughPlayersHook = new EventPipeline<HasEnoughPlayersHookEventArgs>();
         }
 
         public virtual void Initialize(Room room)
@@ -162,14 +163,14 @@ namespace Netsphere.Server.Game
         private bool _CanStartGame()
         {
             var eventArgs = new CanStartGameHookEventArgs(this);
-            _preCanStartGameHook.Invoke(eventArgs);
+            s_preCanStartGameHook.Invoke(eventArgs);
             return eventArgs.Result ?? CanStartGame();
         }
 
         private bool _HasEnoughPlayers()
         {
             var eventArgs = new HasEnoughPlayersHookEventArgs(this);
-            _preHasEnoughPlayersHook.Invoke(eventArgs);
+            s_preHasEnoughPlayersHook.Invoke(eventArgs);
             return eventArgs.Result ?? HasEnoughPlayers();
         }
 
