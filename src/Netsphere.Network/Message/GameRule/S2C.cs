@@ -121,10 +121,10 @@ namespace Netsphere.Network.Message.GameRule
         public ulong PlayerToReplace { get; set; }
 
         [BlubMember(2)]
-        public TeamId FromTeam { get; set; }
+        public TeamId ToTeam { get; set; }
 
         [BlubMember(3)]
-        public TeamId ToTeam { get; set; }
+        public TeamId FromTeam { get; set; }
 
         public SMixChangeTeamAckMessage()
         {

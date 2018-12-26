@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Generic;
 using Logging;
@@ -17,7 +18,8 @@ namespace Netsphere.Server.Game.Handlers
           IHandle<CJoinTunnelInfoReqMessage>, IHandle<CChangeTeamReqMessage>, IHandle<CPlayerGameModeChangeReqMessage>,
           IHandle<CMixChangeTeamReqMessage>, IHandle<CBeginRoundReqMessage>, IHandle<CReadyRoundReqMessage>,
           IHandle<CEventMessageReqMessage>, IHandle<CItemsChangeReqMessage>, IHandle<CAvatarChangeReqMessage>,
-          IHandle<CChangeRuleNotifyReqMessage>, IHandle<CLeavePlayerRequestReqMessage>, IHandle<CScoreKillReqMessage>,
+          IHandle<CChangeRuleNotifyReqMessage>, IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
+          IHandle<CScoreKillReqMessage>,
           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
           IHandle<CScoreSuicideReqMessage>, IHandle<CScoreGoalReqMessage>, IHandle<CScoreReboundReqMessage>,
           IHandle<CScoreOffenseReqMessage>, IHandle<CScoreOffenseAssistReqMessage>, IHandle<CScoreDefenseReqMessage>,
@@ -387,6 +389,35 @@ namespace Netsphere.Server.Game.Handlers
                 return Task.FromResult(true);
 
             room.Leave(targetPlr, message.Reason);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
+        public Task<bool> OnHandle(MessageContext context, CAutoMixingTeamReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var room = session.Player.Room;
+
+            var players = room.Players.Values.Select(x => (plr: x, team: x.Team)).ToList();
+            var rng = new Random(Guid.NewGuid().GetHashCode());
+
+            foreach (var (plr, _) in players)
+                plr.Team.Leave(plr);
+
+            while (players.Count > 0)
+            {
+                var i = rng.Next(0, players.Count);
+                var (plr, oldTeam) = players[i];
+                players.RemoveAt(i);
+                room.TeamManager.Join(plr);
+
+                if (plr.Team != oldTeam)
+                    room.Broadcast(new SMixChangeTeamAckMessage(plr.Account.Id, 0, oldTeam.Id, plr.Team.Id));
+            }
+
+            room.BroadcastBriefing();
             return Task.FromResult(true);
         }
 
