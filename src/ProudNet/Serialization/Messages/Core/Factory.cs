@@ -32,6 +32,7 @@
             Register<SpeedHackDetectorPingMessage>(ProudCoreOpCode.SpeedHackDetectorPing);
             Register<ReliableRelay1Message>(ProudCoreOpCode.ReliableRelay1);
             Register<UnreliableRelay1Message>(ProudCoreOpCode.UnreliableRelay1);
+            Register<UnreliableRelay1_RelayDestListCompressedMessage>(ProudCoreOpCode.UnreliableRelay1_RelayDestListCompressed);
 
             // SC
             Register<RmiMessage>(ProudCoreOpCode.Rmi);

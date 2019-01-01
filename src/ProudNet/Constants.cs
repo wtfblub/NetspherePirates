@@ -17,6 +17,7 @@ namespace ProudNet
         PeerUdp_NotifyHolepunchSuccess = 18,
         ReliableRelay1 = 20,
         UnreliableRelay1 = 21,
+        UnreliableRelay1_RelayDestListCompressed = 22,
         UnreliablePing = 26,
         SpeedHackDetectorPing = 27,
 
@@ -47,7 +48,6 @@ namespace ProudNet
         // Unk
         ReliableUdp_Frame = 19,
 
-        UnreliableRelay1_RelayDestListCompressed = 22,
         LingerDataFrame2 = 25,
         ArbitaryTouch = 29,
         PeerUdp_PeerHolepunch = 30,

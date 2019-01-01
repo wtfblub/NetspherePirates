@@ -16,6 +16,7 @@ namespace ProudNet.Handlers
         : IHandle<ReliableUdp_FrameMessage>,
           IHandle<ReliableRelay1Message>,
           IHandle<UnreliableRelay1Message>,
+          IHandle<UnreliableRelay1_RelayDestListCompressedMessage>,
           IHandle<C2S_RequestCreateUdpSocketMessage>,
           IHandle<C2S_CreateUdpSocketAckMessage>
     {
@@ -97,6 +98,15 @@ namespace ProudNet.Handlers
                 target?.Send(new UnreliableRelay2Message(session.HostId, message.Data), true);
             }
 
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInP2PGroup))]
+        public Task<bool> OnHandle(MessageContext context, UnreliableRelay1_RelayDestListCompressedMessage message)
+        {
+            var session = context.Session;
+
+            session.Logger.Debug("UnreliableRelay1_RelayDestListCompressedMessage: {@Message}", message);
             return Task.FromResult(true);
         }
 

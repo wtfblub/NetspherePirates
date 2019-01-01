@@ -144,4 +144,22 @@ namespace ProudNet.Serialization.Messages.Core
             Data = Array.Empty<byte>();
         }
     }
+
+    [BlubContract]
+    internal class UnreliableRelay1_RelayDestListCompressedMessage : ICoreMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public byte[] Data { get; set; }
+
+        public UnreliableRelay1_RelayDestListCompressedMessage()
+        {
+            Data = Array.Empty<byte>();
+        }
+    }
 }
