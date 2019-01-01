@@ -17,7 +17,7 @@ namespace Netsphere.Tools.ShopEditor.Models
         public IEnumerable<ItemPeriodType> PeriodTypes => s_periodTypes;
         public ShopPriceGroup PriceGroup { get; }
         public ReactiveProperty<ItemPeriodType> PeriodType { get; }
-        public ReactiveProperty<int> Period { get; }
+        public ReactiveProperty<uint> Period { get; }
         public ReactiveProperty<int> Price { get; }
         public ReactiveProperty<bool> IsRefundable { get; }
         public ReactiveProperty<int> Durability { get; }
@@ -28,7 +28,7 @@ namespace Netsphere.Tools.ShopEditor.Models
             Id = entity.Id;
             PriceGroup = priceGroup;
             PeriodType = new ReactiveProperty<ItemPeriodType>((ItemPeriodType)entity.PeriodType);
-            Period = new ReactiveProperty<int>(entity.Period);
+            Period = new ReactiveProperty<uint>((uint)entity.Period);
             Price = new ReactiveProperty<int>(entity.Price);
             IsRefundable = new ReactiveProperty<bool>(entity.IsRefundable);
             Durability = new ReactiveProperty<int>(entity.Durability);
@@ -51,15 +51,35 @@ namespace Netsphere.Tools.ShopEditor.Models
                             break;
                     }
 
-                    if (hasDurability && Period.Value < 0)
+                    if (hasDurability && Durability.Value < 0)
                         return 0;
 
-                    if (!hasDurability && Period.Value >= 0)
+                    if (!hasDurability)
                         return -1;
 
-                    return Period.Value;
+                    return Durability.Value;
                 })
                 .BindTo(this, x => x.Durability.Value);
+
+            this.WhenAnyValue(x => x.PeriodType.Value)
+                .Select(x =>
+                {
+                    bool hasPeriod;
+                    switch (x)
+                    {
+                        case ItemPeriodType.Days:
+                        case ItemPeriodType.Hours:
+                            hasPeriod = true;
+                            break;
+
+                        default:
+                            hasPeriod = false;
+                            break;
+                    }
+
+                    return hasPeriod ? Period.Value : 0;
+                })
+                .BindTo(this, x => x.Period.Value);
         }
     }
 }

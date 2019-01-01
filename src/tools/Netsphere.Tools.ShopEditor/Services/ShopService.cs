@@ -209,7 +209,7 @@ namespace Netsphere.Tools.ShopEditor.Services
                 var periodType = (byte)price.PeriodType.Value;
                 await db.Prices.Where(x => x.Id == price.Id)
                     .Set(x => x.PeriodType, periodType)
-                    .Set(x => x.Period, price.Period.Value)
+                    .Set(x => x.Period, (int)price.Period.Value)
                     .Set(x => x.Price, price.Price.Value)
                     .Set(x => x.IsRefundable, price.IsRefundable.Value)
                     .Set(x => x.Durability, price.Durability.Value)
