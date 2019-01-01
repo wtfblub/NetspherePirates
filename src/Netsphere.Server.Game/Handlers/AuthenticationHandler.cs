@@ -29,7 +29,7 @@ namespace Netsphere.Server.Game.Handlers
     {
         private readonly ILogger _logger;
         private readonly NetworkOptions _networkOptions;
-        private readonly AppOptions _appOptions;
+        private readonly IOptionsMonitor<AppOptions> _appOptions;
         private readonly GameOptions _gameOptions;
         private readonly ICacheClient _cacheClient;
         private readonly ISessionManager _sessionManager;
@@ -39,13 +39,13 @@ namespace Netsphere.Server.Game.Handlers
         private readonly GameDataService _gameDataService;
 
         public AuthenticationHandler(ILogger<AuthenticationHandler> logger,
-            IOptions<NetworkOptions> networkOptions, IOptions<AppOptions> appOptions, IOptions<GameOptions> gameOptions,
+            IOptions<NetworkOptions> networkOptions, IOptionsMonitor<AppOptions> appOptions, IOptions<GameOptions> gameOptions,
             ICacheClient cacheClient, ISessionManager sessionManager, IDatabaseProvider databaseProvider,
             IServiceProvider serviceProvider, PlayerManager playerManager, GameDataService gameDataService)
         {
             _logger = logger;
             _networkOptions = networkOptions.Value;
-            _appOptions = appOptions.Value;
+            _appOptions = appOptions;
             _gameOptions = gameOptions.Value;
             _cacheClient = cacheClient;
             _sessionManager = sessionManager;
@@ -65,10 +65,11 @@ namespace Netsphere.Server.Game.Handlers
 
             logger.Debug("Login");
 
-            if (_appOptions.ClientVersions.All(x => message.Version != x))
+            var allowedVersions = _appOptions.CurrentValue.ClientVersions;
+            if (allowedVersions.All(x => message.Version != x))
             {
                 logger.Information("Invalid client version={Version} supported versions are {SupportedVersions}",
-                    message.Version.ToString(), string.Join(",", _appOptions.ClientVersions.Select(x => x.ToString())));
+                    message.Version.ToString(), string.Join(",", allowedVersions.Select(x => x.ToString())));
                 await session.SendAsync(new SLoginAckMessage(GameLoginResult.WrongVersion));
                 await session.CloseAsync();
                 return true;
@@ -212,11 +213,11 @@ namespace Netsphere.Server.Game.Handlers
                 ("Nickname", message.Nickname));
 
             var available = await IsNickAvailableAsync(message.Nickname);
-                if (!available)
-                {
-                    logger.Debug("Nickname not available");
-                    await session.SendAsync(new SCheckNickAckMessage(true));
-                }
+            if (!available)
+            {
+                logger.Debug("Nickname not available");
+                await session.SendAsync(new SCheckNickAckMessage(true));
+            }
 
             session.Player.Account.Nickname = message.Nickname;
             using (var db = _databaseProvider.Open<AuthContext>())
