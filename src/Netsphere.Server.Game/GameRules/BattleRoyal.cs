@@ -39,9 +39,10 @@ namespace Netsphere.Server.Game.GameRules
         {
             base.Initialize(room);
 
-            var playersPerTeam = Room.Options.MatchKey.PlayerLimit;
-            var spectatorsPerTeam = Room.Options.MatchKey.SpectatorLimit;
+            var playersPerTeam = Room.Options.MatchKey.PlayerLimit / 2;
+            var spectatorsPerTeam = Room.Options.MatchKey.SpectatorLimit / 2;
             Room.TeamManager.Add(TeamId.Alpha, playersPerTeam, spectatorsPerTeam);
+            Room.TeamManager.Add(TeamId.Beta, playersPerTeam, spectatorsPerTeam);
         }
 
         public override void Cleanup()
@@ -49,6 +50,7 @@ namespace Netsphere.Server.Game.GameRules
             base.Cleanup();
 
             Room.TeamManager.Remove(TeamId.Alpha);
+            Room.TeamManager.Remove(TeamId.Beta);
         }
 
         protected override bool CanStartGame()
