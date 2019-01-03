@@ -13,7 +13,7 @@ using Netsphere.Network.Data.Auth;
 
 namespace Netsphere.Server.Auth.Services
 {
-    internal class ServerlistService : IHostedService
+    public class ServerlistService : IHostedService
     {
         private readonly ILogger _logger;
         private readonly IMessageBus _messageBus;
