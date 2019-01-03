@@ -129,7 +129,8 @@ namespace Netsphere.Server.Game
             if (_stateMachine.IsInState(GameRuleState.Waiting))
                 return GameState.Waiting;
 
-            if (_stateMachine.IsInState(GameRuleState.Result))
+            if (_stateMachine.IsInState(GameRuleState.Result) ||
+                _stateMachine.IsInState(GameRuleState.EnteringResult))
                 return GameState.Result;
 
             if (_stateMachine.IsInState(GameRuleState.Playing))
@@ -141,7 +142,8 @@ namespace Netsphere.Server.Game
 
         private GameTimeState GetTimeState()
         {
-            if (_stateMachine.IsInState(GameRuleState.HalfTime))
+            if (_stateMachine.IsInState(GameRuleState.HalfTime) ||
+                _stateMachine.IsInState(GameRuleState.EnteringHalfTime))
                 return GameTimeState.HalfTime;
 
             if (_stateMachine.IsInState(GameRuleState.SecondHalf))
@@ -166,6 +168,7 @@ namespace Netsphere.Server.Game
                 case GameRuleState.EnteringResult:
                     ScheduleTrigger(GameRuleStateTrigger.StartResult, s_preResultWaitTime);
                     AnnounceResult();
+                    OnGameStateChanged();
                     break;
 
                 case GameRuleState.FirstHalf:

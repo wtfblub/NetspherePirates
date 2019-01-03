@@ -423,6 +423,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreKillReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -446,6 +447,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreKillAssistReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -473,6 +475,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreTeamKillReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -495,6 +498,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreHealAssistReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -510,6 +514,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreSuicideReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -526,6 +531,7 @@ namespace Netsphere.Server.Game.Handlers
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
         [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreGoalReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -543,6 +549,7 @@ namespace Netsphere.Server.Game.Handlers
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
         [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreReboundReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -557,6 +564,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreOffenseReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -580,6 +588,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreOffenseAssistReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -607,6 +616,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreDefenseReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -630,6 +640,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInRoom))]
         [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
         public Task<bool> OnHandle(MessageContext context, CScoreDefenseAssistReqMessage message)
         {
             var session = context.GetSession<Session>();
