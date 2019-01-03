@@ -75,6 +75,13 @@ namespace Netsphere.Server.Chat.Handlers
                 return true;
             }
 
+            if (_playerManager.Contains(message.AccountId))
+            {
+                logger.Information("Already logged in");
+                await session.SendAsync(new SLoginAckMessage(4));
+                return true;
+            }
+
             using (var db = _databaseProvider.Open<GameContext>())
             {
                 var accountId = (int)message.AccountId;
@@ -87,7 +94,7 @@ namespace Netsphere.Server.Chat.Handlers
                 if (playerEntity == null)
                 {
                     logger.Warning("Could not load player from database");
-                    await session.SendAsync(new SLoginAckMessage(4));
+                    await session.SendAsync(new SLoginAckMessage(5));
                     return true;
                 }
 

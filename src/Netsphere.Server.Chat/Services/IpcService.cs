@@ -32,6 +32,7 @@ namespace Netsphere.Server.Chat.Services
         {
             await _messageBus.SubscribeAsync<ChannelPlayerJoinedMessage>(OnPlayerJoinedChannel, _shutdown.Token);
             await _messageBus.SubscribeAsync<ChannelPlayerLeftMessage>(OnPlayerLeftChannel, _shutdown.Token);
+            await _messageBus.SubscribeAsync<PlayerDisconnectedMessage>(OnPlayerDisconnected, _shutdown.Token);
             await _messageBus.SubscribeAsync<PlayerUpdateMessage>(OnPlayerUpdate, _shutdown.Token);
         }
 
@@ -72,6 +73,19 @@ namespace Netsphere.Server.Chat.Services
             }
 
             channel.Leave(plr);
+            return Task.CompletedTask;
+        }
+
+        private Task OnPlayerDisconnected(PlayerDisconnectedMessage message)
+        {
+            var plr = _playerManager[message.AccountId];
+            if (plr == null)
+            {
+                _logger.Warning("<OnPlayerDisconnected> Cant find player={Id}", message.AccountId);
+                return Task.CompletedTask;
+            }
+
+            plr.Disconnect();
             return Task.CompletedTask;
         }
 

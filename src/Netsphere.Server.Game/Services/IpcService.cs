@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundatio.Messaging;
@@ -29,6 +28,7 @@ namespace Netsphere.Server.Game.Services
 
             _channelService.PlayerJoined += ChannelOnPlayerJoined;
             _channelService.PlayerLeft += ChannelOnPlayerLeft;
+            _playerManager.PlayerDisconnected += OnPlayerDisconnected;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -84,6 +84,11 @@ namespace Netsphere.Server.Game.Services
         private void ChannelOnPlayerLeft(object sender, ChannelEventArgs e)
         {
             _messageBus.PublishAsync(new ChannelPlayerLeftMessage(e.Player.Account.Id, e.Channel.Id));
+        }
+
+        private void OnPlayerDisconnected(object sender, PlayerEventArgs e)
+        {
+            _messageBus.PublishAsync(new PlayerDisconnectedMessage(e.Player.Account.Id));
         }
     }
 }

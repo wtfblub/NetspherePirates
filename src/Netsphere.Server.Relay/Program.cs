@@ -17,6 +17,7 @@ using Netsphere.Network.Message.Event;
 using Netsphere.Network.Message.P2P;
 using Netsphere.Network.Message.Relay;
 using Netsphere.Network.Serializers;
+using Netsphere.Server.Relay.Services;
 using Newtonsoft.Json;
 using ProudNet;
 using ProudNet.Hosting;
@@ -115,6 +116,7 @@ namespace Netsphere.Server.Relay
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
                         .AddService<IdGeneratorService>()
+                        .AddHostedServiceEx<IpcService>()
                         .AddSingleton<PlayerManager>()
                         .AddTransient<Player>()
                         .AddSingleton<RoomManager>();
