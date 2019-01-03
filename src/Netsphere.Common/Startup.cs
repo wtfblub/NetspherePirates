@@ -138,10 +138,10 @@ namespace Netsphere.Common
                                 _namedProperties(logEvent.MessageTemplate)?.Length ?? 0 +
                                 _positionalProperties(logEvent.MessageTemplate)?.Length ?? 0;
 
-                if (propCount > 1)
+                // if (propCount > 1)
                     _consoleFormatterWithProperties.Format(logEvent, output);
-                else
-                    _consoleFormatter.Format(logEvent, output);
+                // else
+                    // _consoleFormatter.Format(logEvent, output);
             }
         }
     }
