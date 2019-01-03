@@ -49,7 +49,7 @@ namespace ProudNet.DotNetty.Handlers
             {
                 if (_handlerMap.TryGetValue(messageType, out var handlerInfos))
                 {
-                    foreach (var handlerInfo in handlerInfos)
+                    foreach (var handlerInfo in handlerInfos.OrderByDescending(x => x.Priority))
                     {
                         var isAllowed = true;
                         var ruleThatBlocked = default(RuleInfo);
@@ -148,11 +148,10 @@ namespace ProudNet.DotNetty.Handlers
                     // from the interface and not from the type
                     var methodInfo = handlerType.GetInterfaceMap(handleInterface).TargetMethods.Single();
                     var rules = GetRulesFromMethod(methodInfo).ToArray();
-                    methodInfo = handleInterface.GetMethods().Single();
-
                     var priorityAttribute = methodInfo.GetCustomAttribute<PriorityAttribute>();
                     var priority = priorityAttribute?.Priority ?? 10;
 
+                    methodInfo = handleInterface.GetMethods().Single();
                     var handlerFunc = CreateHandlerFunc(handlerType, methodInfo, messageType);
                     handlerList.Add(new HandlerInfo(handler, handlerFunc, rules, priority));
                     map[messageType] = handlerList;
