@@ -4,7 +4,7 @@ namespace WebApi.Models
 {
     public class CharacterDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int Slot { get; set; }
         public CharacterGender Gender { get; set; }
         public DefaultItemDto Hair { get; set; }
