@@ -9,10 +9,10 @@ namespace Netsphere.Database.Game
         public long Id { get; set; }
 
         [Column]
-        public int PlayerId { get; set; }
+        public long PlayerId { get; set; }
 
         [Column]
-        public int SenderPlayerId { get; set; }
+        public long SenderPlayerId { get; set; }
 
         [Column]
         public long SentDate { get; set; }

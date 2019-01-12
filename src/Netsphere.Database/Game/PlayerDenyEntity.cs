@@ -9,10 +9,10 @@ namespace Netsphere.Database.Game
         public long Id { get; set; }
 
         [Column]
-        public int PlayerId { get; set; }
+        public long PlayerId { get; set; }
 
         [Column]
-        public int DenyPlayerId { get; set; }
+        public long DenyPlayerId { get; set; }
 
         [Association(CanBeNull = true, ThisKey = "PlayerId", OtherKey = "Id")]
         public PlayerEntity Player { get; set; }

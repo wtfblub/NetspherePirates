@@ -8,7 +8,7 @@ namespace Netsphere.Database.Game
     public class PlayerEntity
     {
         [PrimaryKey]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Column]
         public byte TutorialState { get; set; }

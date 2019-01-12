@@ -9,7 +9,7 @@ namespace Netsphere.Database.Auth
     {
         [PrimaryKey]
         [Identity]
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [Column(CanBeNull = false)]
         public string Username { get; set; }

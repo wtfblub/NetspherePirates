@@ -10,7 +10,7 @@ namespace Netsphere.Database.Auth
         public int Id { get; set; }
 
         [Column]
-        public int AccountId { get; set; }
+        public long AccountId { get; set; }
 
         [Column]
         public string Nickname { get; set; }
