@@ -413,7 +413,7 @@ namespace Netsphere.Server.Game
             {
                 await db.UpdateAsync(new PlayerEntity
                 {
-                    Id = (int)Account.Id,
+                    Id = (long)Account.Id,
                     TutorialState = TutorialState,
                     TotalExperience = (int)TotalExperience,
                     PEN = (int)PEN,

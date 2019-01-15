@@ -94,8 +94,8 @@ namespace Netsphere.Server.Chat
                 await db.InsertAsync(new PlayerDenyEntity
                 {
                     Id = deny.Id,
-                    PlayerId = (int)Player.Account.Id,
-                    DenyPlayerId = (int)deny.DenyId
+                    PlayerId = (long)Player.Account.Id,
+                    DenyPlayerId = (long)deny.DenyId
                 });
                 deny.SetExistsState(true);
             }

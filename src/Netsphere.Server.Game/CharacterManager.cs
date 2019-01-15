@@ -210,7 +210,7 @@ namespace Netsphere.Server.Game
                     var entity = new PlayerCharacterEntity
                     {
                         Id = character.Id,
-                        PlayerId = (int)Player.Account.Id,
+                        PlayerId = (long)Player.Account.Id,
                         Slot = character.Slot,
                         Gender = (byte)character.Gender,
                         BasicHair = character.Hair.Variation,
@@ -230,7 +230,7 @@ namespace Netsphere.Server.Game
                     var entity = new PlayerCharacterEntity
                     {
                         Id = character.Id,
-                        PlayerId = (int)Player.Account.Id,
+                        PlayerId = (long)Player.Account.Id,
                         Slot = character.Slot,
                         Gender = (byte)character.Gender,
                         BasicHair = character.Hair.Variation,

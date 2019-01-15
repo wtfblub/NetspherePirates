@@ -133,7 +133,7 @@ namespace Netsphere.Server.Game
                     db.Insert(new PlayerItemEntity
                     {
                         Id = (long)item.Id,
-                        PlayerId = (int)Player.Account.Id,
+                        PlayerId = (long)Player.Account.Id,
                         ShopItemInfoId = item.GetShopItemInfo().Id,
                         ShopPriceId = item.GetShopItemInfo().PriceGroup.GetPrice(item.PeriodType, item.Period).Id,
                         Effect = item.Effect,
@@ -153,7 +153,7 @@ namespace Netsphere.Server.Game
                     db.Update(new PlayerItemEntity
                     {
                         Id = (long)item.Id,
-                        PlayerId = (int)Player.Account.Id,
+                        PlayerId = (long)Player.Account.Id,
                         ShopItemInfoId = item.GetShopItemInfo().Id,
                         ShopPriceId = item.GetShopPrice().Id,
                         Effect = item.Effect,

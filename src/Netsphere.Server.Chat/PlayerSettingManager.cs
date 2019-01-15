@@ -95,7 +95,7 @@ namespace Netsphere.Server.Chat
                     await db.InsertAsync(new PlayerSettingEntity
                     {
                         Id = setting.Id,
-                        PlayerId = (int)Player.Account.Id,
+                        PlayerId = (long)Player.Account.Id,
                         Setting = name,
                         Value = GetString(name, setting.Data)
                     });

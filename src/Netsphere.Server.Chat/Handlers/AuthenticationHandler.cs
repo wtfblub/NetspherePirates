@@ -84,7 +84,7 @@ namespace Netsphere.Server.Chat.Handlers
 
             using (var db = _databaseProvider.Open<GameContext>())
             {
-                var accountId = (int)message.AccountId;
+                var accountId = (long)message.AccountId;
                 var playerEntity = await db.Players
                     .LoadWith(x => x.Ignores)
                     .LoadWith(x => x.Inbox)

@@ -84,7 +84,7 @@ namespace Netsphere.Server.Game.Handlers
             AccountEntity accountEntity;
             using (var db = _databaseProvider.Open<AuthContext>())
             {
-                var accountId = (int)message.AccountId;
+                var accountId = (long)message.AccountId;
                 accountEntity = await db.Accounts
                     .LoadWith(x => x.Bans)
                     .FirstOrDefaultAsync(x => x.Id == accountId);
@@ -158,7 +158,7 @@ namespace Netsphere.Server.Game.Handlers
 
                     plr = new PlayerEntity
                     {
-                        Id = (int)account.Id,
+                        Id = (long)account.Id,
                         AP = _gameOptions.StartAP,
                         PEN = _gameOptions.StartPEN,
                         Coins1 = _gameOptions.StartCoins1,
@@ -221,7 +221,7 @@ namespace Netsphere.Server.Game.Handlers
             session.Player.Account.Nickname = message.Nickname;
             using (var db = _databaseProvider.Open<AuthContext>())
             {
-                var accountId = (int)session.Player.Account.Id;
+                var accountId = (long)session.Player.Account.Id;
                 await db.Accounts
                     .Where(x => x.Id == accountId)
                     .Set(x => x.Nickname, message.Nickname)
