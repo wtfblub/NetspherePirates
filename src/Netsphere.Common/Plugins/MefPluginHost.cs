@@ -1,3 +1,4 @@
+using System;
 using System.Composition.Convention;
 using System.Composition.Hosting;
 using System.IO;
@@ -26,11 +27,12 @@ namespace Netsphere.Common.Plugins
                 .Export<IPlugin>()
                 .Shared();
 
-            var assemblies = Enumerable.Empty<Assembly>();
+            var assemblies = Array.Empty<Assembly>();
             if (Directory.Exists(directory))
             {
                 assemblies = Directory.GetFiles(directory, "*.dll", SearchOption.AllDirectories)
-                    .Select(AssemblyLoadContext.Default.LoadFromAssemblyPath);
+                    .Select(AssemblyLoadContext.Default.LoadFromAssemblyPath)
+                    .ToArray();
             }
 
             _container = new ContainerConfiguration().WithAssemblies(assemblies, conventions).CreateContainer();
