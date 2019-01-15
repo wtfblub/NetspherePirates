@@ -97,6 +97,7 @@ namespace Netsphere.Server.Game
 
         public event EventHandler<PlayerEventArgs> Disconnected;
         public event EventHandler<PlayerEventArgs> StateChanged;
+        public event EventHandler<NicknameEventArgs> NicknameCreated;
 
         internal void OnDisconnected()
         {
@@ -109,6 +110,11 @@ namespace Netsphere.Server.Game
         protected virtual void OnStateChanged()
         {
             StateChanged?.Invoke(this, new PlayerEventArgs(this));
+        }
+
+        protected internal virtual void OnNicknameCreated(string nickname)
+        {
+            NicknameCreated?.Invoke(this, new NicknameEventArgs(this, nickname));
         }
 
         static Player()

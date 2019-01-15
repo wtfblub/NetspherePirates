@@ -200,7 +200,6 @@ namespace Netsphere.Server.Game.Handlers
                 logger.Debug("Nickname not available");
 
             await session.SendAsync(new SCheckNickAckMessage(!available));
-
             return true;
         }
 
@@ -230,8 +229,8 @@ namespace Netsphere.Server.Game.Handlers
             }
 
             await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateNicknameSuccess));
-
             await session.Player.SendAccountInformation();
+            session.Player.OnNicknameCreated(message.Nickname);
             return true;
         }
 
