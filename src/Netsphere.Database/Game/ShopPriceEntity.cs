@@ -1,16 +1,18 @@
-﻿using LinqToDB.Mapping;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("shop_prices")]
     public class ShopPriceEntity
     {
-        [PrimaryKey]
-        [Identity]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Column]
         public int PriceGroupId { get; set; }
+        public ShopPriceGroupEntity PriceGroup { get; set; }
 
         [Column]
         public byte PeriodType { get; set; }
@@ -29,8 +31,5 @@ namespace Netsphere.Database.Game
 
         [Column]
         public bool IsEnabled { get; set; }
-
-        [Association(CanBeNull = true, ThisKey = "PriceGroupId", OtherKey = "Id")]
-        public ShopPriceGroupEntity PriceGroup { get; set; }
     }
 }

@@ -1,38 +1,38 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using LinqToDB.Mapping;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Auth
 {
     [Table("accounts")]
     public class AccountEntity
     {
-        [PrimaryKey]
-        [Identity]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
-        [Column(CanBeNull = false)]
+        [Column]
+        [Required]
+        [MaxLength(40)]
         public string Username { get; set; }
 
-        [Column(CanBeNull = true)]
+        [Column]
+        [MaxLength(40)]
         public string Nickname { get; set; }
 
         [Column]
+        [MaxLength(40)]
         public string Password { get; set; }
 
         [Column]
+        [MaxLength(40)]
         public string Salt { get; set; }
 
         [Column]
         public byte SecurityLevel { get; set; }
 
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "AccountId")]
-        public IEnumerable<BanEntity> Bans { get; set; } = Enumerable.Empty<BanEntity>();
-
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "AccountId")]
-        public IEnumerable<LoginHistoryEntity> LoginHistory { get; set; } = Enumerable.Empty<LoginHistoryEntity>();
-
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "AccountId")]
-        public IEnumerable<NicknameHistoryEntity> NicknameHistory { get; set; } = Enumerable.Empty<NicknameHistoryEntity>();
+        public List<BanEntity> Bans { get; set; } = new List<BanEntity>();
+        public List<LoginHistoryEntity> LoginHistory { get; set; } = new List<LoginHistoryEntity>();
+        public List<NicknameHistoryEntity> NicknameHistory { get; set; } = new List<NicknameHistoryEntity>();
     }
 }

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using ExpressMapper.Extensions;
-using LinqToDB;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -14,6 +13,7 @@ using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Data;
 using Netsphere.Server.Game.Services;
+using Z.EntityFramework.Plus;
 
 namespace Netsphere.Server.Game
 {
@@ -130,7 +130,7 @@ namespace Netsphere.Server.Game
             {
                 if (!item.Exists)
                 {
-                    db.Insert(new PlayerItemEntity
+                    db.PlayerItems.Add(new PlayerItemEntity
                     {
                         Id = (long)item.Id,
                         PlayerId = (long)Player.Account.Id,

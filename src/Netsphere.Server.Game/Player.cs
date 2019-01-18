@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ExpressMapper.Extensions;
-using LinqToDB;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
@@ -24,7 +24,7 @@ namespace Netsphere.Server.Game
 
         private ILogger _logger;
         private readonly GameOptions _gameOptions;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly GameDataService _gameDataService;
         private byte _tutorialState;
         private uint _totalExperience;
@@ -124,13 +124,13 @@ namespace Netsphere.Server.Game
                 s_licensesCompleted[i] = i;
         }
 
-        public Player(ILogger<Player> logger, IOptions<GameOptions> gameOptions, IDatabaseProvider databaseProvider,
+        public Player(ILogger<Player> logger, IOptions<GameOptions> gameOptions, DatabaseService databaseService,
             GameDataService gameDataService,
             CharacterManager characterManager, LicenseManager licenseManager, PlayerInventory inventory)
         {
             _logger = logger;
             _gameOptions = gameOptions.Value;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _gameDataService = gameDataService;
             CharacterManager = characterManager;
             LicenseManager = licenseManager;
@@ -334,7 +334,7 @@ namespace Netsphere.Server.Game
             if (Inventory.Count == 0)
             {
                 IEnumerable<StartItemEntity> startItems;
-                using (var db = _databaseProvider.Open<GameContext>())
+                using (var db = _databaseService.Open<GameContext>())
                 {
                     var securityLevel = (byte)Account.SecurityLevel;
                     startItems = await db.StartItems.Where(x => x.RequiredSecurityLevel <= securityLevel).ToArrayAsync();
@@ -411,7 +411,7 @@ namespace Netsphere.Server.Game
         {
             if (IsDirty)
             {
-                await db.UpdateAsync(new PlayerEntity
+                db.Players.Update(new PlayerEntity
                 {
                     Id = (long)Account.Id,
                     TutorialState = TutorialState,

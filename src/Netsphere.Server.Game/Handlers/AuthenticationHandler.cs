@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Foundatio.Caching;
-using LinqToDB;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Netsphere.Common;
@@ -18,6 +18,7 @@ using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Rules;
 using Netsphere.Server.Game.Services;
 using ProudNet;
+using Z.EntityFramework.Plus;
 using Constants = Netsphere.Common.Constants;
 
 namespace Netsphere.Server.Game.Handlers
@@ -33,14 +34,14 @@ namespace Netsphere.Server.Game.Handlers
         private readonly GameOptions _gameOptions;
         private readonly ICacheClient _cacheClient;
         private readonly ISessionManager _sessionManager;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly IServiceProvider _serviceProvider;
         private readonly PlayerManager _playerManager;
         private readonly GameDataService _gameDataService;
 
         public AuthenticationHandler(ILogger<AuthenticationHandler> logger,
             IOptions<NetworkOptions> networkOptions, IOptionsMonitor<AppOptions> appOptions, IOptions<GameOptions> gameOptions,
-            ICacheClient cacheClient, ISessionManager sessionManager, IDatabaseProvider databaseProvider,
+            ICacheClient cacheClient, ISessionManager sessionManager, DatabaseService databaseService,
             IServiceProvider serviceProvider, PlayerManager playerManager, GameDataService gameDataService)
         {
             _logger = logger;
@@ -49,7 +50,7 @@ namespace Netsphere.Server.Game.Handlers
             _gameOptions = gameOptions.Value;
             _cacheClient = cacheClient;
             _sessionManager = sessionManager;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _serviceProvider = serviceProvider;
             _playerManager = playerManager;
             _gameDataService = gameDataService;
@@ -82,11 +83,11 @@ namespace Netsphere.Server.Game.Handlers
             }
 
             AccountEntity accountEntity;
-            using (var db = _databaseProvider.Open<AuthContext>())
+            using (var db = _databaseService.Open<AuthContext>())
             {
                 var accountId = (long)message.AccountId;
                 accountEntity = await db.Accounts
-                    .LoadWith(x => x.Bans)
+                    .Include(x => x.Bans)
                     .FirstOrDefaultAsync(x => x.Id == accountId);
             }
 
@@ -142,12 +143,12 @@ namespace Netsphere.Server.Game.Handlers
                 return true;
             }
 
-            using (var db = _databaseProvider.Open<GameContext>())
+            using (var db = _databaseService.Open<GameContext>())
             {
                 var plr = await db.Players
-                    .LoadWith(x => x.Characters)
-                    .LoadWith(x => x.Items)
-                    .LoadWith(x => x.Licenses)
+                    .Include(x => x.Characters)
+                    .Include(x => x.Items)
+                    .Include(x => x.Licenses)
                     .FirstOrDefaultAsync(x => x.Id == accountEntity.Id);
 
                 if (plr == null)
@@ -166,7 +167,8 @@ namespace Netsphere.Server.Game.Handlers
                         TotalExperience = (int)(levelInfo?.TotalExperience ?? 0)
                     };
 
-                    await db.InsertAsync(plr);
+                    db.Players.Add(plr);
+                    await db.SaveChangesAsync();
                 }
 
                 session.Player = _serviceProvider.GetRequiredService<Player>();
@@ -219,13 +221,12 @@ namespace Netsphere.Server.Game.Handlers
             }
 
             session.Player.Account.Nickname = message.Nickname;
-            using (var db = _databaseProvider.Open<AuthContext>())
+            using (var db = _databaseService.Open<AuthContext>())
             {
                 var accountId = (long)session.Player.Account.Id;
                 await db.Accounts
                     .Where(x => x.Id == accountId)
-                    .Set(x => x.Nickname, message.Nickname)
-                    .UpdateAsync();
+                    .UpdateAsync(x => new AccountEntity { Nickname = message.Nickname });
             }
 
             await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateNicknameSuccess));
@@ -274,7 +275,7 @@ namespace Netsphere.Server.Game.Handlers
             }
 
             var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-            using (var db = _databaseProvider.Open<AuthContext>())
+            using (var db = _databaseService.Open<AuthContext>())
             {
                 var nickExists = await db.Accounts.AnyAsync(x => x.Nickname == nickname);
                 var nickReserved = await db.Nicknames.AnyAsync(x =>

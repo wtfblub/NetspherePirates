@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using LinqToDB.Mapping;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("shop_items")]
     public class ShopItemEntity
     {
-        [PrimaryKey]
+        [Key]
         public long Id { get; set; }
 
         [Column]
@@ -37,7 +37,6 @@ namespace Netsphere.Database.Game
         [Column]
         public bool IsDestroyable { get; set; }
 
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "ShopItemId")]
-        public IEnumerable<ShopItemInfoEntity> ItemInfos { get; set; } = Enumerable.Empty<ShopItemInfoEntity>();
+        public List<ShopItemInfoEntity> ItemInfos { get; set; } = new List<ShopItemInfoEntity>();
     }
 }

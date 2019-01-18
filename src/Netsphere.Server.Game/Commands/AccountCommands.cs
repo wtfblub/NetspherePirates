@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using LinqToDB;
 using Netsphere.Common.Cryptography;
 using Netsphere.Database;
 using Netsphere.Database.Auth;
@@ -10,11 +9,11 @@ namespace Netsphere.Server.Game.Commands
 {
     internal class AccountCommands : ICommandHandler
     {
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
 
-        public AccountCommands(IDatabaseProvider databaseProvider)
+        public AccountCommands(DatabaseService databaseService)
         {
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
         }
 
         [Command(
@@ -31,17 +30,19 @@ namespace Netsphere.Server.Game.Commands
             var password = args[1];
             var (hash, salt) = PasswordHasher.Hash(password);
 
-            using (var db = _databaseProvider.Open<AuthContext>())
+            using (var db = _databaseService.Open<AuthContext>())
             {
-                var id = await db.InsertWithInt32IdentityAsync(new AccountEntity
+                var accountEntity = new AccountEntity
                 {
                     Username = username,
                     Password = hash,
                     Salt = salt,
                     SecurityLevel = (byte)SecurityLevel.User
-                });
+                };
+                db.Accounts.Add(accountEntity);
+                await db.SaveChangesAsync();
 
-                var msg = $"Created account with username={username} id={id}";
+                var msg = $"Created account with username={username} id={accountEntity.Id}";
                 if (plr != null)
                     await plr.SendConsoleMessage(S4Color.Green + msg);
                 else

@@ -11,11 +11,10 @@
   {
     ConnectionStrings:
     {
-      redis: 127.0.0.1
-      game: Server=127.0.0.1;Database=game;Uid=root;Pwd=1234;SslMode=None;
+      Redis: 127.0.0.1
+      Game: Server=127.0.0.1;Database=game;Uid=root;Pwd=1234;SslMode=None;
     }
     RunMigration: true
-    UseSqlite: false
   }
   Logging:
   {

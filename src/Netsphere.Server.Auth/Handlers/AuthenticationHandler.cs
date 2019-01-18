@@ -3,8 +3,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Foundatio.Caching;
-using LinqToDB;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using Netsphere.Common.Cryptography;
 using Netsphere.Database;
 using Netsphere.Database.Auth;
@@ -19,15 +19,15 @@ namespace Netsphere.Server.Auth.Handlers
     internal class AuthenticationHandler : IHandle<CAuthInEUReqMessage>
     {
         private readonly ILogger _logger;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly ICacheClient _cacheClient;
         private readonly RandomNumberGenerator _randomNumberGenerator;
 
-        public AuthenticationHandler(ILogger<AuthenticationHandler> logger, IDatabaseProvider databaseProvider,
+        public AuthenticationHandler(ILogger<AuthenticationHandler> logger, DatabaseService databaseService,
             ICacheClient cacheClient)
         {
             _logger = logger;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _cacheClient = cacheClient;
             _randomNumberGenerator = RandomNumberGenerator.Create();
         }
@@ -45,11 +45,11 @@ namespace Netsphere.Server.Auth.Handlers
             logger.Debug("Login from {RemoteEndPoint} with username {Username}");
 
             AccountEntity account;
-            using (var db = _databaseProvider.Open<AuthContext>())
+            using (var db = _databaseService.Open<AuthContext>())
             {
                 var username = message.Username.ToLower();
                 account = await db.Accounts
-                    .LoadWith(x => x.Bans)
+                    .Include(x => x.Bans)
                     .FirstOrDefaultAsync(x => x.Username == username);
 
                 if (account == null)
@@ -80,12 +80,14 @@ namespace Netsphere.Server.Auth.Handlers
                     return true;
                 }
 
-                await db.InsertAsync(new LoginHistoryEntity
+                db.LoginHistory.Add(new LoginHistoryEntity
                 {
                     AccountId = account.Id,
                     Date = now,
                     IP = remoteAddress
                 });
+
+                await db.SaveChangesAsync();
             }
 
             logger.Information("Login success");

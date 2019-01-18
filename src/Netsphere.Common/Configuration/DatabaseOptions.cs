@@ -4,6 +4,5 @@ namespace Netsphere.Common.Configuration
     {
         public ConnectionStrings ConnectionStrings { get; set; }
         public bool RunMigration { get; set; }
-        public bool UseSqlite { get; set; }
     }
 }

@@ -1,21 +1,25 @@
-﻿using LinqToDB.Mapping;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("player_items")]
     public class PlayerItemEntity
     {
-        [PrimaryKey]
+        [Key]
         public long Id { get; set; }
 
         [Column]
         public long PlayerId { get; set; }
+        public PlayerEntity Player { get; set; }
 
         [Column]
         public int ShopItemInfoId { get; set; }
+        public ShopItemInfoEntity ShopItemInfo { get; set; }
 
         [Column]
         public int ShopPriceId { get; set; }
+        public ShopPriceEntity ShopPrice { get; set; }
 
         [Column]
         public uint Effect { get; set; }
@@ -31,14 +35,5 @@ namespace Netsphere.Database.Game
 
         [Column]
         public int Count { get; set; }
-
-        [Association(CanBeNull = true, ThisKey = "PlayerId", OtherKey = "Id")]
-        public PlayerEntity Player { get; set; }
-
-        [Association(CanBeNull = true, ThisKey = "ShopItemInfoId", OtherKey = "Id")]
-        public ShopItemInfoEntity ShopItemInfo { get; set; }
-
-        [Association(CanBeNull = true, ThisKey = "ShopPriceId", OtherKey = "Id")]
-        public ShopPriceEntity ShopPrice { get; set; }
     }
 }

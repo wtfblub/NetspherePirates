@@ -35,20 +35,15 @@
 
                     <TextBox Name="Username" Margin="0 0 0 5"
                             Watermark="Username" UseFloatingWatermark="True"
-                            IsVisible="{Binding ElementName=UseSqlite,Path=IsChecked,Converter={StaticResource NegateBooleanConverter}}"
                             Text="{Binding Username.Value}" />
 
                     <TextBox Name="Password" Margin="0 0 0 5"
                             Watermark="Password" UseFloatingWatermark="True" PasswordChar="*"
-                            IsVisible="{Binding ElementName=UseSqlite,Path=IsChecked,Converter={StaticResource NegateBooleanConverter}}"
                             Text="{Binding Password.Value}" />
 
-                    <TextBox Name="Database" Margin="0 0 0 5"
+                    <TextBox Name="Database"
                             Watermark="Database" UseFloatingWatermark="True"
-                            IsVisible="{Binding ElementName=UseSqlite,Path=IsChecked,Converter={StaticResource NegateBooleanConverter}}"
                             Text="{Binding Database.Value}" />
-
-                    <CheckBox Name="UseSqlite" IsChecked="{Binding UseSqlite.Value}" Content="Use Sqlite" />
                 </StackPanel>
             </Grid>
         </Grid>

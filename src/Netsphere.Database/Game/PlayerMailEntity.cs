@@ -1,26 +1,33 @@
-﻿using LinqToDB.Mapping;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("player_mails")]
     public class PlayerMailEntity
     {
-        [PrimaryKey]
+        [Key]
         public long Id { get; set; }
 
         [Column]
         public long PlayerId { get; set; }
+        public PlayerEntity Player { get; set; }
 
         [Column]
         public long SenderPlayerId { get; set; }
+        public PlayerEntity SenderPlayer { get; set; }
 
         [Column]
         public long SentDate { get; set; }
 
-        [Column(CanBeNull = false)]
+        [Column]
+        [Required]
+        [MaxLength(100)]
         public string Title { get; set; }
 
-        [Column(CanBeNull = false)]
+        [Column]
+        [Required]
+        [MaxLength(500)]
         public string Message { get; set; }
 
         [Column]
@@ -28,11 +35,5 @@ namespace Netsphere.Database.Game
 
         [Column]
         public bool IsMailDeleted { get; set; }
-
-        [Association(CanBeNull = true, ThisKey = "PlayerId", OtherKey = "Id")]
-        public PlayerEntity Player { get; set; }
-
-        [Association(CanBeNull = true, ThisKey = "SenderPlayerId", OtherKey = "Id")]
-        public PlayerEntity SenderPlayer { get; set; }
     }
 }

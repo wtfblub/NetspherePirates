@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
 using ExpressMapper.Extensions;
 using Foundatio.Caching;
 using Foundatio.Messaging;
 using Foundatio.Serializer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,7 +19,6 @@ using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
-using Netsphere.Server.Chat.Handlers;
 using Netsphere.Server.Chat.Services;
 using Newtonsoft.Json;
 using ProudNet;
@@ -86,8 +88,9 @@ namespace Netsphere.Server.Chat
                         .Configure<ServerListOptions>(context.Configuration.GetSection(nameof(AppOptions.ServerList)))
                         .Configure<DatabaseOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
                         .Configure<IdGeneratorOptions>(x => x.Id = 1)
-                        .AddSingleton<IDatabaseProvider, DatabaseProvider>()
-                        .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
+                        .AddSingleton<DatabaseService>()
+                        .AddDbContext<AuthContext>(x => x.UseMySql(appOptions.Database.ConnectionStrings.Auth))
+                        .AddDbContext<GameContext>(x => x.UseMySql(appOptions.Database.ConnectionStrings.Game))
                         .AddSingleton(redisConnectionMultiplexer)
                         .AddTransient<ISerializer>(x => new JsonNetSerializer(JsonConvert.DefaultSettings()))
                         .AddSingleton<ICacheClient, RedisCacheClient>()
@@ -117,16 +120,28 @@ namespace Netsphere.Server.Chat
 
             var host = hostBuilder.Build();
 
-            Log.Information("Initializing database provider...");
-            var databaseProvider = host.Services.GetRequiredService<IDatabaseProvider>();
-            databaseProvider.Initialize();
+            var contexts = host.Services.GetRequiredService<IEnumerable<DbContext>>();
+            foreach (var db in contexts)
+            {
+                Log.Information("Checking database={Context}...", db.GetType().Name);
 
-            Log.Information("Running database migrations...");
-            var migrator = host.Services.GetRequiredService<IDatabaseMigrator>();
-            if (appOptions.Database.RunMigration)
-                migrator.MigrateTo();
-            else if (migrator.HasMigrationsToApply())
-                throw new DatabaseVersionMismatchException();
+                using (db)
+                {
+                    if (db.Database.GetPendingMigrations().Any())
+                    {
+                        if (appOptions.Database.RunMigration)
+                        {
+                            Log.Information("Applying database={Context} migrations...", db.GetType().Name);
+                            db.Database.Migrate();
+                        }
+                        else
+                        {
+                            Log.Error("Database={Context} does not have all migrations applied", db.GetType().Name);
+                            return;
+                        }
+                    }
+                }
+            }
 
             host.Services
                 .GetRequiredService<IProudNetServerService>()

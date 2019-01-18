@@ -1,31 +1,53 @@
-﻿using LinqToDB;
-using LinqToDB.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using Netsphere.Database.Game;
 
 namespace Netsphere.Database
 {
-    public class GameContext : DataConnection
+    public class GameContext : DbContext
     {
-        public ITable<PlayerEntity> Players => GetTable<PlayerEntity>();
-        public ITable<PlayerCharacterEntity> PlayerCharacters => GetTable<PlayerCharacterEntity>();
-        public ITable<PlayerDenyEntity> PlayerIgnores => GetTable<PlayerDenyEntity>();
-        public ITable<PlayerItemEntity> PlayerItems => GetTable<PlayerItemEntity>();
-        public ITable<PlayerLicenseEntity> PlayerLicenses => GetTable<PlayerLicenseEntity>();
-        public ITable<PlayerMailEntity> PlayerMails => GetTable<PlayerMailEntity>();
-        public ITable<PlayerSettingEntity> PlayerSettings => GetTable<PlayerSettingEntity>();
-        public ITable<ShopEffectGroupEntity> EffectGroups => GetTable<ShopEffectGroupEntity>();
-        public ITable<ShopEffectEntity> Effects => GetTable<ShopEffectEntity>();
-        public ITable<ShopPriceGroupEntity> PriceGroups => GetTable<ShopPriceGroupEntity>();
-        public ITable<ShopPriceEntity> Prices => GetTable<ShopPriceEntity>();
-        public ITable<ShopItemEntity> Items => GetTable<ShopItemEntity>();
-        public ITable<ShopItemInfoEntity> ItemInfos => GetTable<ShopItemInfoEntity>();
-        public ITable<ShopVersionEntity> ShopVersion => GetTable<ShopVersionEntity>();
-        public ITable<StartItemEntity> StartItems => GetTable<StartItemEntity>();
-        public ITable<LicenseRewardEntity> LicenseRewards => GetTable<LicenseRewardEntity>();
+        public DbSet<PlayerEntity> Players { get; set; }
+        public DbSet<PlayerCharacterEntity> PlayerCharacters { get; set; }
+        public DbSet<PlayerDenyEntity> PlayerIgnores { get; set; }
+        public DbSet<PlayerItemEntity> PlayerItems { get; set; }
+        public DbSet<PlayerLicenseEntity> PlayerLicenses { get; set; }
+        public DbSet<PlayerMailEntity> PlayerMails { get; set; }
+        public DbSet<PlayerSettingEntity> PlayerSettings { get; set; }
+        public DbSet<ShopEffectGroupEntity> EffectGroups { get; set; }
+        public DbSet<ShopEffectEntity> Effects { get; set; }
+        public DbSet<ShopPriceGroupEntity> PriceGroups { get; set; }
+        public DbSet<ShopPriceEntity> Prices { get; set; }
+        public DbSet<ShopItemEntity> Items { get; set; }
+        public DbSet<ShopItemInfoEntity> ItemInfos { get; set; }
+        public DbSet<ShopVersionEntity> ShopVersion { get; set; }
+        public DbSet<StartItemEntity> StartItems { get; set; }
+        public DbSet<LicenseRewardEntity> LicenseRewards { get; set; }
 
-        public GameContext(string provider, string connection)
-            : base(provider, connection)
+        public GameContext(DbContextOptions<GameContext> options)
+            : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ShopEffectGroupEntity>()
+                .HasIndex(x => x.Name).IsUnique();
+
+            modelBuilder.Entity<ShopPriceGroupEntity>()
+                .HasIndex(x => x.Name).IsUnique();
+
+            modelBuilder.Entity<PlayerDenyEntity>()
+                .HasOne(x => x.Player)
+                .WithMany(x => x.Ignores);
+
+            modelBuilder.Entity<PlayerDenyEntity>()
+                .HasOne(x => x.DenyPlayer);
+
+            modelBuilder.Entity<PlayerMailEntity>()
+                .HasOne(x => x.Player)
+                .WithMany(x => x.Inbox);
+
+            modelBuilder.Entity<PlayerMailEntity>()
+                .HasOne(x => x.SenderPlayer);
         }
     }
 }

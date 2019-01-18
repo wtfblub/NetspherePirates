@@ -14,7 +14,7 @@ namespace Netsphere.Server.Game.Services
     public partial class GameDataService : IHostedService
     {
         private readonly ILogger _logger;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly string _resourcePath;
 
         public ImmutableDictionary<int, LevelInfo> Levels { get; private set; }
@@ -32,10 +32,10 @@ namespace Netsphere.Server.Game.Services
         public ImmutableDictionary<ItemLicense, LicenseReward> LicenseRewards { get; private set; }
         public string ShopVersion { get; private set; }
 
-        public GameDataService(ILogger<GameDataService> logger, IDatabaseProvider databaseProvider)
+        public GameDataService(ILogger<GameDataService> logger, DatabaseService databaseService)
         {
             _logger = logger;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _resourcePath = Path.Combine(Program.BaseDirectory, "data");
         }
 

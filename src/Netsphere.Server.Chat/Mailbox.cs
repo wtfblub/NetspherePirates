@@ -5,14 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
-using LinqToDB;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Auth;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
 using Netsphere.Network.Message.Chat;
+using Z.EntityFramework.Plus;
 
 namespace Netsphere.Server.Chat
 {
@@ -21,7 +22,7 @@ namespace Netsphere.Server.Chat
         public const int ItemsPerPage = 10;
 
         private ILogger _logger;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly IdGeneratorService _idGeneratorService;
         private readonly PlayerManager _playerManager;
         private readonly ConcurrentDictionary<long, Mail> _mails;
@@ -31,11 +32,11 @@ namespace Netsphere.Server.Chat
         public int Count => _mails.Count;
         public Mail this[long id] => CollectionExtensions.GetValueOrDefault(_mails, id);
 
-        public Mailbox(ILogger<Mailbox> logger, IDatabaseProvider databaseProvider, IdGeneratorService idGeneratorService,
+        public Mailbox(ILogger<Mailbox> logger, DatabaseService databaseService, IdGeneratorService idGeneratorService,
             PlayerManager playerManager)
         {
             _logger = logger;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _idGeneratorService = idGeneratorService;
             _playerManager = playerManager;
             _mails = new ConcurrentDictionary<long, Mail>();
@@ -58,7 +59,7 @@ namespace Netsphere.Server.Chat
                 }
                 else
                 {
-                    using (var db = _databaseProvider.Open<AuthContext>())
+                    using (var db = _databaseService.Open<AuthContext>())
                     {
                         var account = await db.Accounts.FirstOrDefaultAsync(x => x.Id == mailEntity.SenderPlayerId);
                         if (account == null)
@@ -94,13 +95,13 @@ namespace Netsphere.Server.Chat
             // ToDo check for ignore
 
             AccountEntity account;
-            using (var db = _databaseProvider.Open<AuthContext>())
+            using (var db = _databaseService.Open<AuthContext>())
                 account = await db.Accounts.FirstOrDefaultAsync(x => x.Nickname == receiver);
 
             if (account == null)
                 return false;
 
-            using (var db = _databaseProvider.Open<GameContext>())
+            using (var db = _databaseService.Open<GameContext>())
             {
                 var entity = new PlayerMailEntity
                 {
@@ -113,7 +114,7 @@ namespace Netsphere.Server.Chat
                     IsMailNew = true,
                     IsMailDeleted = false
                 };
-                await db.InsertAsync(entity);
+                db.PlayerMails.Add(entity);
 
                 var plr = _playerManager.GetByNickname(receiver);
                 plr?.Mailbox.Add(new Mail(entity, receiver));
@@ -159,11 +160,13 @@ namespace Netsphere.Server.Chat
 
             foreach (var mail in _mails.Values.Where(x => x.IsDirty))
             {
-                await db.PlayerMails
-                    .Where(x => x.Id == mail.Id)
-                    .Set(x => x.IsMailNew, mail.IsNew)
-                    .UpdateAsync();
+                var entity = new PlayerMailEntity
+                {
+                    Id = mail.Id,
+                    IsMailNew = mail.IsNew
+                };
 
+                db.Attach(entity).Property(x => x.IsMailNew).IsModified = true;
                 mail.SetDirtyState(false);
             }
         }

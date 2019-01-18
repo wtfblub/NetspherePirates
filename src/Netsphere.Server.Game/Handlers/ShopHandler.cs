@@ -59,7 +59,7 @@ namespace Netsphere.Server.Game.Handlers
 
             foreach (var group in itemsTobuy)
             {
-                logger = plrLogger.ForContext("ItemToBuy", group.Key);
+                logger = plrLogger.ForContext("@ItemToBuy", group.Key);
                 var itemToBuy = group.Key;
                 var count = group.Count();
                 var itemInfo = _gameDataService.Items.GetValueOrDefault(itemToBuy.ItemNumber);

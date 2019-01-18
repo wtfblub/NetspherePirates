@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
-using LinqToDB;
+using Microsoft.EntityFrameworkCore;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
+using Z.EntityFramework.Plus;
 
 namespace Netsphere.Server.Chat
 {
     public class DenyManager : ISaveable, IReadOnlyCollection<Deny>
     {
         private readonly IdGeneratorService _idGeneratorService;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly ConcurrentDictionary<ulong, Deny> _denies;
         private readonly ConcurrentStack<Deny> _deniesToRemove;
 
@@ -23,10 +24,10 @@ namespace Netsphere.Server.Chat
         public int Count => _denies.Count;
         public Deny this[ulong accountId] => CollectionExtensions.GetValueOrDefault(_denies, accountId);
 
-        public DenyManager(IdGeneratorService idGeneratorService, IDatabaseProvider databaseProvider)
+        public DenyManager(IdGeneratorService idGeneratorService, DatabaseService databaseService)
         {
             _idGeneratorService = idGeneratorService;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _deniesToRemove = new ConcurrentStack<Deny>();
             _denies = new ConcurrentDictionary<ulong, Deny>();
         }
@@ -35,7 +36,7 @@ namespace Netsphere.Server.Chat
         {
             Player = player;
 
-            using (var db = _databaseProvider.Open<AuthContext>())
+            using (var db = _databaseService.Open<AuthContext>())
             {
                 var ids = entity.Ignores.Select(x => x.DenyPlayerId).ToArray();
                 var accounts = await db.Accounts.Where(x => ids.Contains(x.Id)).ToArrayAsync();
@@ -91,7 +92,7 @@ namespace Netsphere.Server.Chat
 
             foreach (var deny in _denies.Values.Where(deny => !deny.Exists))
             {
-                await db.InsertAsync(new PlayerDenyEntity
+                db.PlayerIgnores.Add(new PlayerDenyEntity
                 {
                     Id = deny.Id,
                     PlayerId = (long)Player.Account.Id,

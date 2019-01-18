@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LinqToDB;
 using Logging;
 using Netsphere.Common;
 using Netsphere.Database;
@@ -12,6 +11,7 @@ using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
 using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Services;
+using Z.EntityFramework.Plus;
 
 namespace Netsphere.Server.Game
 {
@@ -219,7 +219,7 @@ namespace Netsphere.Server.Game
                         BasicPants = character.Pants.Variation
                     };
                     SetDtoItems(character, entity);
-                    await db.InsertAsync(entity);
+                    db.PlayerCharacters.Add(entity);
                     character.SetExistsState(true);
                 }
                 else
@@ -239,7 +239,7 @@ namespace Netsphere.Server.Game
                         BasicPants = character.Pants.Variation
                     };
                     SetDtoItems(character, entity);
-                    await db.UpdateAsync(entity);
+                    db.PlayerCharacters.Update(entity);
                     character.SetDirtyState(false);
                 }
             }

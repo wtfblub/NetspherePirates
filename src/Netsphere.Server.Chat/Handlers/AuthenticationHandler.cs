@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Foundatio.Messaging;
-using LinqToDB;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Netsphere.Common;
@@ -23,19 +23,19 @@ namespace Netsphere.Server.Chat.Handlers
         private readonly NetworkOptions _networkOptions;
         private readonly IMessageBus _messageBus;
         private readonly ISessionManager _sessionManager;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly IServiceProvider _serviceProvider;
         private readonly PlayerManager _playerManager;
 
         public AuthenticationHandler(ILogger<AuthenticationHandler> logger, IOptions<NetworkOptions> networkOptions,
-            IMessageBus messageBus, ISessionManager sessionManager, IDatabaseProvider databaseProvider,
+            IMessageBus messageBus, ISessionManager sessionManager, DatabaseService databaseService,
             IServiceProvider serviceProvider, PlayerManager playerManager)
         {
             _logger = logger;
             _networkOptions = networkOptions.Value;
             _messageBus = messageBus;
             _sessionManager = sessionManager;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _serviceProvider = serviceProvider;
             _playerManager = playerManager;
         }
@@ -82,13 +82,13 @@ namespace Netsphere.Server.Chat.Handlers
                 return true;
             }
 
-            using (var db = _databaseProvider.Open<GameContext>())
+            using (var db = _databaseService.Open<GameContext>())
             {
                 var accountId = (long)message.AccountId;
                 var playerEntity = await db.Players
-                    .LoadWith(x => x.Ignores)
-                    .LoadWith(x => x.Inbox)
-                    .LoadWith(x => x.Settings)
+                    .Include(x => x.Ignores)
+                    .Include(x => x.Inbox)
+                    .Include(x => x.Settings)
                     .FirstOrDefaultAsync(x => x.Id == accountId);
 
                 if (playerEntity == null)

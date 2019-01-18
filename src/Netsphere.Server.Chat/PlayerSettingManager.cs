@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using LinqToDB;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -92,7 +91,7 @@ namespace Netsphere.Server.Chat
                 var setting = pair.Value;
                 if (!setting.Exists)
                 {
-                    await db.InsertAsync(new PlayerSettingEntity
+                    db.PlayerSettings.Add(new PlayerSettingEntity
                     {
                         Id = setting.Id,
                         PlayerId = (long)Player.Account.Id,
@@ -106,7 +105,7 @@ namespace Netsphere.Server.Chat
                     if (!setting.IsDirty)
                         continue;
 
-                    await db.UpdateAsync(setting);
+                    db.Update(setting);
                     setting.SetDirtyState(false);
                 }
             }

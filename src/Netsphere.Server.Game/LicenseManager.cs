@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
-using LinqToDB;
 using Logging;
 using Netsphere.Common;
 using Netsphere.Database;
@@ -13,6 +12,7 @@ using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
 using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Services;
+using Z.EntityFramework.Plus;
 
 namespace Netsphere.Server.Game
 {
@@ -138,7 +138,7 @@ namespace Netsphere.Server.Game
             {
                 if (!license.Exists)
                 {
-                    await db.InsertAsync(new PlayerLicenseEntity
+                    db.PlayerLicenses.Add(new PlayerLicenseEntity
                     {
                         Id = license.Id,
                         PlayerId = (long)_player.Account.Id,
@@ -156,8 +156,7 @@ namespace Netsphere.Server.Game
 
                     await db.PlayerLicenses
                         .Where(x => x.Id == license.Id)
-                        .Set(x => x.CompletedCount, license.TimesCompleted)
-                        .UpdateAsync();
+                        .UpdateAsync(x => new PlayerLicenseEntity { CompletedCount = license.TimesCompleted });
 
                     license.SetDirtyState(false);
                 }

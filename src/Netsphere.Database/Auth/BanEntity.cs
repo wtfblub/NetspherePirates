@@ -1,16 +1,18 @@
-﻿using LinqToDB.Mapping;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Auth
 {
     [Table("bans")]
     public class BanEntity
     {
-        [PrimaryKey]
-        [Identity]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Column]
         public long AccountId { get; set; }
+        public AccountEntity Account { get; set; }
 
         [Column]
         public long Date { get; set; }
@@ -20,8 +22,5 @@ namespace Netsphere.Database.Auth
 
         [Column]
         public string Reason { get; set; }
-
-        [Association(CanBeNull = false, ThisKey = "AccountId", OtherKey = "Id")]
-        public AccountEntity Account { get; set; }
     }
 }

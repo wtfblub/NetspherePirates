@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using DotNetty.Transport.Channels;
 using Foundatio.Caching;
 using Foundatio.Messaging;
 using Foundatio.Serializer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -51,8 +54,8 @@ namespace Netsphere.Server.Auth
                         .Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(1))
                         .Configure<AppOptions>(context.Configuration)
                         .Configure<DatabaseOptions>(context.Configuration.GetSection(nameof(AppOptions.Database)))
-                        .AddSingleton<IDatabaseProvider, DatabaseProvider>()
-                        .AddSingleton<IDatabaseMigrator, FluentDatabaseMigrator>()
+                        .AddSingleton<DatabaseService>()
+                        .AddDbContext<AuthContext>(x => x.UseMySql(appOptions.Database.ConnectionStrings.Auth))
                         .AddSingleton(redisConnectionMultiplexer)
                         .AddTransient<ISerializer>(x => new JsonNetSerializer(JsonConvert.DefaultSettings()))
                         .AddSingleton<ICacheClient, RedisCacheClient>()
@@ -101,16 +104,28 @@ namespace Netsphere.Server.Auth
 
             var host = hostBuilder.Build();
 
-            Log.Information("Initializing database provider...");
-            var databaseProvider = host.Services.GetRequiredService<IDatabaseProvider>();
-            databaseProvider.Initialize();
+            var contexts = host.Services.GetRequiredService<IEnumerable<DbContext>>();
+            foreach (var db in contexts)
+            {
+                Log.Information("Checking database={Context}...", db.GetType().Name);
 
-            Log.Information("Running database migrations...");
-            var migrator = host.Services.GetRequiredService<IDatabaseMigrator>();
-            if (appOptions.Database.RunMigration)
-                migrator.MigrateTo();
-            else if (migrator.HasMigrationsToApply())
-                throw new DatabaseVersionMismatchException();
+                using (db)
+                {
+                    if (db.Database.GetPendingMigrations().Any())
+                    {
+                        if (appOptions.Database.RunMigration)
+                        {
+                            Log.Information("Applying database={Context} migrations...", db.GetType().Name);
+                            db.Database.Migrate();
+                        }
+                        else
+                        {
+                            Log.Error("Database={Context} does not have all migrations applied", db.GetType().Name);
+                            return;
+                        }
+                    }
+                }
+            }
 
             host.Services
                 .GetRequiredService<IProudNetServerService>()

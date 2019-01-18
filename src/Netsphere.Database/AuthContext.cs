@@ -1,18 +1,27 @@
-﻿using LinqToDB;
-using LinqToDB.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using Netsphere.Database.Auth;
 
 namespace Netsphere.Database
 {
-    public class AuthContext : DataConnection
+    public class AuthContext : DbContext
     {
-        public ITable<AccountEntity> Accounts => GetTable<AccountEntity>();
-        public ITable<BanEntity> Bans => GetTable<BanEntity>();
-        public ITable<NicknameHistoryEntity> Nicknames => GetTable<NicknameHistoryEntity>();
+        public DbSet<AccountEntity> Accounts { get; set; }
+        public DbSet<BanEntity> Bans { get; set; }
+        public DbSet<NicknameHistoryEntity> Nicknames { get; set; }
+        public DbSet<LoginHistoryEntity> LoginHistory { get; set; }
 
-        public AuthContext(string provider, string connection)
-            : base(provider, connection)
+        public AuthContext(DbContextOptions<AuthContext> options)
+            : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AccountEntity>()
+                .HasIndex(x => x.Username).IsUnique();
+
+            modelBuilder.Entity<AccountEntity>()
+                .HasIndex(x => x.Nickname).IsUnique();
         }
     }
 }

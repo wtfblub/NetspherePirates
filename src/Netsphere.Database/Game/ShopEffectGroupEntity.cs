@@ -1,20 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using LinqToDB.Mapping;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("shop_effect_groups")]
     public class ShopEffectGroupEntity
     {
-        [PrimaryKey]
-        [Identity]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Column(CanBeNull = false)]
+        [Column]
+        [Required]
+        [MaxLength(20)]
         public string Name { get; set; }
 
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "EffectGroupId")]
-        public IEnumerable<ShopEffectEntity> ShopEffects { get; set; } = Enumerable.Empty<ShopEffectEntity>();
+        public List<ShopEffectEntity> ShopEffects { get; set; } = new List<ShopEffectEntity>();
     }
 }

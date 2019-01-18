@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using LinqToDB.Mapping;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("players")]
     public class PlayerEntity
     {
-        [PrimaryKey]
+        [Key]
         public long Id { get; set; }
 
         [Column]
@@ -31,22 +31,11 @@ namespace Netsphere.Database.Game
         [Column]
         public byte CurrentCharacterSlot { get; set; }
 
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "PlayerId")]
-        public IEnumerable<PlayerCharacterEntity> Characters { get; set; } = Enumerable.Empty<PlayerCharacterEntity>();
-
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "PlayerId")]
-        public IEnumerable<PlayerDenyEntity> Ignores { get; set; } = Enumerable.Empty<PlayerDenyEntity>();
-
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "PlayerId")]
-        public IEnumerable<PlayerItemEntity> Items { get; set; } = Enumerable.Empty<PlayerItemEntity>();
-
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "PlayerId")]
-        public IEnumerable<PlayerLicenseEntity> Licenses { get; set; } = Enumerable.Empty<PlayerLicenseEntity>();
-
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "PlayerId")]
-        public IEnumerable<PlayerMailEntity> Inbox { get; set; } = Enumerable.Empty<PlayerMailEntity>();
-
-        [Association(CanBeNull = true, ThisKey = "Id", OtherKey = "PlayerId")]
-        public IEnumerable<PlayerSettingEntity> Settings { get; set; } = Enumerable.Empty<PlayerSettingEntity>();
+        public List<PlayerCharacterEntity> Characters { get; set; } = new List<PlayerCharacterEntity>();
+        public List<PlayerDenyEntity> Ignores { get; set; } = new List<PlayerDenyEntity>();
+        public List<PlayerItemEntity> Items { get; set; } = new List<PlayerItemEntity>();
+        public List<PlayerLicenseEntity> Licenses { get; set; } = new List<PlayerLicenseEntity>();
+        public List<PlayerMailEntity> Inbox { get; set; } = new List<PlayerMailEntity>();
+        public List<PlayerSettingEntity> Settings { get; set; } = new List<PlayerSettingEntity>();
     }
 }

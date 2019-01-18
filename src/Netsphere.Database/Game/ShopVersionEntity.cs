@@ -1,15 +1,18 @@
-﻿using LinqToDB.Mapping;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("shop_version")]
     public class ShopVersionEntity
     {
-        [PrimaryKey]
-        [Identity]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Column(CanBeNull = false)]
+        [Column]
+        [Required]
+        [MaxLength(40)]
         public string Version { get; set; }
     }
 }

@@ -14,17 +14,17 @@ namespace Netsphere.Server.Game.Services
         private readonly ILogger _logger;
         private readonly AppOptions _appOptions;
         private readonly ISchedulerService _schedulerService;
-        private readonly IDatabaseProvider _databaseProvider;
+        private readonly DatabaseService _databaseService;
         private readonly PlayerManager _playerManager;
         private readonly CancellationTokenSource _shutdown;
 
         public PlayerSaveService(ILogger<PlayerSaveService> logger, IOptions<AppOptions> appOptions,
-            ISchedulerService schedulerService, IDatabaseProvider databaseProvider, PlayerManager playerManager)
+            ISchedulerService schedulerService, DatabaseService databaseService, PlayerManager playerManager)
         {
             _logger = logger;
             _appOptions = appOptions.Value;
             _schedulerService = schedulerService;
-            _databaseProvider = databaseProvider;
+            _databaseService = databaseService;
             _playerManager = playerManager;
             _shutdown = new CancellationTokenSource();
         }
@@ -64,7 +64,7 @@ namespace Netsphere.Server.Game.Services
         private async Task SavePlayers()
         {
             _logger.Information("Saving players...");
-            using (var db = _databaseProvider.Open<GameContext>())
+            using (var db = _databaseService.Open<GameContext>())
             {
                 foreach (var plr in _playerManager)
                 {
@@ -72,6 +72,8 @@ namespace Netsphere.Server.Game.Services
                     {
                         if (plr.Session.IsConnected)
                             await plr.Save(db);
+
+                        await db.SaveChangesAsync();
                     }
                     catch (Exception ex)
                     {

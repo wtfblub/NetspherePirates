@@ -1,15 +1,17 @@
-﻿using LinqToDB.Mapping;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Netsphere.Database.Game
 {
     [Table("player_characters")]
     public class PlayerCharacterEntity
     {
-        [PrimaryKey]
+        [Key]
         public long Id { get; set; }
 
         [Column]
         public long PlayerId { get; set; }
+        public PlayerEntity Player { get; set; }
 
         [Column]
         public byte Slot { get; set; }
@@ -31,38 +33,46 @@ namespace Netsphere.Database.Game
 
         [Column]
         public long? Weapon1Id { get; set; }
+        public PlayerItemEntity Weapon1 { get; set; }
 
         [Column]
         public long? Weapon2Id { get; set; }
+        public PlayerItemEntity Weapon2 { get; set; }
 
         [Column]
         public long? Weapon3Id { get; set; }
+        public PlayerItemEntity Weapon3 { get; set; }
 
         [Column]
         public long? SkillId { get; set; }
+        public PlayerItemEntity Skill { get; set; }
 
         [Column]
         public long? HairId { get; set; }
+        public PlayerItemEntity Hair { get; set; }
 
         [Column]
         public long? FaceId { get; set; }
+        public PlayerItemEntity Face { get; set; }
 
         [Column]
         public long? ShirtId { get; set; }
+        public PlayerItemEntity Shirt { get; set; }
 
         [Column]
         public long? PantsId { get; set; }
+        public PlayerItemEntity Pants { get; set; }
 
         [Column]
         public long? GlovesId { get; set; }
+        public PlayerItemEntity Gloves { get; set; }
 
         [Column]
         public long? ShoesId { get; set; }
+        public PlayerItemEntity Shoes { get; set; }
 
         [Column]
         public long? AccessoryId { get; set; }
-
-        [Association(CanBeNull = true, ThisKey = "PlayerId", OtherKey = "Id")]
-        public PlayerEntity Player { get; set; }
+        public PlayerItemEntity Accessory { get; set; }
     }
 }

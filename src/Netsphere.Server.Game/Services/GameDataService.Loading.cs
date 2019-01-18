@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Configuration;
-using LinqToDB;
+using Microsoft.EntityFrameworkCore;
 using Netsphere.Database;
 using Netsphere.Database.Game;
 using Netsphere.Resource.xml;
@@ -495,20 +495,20 @@ namespace Netsphere.Server.Game.Services
 
         public async Task LoadShop()
         {
-            using (var db = _databaseProvider.Open<GameContext>())
+            using (var db = _databaseService.Open<GameContext>())
             {
                 _logger.Information("Loading effect groups...");
-                var effects = await db.EffectGroups.LoadWith(x => x.ShopEffects).ToArrayAsync();
+                var effects = await db.EffectGroups.Include(x => x.ShopEffects).ToArrayAsync();
                 ShopEffects = effects.ToImmutableDictionary(x => x.Id, x => new ShopEffectGroup(x));
                 _logger.Information("Loaded {Count} effect groups", ShopEffects.Count);
 
                 _logger.Information("Loading price groups...");
-                var prices = await db.PriceGroups.LoadWith(x => x.ShopPrices).ToArrayAsync();
+                var prices = await db.PriceGroups.Include(x => x.ShopPrices).ToArrayAsync();
                 ShopPrices = prices.ToImmutableDictionary(x => x.Id, x => new ShopPriceGroup(x));
                 _logger.Information("Loaded {Count} price groups", ShopPrices.Count);
 
                 _logger.Information("Loading shop items...");
-                var items = await db.Items.LoadWith(x => x.ItemInfos).ToArrayAsync();
+                var items = await db.Items.Include(x => x.ItemInfos).ToArrayAsync();
                 ShopItems = items.ToImmutableDictionary(x => (ItemNumber)x.Id, x => new ShopItem(x, this));
                 _logger.Information("Loaded {Count} shop items", ShopItems.Count);
 
