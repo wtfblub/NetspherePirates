@@ -13,7 +13,7 @@ namespace WebApi
     {
         private IConfiguration _configuration;
 
-        public void OnInitialize()
+        public void OnInitialize(IConfiguration appConfiguration)
         {
             var path = new Uri(Assembly.GetExecutingAssembly().CodeBase).AbsolutePath;
             path = Path.GetDirectoryName(path);

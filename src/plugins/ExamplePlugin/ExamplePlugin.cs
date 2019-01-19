@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -16,7 +17,7 @@ namespace ExamplePlugin
 {
     public class ExamplePlugin : IPlugin
     {
-        public void OnInitialize()
+        public void OnInitialize(IConfiguration appConfiguration)
         {
         }
 

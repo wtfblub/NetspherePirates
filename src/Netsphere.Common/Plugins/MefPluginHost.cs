@@ -39,7 +39,7 @@ namespace Netsphere.Common.Plugins
             _plugins = _container.GetExports<IPlugin>().ToArray();
 
             foreach (var plugin in _plugins)
-                plugin.OnInitialize();
+                plugin.OnInitialize(configuration);
 
             logger.Information("Loaded {Count} plugins", _plugins.Length);
         }
@@ -61,7 +61,7 @@ namespace Netsphere.Common.Plugins
 
     public interface IPlugin
     {
-        void OnInitialize();
+        void OnInitialize(IConfiguration appConfiguration);
 
         void OnConfigure(IServiceCollection services);
 
