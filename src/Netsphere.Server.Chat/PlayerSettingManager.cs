@@ -94,7 +94,7 @@ namespace Netsphere.Server.Chat
                     db.PlayerSettings.Add(new PlayerSettingEntity
                     {
                         Id = setting.Id,
-                        PlayerId = (long)Player.Account.Id,
+                        PlayerId = (int)Player.Account.Id,
                         Setting = name,
                         Value = GetString(name, setting.Data)
                     });

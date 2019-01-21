@@ -9,7 +9,7 @@ namespace Netsphere.Database.Auth
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [Column]
         [Required]

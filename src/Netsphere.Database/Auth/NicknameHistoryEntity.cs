@@ -11,7 +11,7 @@ namespace Netsphere.Database.Auth
         public int Id { get; set; }
 
         [Column]
-        public long AccountId { get; set; }
+        public int AccountId { get; set; }
         public AccountEntity Account { get; set; }
 
         [Column]

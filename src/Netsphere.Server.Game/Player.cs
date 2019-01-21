@@ -413,7 +413,7 @@ namespace Netsphere.Server.Game
             {
                 db.Players.Update(new PlayerEntity
                 {
-                    Id = (long)Account.Id,
+                    Id = (int)Account.Id,
                     TutorialState = TutorialState,
                     TotalExperience = (int)TotalExperience,
                     PEN = (int)PEN,

@@ -95,8 +95,8 @@ namespace Netsphere.Server.Chat
                 db.PlayerIgnores.Add(new PlayerDenyEntity
                 {
                     Id = deny.Id,
-                    PlayerId = (long)Player.Account.Id,
-                    DenyPlayerId = (long)deny.DenyId
+                    PlayerId = (int)Player.Account.Id,
+                    DenyPlayerId = (int)deny.DenyId
                 });
                 deny.SetExistsState(true);
             }

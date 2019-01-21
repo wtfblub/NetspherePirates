@@ -141,7 +141,7 @@ namespace Netsphere.Server.Game
                     db.PlayerLicenses.Add(new PlayerLicenseEntity
                     {
                         Id = license.Id,
-                        PlayerId = (long)_player.Account.Id,
+                        PlayerId = (int)_player.Account.Id,
                         License = (byte)license.ItemLicense,
                         FirstCompletedDate = license.FirstCompletedDate.ToUnixTimeSeconds(),
                         CompletedCount = license.TimesCompleted

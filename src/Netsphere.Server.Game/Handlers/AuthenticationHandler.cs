@@ -159,7 +159,7 @@ namespace Netsphere.Server.Game.Handlers
 
                     plr = new PlayerEntity
                     {
-                        Id = (long)account.Id,
+                        Id = (int)account.Id,
                         AP = _gameOptions.StartAP,
                         PEN = _gameOptions.StartPEN,
                         Coins1 = _gameOptions.StartCoins1,

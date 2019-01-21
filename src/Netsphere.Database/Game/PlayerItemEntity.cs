@@ -10,7 +10,7 @@ namespace Netsphere.Database.Game
         public long Id { get; set; }
 
         [Column]
-        public long PlayerId { get; set; }
+        public int PlayerId { get; set; }
         public PlayerEntity Player { get; set; }
 
         [Column]

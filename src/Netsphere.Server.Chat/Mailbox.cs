@@ -107,7 +107,7 @@ namespace Netsphere.Server.Chat
                 {
                     Id = _idGeneratorService.GetNextId(IdKind.Mail),
                     PlayerId = account.Id,
-                    SenderPlayerId = (long)Player.Account.Id,
+                    SenderPlayerId = (int)Player.Account.Id,
                     SentDate = DateTimeOffset.Now.ToUnixTimeSeconds(),
                     Title = title,
                     Message = message,
