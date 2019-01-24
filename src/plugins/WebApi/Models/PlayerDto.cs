@@ -12,5 +12,8 @@ namespace WebApi.Models
         public byte ActiveCharacter { get; set; }
         public CharacterDto[] Characters { get; set; }
         public PlayerItemDto[] Inventory { get; set; }
+
+        public uint? ChannelId { get; set; }
+        public uint? RoomId { get; set; }
     }
 }

@@ -116,7 +116,9 @@ namespace WebApi
                 .Function(dest => dest.Characters,
                     src => src.CharacterManager.Select(x => x.Map<Character, CharacterDto>()).ToArray())
                 .Function(dest => dest.Inventory,
-                    src => src.Inventory.Select(x => x.Map<PlayerItem, PlayerItemDto>()).ToArray());
+                    src => src.Inventory.Select(x => x.Map<PlayerItem, PlayerItemDto>()).ToArray())
+                .Function(dest => dest.ChannelId, src => src.Channel?.Id)
+                .Function(dest => dest.RoomId, src => src.Room?.Id);
 
             Mapper.Register<Character, CharacterDto>()
                 .Function(dest => dest.Weapons, src => src.Weapons.GetItems().Select(x => x?.Id ?? 0).ToArray())
