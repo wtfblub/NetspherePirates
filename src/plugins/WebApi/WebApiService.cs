@@ -63,7 +63,8 @@ namespace WebApi
             _webServer = new WebServer($"http://{options.Value.Listener}/");
             _webServer.RegisterModule(new WebApiModule());
 
-            foreach (var type in typeof(WebApiService).Assembly.DefinedTypes)
+            foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var type in assembly.DefinedTypes)
             {
                 if (type.IsClass && !type.IsAbstract && type.IsSubclassOf(typeof(WebApiController)))
                 {
