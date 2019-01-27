@@ -8,7 +8,7 @@ environment:
   DOCKER_USER:
     secure: VYidDb7gu+5Sb/D7I25OLS1vxZwd1PinespCDLwwIqc=
   DOCKER_PASSWORD:
-    secure: gH6MrYChR6DolTy74JE9mWCl6NctnI+m7mH0GBMcHG0=
+    secure: oE5RRv3cjMjYsGXLLGWX/kyRN5ioh5FQKB9Lv7a8DmU=
 
 install:
   - chmod +x build.sh
