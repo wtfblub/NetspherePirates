@@ -13,7 +13,7 @@ environment:
 install:
   - cmd: chmod +x build.sh
 build_script:
-  - cmd: ./build.sh Dist -Configuration Debug && ./build.sh DockerBuild && 7z a binaries_debug.zip $APPVEYOR_BUILD_FOLDER\dist\*
+  - cmd: ./build.sh Dist -Configuration Debug && ./build.sh DockerBuild && 7z a binaries_debug.zip $APPVEYOR_BUILD_FOLDER/dist/*
 test: off
 artifacts:
   - path: binaries_debug.zip
