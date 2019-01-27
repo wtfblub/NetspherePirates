@@ -48,13 +48,13 @@ namespace WebApi.Controllers
         }
 
         [WebApiHandler(HttpVerbs.Post, BasePath + "/ban")]
-        public Task<bool> Ban()
+        public async Task<bool> Ban()
         {
             var request = this.ParseJsonNet<BanRequestDto>();
             var plr = _playerManager[request.PlayerId];
 
             if (plr == null)
-                return this.JsonResponseAsync(new { error = "Player not found" }, HttpStatusCode.NotFound);
+                return await this.JsonResponseAsync(new { error = "Player not found" }, HttpStatusCode.NotFound);
 
             using (var db = _databaseService.Open<AuthContext>())
             {
@@ -65,10 +65,12 @@ namespace WebApi.Controllers
                     Duration = request.Duration,
                     Reason = request.Reason
                 });
+
+                await db.SaveChangesAsync();
             }
 
             plr.Disconnect();
-            return this.JsonResponseAsync(null);
+            return await this.JsonResponseAsync(null);
         }
 
         [WebApiHandler(HttpVerbs.Post, BasePath + "/roomkick")]
