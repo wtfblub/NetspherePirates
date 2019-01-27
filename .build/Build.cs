@@ -1,12 +1,13 @@
 using System.IO;
-using System.Linq;
 using Nuke.Common;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
+using Nuke.Docker;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
+using static Nuke.Docker.DockerTasks;
 
 internal class Build : NukeBuild
 {
@@ -167,5 +168,42 @@ internal class Build : NukeBuild
 
             File.WriteAllText(Path.Combine(dist, "tools", "ShopEditor.sh"),
                 "#!/bin/sh\ndotnet ShopEditor/Netsphere.Tools.ShopEditor.dll");
+        });
+
+    public Target DockerBuild => _ => _
+        .Executes(() =>
+        {
+            DockerImageBuild(x => x
+                .SetPath(RootDirectory / "dist" / "Auth")
+                .SetFile(RootDirectory / "Dockerfile")
+                .SetBuildArg("APP_BINARY=Netsphere.Server.Auth.dll")
+                .AddTag("netspherepirates/auth"));
+
+            DockerImageBuild(x => x
+                .SetPath(RootDirectory / "dist" / "Chat")
+                .SetFile(RootDirectory / "Dockerfile")
+                .SetBuildArg("APP_BINARY=Netsphere.Server.Chat.dll")
+                .AddTag("netspherepirates/chat"));
+
+            DockerImageBuild(x => x
+                .SetPath(RootDirectory / "dist" / "Game")
+                .SetFile(RootDirectory / "Dockerfile")
+                .SetBuildArg("APP_BINARY=Netsphere.Server.Game.dll")
+                .AddTag("netspherepirates/game"));
+
+            DockerImageBuild(x => x
+                .SetPath(RootDirectory / "dist" / "Relay")
+                .SetFile(RootDirectory / "Dockerfile")
+                .SetBuildArg("APP_BINARY=Netsphere.Server.Relay.dll")
+                .AddTag("netspherepirates/relay"));
+        });
+
+    public Target DockerPush => _ => _
+        .Executes(() =>
+        {
+            DockerImagePush(x => x.SetName("netspherepirates/auth"));
+            DockerImagePush(x => x.SetName("netspherepirates/chat"));
+            DockerImagePush(x => x.SetName("netspherepirates/game"));
+            DockerImagePush(x => x.SetName("netspherepirates/relay"));
         });
 }

@@ -34,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{5FC2263D-9
 		README.md = README.md
 		Rules.ruleset = Rules.ruleset
 		Rules.targets = Rules.targets
+		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Netsphere.Common", "src\Netsphere.Common\Netsphere.Common.csproj", "{6F4935EA-CF29-4ADF-AC23-15D981D2B9A4}"

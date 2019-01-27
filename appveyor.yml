@@ -3,13 +3,25 @@ pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
 image: Visual Studio 2017
-build_script:
-- ps: >-
-    ./build.ps1 Dist -Configuration Debug
+deploy_script:
+  - ps: >-
+      docker login --username $Env:DOCKER_USER --password $Env:DOCKER_PASSWORD
 
-    7z a binaries_debug.zip $Env:APPVEYOR_BUILD_FOLDER\dist\*
+      ./build.ps1 DockerPush
+build_script:
+  - ps: >-
+      ./build.ps1 Dist -Configuration Debug
+
+      ./build.ps1 DockerBuild
+
+      7z a binaries_debug.zip $Env:APPVEYOR_BUILD_FOLDER\dist\*
 test: off
 artifacts:
-- path: binaries_debug.zip
-  name: netspherepirates
+  - path: binaries_debug.zip
+    name: netspherepirates
 deploy: off
+environment:
+  DOCKER_USER:
+    secure: VYidDb7gu+5Sb/D7I25OLS1vxZwd1PinespCDLwwIqc=
+  DOCKER_PASSWORD:
+    secure: gH6MrYChR6DolTy74JE9mWCl6NctnI+m7mH0GBMcHG0=
