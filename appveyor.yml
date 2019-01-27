@@ -11,16 +11,17 @@ environment:
     secure: gH6MrYChR6DolTy74JE9mWCl6NctnI+m7mH0GBMcHG0=
 
 install:
-  - cmd: chmod +x build.sh
+  - chmod +x build.sh
+
 build_script:
-  - cmd: ./build.sh Dist -Configuration Debug && ./build.sh DockerBuild && 7z a binaries_debug.zip $APPVEYOR_BUILD_FOLDER/dist/*
+  - ./build.sh Dist -Configuration Debug && ./build.sh DockerBuild && 7z a binaries_debug.zip $APPVEYOR_BUILD_FOLDER/dist/*
 test: off
 artifacts:
   - path: binaries_debug.zip
     name: netspherepirates
 
 before_deploy:
-  - cmd: docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+  - docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
 deploy_script:
-  - cmd: ./build.sh DockerPush
+  - ./build.sh DockerPush
 deploy: off
