@@ -84,6 +84,9 @@ namespace Netsphere.Server.Game.Services
                 try
                 {
                     var input = Console.ReadLine();
+                    if (input == null)
+                        return;
+
                     await Execute(null, input.GetArgs());
                 }
                 catch (Exception ex)

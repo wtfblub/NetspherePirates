@@ -14,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Netsphere.Common;
 using Netsphere.Common.Configuration;
-using Netsphere.Common.Hosting;
 using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Chat;
@@ -54,6 +53,7 @@ namespace Netsphere.Server.Chat
             hostBuilder
                 .ConfigureHostConfiguration(builder => builder.AddConfiguration(configuration))
                 .ConfigureAppConfiguration(builder => builder.AddConfiguration(configuration))
+                .UseConsoleLifetime()
                 .UseProudNetServer(builder =>
                 {
                     var messageHandlerResolver = new DefaultMessageHandlerResolver(
@@ -81,7 +81,7 @@ namespace Netsphere.Server.Chat
                 .ConfigureServices((context, services) =>
                 {
                     services
-                        .AddSingleton<IHostLifetime, ConsoleApplicationLifetime>()
+                        .Configure<ConsoleLifetimeOptions>(options => options.SuppressStatusMessages = true)
                         .Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(1))
                         .Configure<AppOptions>(context.Configuration)
                         .Configure<NetworkOptions>(context.Configuration.GetSection(nameof(AppOptions.Network)))
