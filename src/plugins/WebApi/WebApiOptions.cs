@@ -4,6 +4,6 @@ namespace WebApi
 {
     public class WebApiOptions
     {
-        public IPEndPoint Listener { get; set; }
+        public string Listener { get; set; }
     }
 }

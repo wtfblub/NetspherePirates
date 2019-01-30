@@ -60,7 +60,7 @@ namespace WebApi
                 }
             };
 
-            _webServer = new WebServer($"http://{options.Value.Listener}/");
+            _webServer = new WebServer(options.Value.Listener);
             _webServer.RegisterModule(new WebApiModule());
 
             foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
