@@ -176,19 +176,27 @@ internal class Build : NukeBuild
             var dockerfile = File.ReadAllText(RootDirectory / "Dockerfile");
             File.WriteAllText(
                 TemporaryDirectory / "Dockerfile-Auth",
-                dockerfile.Replace("${BINARY}", "Netsphere.Server.Auth.dll")
+                dockerfile
+                    .Replace("${BINARY}", "Netsphere.Server.Auth.dll")
+                    .Replace("${ENVNAME}", "NETSPHEREPIRATES_BASEDIR_AUTH")
             );
             File.WriteAllText(
                 TemporaryDirectory / "Dockerfile-Chat",
-                dockerfile.Replace("${BINARY}", "Netsphere.Server.Chat.dll")
+                dockerfile
+                    .Replace("${BINARY}", "Netsphere.Server.Chat.dll")
+                    .Replace("${ENVNAME}", "NETSPHEREPIRATES_BASEDIR_CHAT")
             );
             File.WriteAllText(
                 TemporaryDirectory / "Dockerfile-Game",
-                dockerfile.Replace("${BINARY}", "Netsphere.Server.Game.dll")
+                dockerfile
+                    .Replace("${BINARY}", "Netsphere.Server.Game.dll")
+                    .Replace("${ENVNAME}", "NETSPHEREPIRATES_BASEDIR_GAME")
             );
             File.WriteAllText(
                 TemporaryDirectory / "Dockerfile-Relay",
-                dockerfile.Replace("${BINARY}", "Netsphere.Server.Relay.dll")
+                dockerfile
+                    .Replace("${BINARY}", "Netsphere.Server.Relay.dll")
+                    .Replace("${ENVNAME}", "NETSPHEREPIRATES_BASEDIR_RELAY")
             );
 
             DockerImageBuild(x => x
