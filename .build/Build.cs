@@ -173,28 +173,42 @@ internal class Build : NukeBuild
     public Target DockerBuild => _ => _
         .Executes(() =>
         {
+            var dockerfile = File.ReadAllText(RootDirectory / "Dockerfile");
+            File.WriteAllText(
+                TemporaryDirectory / "Dockerfile-Auth",
+                dockerfile.Replace("${BINARY}", "Netsphere.Server.Auth.dll")
+            );
+            File.WriteAllText(
+                TemporaryDirectory / "Dockerfile-Chat",
+                dockerfile.Replace("${BINARY}", "Netsphere.Server.Chat.dll")
+            );
+            File.WriteAllText(
+                TemporaryDirectory / "Dockerfile-Game",
+                dockerfile.Replace("${BINARY}", "Netsphere.Server.Game.dll")
+            );
+            File.WriteAllText(
+                TemporaryDirectory / "Dockerfile-Relay",
+                dockerfile.Replace("${BINARY}", "Netsphere.Server.Relay.dll")
+            );
+
             DockerImageBuild(x => x
                 .SetPath(RootDirectory / "dist" / "Auth")
-                .SetFile(RootDirectory / "Dockerfile")
-                .SetBuildArg("APP_BINARY=Netsphere.Server.Auth.dll")
+                .SetFile(TemporaryDirectory / "Dockerfile-Auth")
                 .AddTag("netspherepirates/auth"));
 
             DockerImageBuild(x => x
                 .SetPath(RootDirectory / "dist" / "Chat")
-                .SetFile(RootDirectory / "Dockerfile")
-                .SetBuildArg("APP_BINARY=Netsphere.Server.Chat.dll")
+                .SetFile(TemporaryDirectory / "Dockerfile-Chat")
                 .AddTag("netspherepirates/chat"));
 
             DockerImageBuild(x => x
                 .SetPath(RootDirectory / "dist" / "Game")
-                .SetFile(RootDirectory / "Dockerfile")
-                .SetBuildArg("APP_BINARY=Netsphere.Server.Game.dll")
+                .SetFile(TemporaryDirectory / "Dockerfile-Game")
                 .AddTag("netspherepirates/game"));
 
             DockerImageBuild(x => x
                 .SetPath(RootDirectory / "dist" / "Relay")
-                .SetFile(RootDirectory / "Dockerfile")
-                .SetBuildArg("APP_BINARY=Netsphere.Server.Relay.dll")
+                .SetFile(TemporaryDirectory / "Dockerfile-Relay")
                 .AddTag("netspherepirates/relay"));
         });
 
