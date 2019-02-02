@@ -1,0 +1,28 @@
+stages:
+  - build
+  - build_docker
+
+build:
+  image: wtfblub/dotnet-mono
+  stage: build
+  before_script:
+    - chmod +x build.sh
+  script:
+    - ./build.sh Dist -Configuration Debug
+  artifacts:
+    paths:
+      - dist/
+
+build_docker:
+  image: wtfblub/docker-dotnet-sdk:docker18.09-dotnet-sdk2.2.103
+  services:
+    - docker:dind
+  stage: build_docker
+  before_script:
+    - chmod +x build.sh
+    # This is a workaround for https://gitlab.com/gitlab-org/gitlab-ce/issues/27436
+    - export DOCKER_PASSWORD="$(echo "$DOCKER_PASSWORD_ENCODED" | base64 -d)"
+    - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
+  script:
+    - ./build.sh DockerBuild
+    - ./build.sh DockerPush
