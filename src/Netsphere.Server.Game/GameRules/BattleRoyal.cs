@@ -14,7 +14,7 @@ namespace Netsphere.Server.Game.GameRules
 
         public override GameRule GameRule => GameRule.BattleRoyal;
         public override bool HasHalfTime => false;
-        public Player FirstPlace
+        public virtual Player FirstPlace
         {
             get => _firstPlace;
             protected set
