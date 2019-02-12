@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -33,15 +32,13 @@ namespace ExamplePlugin
         }
     }
 
-    public class ExamplePluginService : IHostedService, IGameRuleResolver
+    public class ExamplePluginService : IHostedService
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly DefaultGameRuleResolver _defaultGameRuleResolver;
+        private readonly GameRuleResolver _gameRuleResolver;
 
-        public ExamplePluginService(IServiceProvider serviceProvider, GameRuleResolver gameRuleResolver)
+        public ExamplePluginService(GameRuleResolver gameRuleResolver)
         {
-            _serviceProvider = serviceProvider;
-            _defaultGameRuleResolver = new DefaultGameRuleResolver(gameRuleResolver);
+            _gameRuleResolver = gameRuleResolver;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -50,6 +47,9 @@ namespace ExamplePlugin
             Channel.JoinHook += OnChannelJoinHook;
             GameRuleBase.CanStartGameHook += OnCanStartGameHook;
             GameRuleBase.HasEnoughPlayersHook += OnHasEnoughPlayersHook;
+            _gameRuleResolver.Register(x => x.MatchKey.GameRule == GameRule.Touchdown
+                ? typeof(ExamplePluginGameRule)
+                : null);
             return Task.CompletedTask;
         }
 
@@ -60,7 +60,6 @@ namespace ExamplePlugin
 
         private bool OnRoomCreateHook(RoomCreateHookEventArgs e)
         {
-            e.Options.GameRuleResolver = this;
             return true;
         }
 
@@ -87,13 +86,6 @@ namespace ExamplePlugin
                 e.Result = true;
 
             return true;
-        }
-
-        public GameRuleBase Resolve(Room room)
-        {
-            return room.Options.MatchKey.GameRule == GameRule.Touchdown
-                ? _serviceProvider.GetRequiredService<ExamplePluginGameRule>()
-                : _defaultGameRuleResolver.Resolve(room);
         }
     }
 
