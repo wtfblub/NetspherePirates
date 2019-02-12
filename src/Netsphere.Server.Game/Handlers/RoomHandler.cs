@@ -27,12 +27,10 @@ namespace Netsphere.Server.Game.Handlers
     {
         private readonly ILogger<RoomHandler> _logger;
         private readonly AppOptions _appOptions;
-        private readonly GameRuleManager _gameRuleManager;
 
-        public RoomHandler(ILogger<RoomHandler> logger, IOptions<AppOptions> appOptions, GameRuleManager gameRuleManager)
+        public RoomHandler(ILogger<RoomHandler> logger, IOptions<AppOptions> appOptions)
         {
             _logger = logger;
-            _gameRuleManager = gameRuleManager;
             _appOptions = appOptions.Value;
         }
 
@@ -78,8 +76,7 @@ namespace Netsphere.Server.Game.Handlers
                 MaxLevel = message.Room.MaxLevel,
                 ItemLimit = message.Room.EquipLimit,
                 IsNoIntrusion = message.Room.IsNoIntrusion,
-                RelayEndPoint = _appOptions.RelayEndPoint,
-                GameRuleResolver = new DefaultGameRuleResolver(_gameRuleManager)
+                RelayEndPoint = _appOptions.RelayEndPoint
             });
 
             switch (createError)

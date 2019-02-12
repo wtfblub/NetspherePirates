@@ -39,18 +39,18 @@ namespace Netsphere.Server.Game
 
         private readonly IServiceProvider _serviceProvider;
         private readonly GameDataService _gameDataService;
-        private readonly GameRuleManager _gameRuleManager;
+        private readonly GameRuleResolver _gameRuleResolver;
         private readonly ConcurrentDictionary<uint, Room> _rooms;
         private readonly CounterRecycler _idRecycler;
 
         public Channel Channel { get; private set; }
         public Room this[uint id] => Get(id);
 
-        public RoomManager(IServiceProvider serviceProvider, GameDataService gameDataService, GameRuleManager gameRuleManager)
+        public RoomManager(IServiceProvider serviceProvider, GameDataService gameDataService, GameRuleResolver gameRuleResolver)
         {
             _serviceProvider = serviceProvider;
             _gameDataService = gameDataService;
-            _gameRuleManager = gameRuleManager;
+            _gameRuleResolver = gameRuleResolver;
             _rooms = new ConcurrentDictionary<uint, Room>();
             _idRecycler = new CounterRecycler();
         }
@@ -73,7 +73,7 @@ namespace Netsphere.Server.Game
             if (eventArgs.Error != RoomCreateError.OK)
                 return (null, eventArgs.Error);
 
-            if (!_gameRuleManager.HasGameRule(options.MatchKey.GameRule))
+            if (!_gameRuleResolver.HasGameRule(options))
                 return (null, RoomCreateError.InvalidGameRule);
 
             var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.MatchKey.Map);
@@ -132,7 +132,5 @@ namespace Netsphere.Server.Game
         public byte ItemLimit { get; set; }
         public bool IsNoIntrusion { get; set; }
         public IPEndPoint RelayEndPoint { get; set; }
-
-        public IGameRuleResolver GameRuleResolver { get; set; }
     }
 }

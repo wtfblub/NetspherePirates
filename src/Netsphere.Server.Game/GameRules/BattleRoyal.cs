@@ -180,7 +180,7 @@ namespace Netsphere.Server.Game.GameRules
             SendScoreSuicide(plr);
         }
 
-        private Player GetFirstPlace()
+        protected Player GetFirstPlace()
         {
             return TeamManager.PlayersPlaying
                 .Aggregate((highestPlayer, player) =>
@@ -189,7 +189,7 @@ namespace Netsphere.Server.Game.GameRules
                         : highestPlayer);
         }
 
-        private static BattleRoyalPlayerScore GetScore(ScoreContext plr)
+        protected static BattleRoyalPlayerScore GetScore(ScoreContext plr)
         {
             return (BattleRoyalPlayerScore)plr.Score;
         }
