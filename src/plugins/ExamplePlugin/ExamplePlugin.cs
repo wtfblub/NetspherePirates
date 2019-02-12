@@ -38,10 +38,10 @@ namespace ExamplePlugin
         private readonly IServiceProvider _serviceProvider;
         private readonly DefaultGameRuleResolver _defaultGameRuleResolver;
 
-        public ExamplePluginService(IServiceProvider serviceProvider, GameRuleManager gameRuleManager)
+        public ExamplePluginService(IServiceProvider serviceProvider, GameRuleResolver gameRuleResolver)
         {
             _serviceProvider = serviceProvider;
-            _defaultGameRuleResolver = new DefaultGameRuleResolver(gameRuleManager);
+            _defaultGameRuleResolver = new DefaultGameRuleResolver(gameRuleResolver);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

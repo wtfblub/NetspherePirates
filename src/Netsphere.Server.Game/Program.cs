@@ -141,7 +141,7 @@ namespace Netsphere.Server.Game
                         .AddSingleton<PlayerManager>()
                         .AddTransient<RoomManager>()
                         .AddTransient<Room>()
-                        .AddSingleton<GameRuleManager>()
+                        .AddSingleton<GameRuleResolver>()
                         .AddTransient<GameRuleStateMachine>()
                         .AddTransient<Deathmatch>()
                         .AddTransient<Touchdown>()

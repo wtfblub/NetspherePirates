@@ -24,7 +24,7 @@ namespace Netsphere.Server.Game
             new EventPipeline<RoomJoinHookEventArgs>();
 
         private ILogger _logger;
-        private readonly GameRuleManager _gameRuleManager;
+        private readonly GameRuleResolver _gameRuleResolver;
         private readonly GameDataService _gameDataService;
         private readonly ISchedulerService _schedulerService;
         private readonly IMessageBus _messageBus;
@@ -82,11 +82,11 @@ namespace Netsphere.Server.Game
             RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
         }
 
-        public Room(ILogger<Room> logger, GameRuleManager gameRuleManager, GameDataService gameDataService,
+        public Room(ILogger<Room> logger, GameRuleResolver gameRuleResolver, GameDataService gameDataService,
             ISchedulerService schedulerService, IMessageBus messageBus)
         {
             _logger = logger;
-            _gameRuleManager = gameRuleManager;
+            _gameRuleResolver = gameRuleResolver;
             _gameDataService = gameDataService;
             _schedulerService = schedulerService;
             _messageBus = messageBus;
@@ -103,7 +103,7 @@ namespace Netsphere.Server.Game
             Id = id;
             Options = options;
             Map = _gameDataService.Maps.First(x => x.Id == options.MatchKey.Map);
-            GameRule = Options.GameRuleResolver.Resolve(this);
+            GameRule = _gameRuleResolver.CreateGameRule(Options);
             GameRule.Initialize(this);
             GameRule.StateMachine.GameStateChanged += OnGameStateChanged;
             TeamManager.PlayerTeamChanged += OnPlayerTeamChanged;
@@ -239,8 +239,21 @@ namespace Netsphere.Server.Game
             if (IsChangingRules)
                 return RoomChangeRulesError.AlreadyChangingRules;
 
-            if (!_gameRuleManager.HasGameRule(options.MatchKey.GameRule))
+            if (!_gameRuleResolver.HasGameRule(new RoomCreationOptions
+            {
+                Name = options.Name,
+                MatchKey = options.MatchKey,
+                TimeLimit = options.TimeLimit,
+                ScoreLimit = options.ScoreLimit,
+                Password = options.Password,
+                IsFriendly = options.IsFriendly,
+                IsBalanced = options.IsBalanced,
+                ItemLimit = options.ItemLimit,
+                IsNoIntrusion = options.IsNoIntrusion
+            }))
+            {
                 return RoomChangeRulesError.InvalidGameRule;
+            }
 
             var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.MatchKey.Map);
             if (map == null)
@@ -336,7 +349,7 @@ namespace Netsphere.Server.Game
             room.GameRule.Cleanup();
 
             room.Map = room._gameDataService.Maps.First(x => x.Id == room.Options.MatchKey.Map);
-            room.GameRule = room.Options.GameRuleResolver.Resolve(room);
+            room.GameRule = room._gameRuleResolver.CreateGameRule(room.Options);
             room.GameRule.Initialize(room);
             room.GameRule.StateMachine.GameStateChanged += room.OnGameStateChanged;
 
