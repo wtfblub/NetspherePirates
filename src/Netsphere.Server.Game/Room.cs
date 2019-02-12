@@ -20,6 +20,9 @@ namespace Netsphere.Server.Game
 {
     public class Room
     {
+        private static readonly EventPipeline<RoomJoinHookEventArgs> s_joinHook =
+            new EventPipeline<RoomJoinHookEventArgs>();
+
         private ILogger _logger;
         private readonly GameRuleManager _gameRuleManager;
         private readonly GameDataService _gameDataService;
@@ -45,6 +48,11 @@ namespace Netsphere.Server.Game
         public event EventHandler<RoomPlayerEventArgs> PlayerJoined;
         public event EventHandler<RoomPlayerEventArgs> PlayerLeft;
         public event EventHandler<RoomEventArgs> OptionsChanged;
+        public static event EventPipeline<RoomJoinHookEventArgs>.SubscriberDelegate JoinHook
+        {
+            add => s_joinHook.Subscribe(value);
+            remove => s_joinHook.Unsubscribe(value);
+        }
 
         protected virtual void OnPlayerJoining(Player plr)
         {
@@ -107,6 +115,11 @@ namespace Netsphere.Server.Game
 
         public RoomJoinError Join(Player plr)
         {
+            var eventArgs = new RoomJoinHookEventArgs(this, plr);
+            s_joinHook.Invoke(eventArgs);
+            if (eventArgs.Error != RoomJoinError.OK)
+                return eventArgs.Error;
+
             if (plr.Room != null)
                 return RoomJoinError.AlreadyInRoom;
 
@@ -341,7 +354,6 @@ namespace Netsphere.Server.Game
                     error = team.Join(plr);
                     if (error == TeamJoinError.OK)
                         continue;
-
                 }
 
                 // Original team was full
