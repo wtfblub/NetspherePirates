@@ -60,7 +60,7 @@ namespace ProudNet.DotNetty.Handlers
                 EnablePingTest = _networkOptions.EnablePingTest,
                 EmergencyLogLineCount = _networkOptions.EmergencyLogLineCount
             };
-            await session.SendAsync(new NotifyServerConnectionHintMessage(config, _rsa.ExportParameters(false)));
+            await session.SendAsync(new NotifyServerConnectionHintMessage(config));
             context.Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).Read();
 
             using (var cts = new CancellationTokenSource(_networkOptions.ConnectTimeout))

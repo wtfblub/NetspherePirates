@@ -1,5 +1,8 @@
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using BlubLib.IO;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 using ProudNet.Firewall;
@@ -31,10 +34,30 @@ namespace ProudNet.Handlers
             var session = context.Session;
 
             session.Logger.Verbose("Handshake:NotifyCSEncryptedSessionKey");
-            var secureKey = _rsa.Decrypt(message.SecureKey, true);
-            session.Crypt = new Crypt(secureKey);
-            session.State = SessionState.HandshakeKeyExchanged;
-            await session.SendAsync(new NotifyCSSessionKeySuccessMessage());
+            using (var rsa = new RSACryptoServiceProvider(1024))
+            {
+                rsa.ImportCspBlob(message.Key);
+                session.Crypt = new Crypt(128);
+
+                byte[] blob;
+                using (var w = new BinaryWriter(new MemoryStream()))
+                {
+                    w.Write((byte)1);
+                    w.Write((byte)2);
+                    w.Write((byte)0);
+                    w.Write((byte)0);
+                    w.Write(26625);
+                    w.Write(41984);
+
+                    var encrypted = rsa.Encrypt(session.Crypt.RC4.Key, false);
+                    w.Write(encrypted.Reverse());
+                    blob = w.ToArray();
+                }
+
+                session.State = SessionState.HandshakeKeyExchanged;
+                await session.SendAsync(new NotifyCSSessionKeySuccessMessage(blob));
+            }
+
             return true;
         }
 

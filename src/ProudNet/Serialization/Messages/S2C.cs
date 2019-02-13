@@ -36,7 +36,7 @@ namespace ProudNet.Serialization.Messages
         public uint EventId { get; set; }
 
         [BlubMember(4)]
-        public byte[] SecureKey { get; set; }
+        public byte[] SessionKey { get; set; }
 
         [BlubMember(5)]
         public uint P2PFirstFrameNumber { get; set; }
@@ -53,19 +53,18 @@ namespace ProudNet.Serialization.Messages
         public P2PGroup_MemberJoinMessage()
         {
             UserData = Array.Empty<byte>();
-            SecureKey = Array.Empty<byte>();
+            SessionKey = Array.Empty<byte>();
             ConnectionMagicNumber = Guid.Empty;
         }
 
-        public P2PGroup_MemberJoinMessage(uint groupId, uint memberId, uint eventId, byte[] secureKey,
-            bool enableDirectP2P)
+        public P2PGroup_MemberJoinMessage(uint groupId, uint memberId, uint eventId, byte[] sessionKey, bool enableDirectP2P)
             : this()
         {
             GroupId = groupId;
             MemberId = memberId;
             EventId = eventId;
             EnableDirectP2P = enableDirectP2P;
-            SecureKey = secureKey;
+            SessionKey = sessionKey;
         }
     }
 
