@@ -291,6 +291,13 @@ namespace Netsphere.Server.Game.Handlers
             // Client is trying to enter the game while its running
             if (room.GameRule.StateMachine.GameState == GameState.Playing && plr.State == PlayerState.Lobby)
             {
+                for (var i = 0; i < plr.CharacterStartPlayTime.Length; ++i)
+                    plr.CharacterStartPlayTime[i] = default;
+
+                plr.CharacterStartPlayTime[plr.CharacterManager.CurrentSlot] = DateTimeOffset.Now;
+                plr.StartPlayTime = DateTimeOffset.Now;
+                plr.IsReady = false;
+                plr.Score.Reset();
                 plr.State = plr.Mode == PlayerGameMode.Normal
                     ? PlayerState.Alive
                     : PlayerState.Spectating;
