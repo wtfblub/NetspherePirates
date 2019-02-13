@@ -589,4 +589,10 @@ namespace Netsphere
         Channel = 0,
         Club = 1
     }
+
+    public enum MoneyType
+    {
+        PEN = 0,
+        AP = 1
+    }
 }

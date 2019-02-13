@@ -556,5 +556,16 @@ namespace Netsphere.Server.Game.Services
                 }
             }
         }
+
+        public async Task LoadLevelRewards()
+        {
+            using (var db = _databaseService.Open<GameContext>())
+            {
+                _logger.Information("Loading level rewards...");
+                var rewards = await db.LevelRewards.ToArrayAsync();
+                LevelRewards = rewards.ToImmutableDictionary(x => x.Level, x => new LevelReward(x));
+                _logger.Information("Loaded {Count} level rewards", LevelRewards.Count);
+            }
+        }
     }
 }

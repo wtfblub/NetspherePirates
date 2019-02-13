@@ -204,7 +204,28 @@ namespace Netsphere.Server.Game
 
                 _logger.Debug("Leveled up to {Level}", newLevel);
 
-                // TODO level rewards
+                var reward = _gameDataService.LevelRewards.GetValueOrDefault(newLevel);
+                if (reward != null)
+                {
+                    _logger.Debug("Level reward type={MoneyType} value={Value}", reward.Type, reward.Money);
+                    switch (reward.Type)
+                    {
+                        case MoneyType.PEN:
+                            PEN += (uint)reward.Money;
+                            break;
+
+                        case MoneyType.AP:
+                            AP += (uint)reward.Money;
+                            break;
+
+                        default:
+                            _logger.Warning("Unknown moneyType={MoneyType}", reward.Type);
+                            break;
+                    }
+
+                    SendMoneyUpdate();
+                }
+
                 leveledUp = true;
             }
 

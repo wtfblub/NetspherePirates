@@ -30,6 +30,7 @@ namespace Netsphere.Server.Game.Services
         public ImmutableDictionary<int, ShopEffectGroup> ShopEffects { get; private set; }
         public ImmutableDictionary<int, ShopPriceGroup> ShopPrices { get; private set; }
         public ImmutableDictionary<ItemLicense, LicenseReward> LicenseRewards { get; private set; }
+        public ImmutableDictionary<int, LevelReward> LevelRewards { get; private set; }
         public string ShopVersion { get; private set; }
 
         public GameDataService(ILogger<GameDataService> logger, DatabaseService databaseService)
@@ -77,6 +78,7 @@ namespace Netsphere.Server.Game.Services
             LoadDefaultItems();
             LoadGameTempos();
             await LoadShop();
+            await LoadLevelRewards();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
