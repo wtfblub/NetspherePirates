@@ -191,7 +191,8 @@ namespace Netsphere.Server.Game
             // Did we level up?
             // Using a loop for multiple level ups
             while (levelInfo.ExperienceToNextLevel != 0 &&
-                   levelInfo.ExperienceToNextLevel <= (int)(TotalExperience - levelInfo.TotalExperience))
+                   levelInfo.ExperienceToNextLevel <= (int)(TotalExperience - levelInfo.TotalExperience) &&
+                   levelInfo.Level < _gameOptions.MaxLevel)
             {
                 var newLevel = Level + 1;
                 levelInfo = levels.GetValueOrDefault(newLevel);
