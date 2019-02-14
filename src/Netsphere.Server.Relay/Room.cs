@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Netsphere.Network.Message.Relay;
 using ProudNet;
 
@@ -24,17 +23,17 @@ namespace Netsphere.Server.Relay
             _players = new ConcurrentDictionary<ulong, Player>();
         }
 
-        public async Task Join(Player plr)
+        public void Join(Player plr)
         {
             _players.TryAdd(plr.Account.Id, plr);
 
-            await plr.Session.SendAsync(new SEnterLoginPlayerMessage(plr.Session.HostId, plr.Account.Id, plr.Account.Nickname));
+            plr.Session.Send(new SEnterLoginPlayerMessage(plr.Session.HostId, plr.Account.Id, plr.Account.Nickname));
             foreach (var otherPlayer in _players.Values.Where(x => x.Account.Id != plr.Account.Id))
             {
-                await otherPlayer.Session.SendAsync(new SEnterLoginPlayerMessage(
+                otherPlayer.Session.Send(new SEnterLoginPlayerMessage(
                     plr.Session.HostId, plr.Account.Id, plr.Account.Nickname));
 
-                await plr.Session.SendAsync(new SEnterLoginPlayerMessage(
+                plr.Session.Send(new SEnterLoginPlayerMessage(
                     otherPlayer.Session.HostId, otherPlayer.Account.Id, otherPlayer.Account.Nickname));
             }
 
