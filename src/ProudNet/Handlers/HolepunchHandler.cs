@@ -74,7 +74,9 @@ namespace ProudNet.Handlers
 
             session.Logger.Debug("PeerUdp_NotifyHolepunchSuccess={@Message}", message);
             var remotePeer = session.P2PGroup.GetMemberInternal(session.HostId);
-            var connectionState = remotePeer.ConnectionStates.GetValueOrDefault(message.HostId);
+            var connectionState = remotePeer?.ConnectionStates.GetValueOrDefault(message.HostId);
+            if (connectionState == null)
+                return true;
 
             using (await connectionState.Mutex.LockAsync())
             {
