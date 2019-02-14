@@ -47,9 +47,7 @@ namespace ExamplePlugin
             Channel.JoinHook += OnChannelJoinHook;
             GameRuleBase.CanStartGameHook += OnCanStartGameHook;
             GameRuleBase.HasEnoughPlayersHook += OnHasEnoughPlayersHook;
-            _gameRuleResolver.Register(x => x.MatchKey.GameRule == GameRule.Touchdown
-                ? typeof(ExamplePluginGameRule)
-                : null);
+            _gameRuleResolver.Register(GameRule.Touchdown, x => typeof(ExamplePluginGameRule), 11);
             return Task.CompletedTask;
         }
 
