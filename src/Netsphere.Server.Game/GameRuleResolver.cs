@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Netsphere.Server.Game.GameRules;
 
@@ -8,21 +9,27 @@ namespace Netsphere.Server.Game
     public class GameRuleResolver
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ConcurrentStack<Func<RoomCreationOptions, Type>> _gameRules;
+        // private readonly ConcurrentStack<Func<RoomCreationOptions, Type>> _gameRules;
+        private readonly Dictionary<GameRule, List<Entry>> _gameRules;
 
         public GameRuleResolver(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _gameRules = new ConcurrentStack<Func<RoomCreationOptions, Type>>();
+            _gameRules = new Dictionary<GameRule, List<Entry>>();
 
-            Register(x => x.MatchKey.GameRule == GameRule.Deathmatch ? typeof(Deathmatch) : null);
-            Register(x => x.MatchKey.GameRule == GameRule.Touchdown ? typeof(Touchdown) : null);
-            Register(x => x.MatchKey.GameRule == GameRule.BattleRoyal ? typeof(BattleRoyal) : null);
+            Register(GameRule.Deathmatch, x => typeof(Deathmatch));
+            Register(GameRule.Touchdown, x => typeof(Touchdown));
+            Register(GameRule.BattleRoyal, x => typeof(BattleRoyal));
         }
 
-        public void Register(Func<RoomCreationOptions, Type> gameRuleType)
+        /// <param name="priority">Higher value means higher priority. Default is 10</param>
+        public void Register(GameRule gameRule, Func<RoomCreationOptions, Type> gameRuleType, int priority = 10)
         {
-            _gameRules.Push(gameRuleType);
+            if (!_gameRules.TryGetValue(gameRule, out var entries))
+                entries = new List<Entry>();
+
+            entries.Add(new Entry(priority, gameRuleType));
+            _gameRules[gameRule] = entries;
         }
 
         public bool HasGameRule(RoomCreationOptions roomCreationOptions)
@@ -41,14 +48,29 @@ namespace Netsphere.Server.Game
 
         private Type GetGameRuleType(RoomCreationOptions roomCreationOptions)
         {
-            foreach (var getGameRuleType in _gameRules)
+            if (!_gameRules.TryGetValue(roomCreationOptions.MatchKey.GameRule, out var entries))
+                return null;
+
+            foreach (var entry in entries.OrderByDescending(x => x.Priority))
             {
-                var type = getGameRuleType(roomCreationOptions);
+                var type = entry.Func(roomCreationOptions);
                 if (type != null)
                     return type;
             }
 
             return null;
+        }
+
+        private class Entry
+        {
+            public int Priority { get; }
+            public Func<RoomCreationOptions, Type> Func { get; }
+
+            public Entry(int priority, Func<RoomCreationOptions, Type> func)
+            {
+                Priority = priority;
+                Func = func;
+            }
         }
     }
 }
