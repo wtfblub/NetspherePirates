@@ -135,10 +135,6 @@ namespace Netsphere.Server.Game
             if (Options.IsNoIntrusion && GameRule.StateMachine.GameState == GameState.Playing)
                 return RoomJoinError.NoIntrusion;
 
-            plr.Slot = (byte)_idRecycler.GetId();
-            plr.State = PlayerState.Lobby;
-            plr.IsReady = false;
-
             if (TeamManager.Any(x => x.Value.Players.Count() < x.Value.PlayerLimit))
             {
                 plr.Mode = PlayerGameMode.Normal;
@@ -150,6 +146,10 @@ namespace Netsphere.Server.Game
                 else
                     return RoomJoinError.RoomFull;
             }
+
+            plr.Slot = (byte)_idRecycler.GetId();
+            plr.State = PlayerState.Lobby;
+            plr.IsReady = false;
 
             if (TeamManager.Join(plr) != TeamJoinError.OK)
                 return RoomJoinError.RoomFull;
