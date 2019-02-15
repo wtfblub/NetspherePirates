@@ -84,16 +84,11 @@ namespace Netsphere.Server.Game
             }
             else
             {
-                teams = _teams.Values.Where(x => x.PlayerLimit > 0 && x.Players.Count() < x.PlayerLimit);
-
-                var minCount = teams.Min(x => x.Count);
-                teams = teams.Where(x => x.Players.Count() == minCount);
-
-                var minScore = teams.Min(x => x.Score);
-                teams = teams.Where(x => x.Score == minScore);
-
-                var minTotalScore = teams.Min(x => x.Players.Sum(_ => _.Score.GetTotalScore()));
-                teams = teams.Where(x => x.Players.Sum(_ => _.Score.GetTotalScore()) == minTotalScore);
+                teams = _teams.Values
+                    .Where(x => x.PlayerLimit > 0 && x.Players.Count() < x.PlayerLimit)
+                    .OrderBy(x => x.Count) // Order by player count
+                    .ThenBy(x => x.Score) // Order by score
+                    .ThenBy(t => t.Players.Sum(p => p.Score.GetTotalScore())); // Order by player score sum
             }
 
             return teams.FirstOrDefault()?.Join(plr) ?? TeamJoinError.TeamFull;

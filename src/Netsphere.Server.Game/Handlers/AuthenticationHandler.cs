@@ -82,6 +82,15 @@ namespace Netsphere.Server.Game.Handlers
                 return true;
             }
 
+            // Validate session
+            var sessionId = await _cacheClient.GetAsync<string>(Constants.Cache.SessionKey(message.AccountId));
+            if (!sessionId.HasValue || !sessionId.Value.Equals(message.SessionId))
+            {
+                logger.Information("Invalid session id");
+                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                return true;
+            }
+
             AccountEntity accountEntity;
             using (var db = _databaseService.Open<AuthContext>())
             {
@@ -94,15 +103,6 @@ namespace Netsphere.Server.Game.Handlers
             if (accountEntity == null)
             {
                 logger.Information("Wrong login");
-                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
-                return true;
-            }
-
-            // Validate session
-            var sessionId = await _cacheClient.GetAsync<string>(Constants.Cache.SessionKey(accountEntity.Id));
-            if (!sessionId.HasValue || !sessionId.Value.Equals(message.SessionId))
-            {
-                logger.Information("Invalid session id");
                 await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
                 return true;
             }
