@@ -14,10 +14,7 @@ using Netsphere.Common.Converters.Json;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting;
 using Serilog.Formatting.Json;
-using Serilog.Parsing;
-using Serilog.Sinks.SystemConsole.Themes;
 using TimeSpanConverter = Netsphere.Common.Converters.Json.TimeSpanConverter;
 
 namespace Netsphere.Common
@@ -76,9 +73,24 @@ namespace Netsphere.Common
             Log.Logger = new LoggerConfiguration()
                 .Destructure.ByTransforming<IPEndPoint>(endPoint => endPoint.ToString())
                 .Destructure.ByTransforming<EndPoint>(endPoint => endPoint.ToString())
-                .WriteTo.File(new JsonFormatter(), jsonlog, rollingInterval: RollingInterval.Day)
-                .WriteTo.File(logfile, rollingInterval: RollingInterval.Day)
-                .WriteTo.Console(new ConditionalTemplateRenderer())
+                .WriteTo.File(
+                    new JsonFormatter(),
+                    jsonlog,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    fileSizeLimitBytes: 50 * 1024 * 1024 // 50 MB
+                )
+                .WriteTo.File(
+                    logfile,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    fileSizeLimitBytes: 50 * 1024 * 1024, // 50 MB
+                    outputTemplate:
+                    "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3} {SourceContext}] {Message:lj}{NewLine}    {Properties:l} {NewLine}{Exception}"
+                )
+                .WriteTo.Console(
+                    outputTemplate: "[{Level} {SourceContext}] {Message:lj}{NewLine}    {Properties:l} {NewLine}{Exception}"
+                )
                 .MinimumLevel.Is(logLevel)
                 .CreateLogger().ForContext(Serilog.Core.Constants.SourceContextPropertyName, "Main");
         }
@@ -92,57 +104,6 @@ namespace Netsphere.Common
         private static void OnUnhandledException(object s, UnhandledExceptionEventArgs e)
         {
             Log.Error((Exception)e.ExceptionObject, "UnhandledException");
-        }
-
-        private class ConditionalTemplateRenderer : ITextFormatter
-        {
-            private readonly ITextFormatter _consoleFormatter;
-            private readonly ITextFormatter _consoleFormatterWithProperties;
-            private readonly Func<MessageTemplate, PropertyToken[]> _namedProperties;
-            private readonly Func<MessageTemplate, PropertyToken[]> _positionalProperties;
-
-            public ConditionalTemplateRenderer()
-            {
-                var assembly = Assembly.GetAssembly(typeof(ConsoleLoggerConfigurationExtensions));
-                var theme = Console.IsOutputRedirected || Console.IsErrorRedirected
-                    ? ConsoleTheme.None
-                    : AnsiConsoleTheme.Literate;
-                var type = assembly.GetType("Serilog.Sinks.SystemConsole.Output.OutputTemplateRenderer");
-
-                _consoleFormatter = (ITextFormatter)Activator.CreateInstance(type, theme,
-                    "[{Level} {SourceContext}] {Message:lj}{NewLine}{Exception}", default(IFormatProvider));
-
-                _consoleFormatterWithProperties = (ITextFormatter)Activator.CreateInstance(type, theme,
-                    "[{Level} {SourceContext}] {Message:lj}{NewLine}    {Properties:l} {NewLine}{Exception}",
-                    default(IFormatProvider));
-
-                var namedPropertiesProp = typeof(MessageTemplate)
-                    .GetProperty("NamedProperties", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                var positionalPropertiesProp = typeof(MessageTemplate)
-                    .GetProperty("PositionalProperties", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                var parameter = Expression.Parameter(typeof(MessageTemplate));
-                _namedProperties = Expression.Lambda<Func<MessageTemplate, PropertyToken[]>>(
-                        Expression.Property(parameter, namedPropertiesProp), parameter)
-                    .Compile();
-
-                _positionalProperties = Expression.Lambda<Func<MessageTemplate, PropertyToken[]>>(
-                        Expression.Property(parameter, positionalPropertiesProp), parameter)
-                    .Compile();
-            }
-
-            public void Format(LogEvent logEvent, TextWriter output)
-            {
-                var propCount = logEvent.Properties.Count -
-                                _namedProperties(logEvent.MessageTemplate)?.Length ?? 0 +
-                                _positionalProperties(logEvent.MessageTemplate)?.Length ?? 0;
-
-                // if (propCount > 1)
-                    _consoleFormatterWithProperties.Format(logEvent, output);
-                // else
-                    // _consoleFormatter.Format(logEvent, output);
-            }
         }
     }
 }
