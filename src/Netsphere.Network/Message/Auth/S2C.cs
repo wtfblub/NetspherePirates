@@ -50,12 +50,12 @@ namespace Netsphere.Network.Message.Auth
             Result = result;
         }
 
-        public LoginEUAckMessage(AuthLoginResult result, ulong accountId, uint sessionId)
+        public LoginEUAckMessage(AuthLoginResult result, ulong accountId, string sessionId)
             : this()
         {
             Result = result;
             AccountId = accountId;
-            SessionId = sessionId.ToString();
+            SessionId = sessionId;
         }
     }
 

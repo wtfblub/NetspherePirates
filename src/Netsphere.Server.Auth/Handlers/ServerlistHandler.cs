@@ -6,7 +6,7 @@ using ProudNet;
 
 namespace Netsphere.Server.Auth.Handlers
 {
-    internal class ServerlistHandler : IHandle<CServerListReqMessage>
+    internal class ServerlistHandler : IHandle<ServerListReqMessage>
     {
         private readonly ServerlistService _serverlistService;
 
@@ -17,12 +17,12 @@ namespace Netsphere.Server.Auth.Handlers
 
         [Firewall(typeof(MustBeLoggedIn))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CServerListReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ServerListReqMessage message)
         {
             var session = context.Session;
 
             var servers = _serverlistService.GetServerList();
-            session.Send(new SServerListAckMessage(servers));
+            session.Send(new ServerListAckMessage(servers));
             return true;
         }
     }
