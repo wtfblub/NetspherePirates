@@ -6,7 +6,7 @@ using Netsphere.Network.Serializers;
 namespace Netsphere.Network.Message.Auth
 {
     [BlubContract]
-    public class SAuthInEuAckMessage : IAuthMessage
+    public class LoginEUAckMessage : IAuthMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
@@ -29,7 +29,7 @@ namespace Netsphere.Network.Message.Auth
         [BlubMember(6)]
         public string BannedUntil { get; set; }
 
-        public SAuthInEuAckMessage()
+        public LoginEUAckMessage()
         {
             Unk2 = "";
             SessionId = "";
@@ -37,43 +37,72 @@ namespace Netsphere.Network.Message.Auth
             BannedUntil = "";
         }
 
-        public SAuthInEuAckMessage(DateTimeOffset bannedUntil)
+        public LoginEUAckMessage(DateTimeOffset bannedUntil)
             : this()
         {
             Result = AuthLoginResult.Banned;
             BannedUntil = bannedUntil.ToString("yyyyMMddHHmmss");
         }
 
-        public SAuthInEuAckMessage(AuthLoginResult result)
+        public LoginEUAckMessage(AuthLoginResult result)
             : this()
         {
             Result = result;
         }
 
-        public SAuthInEuAckMessage(AuthLoginResult result, ulong accountId, string sessionId)
+        public LoginEUAckMessage(AuthLoginResult result, ulong accountId, uint sessionId)
             : this()
         {
             Result = result;
             AccountId = accountId;
-            SessionId = sessionId;
+            SessionId = sessionId.ToString();
         }
     }
 
     [BlubContract]
-    public class SServerListAckMessage : IAuthMessage
+    public class ServerListAckMessage : IAuthMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public ServerInfoDto[] ServerList { get; set; }
 
-        public SServerListAckMessage()
+        public ServerListAckMessage()
             : this(Array.Empty<ServerInfoDto>())
-        {
-        }
+        { }
 
-        public SServerListAckMessage(ServerInfoDto[] serverList)
+        public ServerListAckMessage(ServerInfoDto[] serverList)
         {
             ServerList = serverList;
         }
+    }
+
+    [BlubContract]
+    public class OptionVersionCheckAckMessage : IAuthMessage
+    {
+        [BlubMember(0)]
+        public byte[] Data { get; set; }
+
+        public OptionVersionCheckAckMessage()
+        {
+            Data = Array.Empty<byte>();
+        }
+
+        public OptionVersionCheckAckMessage(byte[] data)
+        {
+            Data = data;
+        }
+    }
+
+    [BlubContract]
+    public class GameDataXBNAckMessage : IAuthMessage
+    {
+        [BlubMember(0)]
+        public XBNType XBNType { get; set; }
+
+        [BlubMember(1)]
+        public byte[] Data { get; set; }
+
+        [BlubMember(2)]
+        public int TotalLength { get; set; }
     }
 }
