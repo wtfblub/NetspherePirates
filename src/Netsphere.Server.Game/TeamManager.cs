@@ -48,7 +48,7 @@ namespace Netsphere.Server.Game
             if (playerLimit < 0 || spectatorLimit < 0)
                 throw new ArgumentOutOfRangeException();
 
-            var team = new Team(this, id, (uint)playerLimit, (uint)spectatorLimit);
+            var team = new Team(this, id, (uint)playerLimit, (uint)spectatorLimit, _mutex);
             if (_teams.TryAdd(id, team))
             {
                 team.PlayerJoined += OnPlayerJoinedTeam;
