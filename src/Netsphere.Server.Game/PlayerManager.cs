@@ -98,10 +98,17 @@ namespace Netsphere.Server.Game
                         await plr.Save(db);
                         await db.SaveChangesAsync();
                     }
-
-                    OnPlayerDisconnected(plr);
-                    plr.OnDisconnected();
                 }
+            }
+            catch (Exception ex)
+            {
+                e.Session.Channel.Pipeline.FireExceptionCaught(ex);
+            }
+
+            try
+            {
+                OnPlayerDisconnected(plr);
+                plr.OnDisconnected();
             }
             catch (Exception ex)
             {

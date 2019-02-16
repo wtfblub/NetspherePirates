@@ -234,11 +234,7 @@ namespace Netsphere.Server.Game.Handlers
             }
             else
             {
-                fromTeam.Leave(plrToMove);
-                toTeam.Leave(plrToReplace);
-                fromTeam.Join(plrToReplace);
-                toTeam.Join(plrToMove);
-
+                room.TeamManager.SwapPlayer(plrToMove, plrToReplace);
                 plr.Room.Broadcast(new SMixChangeTeamAckMessage(
                     plrToMove.Account.Id, plrToReplace.Account.Id,
                     fromTeam.Id, toTeam.Id));

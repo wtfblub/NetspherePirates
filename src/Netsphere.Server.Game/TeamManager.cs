@@ -12,6 +12,7 @@ namespace Netsphere.Server.Game
     public class TeamManager : IReadOnlyDictionary<TeamId, Team>
     {
         private readonly ConcurrentDictionary<TeamId, Team> _teams = new ConcurrentDictionary<TeamId, Team>();
+        private readonly object _mutex = new object();
 
         public Room Room { get; }
         public IEnumerable<Player> Players => _teams.Values.SelectMany(team => team.Players);
@@ -77,93 +78,118 @@ namespace Netsphere.Server.Game
 
         public TeamJoinError Join(Player plr)
         {
-            IEnumerable<Team> teams;
-            if (plr.Mode == PlayerGameMode.Spectate)
+            lock (_mutex)
             {
-                teams = _teams.Values.Where(x => x.SpectatorLimit > 0 && x.Spectators.Count() < x.SpectatorLimit);
-            }
-            else
-            {
-                teams = _teams.Values
-                    .Where(x => x.PlayerLimit > 0 && x.Players.Count() < x.PlayerLimit)
-                    .OrderBy(x => x.Count) // Order by player count
-                    .ThenBy(x => x.Score) // Order by score
-                    .ThenBy(t => t.Players.Sum(p => p.Score.GetTotalScore())); // Order by player score sum
-            }
+                IEnumerable<Team> teams;
+                if (plr.Mode == PlayerGameMode.Spectate)
+                {
+                    teams = _teams.Values.Where(x => x.SpectatorLimit > 0 && x.Spectators.Count() < x.SpectatorLimit);
+                }
+                else
+                {
+                    teams = _teams.Values
+                        .Where(x => x.PlayerLimit > 0 && x.Players.Count() < x.PlayerLimit)
+                        .OrderBy(x => x.Count) // Order by player count
+                        .ThenBy(x => x.Score) // Order by score
+                        .ThenBy(t => t.Players.Sum(p => p.Score.GetTotalScore())); // Order by player score sum
+                }
 
-            return teams.FirstOrDefault()?.Join(plr) ?? TeamJoinError.TeamFull;
+                return teams.FirstOrDefault()?.Join(plr) ?? TeamJoinError.TeamFull;
+            }
         }
 
         public TeamChangeError ChangeTeam(Player plr, TeamId teamId)
         {
-            if (plr.Room != Room)
-                return TeamChangeError.WrongRoom;
+            lock (_mutex)
+            {
+                if (plr.Room != Room)
+                    return TeamChangeError.WrongRoom;
 
-            if (Room.GameRule.StateMachine.GameState != GameState.Waiting)
-                return TeamChangeError.GameIsRunning;
+                if (Room.GameRule.StateMachine.GameState != GameState.Waiting)
+                    return TeamChangeError.GameIsRunning;
 
-            if (plr.Team == null)
-                return TeamChangeError.NotInTeam;
+                if (plr.Team == null)
+                    return TeamChangeError.NotInTeam;
 
-            if (plr.Team.Id == teamId)
-                return TeamChangeError.AlreadyInTeam;
+                if (plr.Team.Id == teamId)
+                    return TeamChangeError.AlreadyInTeam;
 
-            if (plr.IsReady)
-                return TeamChangeError.PlayerIsReady;
+                if (plr.IsReady)
+                    return TeamChangeError.PlayerIsReady;
 
-            var sourceTeam = plr.Team;
-            var targetTeam = this[teamId];
-            if (targetTeam == null)
-                return TeamChangeError.InvalidTeam;
+                var sourceTeam = plr.Team;
+                var targetTeam = this[teamId];
+                if (targetTeam == null)
+                    return TeamChangeError.InvalidTeam;
 
-            var joinError = targetTeam.Join(plr);
-            if (joinError != TeamJoinError.OK)
-                return TeamChangeError.Full;
+                var joinError = targetTeam.Join(plr);
+                if (joinError != TeamJoinError.OK)
+                    return TeamChangeError.Full;
 
-            //Broadcast(new SChangeTeamAckMessage(plr.Account.Id, plr.Team.Id, plr.Mode));
-            OnPlayerTeamChanged(plr, sourceTeam, targetTeam);
-            return TeamChangeError.OK;
+                //Broadcast(new SChangeTeamAckMessage(plr.Account.Id, plr.Team.Id, plr.Mode));
+                OnPlayerTeamChanged(plr, sourceTeam, targetTeam);
+                return TeamChangeError.OK;
+            }
         }
 
         public TeamChangeModeError ChangeMode(Player plr, PlayerGameMode mode)
         {
-            if (plr.Room != Room)
-                return TeamChangeModeError.WrongRoom;
-
-            if (plr.State != PlayerState.Lobby)
-                return TeamChangeModeError.PlayerIsPlaying;
-
-            if (plr.Mode == mode)
-                return TeamChangeModeError.AlreadyInMode;
-
-            if (plr.Team == null)
-                return TeamChangeModeError.NotInTeam;
-
-            if (plr.IsReady)
-                return TeamChangeModeError.PlayerIsReady;
-
-            var team = plr.Team;
-            switch (mode)
+            lock (_mutex)
             {
-                case PlayerGameMode.Normal:
-                    if (team.Players.Count() >= team.PlayerLimit)
-                        return TeamChangeModeError.Full;
+                if (plr.Room != Room)
+                    return TeamChangeModeError.WrongRoom;
 
-                    break;
+                if (plr.State != PlayerState.Lobby)
+                    return TeamChangeModeError.PlayerIsPlaying;
 
-                case PlayerGameMode.Spectate:
-                    if (team.Spectators.Count() >= team.SpectatorLimit)
-                        return TeamChangeModeError.Full;
+                if (plr.Mode == mode)
+                    return TeamChangeModeError.AlreadyInMode;
 
-                    break;
+                if (plr.Team == null)
+                    return TeamChangeModeError.NotInTeam;
 
-                default:
-                    return TeamChangeModeError.InvalidMode;
+                if (plr.IsReady)
+                    return TeamChangeModeError.PlayerIsReady;
+
+                var team = plr.Team;
+                switch (mode)
+                {
+                    case PlayerGameMode.Normal:
+                        if (team.Players.Count() >= team.PlayerLimit)
+                            return TeamChangeModeError.Full;
+
+                        break;
+
+                    case PlayerGameMode.Spectate:
+                        if (team.Spectators.Count() >= team.SpectatorLimit)
+                            return TeamChangeModeError.Full;
+
+                        break;
+
+                    default:
+                        return TeamChangeModeError.InvalidMode;
+                }
+
+                plr.Mode = mode;
+                Broadcast(new SPlayerGameModeChangeAckMessage(plr.Account.Id, mode));
+                return TeamChangeModeError.OK;
             }
+        }
 
-            plr.Mode = mode;
-            Broadcast(new SPlayerGameModeChangeAckMessage(plr.Account.Id, mode));
-            return TeamChangeModeError.OK;
+        public void SwapPlayer(Player a, Player b)
+        {
+            lock (_mutex)
+            {
+                if (a.Team == b.Team)
+                    return;
+
+                var teamA = a.Team;
+                var teamB = b.Team;
+                teamA.Leave(a);
+                teamB.Leave(b);
+                teamA.Join(b);
+                teamB.Join(a);
+            }
         }
 
         public void Broadcast(IGameMessage message)
@@ -216,6 +242,7 @@ namespace Netsphere.Server.Game
     public class Team : IReadOnlyDictionary<byte, Player>
     {
         private readonly ConcurrentDictionary<byte, Player> _players = new ConcurrentDictionary<byte, Player>();
+        private readonly object _mutex;
 
         public TeamManager TeamManager { get; }
         public TeamId Id { get; }
@@ -241,55 +268,62 @@ namespace Netsphere.Server.Game
             PlayerLeft?.Invoke(this, new TeamEventArgs(this, plr));
         }
 
-        public Team(TeamManager teamManager, TeamId id, uint playerLimit, uint spectatorLimit)
+        public Team(TeamManager teamManager, TeamId id, uint playerLimit, uint spectatorLimit, object mutex)
         {
             TeamManager = teamManager;
             Id = id;
             PlayerLimit = playerLimit;
             SpectatorLimit = spectatorLimit;
+            _mutex = mutex;
         }
 
         public TeamJoinError Join(Player plr)
         {
-            if (plr.Team == this)
-                return TeamJoinError.AlreadyInTeam;
-
-            if (plr.Mode == PlayerGameMode.Normal)
+            lock (_mutex)
             {
-                if (Players.Count() >= PlayerLimit)
-                    return TeamJoinError.TeamFull;
+                if (plr.Team == this)
+                    return TeamJoinError.AlreadyInTeam;
+
+                if (plr.Mode == PlayerGameMode.Normal)
+                {
+                    if (Players.Count() >= PlayerLimit)
+                        return TeamJoinError.TeamFull;
+                }
+                else
+                {
+                    if (Spectators.Count() >= SpectatorLimit)
+                        return TeamJoinError.TeamFull;
+                }
+
+                var isChange = false;
+                if (plr.Team != null && plr.Team.Id != Id)
+                {
+                    plr.Team.Leave(plr);
+                    isChange = true;
+                }
+
+                plr.Team = this;
+                _players.TryAdd(plr.Slot, plr);
+
+                if (isChange)
+                    TeamManager.Broadcast(new SChangeTeamAckMessage(plr.Account.Id, Id, plr.Mode));
+
+                OnPlayerJoined(plr);
+                return TeamJoinError.OK;
             }
-            else
-            {
-                if (Spectators.Count() >= SpectatorLimit)
-                    return TeamJoinError.TeamFull;
-            }
-
-            var isChange = false;
-            if (plr.Team != null && plr.Team.Id != Id)
-            {
-                plr.Team.Leave(plr);
-                isChange = true;
-            }
-
-            plr.Team = this;
-            _players.TryAdd(plr.Slot, plr);
-
-            if (isChange)
-                TeamManager.Broadcast(new SChangeTeamAckMessage(plr.Account.Id, Id, plr.Mode));
-
-            OnPlayerJoined(plr);
-            return TeamJoinError.OK;
         }
 
         public void Leave(Player plr)
         {
-            if (plr.Team != this)
-                return;
+            lock (_mutex)
+            {
+                if (plr.Team != this)
+                    return;
 
-            _players.Remove(plr.Slot);
-            plr.Team = null;
-            OnPlayerLeft(plr);
+                _players.Remove(plr.Slot);
+                plr.Team = null;
+                OnPlayerLeft(plr);
+            }
         }
 
         public void Broadcast(IGameMessage message)
