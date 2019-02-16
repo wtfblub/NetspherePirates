@@ -6,10 +6,13 @@ using ProudNet.Serialization.Serializers;
 namespace ProudNet.Serialization.Messages.Core
 {
     [BlubContract]
-    internal class NotifyCSEncryptedSessionKeyMessage : ICoreMessage
+    internal class     NotifyCSEncryptedSessionKeyMessage : ICoreMessage
     {
         [BlubMember(0)]
         public byte[] SecureKey { get; set; }
+
+        [BlubMember(1)]
+        public byte[] FastKey { get; set; }
     }
 
     [BlubContract]

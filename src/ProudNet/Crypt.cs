@@ -18,8 +18,9 @@ namespace ProudNet
         private int _decryptCounter;
 
         public SymmetricAlgorithm AES { get; private set; }
+        public SymmetricAlgorithm RC4 { get; private set; }
 
-        public Crypt(int keySize)
+        public Crypt(int keySize, int fastKeySize)
         {
             if (keySize == 0)
             {
@@ -43,6 +44,25 @@ namespace ProudNet
                 };
                 AES.GenerateKey();
             }
+
+            if (fastKeySize == 0)
+            {
+                RC4 = new RC4 { KeySize = fastKeySize };
+            }
+            else
+            {
+                RC4 = new RC4();
+                RC4.GenerateKey();
+            }
+        }
+
+        internal void InitializeFastEncryption(byte[] key)
+        {
+            RC4 = new RC4
+            {
+                KeySize = key.Length * 8,
+                Key = key
+            };
         }
 
         public Crypt(byte[] secureKey)
@@ -130,6 +150,12 @@ namespace ProudNet
                 AES.Dispose();
                 AES = null;
             }
+
+            if (RC4 != null)
+            {
+                RC4.Dispose();
+                RC4 = null;
+            }
         }
 
         private SymmetricAlgorithm GetAlgorithm(EncryptMode mode)
@@ -138,6 +164,9 @@ namespace ProudNet
             {
                 case EncryptMode.Secure:
                     return AES;
+
+                case EncryptMode.Fast:
+                    return RC4;
 
                 default:
                     throw new ArgumentException("Invalid mode", nameof(mode));

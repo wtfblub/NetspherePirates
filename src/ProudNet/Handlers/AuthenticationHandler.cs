@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using BlubLib.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using ProudNet.Configuration;
 using ProudNet.Firewall;
@@ -34,6 +35,8 @@ namespace ProudNet.Handlers
             session.Logger.Verbose("Handshake:NotifyCSEncryptedSessionKey");
             var secureKey = _rsa.Decrypt(message.SecureKey, true);
             session.Crypt = new Crypt(secureKey);
+            var fastKey = session.Crypt.AES.Decrypt(message.FastKey);
+            session.Crypt.InitializeFastEncryption(fastKey);
             session.State = SessionState.HandshakeKeyExchanged;
             session.Send(new NotifyCSSessionKeySuccessMessage());
             return true;

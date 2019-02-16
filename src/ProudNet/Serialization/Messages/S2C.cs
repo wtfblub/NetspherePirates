@@ -39,25 +39,29 @@ namespace ProudNet.Serialization.Messages
         public byte[] SecureKey { get; set; }
 
         [BlubMember(5)]
-        public uint P2PFirstFrameNumber { get; set; }
+        public byte[] FastKey { get; set; }
 
         [BlubMember(6)]
-        public Guid ConnectionMagicNumber { get; set; }
+        public uint P2PFirstFrameNumber { get; set; }
 
         [BlubMember(7)]
-        public bool EnableDirectP2P { get; set; }
+        public Guid ConnectionMagicNumber { get; set; }
 
         [BlubMember(8)]
+        public bool EnableDirectP2P { get; set; }
+
+        [BlubMember(9)]
         public ushort BindPort { get; set; }
 
         public P2PGroup_MemberJoinMessage()
         {
             UserData = Array.Empty<byte>();
             SecureKey = Array.Empty<byte>();
+            FastKey = Array.Empty<byte>();
             ConnectionMagicNumber = Guid.Empty;
         }
 
-        public P2PGroup_MemberJoinMessage(uint groupId, uint memberId, uint eventId, byte[] secureKey,
+        public P2PGroup_MemberJoinMessage(uint groupId, uint memberId, uint eventId, byte[] secureKey, byte[] fastKey,
             bool enableDirectP2P)
             : this()
         {
@@ -66,6 +70,7 @@ namespace ProudNet.Serialization.Messages
             EventId = eventId;
             EnableDirectP2P = enableDirectP2P;
             SecureKey = secureKey;
+            FastKey = fastKey;
         }
     }
 

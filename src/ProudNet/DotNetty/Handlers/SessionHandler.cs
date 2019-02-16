@@ -53,10 +53,12 @@ namespace ProudNet.DotNetty.Handlers
                 OverSendSuspectingThresholdInBytes = _networkOptions.OverSendSuspectingThresholdInBytes,
                 EnableNagleAlgorithm = _networkOptions.EnableNagleAlgorithm,
                 EncryptedMessageKeyLength = _networkOptions.EncryptedMessageKeyLength,
+                FastEncryptedMessageKeyLength = _networkOptions.FastEncryptedMessageKeyLength,
                 AllowServerAsP2PGroupMember = _networkOptions.AllowServerAsP2PGroupMember,
                 EnableP2PEncryptedMessaging = _networkOptions.EnableP2PEncryptedMessaging,
                 UpnpDetectNatDevice = _networkOptions.UpnpDetectNatDevice,
                 UpnpTcpAddrPortMapping = _networkOptions.UpnpTcpAddrPortMapping,
+                EnableLookaheadP2PSend = _networkOptions.EnableLookaheadP2PSend,
                 EnablePingTest = _networkOptions.EnablePingTest,
                 EmergencyLogLineCount = _networkOptions.EmergencyLogLineCount
             };

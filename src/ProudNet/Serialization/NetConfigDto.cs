@@ -29,8 +29,8 @@ namespace ProudNet.Serialization
         [BlubMember(7)]
         public int EncryptedMessageKeyLength { get; set; }
 
-        //[BlubMember(8)]
-        //public uint FastEncryptedMessageKeyLength { get; set; }
+        [BlubMember(8)]
+        public int FastEncryptedMessageKeyLength { get; set; }
 
         [BlubMember(9)]
         public bool AllowServerAsP2PGroupMember { get; set; }
