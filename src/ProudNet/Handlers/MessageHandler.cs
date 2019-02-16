@@ -75,7 +75,7 @@ namespace ProudNet.Handlers
             var buffer = context.ChannelHandlerContext.Allocator.Buffer(message.Data.Length);
             using (var src = new MemoryStream(message.Data))
             using (var dst = new WriteOnlyByteBufferStream(buffer, false))
-                crypt.Decrypt(context.ChannelHandlerContext.Allocator, message.EncryptMode, src, dst, true);
+                crypt.Decrypt(context.ChannelHandlerContext.Allocator, EncryptMode.Fast, src, dst, true);
 
             context.Message = buffer;
             context.ChannelHandlerContext.Channel.Pipeline.Context<MessageContextDecoder>().FireChannelRead(context);

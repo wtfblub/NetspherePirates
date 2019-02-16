@@ -72,7 +72,7 @@ namespace Netsphere.Server.Relay
                             options.TcpListener = appOptions.Network.Listener;
                             options.UdpAddress = appOptions.Network.Address;
                             options.UdpListenerPorts = appOptions.Network.UdpPorts;
-                            options.ServerAsP2PGroupMemberHack = true;
+                            options.ServerAsP2PGroupMemberHack = false; //TODO: p26 structures
                         })
                         .UseThreadingConfiguration((context, options) =>
                         {

@@ -90,7 +90,7 @@ namespace ProudNet
             memberToJoin.Crypt = crypt;
 
             if (encrypted)
-                sessionToJoin.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, crypt.AES.Key, AllowDirectP2P));
+                sessionToJoin.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, crypt.RC4.Key, AllowDirectP2P));
             else
                 sessionToJoin.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, AllowDirectP2P));
 
@@ -104,9 +104,9 @@ namespace ProudNet
                 member.ConnectionStates[memberToJoin.HostId] = stateB;
                 if (encrypted)
                 {
-                    member.Send(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.AES.Key, AllowDirectP2P));
+                    member.Send(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.RC4.Key, AllowDirectP2P));
                     sessionToJoin.SendAsync(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId,
-                        crypt.AES.Key, AllowDirectP2P));
+                        crypt.RC4.Key, AllowDirectP2P));
                 }
                 else
                 {

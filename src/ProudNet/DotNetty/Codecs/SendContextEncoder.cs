@@ -41,11 +41,11 @@ namespace ProudNet.DotNetty.Codecs
                     using (var src = new MemoryStream(data))
                     using (var dst = new MemoryStream())
                     {
-                        session.Crypt.Encrypt(context.Allocator, EncryptMode.Secure, src, dst, true);
+                        session.Crypt.Encrypt(context.Allocator, EncryptMode.Fast, src, dst, true);
                         data = dst.ToArray();
                     }
 
-                    coreMessage = new EncryptedReliableMessage(data, EncryptMode.Secure);
+                    coreMessage = new EncryptedReliableMessage(data, EncryptMode.Fast);
                 }
 
                 output.Add(coreMessage);

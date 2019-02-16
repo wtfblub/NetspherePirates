@@ -158,7 +158,7 @@ namespace ProudNet
 
     public static class Constants
     {
-        public const uint NetVersion = 196977;
+        public const uint NetVersion = 196713;
         public const short NetMagic = 0x5713;
         public static readonly Encoding Encoding = CodePagesEncodingProvider.Instance.GetEncoding(1252);
         public static readonly IPEndPoint EmptyIPEndPoint = new IPEndPoint(0, 0);
