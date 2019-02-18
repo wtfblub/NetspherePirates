@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace NoPity
 {
     public class NoPityOptions
