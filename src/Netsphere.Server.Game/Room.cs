@@ -110,7 +110,8 @@ namespace Netsphere.Server.Game
 
             _logger = _logger.ForContext(
                 ("ChannelId", RoomManager.Channel.Id),
-                ("RoomId", Id));
+                ("RoomId", Id)
+            );
         }
 
         public RoomJoinError Join(Player plr)
@@ -123,36 +124,57 @@ namespace Netsphere.Server.Game
             if (plr.Room != null)
                 return RoomJoinError.AlreadyInRoom;
 
-            if (_players.Count >= Options.MatchKey.PlayerLimit + Options.MatchKey.SpectatorLimit)
+            if (_players.Count >= Options.MatchKey.PlayerLimit + Options.MatchKey.SpectatorLimit &&
+                !plr.IsInGMMode)
+            {
                 return RoomJoinError.RoomFull;
+            }
 
-            if (_kickedPlayers.ContainsKey(plr.Account.Id))
+            if (_kickedPlayers.ContainsKey(plr.Account.Id) && !plr.IsInGMMode)
                 return RoomJoinError.KickedPreviously;
 
             if (IsChangingRules)
                 return RoomJoinError.ChangingRules;
 
-            if (Options.IsNoIntrusion && GameRule.StateMachine.GameState == GameState.Playing)
-                return RoomJoinError.NoIntrusion;
-
-            if (TeamManager.Any(x => x.Value.Players.Count() < x.Value.PlayerLimit))
+            if (Options.IsNoIntrusion &&
+                GameRule.StateMachine.GameState == GameState.Playing &&
+                !plr.IsInGMMode)
             {
-                plr.Mode = PlayerGameMode.Normal;
+                return RoomJoinError.NoIntrusion;
+            }
+
+            if (plr.IsInGMMode)
+            {
+                plr.Mode = PlayerGameMode.Spectate;
             }
             else
             {
-                if (TeamManager.Any(x => x.Value.Spectators.Count() < x.Value.SpectatorLimit))
-                    plr.Mode = PlayerGameMode.Spectate;
+                if (TeamManager.Any(x => x.Value.Players.Count() < x.Value.PlayerLimit))
+                {
+                    plr.Mode = PlayerGameMode.Normal;
+                }
                 else
-                    return RoomJoinError.RoomFull;
+                {
+                    if (TeamManager.Any(x => x.Value.Spectators.Count() < x.Value.SpectatorLimit))
+                        plr.Mode = PlayerGameMode.Spectate;
+                    else
+                        return RoomJoinError.RoomFull;
+                }
             }
 
             plr.Slot = (byte)_idRecycler.GetId();
             plr.State = PlayerState.Lobby;
             plr.IsReady = false;
 
-            if (TeamManager.Join(plr) != TeamJoinError.OK)
-                return RoomJoinError.RoomFull;
+            if (plr.IsInGMMode)
+            {
+                TeamManager.Values.First().Join(plr);
+            }
+            else
+            {
+                if (TeamManager.Join(plr) != TeamJoinError.OK)
+                    return RoomJoinError.RoomFull;
+            }
 
             _players.TryAdd(plr.Account.Id, plr);
             plr.Room = this;
