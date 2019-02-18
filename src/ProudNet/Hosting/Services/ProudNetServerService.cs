@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.Collections.Concurrent;
+using DotNetty.Common.Internal.Logging;
 using DotNetty.Handlers.Flow;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
@@ -101,7 +102,7 @@ namespace ProudNet.Hosting.Services
         public ProudNetServerService(ILogger<ProudNetServerService> logger, IServiceProvider serviceProvider,
             IOptions<NetworkOptions> networkOptions, IOptions<ThreadingOptions> threadingOptions,
             P2PGroupManager groupManager, UdpSocketManager udpSocketManager, ISchedulerService schedulerService,
-            ISessionManagerFactory sessionManagerFactory)
+            ISessionManagerFactory sessionManagerFactory, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
         {
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
@@ -115,7 +116,7 @@ namespace ProudNet.Hosting.Services
             _schedulerService = schedulerService;
             _magicNumberSessionManager = sessionManagerFactory.GetSessionManager<Guid>(SessionManagerType.MagicNumber);
             _udpSessionManager = sessionManagerFactory.GetSessionManager<uint>(SessionManagerType.UdpId);
-            // InternalLoggerFactory.DefaultFactory = loggerFactory;
+            InternalLoggerFactory.DefaultFactory = loggerFactory;
 
             var sessionManager = _serviceProvider.GetRequiredService<ISessionManager>();
             sessionManager.Added += SessionManager_OnAdded;
