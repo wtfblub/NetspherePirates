@@ -45,7 +45,7 @@ namespace Netsphere.Server.Game.Handlers
             if (message.ItemVersion != version)
                 flags |= ShopResourceType.Item;
 
-            await session.SendAsync(new SNewShopUpdateCheckAckMessage
+            session.Send(new SNewShopUpdateCheckAckMessage
             {
                 PriceVersion = version,
                 EffectVersion = version,
@@ -68,7 +68,7 @@ namespace Netsphere.Server.Game.Handlers
                     var data = w.ToArray();
                     var decompressedLength = data.Length;
                     var compressed = data.CompressLZO();
-                    await session.SendAsync(new SNewShopUpdateInfoAckMessage(pair.Key,
+                    session.Send(new SNewShopUpdateInfoAckMessage(pair.Key,
                         compressed, (uint)compressed.Length, (uint)decompressedLength, version));
                 }
             }
@@ -78,7 +78,7 @@ namespace Netsphere.Server.Game.Handlers
             // {
             //     w.Write(0);
             //
-            //     await session.SendAsync(new SNewShopUpdateInfoAckMessage
+            //     session.Send(new SNewShopUpdateInfoAckMessage
             //     {
             //         Type = ShopResourceType.UniqueItem,
             //         Data = w.ToArray(),

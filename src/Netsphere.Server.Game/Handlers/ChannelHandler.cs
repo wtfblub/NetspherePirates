@@ -36,7 +36,7 @@ namespace Netsphere.Server.Game.Handlers
                     if (plr.Channel != null)
                     {
                         var rooms = plr.Channel.RoomManager.Select(x => x.Map<Room, RoomDto>()).ToArray();
-                        await session.SendAsync(new SGameRoomListAckMessage(message.Request, rooms));
+                        session.Send(new SGameRoomListAckMessage(message.Request, rooms));
                     }
 
                     break;
@@ -45,7 +45,7 @@ namespace Netsphere.Server.Game.Handlers
                     if (plr.Channel == null)
                     {
                         var channels = _channelService.Select(x => x.Map<Channel, ChannelInfoDto>()).ToArray();
-                        await session.SendAsync(new SChannelListInfoAckMessage(channels));
+                        session.Send(new SChannelListInfoAckMessage(channels));
                     }
 
                     break;
@@ -68,7 +68,7 @@ namespace Netsphere.Server.Game.Handlers
             var channel = _channelService[message.Channel];
             if (channel == null)
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.NonExistingChannel));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.NonExistingChannel));
                 return true;
             }
 
@@ -76,15 +76,15 @@ namespace Netsphere.Server.Game.Handlers
             switch (result)
             {
                 case ChannelJoinError.OK:
-                    await plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelEnter));
+                    plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelEnter));
                     break;
 
                 case ChannelJoinError.AlreadyInChannel:
-                    await plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.JoinChannelFailed));
+                    plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.JoinChannelFailed));
                     break;
 
                 case ChannelJoinError.ChannelFull:
-                    await plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLimitReached));
+                    plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelLimitReached));
                     break;
             }
 
@@ -99,7 +99,7 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
 
             plr.Channel.Leave(plr);
-            await plr.Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
+            plr.Session.Send(new SServerResultInfoAckMessage(ServerResult.ChannelLeave));
             return true;
         }
     }

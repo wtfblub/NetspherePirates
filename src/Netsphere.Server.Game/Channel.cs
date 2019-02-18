@@ -82,7 +82,7 @@ namespace Netsphere.Server.Game
         public void Broadcast(IGameMessage message, bool excludeRooms = false)
         {
             foreach (var plr in Players.Values.Where(plr => !excludeRooms || plr.Room == null))
-                plr.Session.SendAsync(message);
+                plr.Session.Send(message);
         }
     }
 }

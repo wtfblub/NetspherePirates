@@ -65,9 +65,10 @@ namespace ProudNet
             }
         }
 
-        public Task SendAsync(ICoreMessage message, IPEndPoint endPoint)
+        public void Send(ICoreMessage message, IPEndPoint endPoint)
         {
-            return Channel.WriteAndFlushAsync(new SendContext { Message = message, UdpEndPoint = endPoint });
+            if (!_disposed && Channel.IsWritable)
+                Channel.WriteAndFlushAsync(new SendContext { Message = message, UdpEndPoint = endPoint });
         }
 
         public void Dispose()
@@ -76,6 +77,7 @@ namespace ProudNet
                 return;
 
             _disposed = true;
+            Channel.CloseAsync();
             _eventLoopGroup?.ShutdownGracefullyAsync(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10)).WaitEx();
         }
 

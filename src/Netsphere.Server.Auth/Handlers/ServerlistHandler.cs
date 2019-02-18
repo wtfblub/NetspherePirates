@@ -21,7 +21,7 @@ namespace Netsphere.Server.Auth.Handlers
             var session = context.Session;
 
             var servers = _serverlistService.GetServerList();
-            await session.SendAsync(new SServerListAckMessage(servers));
+            session.Send(new SServerListAckMessage(servers));
             return true;
         }
     }

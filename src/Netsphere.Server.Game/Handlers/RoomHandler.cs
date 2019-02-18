@@ -45,8 +45,8 @@ namespace Netsphere.Server.Game.Handlers
                 return true;
 
             room.Broadcast(new SEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.Mode, 0));
-            await session.SendAsync(new SChangeMasterAckMessage(plr.Room.Master.Account.Id));
-            await session.SendAsync(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id));
+            session.Send(new SChangeMasterAckMessage(plr.Room.Master.Account.Id));
+            session.Send(new SChangeRefeReeAckMessage(plr.Room.Host.Account.Id));
             plr.Room.BroadcastBriefing();
             plr.IsConnectingToRoom = false;
             plr.Room.OnPlayerJoined(plr);
@@ -86,17 +86,17 @@ namespace Netsphere.Server.Game.Handlers
 
                 case RoomCreateError.InvalidGameRule:
                     logger.Warning("Trying to create room with invalid gamerule");
-                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                     return true;
 
                 case RoomCreateError.InvalidMap:
                     logger.Warning("Trying to create room with invalid map");
-                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                     return true;
 
                 default:
                     logger.Warning("Unknown error={Error} when creating room", createError);
-                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
                     return true;
             }
 
@@ -117,15 +117,15 @@ namespace Netsphere.Server.Game.Handlers
 
             if (room == null)
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
-                await session.SendAsync(new SDisposeGameRoomAckMessage(message.RoomId));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.ImpossibleToEnterRoom));
+                session.Send(new SDisposeGameRoomAckMessage(message.RoomId));
                 return true;
             }
 
             if (!string.IsNullOrWhiteSpace(room.Options.Password) &&
                 !room.Options.Password.Equals(message.Password))
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.PasswordError));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.PasswordError));
                 return true;
             }
 
@@ -136,11 +136,11 @@ namespace Netsphere.Server.Game.Handlers
                 case RoomJoinError.RoomFull:
                 case RoomJoinError.KickedPreviously:
                 case RoomJoinError.NoIntrusion:
-                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.CantEnterRoom));
                     break;
 
                 case RoomJoinError.ChangingRules:
-                    await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.RoomChangingRules));
                     break;
             }
 
@@ -170,11 +170,11 @@ namespace Netsphere.Server.Game.Handlers
             switch (error)
             {
                 case TeamChangeError.Full:
-                    await session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                    session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                     break;
 
                 case TeamChangeError.PlayerIsReady:
-                    await session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                    session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                     break;
             }
 
@@ -193,11 +193,11 @@ namespace Netsphere.Server.Game.Handlers
             switch (error)
             {
                 case TeamChangeModeError.Full:
-                    await session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                    session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
                     break;
 
                 case TeamChangeModeError.PlayerIsReady:
-                    await session.SendAsync(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                    session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
                     break;
             }
 
@@ -221,7 +221,7 @@ namespace Netsphere.Server.Game.Handlers
                 fromTeam != plrToMove.Team ||
                 plrToReplace != null && toTeam != plrToReplace.Team)
             {
-                await session.SendAsync(new SMixChangeTeamFailAckMessage());
+                session.Send(new SMixChangeTeamFailAckMessage());
                 return true;
             }
 
@@ -230,7 +230,7 @@ namespace Netsphere.Server.Game.Handlers
                 var error = toTeam.Join(plrToMove);
 
                 if (error != TeamJoinError.OK)
-                    await session.SendAsync(new SMixChangeTeamFailAckMessage());
+                    session.Send(new SMixChangeTeamFailAckMessage());
             }
             else
             {
@@ -256,7 +256,7 @@ namespace Netsphere.Server.Game.Handlers
             var room = plr.Room;
 
             if (!room.GameRule.StateMachine.StartGame())
-                await session.SendAsync(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
+                session.Send(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
 
             return true;
         }
@@ -351,7 +351,7 @@ namespace Netsphere.Server.Game.Handlers
 
             var error = room.ChangeRules(message.Settings);
             if (error != RoomChangeRulesError.OK)
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
 
             return true;
         }

@@ -86,7 +86,7 @@ namespace Netsphere.Server.Chat
         internal void Add(Mail mail)
         {
             if (_mails.TryAdd(mail.Id, mail))
-                UpdateReminderAsync();
+                UpdateReminder();
         }
 
         public async Task<bool> SendAsync(string receiver, string title, string message)
@@ -138,13 +138,13 @@ namespace Netsphere.Server.Chat
                 _mailsToDelete.Push(mail);
             }
 
-            UpdateReminderAsync();
+            UpdateReminder();
             return changed;
         }
 
-        public Task UpdateReminderAsync()
+        public void UpdateReminder()
         {
-            return Player.Session.SendAsync(new SNoteReminderInfoAckMessage((byte)this.Count(x => x.IsNew), 0, 0));
+            Player.Session.Send(new SNoteReminderInfoAckMessage((byte)this.Count(x => x.IsNew), 0, 0));
         }
 
         public async Task Save(GameContext db)

@@ -70,14 +70,14 @@ namespace Netsphere.Server.Game.Handlers
                 if (itemInfo.License != ItemLicense.None && !hasLicense)
                 {
                     logger.Warning("Trying to buy item without required license");
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (itemInfo.Level > plr.Level)
                 {
                     logger.Warning("Trying to buy item without required level playerLevel={PlayerLevel}", plr.Level);
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -87,14 +87,14 @@ namespace Netsphere.Server.Game.Handlers
                 if (shopItem == null)
                 {
                     logger.Warning("Trying to buy non-existant item");
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (itemToBuy.Color > shopItem.ColorGroup)
                 {
                     logger.Warning("Trying to buy item with invalid color");
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -102,14 +102,14 @@ namespace Netsphere.Server.Game.Handlers
                 if (shopItemInfo == null)
                 {
                     logger.Warning("Trying to buy non-existant item");
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (!shopItemInfo.IsEnabled)
                 {
                     logger.Warning("Trying to buy disabled item");
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -117,14 +117,14 @@ namespace Netsphere.Server.Game.Handlers
                 if (priceInfo == null)
                 {
                     logger.Warning("Trying to buy item with invalid price info");
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (!priceInfo.IsEnabled)
                 {
                     logger.Warning("Trying to buy item with disabled price info");
-                    await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -139,7 +139,7 @@ namespace Netsphere.Server.Game.Handlers
                         if (plr.PEN < cost)
                         {
                             logger.Warning("Trying to buy item without enough PEN currentPEN={CurrentPEN}", plr.PEN);
-                            await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
+                            session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
                             return true;
                         }
 
@@ -152,7 +152,7 @@ namespace Netsphere.Server.Game.Handlers
                         if (plr.AP < cost)
                         {
                             logger.Warning("Trying to buy item without enough AP currentAP={CurrentAP}", plr.AP);
-                            await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
+                            session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
                             return true;
                         }
 
@@ -164,7 +164,7 @@ namespace Netsphere.Server.Game.Handlers
 
                     default:
                         logger.Warning("Trying to buy item with invalid price type");
-                        await session.SendAsync(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.DBError));
+                        session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.DBError));
                         return true;
                 }
 
@@ -183,10 +183,10 @@ namespace Netsphere.Server.Game.Handlers
                 }
 
                 var newItemIds = newItems.Select(x => x.Id).ToArray();
-                await session.SendAsync(new SBuyItemAckMessage(newItemIds, itemToBuy));
+                session.Send(new SBuyItemAckMessage(newItemIds, itemToBuy));
                 newItems.Clear();
 
-                await plr.SendMoneyUpdate();
+                plr.SendMoneyUpdate();
             }
 
             return true;

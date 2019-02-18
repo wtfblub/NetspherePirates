@@ -90,9 +90,9 @@ namespace ProudNet
             memberToJoin.Crypt = crypt;
 
             if (encrypted)
-                sessionToJoin.SendAsync(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, crypt.AES.Key, AllowDirectP2P));
+                sessionToJoin.Send(new P2PGroup_MemberJoinMessage(HostId, hostId, 0, crypt.AES.Key, AllowDirectP2P));
             else
-                sessionToJoin.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, AllowDirectP2P));
+                sessionToJoin.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, 0, AllowDirectP2P));
 
             foreach (var member in _members.Values.Where(member => member.HostId != hostId))
             {
@@ -105,14 +105,27 @@ namespace ProudNet
                 if (encrypted)
                 {
                     member.Send(new P2PGroup_MemberJoinMessage(HostId, hostId, stateB.EventId, crypt.AES.Key, AllowDirectP2P));
-                    sessionToJoin.SendAsync(new P2PGroup_MemberJoinMessage(HostId, member.HostId, stateA.EventId,
-                        crypt.AES.Key, AllowDirectP2P));
+                    sessionToJoin.Send(
+                        new P2PGroup_MemberJoinMessage(
+                            HostId,
+                            member.HostId,
+                            stateA.EventId,
+                            crypt.AES.Key,
+                            AllowDirectP2P
+                        )
+                    );
                 }
                 else
                 {
                     member.Send(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, hostId, stateB.EventId, AllowDirectP2P));
-                    sessionToJoin.SendAsync(new P2PGroup_MemberJoin_UnencryptedMessage(HostId, member.HostId, stateA.EventId,
-                        AllowDirectP2P));
+                    sessionToJoin.Send(
+                        new P2PGroup_MemberJoin_UnencryptedMessage(
+                            HostId,
+                            member.HostId,
+                            stateA.EventId,
+                            AllowDirectP2P
+                        )
+                    );
                 }
             }
 

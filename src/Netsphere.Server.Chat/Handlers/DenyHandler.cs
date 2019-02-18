@@ -37,7 +37,7 @@ namespace Netsphere.Server.Chat.Handlers
                         return true;
 
                     deny = plr.Ignore.Add(target.Account.Id, target.Account.Nickname);
-                    await session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
+                    session.Send(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
                     break;
 
                 case DenyAction.Remove:
@@ -46,7 +46,7 @@ namespace Netsphere.Server.Chat.Handlers
                         return true;
 
                     plr.Ignore.Remove(message.Deny.AccountId);
-                    await session.SendAsync(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
+                    session.Send(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
                     break;
             }
 

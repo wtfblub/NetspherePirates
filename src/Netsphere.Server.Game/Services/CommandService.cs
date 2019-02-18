@@ -69,7 +69,7 @@ namespace Netsphere.Server.Game.Services
             if (!result)
             {
                 if (plr != null)
-                    await plr.SendConsoleMessage(command.Help);
+                    plr.SendConsoleMessage(command.Help);
                 else
                     Console.WriteLine(command.Help);
             }

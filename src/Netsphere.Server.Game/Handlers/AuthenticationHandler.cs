@@ -71,14 +71,14 @@ namespace Netsphere.Server.Game.Handlers
             {
                 logger.Information("Invalid client version={Version} supported versions are {SupportedVersions}",
                     message.Version.ToString(), string.Join(",", allowedVersions.Select(x => x.ToString())));
-                await session.SendAsync(new SLoginAckMessage(GameLoginResult.WrongVersion));
+                session.Send(new SLoginAckMessage(GameLoginResult.WrongVersion));
                 await session.CloseAsync();
                 return true;
             }
 
             if (_sessionManager.Sessions.Count >= _networkOptions.MaxSessions)
             {
-                await session.SendAsync(new SLoginAckMessage(GameLoginResult.ServerFull));
+                session.Send(new SLoginAckMessage(GameLoginResult.ServerFull));
                 return true;
             }
 
@@ -87,7 +87,7 @@ namespace Netsphere.Server.Game.Handlers
             if (!sessionId.HasValue || !sessionId.Value.Equals(message.SessionId))
             {
                 logger.Information("Invalid session id");
-                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                session.Send(new SLoginAckMessage(GameLoginResult.SessionTimeout));
                 return true;
             }
 
@@ -103,7 +103,7 @@ namespace Netsphere.Server.Game.Handlers
             if (accountEntity == null)
             {
                 logger.Information("Wrong login");
-                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                session.Send(new SLoginAckMessage(GameLoginResult.SessionTimeout));
                 return true;
             }
 
@@ -117,7 +117,7 @@ namespace Netsphere.Server.Game.Handlers
                     unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
 
                 logger.Information("Account is banned until {UnbanDate}", unbanDate);
-                await session.SendAsync(new SLoginAckMessage(GameLoginResult.SessionTimeout));
+                session.Send(new SLoginAckMessage(GameLoginResult.SessionTimeout));
                 return true;
             }
 
@@ -139,7 +139,7 @@ namespace Netsphere.Server.Game.Handlers
                 // TODO Check if logged in on another server
 
                 logger.Information("Account is already logged in");
-                await session.SendAsync(new SLoginAckMessage(GameLoginResult.TerminateOtherConnection));
+                session.Send(new SLoginAckMessage(GameLoginResult.TerminateOtherConnection));
                 return true;
             }
 
@@ -182,7 +182,7 @@ namespace Netsphere.Server.Game.Handlers
             var result = string.IsNullOrWhiteSpace(account.Nickname)
                 ? GameLoginResult.ChooseNickname
                 : GameLoginResult.OK;
-            await session.SendAsync(new SLoginAckMessage(result, account.Id));
+            session.Send(new SLoginAckMessage(result, account.Id));
 
             if (!string.IsNullOrWhiteSpace(account.Nickname))
                 await session.Player.SendAccountInformation();
@@ -201,7 +201,7 @@ namespace Netsphere.Server.Game.Handlers
             if (!available)
                 logger.Debug("Nickname not available");
 
-            await session.SendAsync(new SCheckNickAckMessage(!available));
+            session.Send(new SCheckNickAckMessage(!available));
             return true;
         }
 
@@ -217,7 +217,7 @@ namespace Netsphere.Server.Game.Handlers
             if (!available)
             {
                 logger.Debug("Nickname not available");
-                await session.SendAsync(new SCheckNickAckMessage(true));
+                session.Send(new SCheckNickAckMessage(true));
             }
 
             session.Player.Account.Nickname = message.Nickname;
@@ -229,7 +229,7 @@ namespace Netsphere.Server.Game.Handlers
                     .UpdateAsync(x => new AccountEntity { Nickname = message.Nickname });
             }
 
-            await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateNicknameSuccess));
+            session.Send(new SServerResultInfoAckMessage(ServerResult.CreateNicknameSuccess));
             await session.Player.SendAccountInformation();
             session.Player.OnNicknameCreated(message.Nickname);
             return true;

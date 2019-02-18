@@ -33,7 +33,7 @@ namespace ProudNet.Handlers
                 session.LastUdpPing = DateTimeOffset.Now;
 
             var ts = DateTime.Now - _processStartTime.Value;
-            await session.SendUdpIfAvailableAsync(new UnreliablePongMessage(message.ClientTime, ts.TotalSeconds));
+            session.Send(new UnreliablePongMessage(message.ClientTime, ts.TotalSeconds), true);
             return true;
         }
 
@@ -45,7 +45,7 @@ namespace ProudNet.Handlers
 
         public async Task<bool> OnHandle(MessageContext context, ReliablePingMessage message)
         {
-            await context.Session.SendAsync(new ReliablePongMessage());
+            context.Session.Send(new ReliablePongMessage());
             return true;
         }
 

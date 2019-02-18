@@ -31,7 +31,7 @@ namespace ProudNet.Handlers
             if (!_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return true;
 
-            await session.SendUdpAsync(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint));
+            session.Send(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint), true);
             return true;
         }
 
@@ -47,7 +47,7 @@ namespace ProudNet.Handlers
             session.LastUdpPing = DateTimeOffset.Now;
             session.UdpEnabled = true;
             session.UdpLocalEndPoint = message.LocalEndPoint;
-            await session.SendUdpAsync(new NotifyClientServerUdpMatchedMessage(message.MagicNumber));
+            session.Send(new NotifyClientServerUdpMatchedMessage(message.MagicNumber), true);
             return true;
         }
 
@@ -61,8 +61,10 @@ namespace ProudNet.Handlers
             if (!(session.P2PGroup.GetMember(message.HostId) is ProudSession target) || !target.UdpEnabled)
                 return true;
 
-            await session.SendUdpAsync(
-                new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, session.UdpEndPoint, target.HostId));
+            session.Send(
+                new PeerUdp_ServerHolepunchAckMessage(message.MagicNumber, session.UdpEndPoint, target.HostId),
+                true
+            );
             return true;
         }
 
