@@ -33,6 +33,7 @@ namespace Netsphere.Server.Auth.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn), Invert = true)]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CAuthInEUReqMessage message)
         {
             var session = context.GetSession<Session>();

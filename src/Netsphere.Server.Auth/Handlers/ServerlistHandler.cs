@@ -16,6 +16,7 @@ namespace Netsphere.Server.Auth.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CServerListReqMessage message)
         {
             var session = context.Session;

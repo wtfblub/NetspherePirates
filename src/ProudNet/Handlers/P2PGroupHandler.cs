@@ -27,27 +27,24 @@ namespace ProudNet.Handlers
             if (stateA?.EventId != message.EventId)
                 return true;
 
-            using (await stateA.Mutex.LockAsync())
+            stateA.IsJoined = true;
+            var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
+            if (stateB?.IsJoined == true)
             {
-                stateA.IsJoined = true;
-                var stateB = stateA.RemotePeer.ConnectionStates.GetValueOrDefault(session.HostId);
-                if (stateB?.IsJoined == true)
-                {
-                    if (!session.P2PGroup.AllowDirectP2P)
-                        return true;
+                if (!session.P2PGroup.AllowDirectP2P)
+                    return true;
 
-                    // Do not try p2p when the udp relay is not used by one of the clients
-                    if (!(stateA.RemotePeer is ProudSession sessionA) || !sessionA.UdpEnabled ||
-                        !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
-                        return true;
+                // Do not try p2p when the udp relay is not used by one of the clients
+                if (!(stateA.RemotePeer is ProudSession sessionA) || !sessionA.UdpEnabled ||
+                    !(stateB.RemotePeer is ProudSession sessionB) || !sessionB.UdpEnabled)
+                    return true;
 
-                    session.Logger.Debug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
-                    sessionA.Logger.Debug("Initialize P2P with {TargetHostId}", session.HostId);
-                    stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
-                    stateA.IsInitialized = stateB.IsInitialized = true;
-                    remotePeer.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
-                    stateA.RemotePeer.Send(new P2PRecycleCompleteMessage(session.HostId));
-                }
+                session.Logger.Debug("Initialize P2P with {TargetHostId}", stateA.RemotePeer.HostId);
+                sessionA.Logger.Debug("Initialize P2P with {TargetHostId}", session.HostId);
+                stateA.LastHolepunch = stateB.LastHolepunch = DateTimeOffset.Now;
+                stateA.IsInitialized = stateB.IsInitialized = true;
+                remotePeer.Send(new P2PRecycleCompleteMessage(stateA.RemotePeer.HostId));
+                stateA.RemotePeer.Send(new P2PRecycleCompleteMessage(session.HostId));
             }
 
             return true;

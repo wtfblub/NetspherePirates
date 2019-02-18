@@ -17,6 +17,7 @@ namespace Netsphere.Server.Game.Handlers
             _logger = logger;
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CUseItemReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -44,6 +45,7 @@ namespace Netsphere.Server.Game.Handlers
             return true;
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CRepairItemReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -98,6 +100,7 @@ namespace Netsphere.Server.Game.Handlers
             return true;
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CRefundItemReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -136,6 +139,7 @@ namespace Netsphere.Server.Game.Handlers
             return true;
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CDiscardItemReqMessage message)
         {
             var session = context.GetSession<Session>();

@@ -18,6 +18,7 @@ namespace Netsphere.Server.Game.Handlers
             _commandService = commandService;
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CTimeSyncReqMessage message)
         {
             context.Session.Send(new STimeSyncAckMessage
@@ -30,6 +31,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CAdminShowWindowReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -40,6 +42,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CAdminActionReqMessage message)
         {
             var session = context.GetSession<Session>();

@@ -57,6 +57,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn), Invert = true)]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CLoginReqMessage message)
         {
             var session = context.GetSession<Session>();

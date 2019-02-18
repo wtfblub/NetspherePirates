@@ -28,6 +28,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, CLicensedReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -38,6 +39,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, CExerciseLicenceReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -47,6 +49,7 @@ namespace Netsphere.Server.Game.Handlers
             return Task.FromResult(true);
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CBuyItemReqMessage message)
         {
             var session = context.GetSession<Session>();

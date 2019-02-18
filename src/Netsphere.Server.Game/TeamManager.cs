@@ -12,7 +12,6 @@ namespace Netsphere.Server.Game
     public class TeamManager : IReadOnlyDictionary<TeamId, Team>
     {
         private readonly ConcurrentDictionary<TeamId, Team> _teams = new ConcurrentDictionary<TeamId, Team>();
-        private readonly object _mutex = new object();
 
         public Room Room { get; }
         public IEnumerable<Player> Players => _teams.Values.SelectMany(team => team.Players);
@@ -48,7 +47,7 @@ namespace Netsphere.Server.Game
             if (playerLimit < 0 || spectatorLimit < 0)
                 throw new ArgumentOutOfRangeException();
 
-            var team = new Team(this, id, (uint)playerLimit, (uint)spectatorLimit, _mutex);
+            var team = new Team(this, id, (uint)playerLimit, (uint)spectatorLimit);
             if (_teams.TryAdd(id, team))
             {
                 team.PlayerJoined += OnPlayerJoinedTeam;
@@ -78,8 +77,6 @@ namespace Netsphere.Server.Game
 
         public TeamJoinError Join(Player plr)
         {
-            lock (_mutex)
-            {
                 IEnumerable<Team> teams;
                 if (plr.Mode == PlayerGameMode.Spectate)
                 {
@@ -95,13 +92,10 @@ namespace Netsphere.Server.Game
                 }
 
                 return teams.FirstOrDefault()?.Join(plr) ?? TeamJoinError.TeamFull;
-            }
         }
 
         public TeamChangeError ChangeTeam(Player plr, TeamId teamId)
         {
-            lock (_mutex)
-            {
                 if (plr.Room != Room)
                     return TeamChangeError.WrongRoom;
 
@@ -129,13 +123,10 @@ namespace Netsphere.Server.Game
                 //Broadcast(new SChangeTeamAckMessage(plr.Account.Id, plr.Team.Id, plr.Mode));
                 OnPlayerTeamChanged(plr, sourceTeam, targetTeam);
                 return TeamChangeError.OK;
-            }
         }
 
         public TeamChangeModeError ChangeMode(Player plr, PlayerGameMode mode)
         {
-            lock (_mutex)
-            {
                 if (plr.Room != Room)
                     return TeamChangeModeError.WrongRoom;
 
@@ -173,13 +164,10 @@ namespace Netsphere.Server.Game
                 plr.Mode = mode;
                 Broadcast(new SPlayerGameModeChangeAckMessage(plr.Account.Id, mode));
                 return TeamChangeModeError.OK;
-            }
         }
 
         public void SwapPlayer(Player a, Player b)
         {
-            lock (_mutex)
-            {
                 if (a.Team == b.Team)
                     return;
 
@@ -189,7 +177,6 @@ namespace Netsphere.Server.Game
                 teamB.Leave(b);
                 teamA.Join(b);
                 teamB.Join(a);
-            }
         }
 
         public void Broadcast(IGameMessage message)
@@ -242,7 +229,6 @@ namespace Netsphere.Server.Game
     public class Team : IReadOnlyDictionary<byte, Player>
     {
         private readonly ConcurrentDictionary<byte, Player> _players = new ConcurrentDictionary<byte, Player>();
-        private readonly object _mutex;
 
         public TeamManager TeamManager { get; }
         public TeamId Id { get; }
@@ -268,19 +254,16 @@ namespace Netsphere.Server.Game
             PlayerLeft?.Invoke(this, new TeamEventArgs(this, plr));
         }
 
-        public Team(TeamManager teamManager, TeamId id, uint playerLimit, uint spectatorLimit, object mutex)
+        public Team(TeamManager teamManager, TeamId id, uint playerLimit, uint spectatorLimit)
         {
             TeamManager = teamManager;
             Id = id;
             PlayerLimit = playerLimit;
             SpectatorLimit = spectatorLimit;
-            _mutex = mutex;
         }
 
         public TeamJoinError Join(Player plr)
         {
-            lock (_mutex)
-            {
                 if (plr.Team == this)
                     return TeamJoinError.AlreadyInTeam;
 
@@ -310,20 +293,16 @@ namespace Netsphere.Server.Game
 
                 OnPlayerJoined(plr);
                 return TeamJoinError.OK;
-            }
         }
 
         public void Leave(Player plr)
         {
-            lock (_mutex)
-            {
                 if (plr.Team != this)
                     return;
 
                 _players.Remove(plr.Slot);
                 plr.Team = null;
                 OnPlayerLeft(plr);
-            }
         }
 
         public void Broadcast(IGameMessage message)

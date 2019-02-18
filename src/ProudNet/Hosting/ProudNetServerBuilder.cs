@@ -27,21 +27,6 @@ namespace ProudNet.Hosting
 
             _hostBuilder.ConfigureServices((context, collection) =>
             {
-                /*
-                * External code can access the default session manager(by host id lookup)
-                * by using the public ISessionManager interface
-                *
-                * Internal code can use the ISessionManagerFactory interface
-                * to request additional internal session managers
-                */
-                var sessionManager = new SessionManager();
-                var sessionManagerFactory = new SessionManagerFactory(new Dictionary<SessionManagerType, object>
-                {
-                    [SessionManagerType.HostId] = sessionManager,
-                    [SessionManagerType.UdpId] = new SessionManager<uint>(),
-                    [SessionManagerType.MagicNumber] = new SessionManager<Guid>()
-                });
-
                 collection
                     .AddOptions()
 
@@ -57,7 +42,24 @@ namespace ProudNet.Hosting
                     .AddSingleton(_ => (IHostedService)_.GetRequiredService<IProudNetServerService>())
 
                     // Session managers
-                    .AddSingleton<ISessionManagerFactory>(sessionManagerFactory)
+                    .AddSingleton<ISessionManagerFactory>(x =>
+                    {
+                        /*
+                        * External code can access the default session manager(by host id lookup)
+                        * by using the public ISessionManager interface
+                        *
+                        * Internal code can use the ISessionManagerFactory interface
+                        * to request additional internal session managers
+                        */
+                        var schedulerService = x.GetRequiredService<ISchedulerService>();
+                        var sessionManager = new SessionManager(schedulerService);
+                        return new SessionManagerFactory(new Dictionary<SessionManagerType, object>
+                        {
+                            [SessionManagerType.HostId] = sessionManager,
+                            [SessionManagerType.UdpId] = new SessionManager<uint>(schedulerService),
+                            [SessionManagerType.MagicNumber] = new SessionManager<Guid>(schedulerService)
+                        });
+                    })
                     .AddSingleton(_ => (ISessionManager)_.GetRequiredService<ISessionManagerFactory>()
                         .GetSessionManager<uint>(SessionManagerType.HostId))
                     .AddSingleton(_serializer)

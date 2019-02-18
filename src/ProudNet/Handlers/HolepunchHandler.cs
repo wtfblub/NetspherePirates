@@ -23,6 +23,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, ServerHolepunchMessage message)
         {
             var session = context.Session;
@@ -36,6 +37,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, NotifyHolepunchSuccessMessage message)
         {
             var session = context.Session;
@@ -80,24 +82,21 @@ namespace ProudNet.Handlers
             if (connectionState == null)
                 return true;
 
-            using (await connectionState.Mutex.LockAsync())
+            connectionState.PeerUdpHolepunchSuccess = true;
+            connectionState.LocalEndPoint = message.LocalEndPoint;
+            connectionState.EndPoint = message.EndPoint;
+            var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
+            if (connectionStateB.PeerUdpHolepunchSuccess)
             {
-                connectionState.PeerUdpHolepunchSuccess = true;
-                connectionState.LocalEndPoint = message.LocalEndPoint;
-                connectionState.EndPoint = message.EndPoint;
-                var connectionStateB = connectionState.RemotePeer.ConnectionStates[session.HostId];
-                if (connectionStateB.PeerUdpHolepunchSuccess)
-                {
-                    remotePeer.Send(new RequestP2PHolepunchMessage(
-                        message.HostId,
-                        connectionStateB.LocalEndPoint,
-                        connectionStateB.EndPoint));
+                remotePeer.Send(new RequestP2PHolepunchMessage(
+                    message.HostId,
+                    connectionStateB.LocalEndPoint,
+                    connectionStateB.EndPoint));
 
-                    connectionState.RemotePeer.Send(new RequestP2PHolepunchMessage(
-                        session.HostId,
-                        connectionState.LocalEndPoint,
-                        connectionState.EndPoint));
-                }
+                connectionState.RemotePeer.Send(new RequestP2PHolepunchMessage(
+                    session.HostId,
+                    connectionState.LocalEndPoint,
+                    connectionState.EndPoint));
             }
 
             return true;
@@ -124,22 +123,19 @@ namespace ProudNet.Handlers
             if (stateA == null || stateB == null)
                 return true;
 
-            using (await stateA.Mutex.LockAsync())
+            if (session.HostId == remotePeerA.HostId)
+                stateA.HolepunchSuccess = true;
+            else if (session.HostId == remotePeerB.HostId)
+                stateB.HolepunchSuccess = true;
+
+            if (stateA.HolepunchSuccess && stateB.HolepunchSuccess)
             {
-                if (session.HostId == remotePeerA.HostId)
-                    stateA.HolepunchSuccess = true;
-                else if (session.HostId == remotePeerB.HostId)
-                    stateB.HolepunchSuccess = true;
+                var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr,
+                    message.ABRecvAddr,
+                    message.BASendAddr, message.BARecvAddr);
 
-                if (stateA.HolepunchSuccess && stateB.HolepunchSuccess)
-                {
-                    var notify = new NotifyDirectP2PEstablishMessage(message.A, message.B, message.ABSendAddr,
-                        message.ABRecvAddr,
-                        message.BASendAddr, message.BARecvAddr);
-
-                    remotePeerA.Send(notify);
-                    remotePeerB.Send(notify);
-                }
+                remotePeerA.Send(notify);
+                remotePeerB.Send(notify);
             }
 
             return true;
@@ -164,18 +160,15 @@ namespace ProudNet.Handlers
             if (stateA == null || stateB == null)
                 return true;
 
-            using (await stateA.Mutex.LockAsync())
-            {
-                if (session.HostId == remotePeerA.HostId)
-                    stateA.JitTriggered = true;
-                else if (session.HostId == remotePeerB.HostId)
-                    stateB.JitTriggered = true;
+            if (session.HostId == remotePeerA.HostId)
+                stateA.JitTriggered = true;
+            else if (session.HostId == remotePeerB.HostId)
+                stateB.JitTriggered = true;
 
-                if (stateA.JitTriggered && stateB.JitTriggered)
-                {
-                    remotePeerA.Send(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
-                    remotePeerB.Send(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
-                }
+            if (stateA.JitTriggered && stateB.JitTriggered)
+            {
+                remotePeerA.Send(new NewDirectP2PConnectionMessage(remotePeerB.HostId));
+                remotePeerB.Send(new NewDirectP2PConnectionMessage(remotePeerA.HostId));
             }
 
             return true;

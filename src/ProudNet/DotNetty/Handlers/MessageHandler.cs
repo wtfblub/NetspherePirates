@@ -5,10 +5,12 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using BlubLib.Collections.Generic;
+using BlubLib.Threading.Tasks;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Logging;
 using Microsoft.Extensions.DependencyInjection;
+using ProudNet.Hosting.Services;
 using ProudNet.Serialization.Messages.Core;
 
 namespace ProudNet.DotNetty.Handlers
@@ -18,8 +20,9 @@ namespace ProudNet.DotNetty.Handlers
         private delegate Task<bool> HandlerDelegate(object handler, MessageContext context, object messsage);
 
         private readonly ILogger _logger;
-        private readonly IMessageHandlerResolver _messageHandlerResolver;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IMessageHandlerResolver _messageHandlerResolver;
+        private readonly ISchedulerService _schedulerService;
         private IReadOnlyDictionary<Type, HandlerInfo[]> _handlerMap;
 
         public event Action<MessageContext> UnhandledMessage;
@@ -29,11 +32,13 @@ namespace ProudNet.DotNetty.Handlers
             UnhandledMessage?.Invoke(context);
         }
 
-        public MessageHandler(IServiceProvider serviceProvider, IMessageHandlerResolver messageHandlerResolver)
+        public MessageHandler(IServiceProvider serviceProvider, IMessageHandlerResolver messageHandlerResolver,
+            ISchedulerService schedulerService)
         {
             _logger = serviceProvider.GetRequiredService<ILogger<MessageHandler>>();
-            _messageHandlerResolver = messageHandlerResolver;
             _serviceProvider = serviceProvider;
+            _messageHandlerResolver = messageHandlerResolver;
+            _schedulerService = schedulerService;
         }
 
         public override async void ChannelRead(IChannelHandlerContext context, object message)
@@ -77,7 +82,35 @@ namespace ProudNet.DotNetty.Handlers
                             continue;
                         }
 
-                        if (!await handlerInfo.Func(handlerInfo.Instance, messageContext, messageContext.Message))
+                        bool continueExecution;
+                        if (handlerInfo.Inline)
+                        {
+                            continueExecution = await handlerInfo.Func(
+                                handlerInfo.Instance, messageContext, messageContext.Message
+                            );
+                        }
+                        else
+                        {
+                            var tcs = new TaskCompletionSource<bool>();
+                            _schedulerService.Execute(ExecuteHandler, (handlerInfo, messageContext, tcs), null);
+
+                            async void ExecuteHandler(object state, object _)
+                            {
+                                var tuple =
+                                    ((HandlerInfo handlerInfo, MessageContext messageContext, TaskCompletionSource<bool> tcs))
+                                    state;
+                                var result = await tuple.handlerInfo.Func(
+                                    tuple.handlerInfo.Instance,
+                                    tuple.messageContext,
+                                    tuple.messageContext.Message
+                                ).AnyContext();
+                                tuple.tcs.TrySetResult(result);
+                            }
+
+                            continueExecution = await tcs.Task;
+                        }
+
+                        if (!continueExecution)
                         {
                             _logger.Debug("Execution cancelled by {HandlerType}", handlerInfo.Type.FullName);
                             break;
@@ -150,10 +183,11 @@ namespace ProudNet.DotNetty.Handlers
                     var rules = GetRulesFromMethod(methodInfo).ToArray();
                     var priorityAttribute = methodInfo.GetCustomAttribute<PriorityAttribute>();
                     var priority = priorityAttribute?.Priority ?? 10;
+                    var scheduleAttribute = methodInfo.GetCustomAttribute<InlineAttribute>();
 
                     methodInfo = handleInterface.GetMethods().Single();
                     var handlerFunc = CreateHandlerFunc(handlerType, methodInfo, messageType);
-                    handlerList.Add(new HandlerInfo(handler, handlerFunc, rules, priority));
+                    handlerList.Add(new HandlerInfo(handler, handlerFunc, rules, priority, scheduleAttribute != null));
                     map[messageType] = handlerList;
                 }
             }
@@ -221,14 +255,16 @@ namespace ProudNet.DotNetty.Handlers
             public readonly HandlerDelegate Func;
             public readonly RuleInfo[] Rules;
             public readonly byte Priority;
+            public readonly bool Inline;
 
-            public HandlerInfo(object instance, HandlerDelegate func, RuleInfo[] rules, byte priority)
+            public HandlerInfo(object instance, HandlerDelegate func, RuleInfo[] rules, byte priority, bool inline)
             {
                 Type = instance.GetType();
                 Instance = instance;
                 Func = func;
                 Rules = rules;
                 Priority = priority;
+                Inline = inline;
             }
         }
 

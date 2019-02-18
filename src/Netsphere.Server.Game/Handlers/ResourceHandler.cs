@@ -29,6 +29,7 @@ namespace Netsphere.Server.Game.Handlers
             };
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CNewShopUpdateCheckReqMessage message)
         {
             var session = context.Session;

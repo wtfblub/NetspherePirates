@@ -15,6 +15,7 @@ namespace Netsphere.Server.Relay.Handlers
             _messageBus = messageBus;
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, PlayerSpawnReqMessage message)
         {
             var session = context.GetSession<Session>();
