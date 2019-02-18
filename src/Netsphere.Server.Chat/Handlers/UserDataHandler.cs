@@ -46,6 +46,7 @@ namespace Netsphere.Server.Chat.Handlers
         }
 
         [Firewall(typeof(MustBeInChannel))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CGetUserDataReqMessage message)
         {
             var session = context.GetSession<Session>();

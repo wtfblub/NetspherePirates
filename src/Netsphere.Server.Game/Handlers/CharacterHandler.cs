@@ -19,6 +19,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CCreateCharacterReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -40,6 +41,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CDeleteCharacterReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -52,6 +54,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CSelectCharacterReqMessage message)
         {
             var session = context.GetSession<Session>();

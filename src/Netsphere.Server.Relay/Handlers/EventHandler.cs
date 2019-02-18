@@ -19,6 +19,7 @@ namespace Netsphere.Server.Relay.Handlers
             _serializer = serializer;
         }
 
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, PacketMessage message)
         {
             var data = message.IsCompressed ? message.Data.DecompressLZO(2048) : message.Data;

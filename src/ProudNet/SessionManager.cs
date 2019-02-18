@@ -2,11 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using BlubLib.Collections.Concurrent;
+using ProudNet.Hosting.Services;
 
 namespace ProudNet
 {
     internal class SessionManager<TKey> : IInternalSessionManager<TKey>
     {
+        private readonly ISchedulerService _schedulerService;
         private readonly ConcurrentDictionary<TKey, ProudSession> _sessions;
 
         public event EventHandler<SessionEventArgs> Added;
@@ -24,8 +26,9 @@ namespace ProudNet
 
         public IReadOnlyDictionary<TKey, ProudSession> Sessions => _sessions;
 
-        public SessionManager()
+        public SessionManager(ISchedulerService schedulerService)
         {
+            _schedulerService = schedulerService;
             _sessions = new ConcurrentDictionary<TKey, ProudSession>();
         }
 
@@ -54,18 +57,30 @@ namespace ProudNet
             if (!_sessions.TryAdd(key, session))
                 throw new ProudException($"Session {key} is already registered");
 
-            OnAdded(session);
+            _schedulerService.Execute(
+                (This, s) => ((SessionManager<TKey>)This).OnAdded((ProudSession)s),
+                this, session
+            );
         }
 
         public void RemoveSession(TKey key)
         {
             if (_sessions.TryRemove(key, out var session))
-                OnRemoved(session);
+            {
+                _schedulerService.Execute(
+                    (This, s) => ((SessionManager<TKey>)This).OnRemoved((ProudSession)s),
+                    this, session
+                );
+            }
         }
     }
 
     internal class SessionManager : SessionManager<uint>, ISessionManager
     {
+        public SessionManager(ISchedulerService schedulerService)
+            : base(schedulerService)
+        {
+        }
     }
 
     public interface ISessionManager : ISessionManager<uint>

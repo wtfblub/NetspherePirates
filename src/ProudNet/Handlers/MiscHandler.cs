@@ -24,6 +24,7 @@ namespace ProudNet.Handlers
             _logger = logger;
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, UnreliablePingMessage message)
         {
             var session = context.Session;
@@ -43,29 +44,34 @@ namespace ProudNet.Handlers
             return Task.FromResult(true);
         }
 
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, ReliablePingMessage message)
         {
             context.Session.Send(new ReliablePongMessage());
             return true;
         }
 
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, ShutdownTcpMessage message)
         {
             var _ = context.Session.CloseAsync();
             return Task.FromResult(true);
         }
 
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, NotifyLogMessage message)
         {
             _logger.Debug("NotifyLog {@Message}", message);
             return Task.FromResult(true);
         }
 
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, NotifyNatDeviceNameDetectedMessage message)
         {
             return Task.FromResult(true);
         }
 
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, ReportC2SUdpMessageTrialCountMessage message)
         {
             return Task.FromResult(true);

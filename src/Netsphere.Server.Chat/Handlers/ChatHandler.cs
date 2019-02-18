@@ -15,6 +15,7 @@ namespace Netsphere.Server.Chat.Handlers
         }
 
         [Firewall(typeof(MustBeInChannel))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CChatMessageReqMessage message)
         {
             var session = context.GetSession<Session>();
@@ -37,6 +38,7 @@ namespace Netsphere.Server.Chat.Handlers
         }
 
         [Firewall(typeof(MustBeInChannel))]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, CWhisperChatMessageReqMessage message)
         {
             var session = context.GetSession<Session>();

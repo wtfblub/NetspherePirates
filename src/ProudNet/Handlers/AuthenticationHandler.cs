@@ -26,6 +26,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInState), SessionState.Handshake)]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, NotifyCSEncryptedSessionKeyMessage message)
         {
             var session = context.Session;
@@ -39,6 +40,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInState), SessionState.HandshakeKeyExchanged)]
+        [Inline]
         public async Task<bool> OnHandle(MessageContext context, NotifyServerConnectionRequestDataMessage message)
         {
             var session = context.Session;

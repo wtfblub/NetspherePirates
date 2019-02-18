@@ -40,6 +40,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeUdpRelay))]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, NotifyUdpToTcpFallbackByClientMessage message)
         {
             var session = context.Session;

@@ -14,6 +14,7 @@ namespace ProudNet.Handlers
           IHandle<EncryptedReliableMessage>
     {
         [Firewall(typeof(MustBeInState), SessionState.Connected)]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, RmiMessage message)
         {
             var buffer = Unpooled.WrappedBuffer(message.Data);
@@ -43,6 +44,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInState), SessionState.Connected)]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, CompressedMessage message)
         {
             var decompressed = message.Data.DecompressZLib();
@@ -53,6 +55,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInState), SessionState.Connected)]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, EncryptedReliableMessage message)
         {
             Crypt crypt;

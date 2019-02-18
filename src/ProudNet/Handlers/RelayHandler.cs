@@ -33,6 +33,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, ReliableUdp_FrameMessage message)
         {
             var decodedMessage = CoreMessageDecoder.Decode(_serializer, Unpooled.WrappedBuffer(message.Data));
@@ -47,6 +48,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, ReliableRelay1Message message)
         {
             var session = context.Session;
@@ -75,6 +77,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, UnreliableRelay1Message message)
         {
             var session = context.Session;
@@ -102,6 +105,7 @@ namespace ProudNet.Handlers
         }
 
         [Firewall(typeof(MustBeInP2PGroup))]
+        [Inline]
         public Task<bool> OnHandle(MessageContext context, UnreliableRelay1_RelayDestListCompressedMessage message)
         {
             var session = context.Session;

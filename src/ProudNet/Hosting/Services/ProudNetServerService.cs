@@ -147,13 +147,24 @@ namespace ProudNet.Hosting.Services
                     {
                         var coreMessageHandler = new MessageHandler(_serviceProvider,
                             new DefaultMessageHandlerResolver(
-                                new[] { typeof(AuthenticationHandler).Assembly }, typeof(ICoreMessage)));
+                                new[] { typeof(AuthenticationHandler).Assembly }, typeof(ICoreMessage)
+                            ),
+                            _schedulerService
+                        );
 
-                        var internalRmiMessageHandler = new MessageHandler(_serviceProvider,
-                            new DefaultMessageHandlerResolver(new[] { typeof(ReliablePingMessage).Assembly }, typeof(IMessage)));
+                        var internalRmiMessageHandler = new MessageHandler(
+                            _serviceProvider,
+                            new DefaultMessageHandlerResolver(
+                                new[] { typeof(ReliablePingMessage).Assembly }, typeof(IMessage)
+                            ),
+                            _schedulerService
+                        );
 
-                        var rmiMessageHandler = new MessageHandler(_serviceProvider,
-                            _serviceProvider.GetRequiredService<IMessageHandlerResolver>());
+                        var rmiMessageHandler = new MessageHandler(
+                            _serviceProvider,
+                            _serviceProvider.GetRequiredService<IMessageHandlerResolver>(),
+                            _schedulerService
+                        );
 
                         coreMessageHandler.UnhandledMessage +=
                             ctx => ctx.Session.Logger.Debug("Unhandled core message={@Message}", ctx.Message);
@@ -300,57 +311,54 @@ namespace ProudNet.Hosting.Services
                                     !session.UdpEnabled)
                                     continue;
 
-                                using (stateToTarget.Mutex.Lock())
+                                if (stateToTarget.IsInitialized)
                                 {
-                                    if (stateToTarget.IsInitialized)
+                                    var diff = now - stateToTarget.LastHolepunch;
+                                    if (!stateToTarget.HolepunchSuccess && diff >= configuration.HolepunchTimeout)
                                     {
-                                        var diff = now - stateToTarget.LastHolepunch;
-                                        if (!stateToTarget.HolepunchSuccess && diff >= configuration.HolepunchTimeout)
-                                        {
-                                            session.Logger
-                                                .ForContext("P2PState", new
-                                                {
-                                                    Target = stateToTarget.RemotePeer.HostId,
-                                                    stateToTarget.IsInitialized,
-                                                    stateToTarget.IsJoined,
-                                                    stateToTarget.JitTriggered,
-                                                    stateToTarget.HolepunchSuccess,
-                                                    stateToTarget.LastHolepunch
-                                                })
-                                                .Information("Trying to reconnect P2P to {TargetHostId}",
-                                                    stateToTarget.RemotePeer.HostId);
+                                        session.Logger
+                                            .ForContext("P2PState", new
+                                            {
+                                                Target = stateToTarget.RemotePeer.HostId,
+                                                stateToTarget.IsInitialized,
+                                                stateToTarget.IsJoined,
+                                                stateToTarget.JitTriggered,
+                                                stateToTarget.HolepunchSuccess,
+                                                stateToTarget.LastHolepunch
+                                            })
+                                            .Information("Trying to reconnect P2P to {TargetHostId}",
+                                                stateToTarget.RemotePeer.HostId);
 
-                                            targetSession.Logger
-                                                .ForContext("P2PState", new
-                                                {
-                                                    Target = stateFromTarget.RemotePeer.HostId,
-                                                    stateFromTarget.IsInitialized,
-                                                    stateFromTarget.IsJoined,
-                                                    stateFromTarget.JitTriggered,
-                                                    stateFromTarget.HolepunchSuccess,
-                                                    stateFromTarget.LastHolepunch
-                                                })
-                                                .Information("Trying to reconnect P2P to {TargetHostId}",
-                                                    member.HostId);
+                                        targetSession.Logger
+                                            .ForContext("P2PState", new
+                                            {
+                                                Target = stateFromTarget.RemotePeer.HostId,
+                                                stateFromTarget.IsInitialized,
+                                                stateFromTarget.IsJoined,
+                                                stateFromTarget.JitTriggered,
+                                                stateFromTarget.HolepunchSuccess,
+                                                stateFromTarget.LastHolepunch
+                                            })
+                                            .Information("Trying to reconnect P2P to {TargetHostId}",
+                                                member.HostId);
 
-                                            stateToTarget.JitTriggered = stateFromTarget.JitTriggered = false;
-                                            stateToTarget.PeerUdpHolepunchSuccess =
-                                                stateFromTarget.PeerUdpHolepunchSuccess = false;
-                                            stateToTarget.LastHolepunch = stateFromTarget.LastHolepunch = now;
-                                            member.Send(new RenewP2PConnectionStateMessage(stateToTarget.RemotePeer.HostId));
-                                            stateToTarget.RemotePeer.Send(new RenewP2PConnectionStateMessage(member.HostId));
-                                        }
+                                        stateToTarget.JitTriggered = stateFromTarget.JitTriggered = false;
+                                        stateToTarget.PeerUdpHolepunchSuccess =
+                                            stateFromTarget.PeerUdpHolepunchSuccess = false;
+                                        stateToTarget.LastHolepunch = stateFromTarget.LastHolepunch = now;
+                                        member.Send(new RenewP2PConnectionStateMessage(stateToTarget.RemotePeer.HostId));
+                                        stateToTarget.RemotePeer.Send(new RenewP2PConnectionStateMessage(member.HostId));
                                     }
-                                    else
-                                    {
-                                        session.Logger.Debug("Initialize P2P with {TargetHostId}",
-                                            stateToTarget.RemotePeer.HostId);
-                                        targetSession.Logger.Debug("Initialize P2P with {TargetHostId}", member.HostId);
-                                        stateToTarget.LastHolepunch = stateFromTarget.LastHolepunch = DateTimeOffset.Now;
-                                        stateToTarget.IsInitialized = stateFromTarget.IsInitialized = true;
-                                        member.Send(new P2PRecycleCompleteMessage(stateToTarget.RemotePeer.HostId));
-                                        stateToTarget.RemotePeer.Send(new P2PRecycleCompleteMessage(member.HostId));
-                                    }
+                                }
+                                else
+                                {
+                                    session.Logger.Debug("Initialize P2P with {TargetHostId}",
+                                        stateToTarget.RemotePeer.HostId);
+                                    targetSession.Logger.Debug("Initialize P2P with {TargetHostId}", member.HostId);
+                                    stateToTarget.LastHolepunch = stateFromTarget.LastHolepunch = DateTimeOffset.Now;
+                                    stateToTarget.IsInitialized = stateFromTarget.IsInitialized = true;
+                                    member.Send(new P2PRecycleCompleteMessage(stateToTarget.RemotePeer.HostId));
+                                    stateToTarget.RemotePeer.Send(new P2PRecycleCompleteMessage(member.HostId));
                                 }
                             }
                         }
