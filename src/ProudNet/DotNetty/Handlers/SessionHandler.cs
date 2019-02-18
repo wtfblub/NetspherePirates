@@ -60,7 +60,7 @@ namespace ProudNet.DotNetty.Handlers
                 EnablePingTest = _networkOptions.EnablePingTest,
                 EmergencyLogLineCount = _networkOptions.EmergencyLogLineCount
             };
-            await session.SendAsync(new NotifyServerConnectionHintMessage(config, _rsa.ExportParameters(false)));
+            session.Send(new NotifyServerConnectionHintMessage(config, _rsa.ExportParameters(false)));
             context.Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).Read();
 
             using (var cts = new CancellationTokenSource(_networkOptions.ConnectTimeout))
@@ -76,7 +76,7 @@ namespace ProudNet.DotNetty.Handlers
 
                     _logger.Debug("Client({HostId} - {EndPoint}) handshake timeout", hostId,
                         context.Channel.RemoteAddress.ToString());
-                    await session.SendAsync(new ConnectServerTimedoutMessage());
+                    session.Send(new ConnectServerTimedoutMessage());
                     await session.CloseAsync();
                     return;
                 }

@@ -54,7 +54,7 @@ namespace Netsphere.Server.Chat.Handlers
 
             if (_sessionManager.Sessions.Count >= _networkOptions.MaxSessions)
             {
-                await session.SendAsync(new SLoginAckMessage(1));
+                session.Send(new SLoginAckMessage(1));
                 return true;
             }
 
@@ -64,21 +64,21 @@ namespace Netsphere.Server.Chat.Handlers
             if (!response.OK)
             {
                 logger.Information("Wrong login");
-                await session.SendAsync(new SLoginAckMessage(2));
+                session.Send(new SLoginAckMessage(2));
                 return true;
             }
 
             if (!response.Account.Nickname.Equals(message.Nickname))
             {
                 logger.Information("Wrong login");
-                await session.SendAsync(new SLoginAckMessage(3));
+                session.Send(new SLoginAckMessage(3));
                 return true;
             }
 
             if (_playerManager.Contains(message.AccountId))
             {
                 logger.Information("Already logged in");
-                await session.SendAsync(new SLoginAckMessage(4));
+                session.Send(new SLoginAckMessage(4));
                 return true;
             }
 
@@ -94,7 +94,7 @@ namespace Netsphere.Server.Chat.Handlers
                 if (playerEntity == null)
                 {
                     logger.Warning("Could not load player from database");
-                    await session.SendAsync(new SLoginAckMessage(5));
+                    session.Send(new SLoginAckMessage(5));
                     return true;
                 }
 
@@ -103,8 +103,8 @@ namespace Netsphere.Server.Chat.Handlers
                 _playerManager.Add(session.Player);
             }
 
-            await session.SendAsync(new SLoginAckMessage(0));
-            await session.SendAsync(
+            session.Send(new SLoginAckMessage(0));
+            session.Send(
                 new SDenyChatListAckMessage(session.Player.Ignore.Select(x => x.Map<Deny, DenyDto>()).ToArray()));
 
             return true;

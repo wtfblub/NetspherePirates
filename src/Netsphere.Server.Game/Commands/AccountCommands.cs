@@ -44,7 +44,7 @@ namespace Netsphere.Server.Game.Commands
 
                 var msg = $"Created account with username={username} id={accountEntity.Id}";
                 if (plr != null)
-                    await plr.SendConsoleMessage(S4Color.Green + msg);
+                    plr.SendConsoleMessage(S4Color.Green + msg);
                 else
                     Console.WriteLine(msg);
             }

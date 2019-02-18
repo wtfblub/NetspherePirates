@@ -142,7 +142,7 @@ namespace Netsphere.Server.Game
             var charStyle = new CharacterStyle(character.Gender, character.Slot,
                 character.Hair.Variation, character.Face.Variation,
                 character.Shirt.Variation, character.Pants.Variation);
-            Player.Session.SendAsync(new SSuccessCreateCharacterAckMessage(character.Slot, charStyle));
+            Player.Session.Send(new SSuccessCreateCharacterAckMessage(character.Slot, charStyle));
 
             return (character, CharacterCreateResult.Success);
         }

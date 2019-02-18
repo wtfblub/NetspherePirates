@@ -83,57 +83,46 @@ namespace ProudNet
 
         public void Send(object message)
         {
-            SendAsync(message, SendOptions.ReliableSecure);
+            Send(message, SendOptions.ReliableSecure);
         }
 
-        public Task SendAsync(object message)
+        public void Send(object message, SendOptions options)
         {
-            return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.ReliableSecure);
+            if (_disposed || !Channel.IsWritable)
+                return;
+
+            Channel.WriteAndFlushAsync(new SendContext(message, options));
         }
 
-        public Task SendAsync(object message, SendOptions options)
+        internal void Send(IMessage message)
         {
-            return _disposed ? Task.CompletedTask : Channel.WriteAndFlushAsync(new SendContext(message, options));
+            Send(message, SendOptions.Reliable);
         }
 
-        internal Task SendAsync(IMessage message)
+        internal void Send(ICoreMessage message)
         {
-            return _disposed ? Task.CompletedTask : SendAsync(message, SendOptions.Reliable);
+            Send(message, false);
         }
 
-        internal Task SendAsync(ICoreMessage message)
+        internal void Send(ICoreMessage message, bool udp)
         {
-            return _disposed
-                ? Task.CompletedTask
-                : Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).WriteAndFlushAsync(message);
-        }
+            if (_disposed || !Channel.IsWritable)
+                return;
 
-        internal Task SendUdpIfAvailableAsync(ICoreMessage message)
-        {
-            if (UdpEnabled)
-            {
-                return UdpSocket.SendAsync(message, UdpEndPoint);
-            }
-
-            return SendAsync(message);
-        }
-
-        internal Task SendUdpAsync(ICoreMessage message)
-        {
-            return UdpSocket.SendAsync(message, UdpEndPoint);
-        }
-
-        void IP2PMemberInternal.Send(ICoreMessage message, bool udp)
-        {
-            if (udp)
-                SendUdpIfAvailableAsync(message);
+            if (UdpEnabled && udp)
+                UdpSocket.Send(message, UdpEndPoint);
             else
-                SendAsync(message);
+                Channel.Pipeline.Context(Constants.Pipeline.CoreMessageHandlerName).WriteAndFlushAsync(message);
         }
 
         void IP2PMemberInternal.Send(IMessage message)
         {
-            SendAsync(message);
+            Send(message);
+        }
+
+        void IP2PMemberInternal.Send(ICoreMessage message, bool udp)
+        {
+            Send(message, udp);
         }
 
         private void SetLoggingScope()

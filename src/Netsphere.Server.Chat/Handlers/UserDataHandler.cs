@@ -21,7 +21,7 @@ namespace Netsphere.Server.Chat.Handlers
                 // We can't send the channel player list in Channel.Join because the client only accepts it here :/
                 plr.SentPlayerList = true;
                 var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
-                await session.SendAsync(new SChannelPlayerListAckMessage(data));
+                session.Send(new SChannelPlayerListAckMessage(data));
             }
 
             // Save settings if any of them changed
@@ -53,7 +53,7 @@ namespace Netsphere.Server.Chat.Handlers
 
             if (plr.Account.Id == message.AccountId)
             {
-                await session.SendAsync(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()));
+                session.Send(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()));
                 return true;
             }
 
@@ -71,7 +71,7 @@ namespace Netsphere.Server.Chat.Handlers
                     return true;
             }
 
-            await session.SendAsync(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
+            session.Send(new SUserDataAckMessage(target.Map<Player, UserDataDto>()));
             return true;
         }
     }

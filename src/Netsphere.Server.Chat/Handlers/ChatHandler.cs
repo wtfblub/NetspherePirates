@@ -28,7 +28,7 @@ namespace Netsphere.Server.Chat.Handlers
 
                 case ChatType.Club:
                     // ToDo Change this when clans are implemented
-                    await session.SendAsync(new SChatMessageAckMessage(ChatType.Club,
+                    session.Send(new SChatMessageAckMessage(ChatType.Club,
                         plr.Account.Id, plr.Account.Nickname, message.Message));
                     break;
             }
@@ -46,7 +46,7 @@ namespace Netsphere.Server.Chat.Handlers
             // TODO Is there an answer for this case?
             if (toPlr == null)
             {
-                await session.SendAsync(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id,
+                session.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id,
                     "SYSTEM", $"{message.ToNickname} is not online"));
                 return true;
             }
@@ -54,13 +54,20 @@ namespace Netsphere.Server.Chat.Handlers
             // TODO Is there an answer for this case?
             if (toPlr.Ignore.Contains(session.Player.Account.Id))
             {
-                await session.SendAsync(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id,
+                session.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id,
                     "SYSTEM", $"{message.ToNickname} is ignoring you"));
                 return true;
             }
 
-            await toPlr.Session.SendAsync(new SWhisperChatMessageAckMessage(0, toPlr.Account.Nickname,
-                plr.Account.Id, plr.Account.Nickname, message.Message));
+            toPlr.Session.Send(
+                new SWhisperChatMessageAckMessage(
+                    0,
+                    toPlr.Account.Nickname,
+                    plr.Account.Id,
+                    plr.Account.Nickname,
+                    message.Message
+                )
+            );
             return true;
         }
     }

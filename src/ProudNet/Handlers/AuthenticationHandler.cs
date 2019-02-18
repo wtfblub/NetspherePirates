@@ -34,7 +34,7 @@ namespace ProudNet.Handlers
             var secureKey = _rsa.Decrypt(message.SecureKey, true);
             session.Crypt = new Crypt(secureKey);
             session.State = SessionState.HandshakeKeyExchanged;
-            await session.SendAsync(new NotifyCSSessionKeySuccessMessage());
+            session.Send(new NotifyCSSessionKeySuccessMessage());
             return true;
         }
 
@@ -54,15 +54,16 @@ namespace ProudNet.Handlers
                     new { NetVersion = Constants.NetVersion, Version = _networkOptions.Version });
                 // ReSharper restore RedundantAnonymousTypePropertyName
 
-                await session.SendAsync(new NotifyProtocolVersionMismatchMessage());
+                session.Send(new NotifyProtocolVersionMismatchMessage());
                 var _ = session.CloseAsync();
             }
 
             _sessionManager.AddSession(session.HostId, session);
             session.HandhsakeEvent.Set();
             session.State = SessionState.Connected;
-            await session.SendAsync(new NotifyServerConnectSuccessMessage(
-                session.HostId, _networkOptions.Version, session.RemoteEndPoint));
+            session.Send(new NotifyServerConnectSuccessMessage(
+                session.HostId, _networkOptions.Version, session.RemoteEndPoint)
+            );
             return true;
         }
     }

@@ -55,14 +55,14 @@ namespace Netsphere.Server.Auth.Handlers
                 if (account == null)
                 {
                     logger.Information("Wrong login");
-                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
+                    session.Send(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
                     return true;
                 }
 
                 if (!PasswordHasher.IsPasswordValid(message.Password, account.Password, account.Salt))
                 {
                     logger.Information("Wrong login");
-                    await session.SendAsync(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
+                    session.Send(new SAuthInEuAckMessage(AuthLoginResult.WrongLogin));
                     return true;
                 }
 
@@ -76,7 +76,7 @@ namespace Netsphere.Server.Auth.Handlers
                         unbanDate = DateTimeOffset.FromUnixTimeSeconds(ban.Date + (ban.Duration ?? 0));
 
                     logger.Information("Account is banned until {UnbanDate}", unbanDate);
-                    await session.SendAsync(new SAuthInEuAckMessage(unbanDate));
+                    session.Send(new SAuthInEuAckMessage(unbanDate));
                     return true;
                 }
 

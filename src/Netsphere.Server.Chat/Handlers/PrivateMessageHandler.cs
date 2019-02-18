@@ -38,7 +38,7 @@ namespace Netsphere.Server.Chat.Handlers
             }
 
             var mails = session.Player.Mailbox.GetMailsByPage(message.Page);
-            await session.SendAsync(new SNoteListAckMessage(maxPages, message.Page,
+            session.Send(new SNoteListAckMessage(maxPages, message.Page,
                 mails.Select(mail => mail.Map<Mail, NoteDto>()).ToArray()));
 
             return true;
@@ -58,13 +58,13 @@ namespace Netsphere.Server.Chat.Handlers
             {
                 logger.Error("Mail={Id} not found", message.Id);
 
-                await session.SendAsync(new SReadNoteAckMessage(0, new NoteContentDto(), 1));
+                session.Send(new SReadNoteAckMessage(0, new NoteContentDto(), 1));
                 return true;
             }
 
             mail.IsNew = false;
-            await plr.Mailbox.UpdateReminderAsync();
-            await session.SendAsync(new SReadNoteAckMessage((ulong)mail.Id, mail.Map<Mail, NoteContentDto>(), 0));
+            plr.Mailbox.UpdateReminder();
+            session.Send(new SReadNoteAckMessage((ulong)mail.Id, mail.Map<Mail, NoteContentDto>(), 0));
 
             return true;
         }
@@ -78,7 +78,7 @@ namespace Netsphere.Server.Chat.Handlers
 
             logger.Debug("Delete note Ids={Ids}", string.Join(",", message.Notes));
             plr.Mailbox.Remove(message.Notes.Select(x => (long)x));
-            await session.SendAsync(new SDeleteNoteAckMessage());
+            session.Send(new SDeleteNoteAckMessage());
 
             return true;
         }
@@ -106,7 +106,7 @@ namespace Netsphere.Server.Chat.Handlers
             }
 
             var result = await plr.Mailbox.SendAsync(message.Receiver, message.Title, message.Message);
-            await session.SendAsync(new SSendNoteAckMessage(result ? 0 : 1));
+            session.Send(new SSendNoteAckMessage(result ? 0 : 1));
 
             return true;
         }

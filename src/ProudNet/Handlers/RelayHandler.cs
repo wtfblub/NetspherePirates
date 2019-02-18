@@ -126,8 +126,9 @@ namespace ProudNet.Handlers
             session.UdpSocket = socket;
             session.HolepunchMagicNumber = Guid.NewGuid();
             _magicNumberSessionManager.AddSession(session.HolepunchMagicNumber, session);
-            await session.SendAsync(new S2C_RequestCreateUdpSocketMessage(
-                new IPEndPoint(_udpSocketManager.Address, ((IPEndPoint)socket.Channel.LocalAddress).Port)));
+            session.Send(new S2C_RequestCreateUdpSocketMessage(
+                new IPEndPoint(_udpSocketManager.Address, ((IPEndPoint)socket.Channel.LocalAddress).Port))
+            );
             return true;
         }
 
@@ -141,7 +142,7 @@ namespace ProudNet.Handlers
             if (!_udpSocketManager.IsRunning)
                 return true;
 
-            await session.SendAsync(new RequestStartServerHolepunchMessage(session.HolepunchMagicNumber));
+            session.Send(new RequestStartServerHolepunchMessage(session.HolepunchMagicNumber));
             return true;
         }
     }

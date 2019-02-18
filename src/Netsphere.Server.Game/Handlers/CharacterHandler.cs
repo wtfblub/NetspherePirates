@@ -33,7 +33,7 @@ namespace Netsphere.Server.Game.Handlers
             if (result != CharacterCreateResult.Success)
             {
                 logger.Information("Failed to create character result={Result}", result);
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
             }
 
             return true;
@@ -46,7 +46,7 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
 
             if (!plr.CharacterManager.Remove(message.Slot))
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed));
 
             return true;
         }
@@ -61,12 +61,12 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.Room != null && plr.State != PlayerState.Lobby &&
                 plr.Room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime)
             {
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
                 return true;
             }
 
             if (!plr.CharacterManager.Select(message.Slot))
-                await session.SendAsync(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
 
             return true;
         }

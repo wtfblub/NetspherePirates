@@ -304,13 +304,13 @@ namespace Netsphere.Server.Game
                 ? LicenseManager.Select(x => (uint)x.ItemLicense).ToArray()
                 : s_licensesCompleted;
 
-            await Session.SendAsync(new SMyLicenseInfoAckMessage(licenses));
-            await Session.SendAsync(new SInventoryInfoAckMessage
+            Session.Send(new SMyLicenseInfoAckMessage(licenses));
+            Session.Send(new SInventoryInfoAckMessage
             {
                 Items = Inventory.Select(x => x.Map<PlayerItem, ItemDto>()).ToArray()
             });
 
-            await Session.SendAsync(new SCharacterSlotInfoAckMessage
+            Session.Send(new SCharacterSlotInfoAckMessage
             {
                 ActiveCharacter = CharacterManager.CurrentSlot,
                 CharacterCount = (byte)CharacterManager.Count,
@@ -319,7 +319,7 @@ namespace Netsphere.Server.Game
 
             foreach (var character in CharacterManager)
             {
-                await Session.SendAsync(new SOpenCharacterInfoAckMessage
+                Session.Send(new SOpenCharacterInfoAckMessage
                 {
                     Slot = character.Slot,
                     Style = new CharacterStyle(character.Gender, character.Slot,
@@ -335,13 +335,13 @@ namespace Netsphere.Server.Game
                     Clothes = character.Costumes.GetItems().Select(x => x?.Id ?? 0).ToArray()
                 };
 
-                await Session.SendAsync(message);
+                Session.Send(message);
             }
 
-            await Session.SendAsync(new SRefreshCashInfoAckMessage(PEN, AP));
-            await Session.SendAsync(new SSetCoinAckMessage(Coins1, Coins2));
-            await Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World));
-            await Session.SendAsync(new SBeginAccountInfoAckMessage
+            Session.Send(new SRefreshCashInfoAckMessage(PEN, AP));
+            Session.Send(new SSetCoinAckMessage(Coins1, Coins2));
+            Session.Send(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World));
+            Session.Send(new SBeginAccountInfoAckMessage
             {
                 Level = (byte)Level,
                 TotalExp = TotalExperience,
@@ -351,7 +351,7 @@ namespace Netsphere.Server.Game
                 Nickname = Account.Nickname
             });
 
-            await Session.SendAsync(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World2));
+            Session.Send(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World2));
 
             if (Inventory.Count == 0)
             {
@@ -406,27 +406,27 @@ namespace Netsphere.Server.Game
             }
         }
 
-        public Task SendMoneyUpdate()
+        public void SendMoneyUpdate()
         {
-            return Session.SendAsync(new SRefreshCashInfoAckMessage(PEN, AP));
+            Session.Send(new SRefreshCashInfoAckMessage(PEN, AP));
         }
 
         /// <summary>
         /// Sends a message to the game master console
         /// </summary>
         /// <param name="message">The message to send</param>
-        public Task SendConsoleMessage(string message)
+        public void SendConsoleMessage(string message)
         {
-            return Session.SendAsync(new SAdminActionAckMessage(message));
+            Session.Send(new SAdminActionAckMessage(message));
         }
 
         /// <summary>
         /// Sends a notice message
         /// </summary>
         /// <param name="message">The message to send</param>
-        public Task SendNotice(string message)
+        public void SendNotice(string message)
         {
-            return Session.SendAsync(new SNoticeMessageAckMessage(message));
+            Session.Send(new SNoticeMessageAckMessage(message));
         }
 
         public async Task Save(GameContext db)

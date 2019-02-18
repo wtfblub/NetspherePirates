@@ -49,14 +49,14 @@ namespace Netsphere.Server.Relay.Handlers
 
             if (!response.OK)
             {
-                await session.SendAsync(new SNotifyLoginResultMessage(1));
+                session.Send(new SNotifyLoginResultMessage(1));
                 return true;
             }
 
             if (_playerManager[message.AccountId] != null)
             {
                 logger.Information("Already logged in");
-                await session.SendAsync(new SNotifyLoginResultMessage(2));
+                session.Send(new SNotifyLoginResultMessage(2));
                 return true;
             }
 
@@ -69,8 +69,7 @@ namespace Netsphere.Server.Relay.Handlers
 
             var room = _roomManager.GetOrCreate(roomId);
             room.Join(plr);
-            await session.SendAsync(new SNotifyLoginResultMessage(0));
-
+            session.Send(new SNotifyLoginResultMessage(0));
             return true;
         }
     }

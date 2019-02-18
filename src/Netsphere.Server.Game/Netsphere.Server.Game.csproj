@@ -5,6 +5,7 @@
     <RuntimeIdentifiers>win-x86;win-x64;linux-x64</RuntimeIdentifiers>
     <LangVersion>7.2</LangVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <NoWarn>1998</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Expressmapper" Version="1.9.1" />
