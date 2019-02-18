@@ -16,6 +16,7 @@ namespace ProudNet
         private readonly object _disposeMutex = new object();
         private readonly ConcurrentDictionary<uint, P2PConnectionState> _connectionStates =
             new ConcurrentDictionary<uint, P2PConnectionState>();
+        private readonly ILogger _baseLogger;
         private volatile bool _disposed;
         private volatile bool _isDisposing;
         private IPEndPoint _udpEndPoint;
@@ -77,8 +78,11 @@ namespace ProudNet
             var localEndPoint = (IPEndPoint)Channel.LocalAddress;
             LocalEndPoint = new IPEndPoint(localEndPoint.Address.MapToIPv4(), localEndPoint.Port);
 
-            Logger = logger;
-            SetLoggingScope();
+            _baseLogger = logger.ForContext(
+                ("HostId", HostId),
+                ("EndPoint", RemoteEndPoint?.ToString())
+            );
+            Logger = _baseLogger;
         }
 
         public void Send(object message)
@@ -127,7 +131,7 @@ namespace ProudNet
 
         private void SetLoggingScope()
         {
-            Logger = Logger.ForContext(
+            Logger = _baseLogger.ForContext(
                 ("HostId", HostId),
                 ("EndPoint", RemoteEndPoint?.ToString()),
                 ("UdpEndPoint", UdpEndPoint?.ToString()),
