@@ -32,7 +32,10 @@ namespace ProudNet.Handlers
             if (!_udpSocketManager.IsRunning || session.HolepunchMagicNumber != message.MagicNumber)
                 return true;
 
-            session.Send(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint), true);
+            session.UdpSocket.Send(
+                new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint),
+                session.UdpEndPoint
+            );
             return true;
         }
 
