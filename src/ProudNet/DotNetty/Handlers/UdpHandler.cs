@@ -64,7 +64,10 @@ namespace ProudNet.DotNetty.Handlers
                     session.UdpSessionId = message.SessionId;
                     session.UdpEndPoint = message.EndPoint;
                     _udpSessionManager.AddSession(session.UdpSessionId, session);
-                    session.Send(new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint), true);
+                    session.UdpSocket.Send(
+                        new ServerHolepunchAckMessage(session.HolepunchMagicNumber, session.UdpEndPoint),
+                        session.UdpEndPoint
+                    );
                     return;
                 }
 
