@@ -54,6 +54,7 @@ namespace NoPity
         public Task StartAsync(CancellationToken cancellationToken)
         {
             RoomManager.RoomCreateHook += OnRoomCreateHook;
+            Room.ChangeRulesHook += OnRoomChangeRulesHook;
             return Task.CompletedTask;
         }
 
@@ -63,6 +64,14 @@ namespace NoPity
         }
 
         private bool OnRoomCreateHook(RoomCreateHookEventArgs e)
+        {
+            if (_noPityOptions.CurrentValue.Enabled)
+                e.Options.IsBalanced = false;
+
+            return true;
+        }
+
+        private bool OnRoomChangeRulesHook(RoomChangeHookEventArgs e)
         {
             if (_noPityOptions.CurrentValue.Enabled)
                 e.Options.IsBalanced = false;
