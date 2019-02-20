@@ -80,15 +80,17 @@ namespace Netsphere.Server.Game
             IEnumerable<Team> teams;
             if (plr.Mode == PlayerGameMode.Spectate)
             {
-                teams = _teams.Values.Where(x => x.SpectatorLimit > 0 && x.Spectators.Count() < x.SpectatorLimit);
+                teams = _teams.Values.Where(
+                    team => team.SpectatorLimit > 0 && team.Spectators.Count(x => !x.IsInGMMode) < team.SpectatorLimit
+                );
             }
             else
             {
                 teams = _teams.Values
-                    .Where(x => x.PlayerLimit > 0 && x.Players.Count() < x.PlayerLimit)
-                    .OrderBy(x => x.Count) // Order by player count
-                    .ThenBy(x => x.Score) // Order by score
-                    .ThenBy(t => t.Players.Sum(p => p.Score.GetTotalScore())); // Order by player score sum
+                    .Where(team => team.PlayerLimit > 0 && team.Players.Count(x => !x.IsInGMMode) < team.PlayerLimit)
+                    .OrderBy(team => team.Count) // Order by player count
+                    .ThenBy(team => team.Score) // Order by score
+                    .ThenBy(team => team.Players.Sum(x => x.Score.GetTotalScore())); // Order by player score sum
             }
 
             return teams.FirstOrDefault()?.Join(plr) ?? TeamJoinError.TeamFull;
@@ -146,13 +148,13 @@ namespace Netsphere.Server.Game
             switch (mode)
             {
                 case PlayerGameMode.Normal:
-                    if (team.Players.Count() >= team.PlayerLimit)
+                    if (team.Players.Count(x => !x.IsInGMMode) >= team.PlayerLimit)
                         return TeamChangeModeError.Full;
 
                     break;
 
                 case PlayerGameMode.Spectate:
-                    if (team.Spectators.Count() >= team.SpectatorLimit)
+                    if (team.Spectators.Count(x => !x.IsInGMMode) >= team.SpectatorLimit)
                         return TeamChangeModeError.Full;
 
                     break;
@@ -269,12 +271,12 @@ namespace Netsphere.Server.Game
 
             if (plr.Mode == PlayerGameMode.Normal)
             {
-                if (Players.Count() >= PlayerLimit)
+                if (Players.Count(x => !x.IsInGMMode) >= PlayerLimit)
                     return TeamJoinError.TeamFull;
             }
             else
             {
-                if (Spectators.Count() >= SpectatorLimit && !plr.IsInGMMode)
+                if (Spectators.Count(x => !x.IsInGMMode) >= SpectatorLimit && !plr.IsInGMMode)
                     return TeamJoinError.TeamFull;
             }
 
