@@ -177,7 +177,7 @@ namespace Netsphere.Server.Game
                     foreach (var team in room.TeamManager.Values)
                         team.Score = 0;
 
-                    foreach (var plr in room.TeamManager.SelectMany(x => x.Value.Values))
+                    foreach (var plr in room.Players.Values)
                     {
                         if (!plr.IsReady && plr != room.Master)
                             continue;
@@ -223,7 +223,7 @@ namespace Netsphere.Server.Game
                 case GameRuleState.Result:
                     ScheduleTrigger(GameRuleStateTrigger.EndGame, s_resultWaitTime);
 
-                    foreach (var plr in room.TeamManager.Players.Where(plr => plr.State != PlayerState.Lobby))
+                    foreach (var plr in room.Players.Values.Where(plr => plr.State != PlayerState.Lobby))
                         plr.State = PlayerState.Waiting;
 
                     room.Broadcast(new SChangeStateAckMessage(GameState.Result));
@@ -233,7 +233,7 @@ namespace Netsphere.Server.Game
 
                 case GameRuleState.Waiting:
                     _gameEnded.Cancel();
-                    foreach (var plr in room.TeamManager.Players.Where(plr => plr.State != PlayerState.Lobby))
+                    foreach (var plr in room.Players.Values.Where(plr => plr.State != PlayerState.Lobby))
                         plr.State = PlayerState.Lobby;
 
                     room.Broadcast(new SChangeStateAckMessage(GameState.Waiting));
