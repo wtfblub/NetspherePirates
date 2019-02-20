@@ -22,6 +22,8 @@ namespace Netsphere.Server.Game
     {
         private static readonly EventPipeline<RoomJoinHookEventArgs> s_joinHook =
             new EventPipeline<RoomJoinHookEventArgs>();
+        private static readonly EventPipeline<RoomChangeHookEventArgs> s_changeRulesHook =
+            new EventPipeline<RoomChangeHookEventArgs>();
 
         private ILogger _logger;
         private readonly GameRuleResolver _gameRuleResolver;
@@ -52,6 +54,11 @@ namespace Netsphere.Server.Game
         {
             add => s_joinHook.Subscribe(value);
             remove => s_joinHook.Unsubscribe(value);
+        }
+        public static event EventPipeline<RoomChangeHookEventArgs>.SubscriberDelegate ChangeRulesHook
+        {
+            add => s_changeRulesHook.Subscribe(value);
+            remove => s_changeRulesHook.Unsubscribe(value);
         }
 
         protected virtual void OnPlayerJoining(Player plr)
@@ -260,6 +267,11 @@ namespace Netsphere.Server.Game
         {
             if (IsChangingRules)
                 return RoomChangeRulesError.AlreadyChangingRules;
+
+            var eventArgs = new RoomChangeHookEventArgs(this, options);
+            s_changeRulesHook.Invoke(eventArgs);
+            if (eventArgs.Error != RoomChangeRulesError.OK)
+                return eventArgs.Error;
 
             if (!_gameRuleResolver.HasGameRule(new RoomCreationOptions
             {
