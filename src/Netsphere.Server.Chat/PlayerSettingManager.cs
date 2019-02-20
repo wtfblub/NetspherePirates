@@ -105,7 +105,13 @@ namespace Netsphere.Server.Chat
                     if (!setting.IsDirty)
                         continue;
 
-                    db.Update(setting);
+                    db.Update(new PlayerSettingEntity
+                    {
+                        Id = setting.Id,
+                        PlayerId = (int)Player.Account.Id,
+                        Setting = name,
+                        Value = GetString(name, setting.Data)
+                    });
                     setting.SetDirtyState(false);
                 }
             }

@@ -18,6 +18,7 @@ using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
+using Netsphere.Network.Serializers;
 using Netsphere.Server.Chat.Services;
 using Newtonsoft.Json;
 using ProudNet;
@@ -76,6 +77,10 @@ namespace Netsphere.Server.Chat
                                 ? new MultithreadEventLoopGroup()
                                 : new MultithreadEventLoopGroup(appOptions.Network.WorkerThreads);
                             options.WorkerThreadFactory = () => new SingleThreadEventLoop();
+                        })
+                        .ConfigureSerializer(serializer =>
+                        {
+                            serializer.AddSerializer(new ItemNumberSerializer());
                         });
                 })
                 .ConfigureServices((context, services) =>
