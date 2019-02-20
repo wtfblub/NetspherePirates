@@ -19,14 +19,19 @@ namespace ProudNet.DotNetty.Handlers
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
         {
+            var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
             if (exception is SocketException socketException)
             {
-                if (socketException.SocketErrorCode == SocketError.ConnectionReset)
+                if (socketException.SocketErrorCode == SocketError.ConnectionReset ||
+                    socketException.SocketErrorCode == SocketError.TimedOut ||
+                    socketException.SocketErrorCode == SocketError.HostUnreachable)
+                {
+                    session?.CloseAsync();
                     return;
+                }
             }
 
             _logger.Error(exception, "Unhandled exception");
-            var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
             _server.RaiseError(new ErrorEventArgs(session, exception));
             session?.CloseAsync();
         }
