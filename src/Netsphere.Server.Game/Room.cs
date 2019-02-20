@@ -131,7 +131,7 @@ namespace Netsphere.Server.Game
             if (plr.Room != null)
                 return RoomJoinError.AlreadyInRoom;
 
-            if (_players.Count >= Options.MatchKey.PlayerLimit + Options.MatchKey.SpectatorLimit &&
+            if (_players.Count(x => !x.Value.IsInGMMode) >= Options.MatchKey.PlayerLimit + Options.MatchKey.SpectatorLimit &&
                 !plr.IsInGMMode)
             {
                 return RoomJoinError.RoomFull;
@@ -156,13 +156,13 @@ namespace Netsphere.Server.Game
             }
             else
             {
-                if (TeamManager.Any(x => x.Value.Players.Count() < x.Value.PlayerLimit))
+                if (TeamManager.Any(team => team.Value.Players.Count(x => !x.IsInGMMode) < team.Value.PlayerLimit))
                 {
                     plr.Mode = PlayerGameMode.Normal;
                 }
                 else
                 {
-                    if (TeamManager.Any(x => x.Value.Spectators.Count() < x.Value.SpectatorLimit))
+                    if (TeamManager.Any(team => team.Value.Spectators.Count(x => !x.IsInGMMode) < team.Value.SpectatorLimit))
                         plr.Mode = PlayerGameMode.Spectate;
                     else
                         return RoomJoinError.RoomFull;

@@ -123,7 +123,8 @@ namespace Netsphere.Server.Game.Handlers
             }
 
             if (!string.IsNullOrWhiteSpace(room.Options.Password) &&
-                !room.Options.Password.Equals(message.Password))
+                !room.Options.Password.Equals(message.Password) &&
+                !plr.IsInGMMode)
             {
                 session.Send(new SServerResultInfoAckMessage(ServerResult.PasswordError));
                 return true;
