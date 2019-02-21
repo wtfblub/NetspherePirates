@@ -2,7 +2,7 @@ namespace Netsphere.Server.Game
 {
     public abstract partial class GameRuleBase
     {
-        protected internal virtual void OnScoreMission(int unk)
+        protected internal virtual void OnScoreMission(Player plr)
         {
         }
 

@@ -102,7 +102,7 @@ namespace Netsphere.Server.Game.Services
                         map.Config = IniFile.Load(ms);
 
                     foreach (var enabledMode in map.Config["MAPINFO"]
-                        .Where(pair => pair.Key.StartsWith("enableMode", StringComparison.InvariantCultureIgnoreCase))
+                        .Where(pair => pair.Key.StartsWith("enableMode1", StringComparison.InvariantCultureIgnoreCase))
                         .Select(pair => pair.Value))
                     {
                         switch (enabledMode.Value.ToLower())
@@ -131,7 +131,7 @@ namespace Netsphere.Server.Game.Services
                                 map.GameRules.Add(GameRule.Survival);
                                 break;
 
-                            case "n":
+                            case "m":
                                 map.GameRules.Add(GameRule.Practice);
                                 break;
 
@@ -139,10 +139,11 @@ namespace Netsphere.Server.Game.Services
                                 map.GameRules.Add(GameRule.Arcade);
                                 break;
 
-                            case "std": // wtf is this?
-                                break;
-                            case "m": // wtf is this?
-                                break;
+                            // wtf is this?
+                            // probably s:survival, t:touchdown, d:deathmatch
+                            // this is also on enableMode2 while others are on enableMode1
+                            // case "std":
+                            //     break;
 
                             default:
                                 throw new Exception("Invalid game rule " + enabledMode);

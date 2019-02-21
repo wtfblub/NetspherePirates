@@ -20,6 +20,7 @@ namespace Netsphere.Server.Game
             Register(GameRule.Deathmatch, x => typeof(Deathmatch));
             Register(GameRule.Touchdown, x => typeof(Touchdown));
             Register(GameRule.BattleRoyal, x => typeof(BattleRoyal));
+            Register(GameRule.Practice, X => typeof(Practice));
         }
 
         /// <param name="priority">Higher value means higher priority. Default is 10</param>
@@ -40,7 +41,6 @@ namespace Netsphere.Server.Game
         public GameRuleBase CreateGameRule(RoomCreationOptions roomCreationOptions)
         {
             var type = GetGameRuleType(roomCreationOptions);
-            Console.WriteLine(type);
             return type != null
                 ? (GameRuleBase)_serviceProvider.GetRequiredService(type)
                 : null;

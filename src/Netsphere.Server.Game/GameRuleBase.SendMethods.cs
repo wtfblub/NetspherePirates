@@ -94,5 +94,10 @@ namespace Netsphere.Server.Game
                         target.SentryId ?? target.Player.PeerId, attackAttribute)));
             }
         }
+
+        public void SendScoreMission(ScoreContext context, int scoreGained)
+        {
+            Room.Broadcast(new SMissionScoreAckMessage(context.Player.Account.Id, scoreGained));
+        }
     }
 }
