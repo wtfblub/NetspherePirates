@@ -146,6 +146,7 @@ namespace Netsphere.Server.Game
                         .AddTransient<Deathmatch>()
                         .AddTransient<Touchdown>()
                         .AddTransient<BattleRoyal>()
+                        .AddTransient<Practice>()
                         .AddCommands(typeof(Program).Assembly)
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()

@@ -12,10 +12,18 @@ namespace Netsphere
         public byte JoinAuth => (byte)((_key[0] >> 2) & 1);
 
         // Contains spectator limit
-        public bool IsObserveEnabled => _key[3] > 0;
+        public bool IsObserveEnabled
+        {
+            get => _key[3] > 0;
+            set => _key[3] = (byte)(value ? 1 : 0);
+        }
 
         public GameRule GameRule => (GameRule)(byte)(_key[0] >> 4);
-        public byte Map => _key[1];
+        public byte Map
+        {
+            get => _key[1];
+            set => _key[1] = value;
+        }
 
         public int PlayerLimit
         {
@@ -39,7 +47,36 @@ namespace Netsphere
                         return 4;
                 }
 
-                return 0;
+                return _key[2];
+            }
+            set
+            {
+                switch (value)
+                {
+                    case 12:
+                        _key[2] = 8;
+                        break;
+
+                    case 10:
+                        _key[2] = 7;
+                        break;
+
+                    case 8:
+                        _key[2] = 6;
+                        break;
+
+                    case 6:
+                        _key[2] = 5;
+                        break;
+
+                    case 4:
+                        _key[2] = 3;
+                        break;
+
+                    default:
+                        _key[2] = (byte)value;
+                        break;
+                }
             }
         }
 
@@ -47,7 +84,8 @@ namespace Netsphere
 
         public MatchKey()
             : this(0)
-        { }
+        {
+        }
 
         public MatchKey(uint key)
         {

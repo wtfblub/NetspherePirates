@@ -23,7 +23,7 @@ namespace Netsphere.Server.Game.Handlers
           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
           IHandle<CScoreSuicideReqMessage>, IHandle<CScoreGoalReqMessage>, IHandle<CScoreReboundReqMessage>,
           IHandle<CScoreOffenseReqMessage>, IHandle<CScoreOffenseAssistReqMessage>, IHandle<CScoreDefenseReqMessage>,
-          IHandle<CScoreDefenseAssistReqMessage>
+          IHandle<CScoreDefenseAssistReqMessage>, IHandle<CMissionScoreReqMessage>
     {
         private readonly ILogger<RoomHandler> _logger;
         private readonly AppOptions _appOptions;
@@ -62,6 +62,9 @@ namespace Netsphere.Server.Game.Handlers
             var channel = plr.Channel;
             var roomMgr = channel.RoomManager;
             var logger = plr.AddContextToLogger(_logger).ForContext("Message", message.ToJson());
+
+            if (message.Room.MatchKey.GameRule == GameRule.Practice)
+                message.Room.MatchKey.PlayerLimit = 1;
 
             var (room, createError) = roomMgr.Create(new RoomCreationOptions
             {
@@ -664,6 +667,22 @@ namespace Netsphere.Server.Game.Handlers
                 new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
                 message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, CMissionScoreReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreMission(plr);
             return Task.FromResult(true);
         }
     }
