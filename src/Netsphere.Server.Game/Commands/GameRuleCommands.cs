@@ -109,5 +109,22 @@ namespace Netsphere.Server.Game.Commands
 
             return true;
         }
+
+        [Command(
+            CommandUsage.Player,
+            SecurityLevel.Developer,
+            "Usage: briefing"
+        )]
+        public async Task<bool> Briefing(Player plr, string[] args)
+        {
+            if (plr.Room == null)
+            {
+                plr.SendConsoleMessage(S4Color.Red + "You need to be a in a room");
+                return false;
+            }
+
+            plr.Room.BroadcastBriefing();
+            return true;
+        }
     }
 }
