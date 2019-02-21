@@ -77,11 +77,17 @@ namespace Netsphere.Server.Game
                 briefingPlayer.PENGained = penGain;
                 briefingPlayer.BonusPENGained = bonusPENGain;
 
-                var levelUp = plr.GainExperience(briefingPlayer.ExperienceGained + briefingPlayer.BonusExperienceGained);
-                briefingPlayer.LevelUp = levelUp;
+                if (expGain > 0)
+                {
+                    var levelUp = plr.GainExperience(briefingPlayer.ExperienceGained + briefingPlayer.BonusExperienceGained);
+                    briefingPlayer.LevelUp = levelUp;
+                }
 
-                plr.PEN += penGain + bonusPENGain;
-                plr.SendMoneyUpdate();
+                if (penGain > 0)
+                {
+                    plr.PEN += penGain + bonusPENGain;
+                    plr.SendMoneyUpdate();
+                }
 
                 // Durability loss based on play time
                 foreach (var character in plr.CharacterManager)
