@@ -231,8 +231,8 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
                 .Member(dest => dest.EquipLimit, src => src.Options.ItemLimit)
                 .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
-                .Member(dest => dest.ConnectingCount, src => src.TeamManager.Players.Count())
-                .Member(dest => dest.PlayerCount, src => src.TeamManager.Players.Count())
+                .Member(dest => dest.ConnectingCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
+                .Member(dest => dest.PlayerCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
                 .Function(dest => dest.Latency, src =>
                 {
                     const int good = 30;

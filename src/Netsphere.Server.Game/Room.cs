@@ -71,8 +71,14 @@ namespace Netsphere.Server.Game
         internal virtual void OnPlayerJoined(Player plr)
         {
             PlayerJoined?.Invoke(this, new RoomPlayerEventArgs(this, plr));
+
+            var team = TeamId.Neutral;
+            if (!plr.IsInGMMode)
+                team = plr.Team?.Id ?? TeamId.Neutral;
+
             _messageBus.PublishAsync(new PlayerUpdateMessage(
-                plr.Account.Id, plr.TotalExperience, Id, plr.Team?.Id ?? TeamId.Neutral));
+                plr.Account.Id, plr.TotalExperience, Id, team)
+            );
         }
 
         protected virtual void OnPlayerLeft(Player plr)
@@ -372,8 +378,13 @@ namespace Netsphere.Server.Game
         private void OnPlayerTeamChanged(object sender, PlayerTeamChangedEventArgs e)
         {
             var plr = e.Player;
+            var team = TeamId.Neutral;
+            if (!plr.IsInGMMode)
+                team = plr.Team?.Id ?? TeamId.Neutral;
+
             _messageBus.PublishAsync(new PlayerUpdateMessage(
-                plr.Account.Id, plr.TotalExperience, Id, plr.Team?.Id ?? TeamId.Neutral));
+                plr.Account.Id, plr.TotalExperience, Id, team)
+            );
         }
 
         private static void OnChangeRules(object This, object _)
