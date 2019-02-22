@@ -404,7 +404,10 @@ namespace Netsphere.Server.Game.Handlers
             var session = context.GetSession<Session>();
             var room = session.Player.Room;
 
-            var players = room.Players.Values.Select(x => (plr: x, team: x.Team)).ToList();
+            var players = room.Players.Values
+                .Where(x => x.Mode == PlayerGameMode.Normal)
+                .Select(x => (plr: x, team: x.Team))
+                .ToList();
             var rng = new Random(Guid.NewGuid().GetHashCode());
 
             foreach (var (plr, _) in players)
@@ -416,6 +419,9 @@ namespace Netsphere.Server.Game.Handlers
                 var (plr, oldTeam) = players[i];
                 players.RemoveAt(i);
                 room.TeamManager.Join(plr);
+
+                _logger.Debug("Shuffle team PlayerId={PlayerId} OldTeam={OldTeam} NewTeam={NewTeam}",
+                    plr.Account.Id, oldTeam?.Id, plr.Team?.Id);
 
                 if (plr.Team != oldTeam)
                     room.Broadcast(new SMixChangeTeamAckMessage(plr.Account.Id, 0, oldTeam.Id, plr.Team.Id));
