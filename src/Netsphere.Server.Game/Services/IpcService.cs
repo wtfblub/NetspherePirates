@@ -35,7 +35,7 @@ namespace Netsphere.Server.Game.Services
         {
             await _messageBus.SubscribeToRequestAsync<ChatLoginRequest, ChatLoginResponse>(OnChatLogin, _cts.Token);
             await _messageBus.SubscribeToRequestAsync<RelayLoginRequest, RelayLoginResponse>(OnRelayLogin, _cts.Token);
-            await _messageBus.SubscribeAsync<PlayerPeerIdMessage>(OnPlayerPeerId);
+            await _messageBus.SubscribeAsync<PlayerPeerIdMessage>(OnPlayerPeerId, _cts.Token);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
