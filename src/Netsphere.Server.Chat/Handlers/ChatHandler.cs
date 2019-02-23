@@ -5,7 +5,7 @@ using ProudNet;
 
 namespace Netsphere.Server.Chat.Handlers
 {
-    internal class ChatHandler : IHandle<CChatMessageReqMessage>, IHandle<CWhisperChatMessageReqMessage>
+    internal class ChatHandler : IHandle<MessageChatReqMessage>, IHandle<MessageWhisperChatReqMessage>
     {
         private readonly PlayerManager _playerManager;
 
@@ -16,7 +16,7 @@ namespace Netsphere.Server.Chat.Handlers
 
         [Firewall(typeof(MustBeInChannel))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CChatMessageReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, MessageChatReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -29,7 +29,7 @@ namespace Netsphere.Server.Chat.Handlers
 
                 case ChatType.Club:
                     // ToDo Change this when clans are implemented
-                    session.Send(new SChatMessageAckMessage(ChatType.Club,
+                    session.Send(new MessageChatAckMessage(ChatType.Club,
                         plr.Account.Id, plr.Account.Nickname, message.Message));
                     break;
             }
@@ -39,7 +39,7 @@ namespace Netsphere.Server.Chat.Handlers
 
         [Firewall(typeof(MustBeInChannel))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CWhisperChatMessageReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, MessageWhisperChatReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -48,7 +48,7 @@ namespace Netsphere.Server.Chat.Handlers
             // TODO Is there an answer for this case?
             if (toPlr == null)
             {
-                session.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id,
+                session.Send(new MessageChatAckMessage(ChatType.Channel, session.Player.Account.Id,
                     "SYSTEM", $"{message.ToNickname} is not online"));
                 return true;
             }
@@ -56,13 +56,13 @@ namespace Netsphere.Server.Chat.Handlers
             // TODO Is there an answer for this case?
             if (toPlr.Ignore.Contains(session.Player.Account.Id))
             {
-                session.Send(new SChatMessageAckMessage(ChatType.Channel, session.Player.Account.Id,
+                session.Send(new MessageChatAckMessage(ChatType.Channel, session.Player.Account.Id,
                     "SYSTEM", $"{message.ToNickname} is ignoring you"));
                 return true;
             }
 
             toPlr.Session.Send(
-                new SWhisperChatMessageAckMessage(
+                new MessageWhisperChatAckMessage(
                     0,
                     toPlr.Account.Nickname,
                     plr.Account.Id,

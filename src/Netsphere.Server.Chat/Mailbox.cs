@@ -144,7 +144,7 @@ namespace Netsphere.Server.Chat
 
         public void UpdateReminder()
         {
-            Player.Session.Send(new SNoteReminderInfoAckMessage((byte)this.Count(x => x.IsNew), 0, 0));
+            Player.Session.Send(new NoteCountAckMessage((byte)this.Count(x => x.IsNew), 0, 0));
         }
 
         public async Task Save(GameContext db)

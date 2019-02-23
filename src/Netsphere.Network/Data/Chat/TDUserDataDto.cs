@@ -6,24 +6,24 @@ namespace Netsphere.Network.Data.Chat
     public class TDUserDataDto
     {
         [BlubMember(0)]
-        public float TotalScore { get; set; }
+        public float WinRate { get; set; }
 
         [BlubMember(1)]
         public float TDScore { get; set; }
 
         [BlubMember(2)]
-        public float OffenseScore { get; set; }
+        public float TotalScore { get; set; }
 
         [BlubMember(3)]
         public float DefenseScore { get; set; }
 
         [BlubMember(4)]
-        public float KillScore { get; set; }
+        public float OffenseScore { get; set; }
 
         [BlubMember(5)]
-        public float RecoveryScore { get; set; }
+        public float KillScore { get; set; }
 
         [BlubMember(6)]
-        public float WinRate { get; set; }
+        public float RecoveryScore { get; set; }
     }
 }

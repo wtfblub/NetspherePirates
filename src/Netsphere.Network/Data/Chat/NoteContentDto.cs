@@ -14,6 +14,12 @@ namespace Netsphere.Network.Data.Chat
         [BlubMember(2)]
         public NoteGiftDto Gift { get; set; }
 
+        [BlubMember(3)]
+        public byte Unk1 { get; set; }
+
+        [BlubMember(4)]
+        public byte Unk2 { get; set; }
+
         public NoteContentDto()
         {
             Message = "";

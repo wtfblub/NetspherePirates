@@ -8,10 +8,10 @@ using ProudNet;
 
 namespace Netsphere.Server.Chat.Handlers
 {
-    internal class UserDataHandler : IHandle<CSetUserDataReqMessage>, IHandle<CGetUserDataReqMessage>
+    internal class UserDataHandler : IHandle<UserDataThreeAckMessage>, IHandle<UserDataOneReqMessage>
     {
         [Firewall(typeof(MustBeLoggedIn))]
-        public async Task<bool> OnHandle(MessageContext context, CSetUserDataReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, UserDataThreeAckMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -21,7 +21,7 @@ namespace Netsphere.Server.Chat.Handlers
                 // We can't send the channel player list in Channel.Join because the client only accepts it here :/
                 plr.SentPlayerList = true;
                 var data = plr.Channel.Players.Values.Select(p => p.Map<Player, UserDataWithNickDto>()).ToArray();
-                session.Send(new SChannelPlayerListAckMessage(data));
+                session.Send(new ChannelPlayerListAckMessage(data));
             }
 
             // Save settings if any of them changed
@@ -47,7 +47,7 @@ namespace Netsphere.Server.Chat.Handlers
 
         [Firewall(typeof(MustBeInChannel))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CGetUserDataReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, UserDataOneReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;

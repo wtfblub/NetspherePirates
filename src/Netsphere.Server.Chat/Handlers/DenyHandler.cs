@@ -7,7 +7,7 @@ using ProudNet;
 
 namespace Netsphere.Server.Chat.Handlers
 {
-    internal class DenyHandler : IHandle<CDenyChatReqMessage>
+    internal class DenyHandler : IHandle<DenyActionReqMessage>
     {
         private readonly PlayerManager _playerManager;
 
@@ -18,7 +18,7 @@ namespace Netsphere.Server.Chat.Handlers
 
         [Firewall(typeof(MustBeLoggedIn))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CDenyChatReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, DenyActionReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -38,7 +38,7 @@ namespace Netsphere.Server.Chat.Handlers
                         return true;
 
                     deny = plr.Ignore.Add(target.Account.Id, target.Account.Nickname);
-                    session.Send(new SDenyChatAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
+                    session.Send(new DenyActionAckMessage(0, DenyAction.Add, deny.Map<Deny, DenyDto>()));
                     break;
 
                 case DenyAction.Remove:
@@ -47,7 +47,7 @@ namespace Netsphere.Server.Chat.Handlers
                         return true;
 
                     plr.Ignore.Remove(message.Deny.AccountId);
-                    session.Send(new SDenyChatAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
+                    session.Send(new DenyActionAckMessage(0, DenyAction.Remove, deny.Map<Deny, DenyDto>()));
                     break;
             }
 

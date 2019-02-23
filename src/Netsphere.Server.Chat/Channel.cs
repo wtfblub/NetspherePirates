@@ -37,7 +37,7 @@ namespace Netsphere.Server.Chat
         {
             _players.Add(plr.Account.Id, plr);
             plr.Channel = this;
-            Broadcast(new SChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
+            Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
             OnPlayerJoined(plr);
         }
 
@@ -46,7 +46,7 @@ namespace Netsphere.Server.Chat
             _players.Remove(plr.Account.Id);
             plr.Channel = null;
             plr.SentPlayerList = false;
-            Broadcast(new SChannelLeavePlayerAckMessage(plr.Account.Id));
+            Broadcast(new ChannelLeavePlayerAckMessage(plr.Account.Id));
             OnPlayerLeft(plr);
         }
 
@@ -58,7 +58,7 @@ namespace Netsphere.Server.Chat
 
         public void SendChatMessage(Player sender, string message)
         {
-            Broadcast(new SChatMessageAckMessage(ChatType.Channel, sender.Account.Id, sender.Account.Nickname, message), true);
+            Broadcast(new MessageChatAckMessage(ChatType.Channel, sender.Account.Id, sender.Account.Nickname, message), true);
         }
     }
 }

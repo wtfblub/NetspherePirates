@@ -6,9 +6,9 @@ namespace Netsphere.Network.Data.Chat
     public class ChaserUserDataDto
     {
         [BlubMember(0)]
-        public float SurvivalProbability { get; set; }
+        public float KillProbability { get; set; }
 
         [BlubMember(1)]
-        public float AllKillProbability { get; set; }
+        public float Kills { get; set; }
     }
 }

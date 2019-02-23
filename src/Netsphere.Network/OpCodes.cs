@@ -82,10 +82,10 @@
         ClubNoteSendAck = 16031,
         ClubMemberListAck = 16032,
         ClubMemberLoginStateAck = 16033,
-        ChennelPlayerNameTagListAck = 16034,
+        ChannelPlayerNameTagListAck = 16034,
         ClubClubMemberInfoAck2 = 16035,
         ClubMemberListAck2 = 16036,
-        BroadCastClubClose = 16037
+        BroadcastClubClose = 16037
     }
 
     public enum ClubOpCode

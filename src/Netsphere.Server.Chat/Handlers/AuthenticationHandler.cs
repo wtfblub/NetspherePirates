@@ -17,7 +17,7 @@ using ProudNet;
 
 namespace Netsphere.Server.Chat.Handlers
 {
-    internal class AuthenticationHandler : IHandle<CLoginReqMessage>
+    internal class AuthenticationHandler : IHandle<LoginReqMessage>
     {
         private readonly ILogger _logger;
         private readonly NetworkOptions _networkOptions;
@@ -40,7 +40,7 @@ namespace Netsphere.Server.Chat.Handlers
             _playerManager = playerManager;
         }
 
-        public async Task<bool> OnHandle(MessageContext context, CLoginReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, LoginReqMessage message)
         {
             var session = context.GetSession<Session>();
             var logger = _logger.ForContext(
@@ -54,7 +54,7 @@ namespace Netsphere.Server.Chat.Handlers
 
             if (_sessionManager.Sessions.Count >= _networkOptions.MaxSessions)
             {
-                session.Send(new SLoginAckMessage(1));
+                session.Send(new LoginAckMessage(1));
                 return true;
             }
 
@@ -64,21 +64,21 @@ namespace Netsphere.Server.Chat.Handlers
             if (!response.OK)
             {
                 logger.Information("Wrong login");
-                session.Send(new SLoginAckMessage(2));
+                session.Send(new LoginAckMessage(2));
                 return true;
             }
 
             if (!response.Account.Nickname.Equals(message.Nickname))
             {
                 logger.Information("Wrong login");
-                session.Send(new SLoginAckMessage(3));
+                session.Send(new LoginAckMessage(3));
                 return true;
             }
 
             if (_playerManager.Contains(message.AccountId))
             {
                 logger.Information("Already logged in");
-                session.Send(new SLoginAckMessage(4));
+                session.Send(new LoginAckMessage(4));
                 return true;
             }
 
@@ -94,7 +94,7 @@ namespace Netsphere.Server.Chat.Handlers
                 if (playerEntity == null)
                 {
                     logger.Warning("Could not load player from database");
-                    session.Send(new SLoginAckMessage(5));
+                    session.Send(new LoginAckMessage(5));
                     return true;
                 }
 
@@ -103,9 +103,9 @@ namespace Netsphere.Server.Chat.Handlers
                 _playerManager.Add(session.Player);
             }
 
-            session.Send(new SLoginAckMessage(0));
+            session.Send(new LoginAckMessage(0));
             session.Send(
-                new SDenyChatListAckMessage(session.Player.Ignore.Select(x => x.Map<Deny, DenyDto>()).ToArray()));
+                new DenyListAckMessage(session.Player.Ignore.Select(x => x.Map<Deny, DenyDto>()).ToArray()));
 
             return true;
         }

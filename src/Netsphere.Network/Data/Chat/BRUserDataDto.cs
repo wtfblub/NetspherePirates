@@ -6,12 +6,9 @@ namespace Netsphere.Network.Data.Chat
     public class BRUserDataDto
     {
         [BlubMember(0)]
-        public float Score { get; set; }
-
-        [BlubMember(1)]
         public uint CountFirstPlaceKilled { get; set; }
 
-        [BlubMember(2)]
+        [BlubMember(1)]
         public uint CountFirstPlace { get; set; }
     }
 }

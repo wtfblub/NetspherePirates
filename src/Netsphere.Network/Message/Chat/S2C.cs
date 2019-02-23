@@ -1,33 +1,28 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using BlubLib;
-using BlubLib.IO;
 using BlubLib.Serialization;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Serializers;
-using ProudNet;
 
 namespace Netsphere.Network.Message.Chat
 {
     [BlubContract]
-    public class SLoginAckMessage : IChatMessage
+    public class LoginAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Result { get; set; }
 
-        public SLoginAckMessage()
+        public LoginAckMessage()
         {
         }
 
-        public SLoginAckMessage(uint result)
+        public LoginAckMessage(uint result)
         {
             Result = result;
         }
     }
 
     [BlubContract]
-    public class SFriendAckMessage : IChatMessage
+    public class FriendActionAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
@@ -38,18 +33,18 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(2)]
         public FriendDto Friend { get; set; }
 
-        public SFriendAckMessage()
+        public FriendActionAckMessage()
         {
             Friend = new FriendDto();
         }
 
-        public SFriendAckMessage(int result)
+        public FriendActionAckMessage(int result)
             : this()
         {
             Result = result;
         }
 
-        public SFriendAckMessage(int result, int unk, FriendDto friend)
+        public FriendActionAckMessage(int result, int unk, FriendDto friend)
         {
             Result = result;
             Unk = unk;
@@ -58,25 +53,25 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SFriendListAckMessage : IChatMessage
+    public class FriendListAckMessage : IChatMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public FriendDto[] Friends { get; set; }
 
-        public SFriendListAckMessage()
+        public FriendListAckMessage()
         {
             Friends = Array.Empty<FriendDto>();
         }
 
-        public SFriendListAckMessage(FriendDto[] friends)
+        public FriendListAckMessage(FriendDto[] friends)
         {
             Friends = friends;
         }
     }
 
     [BlubContract]
-    public class SCombiAckMessage : IChatMessage
+    public class CombiActionAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
@@ -87,12 +82,12 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(2)]
         public CombiDto Combi { get; set; }
 
-        public SCombiAckMessage()
+        public CombiActionAckMessage()
         {
             Combi = new CombiDto();
         }
 
-        public SCombiAckMessage(int result, int unk, CombiDto combi)
+        public CombiActionAckMessage(int result, int unk, CombiDto combi)
         {
             Result = result;
             Unk = unk;
@@ -101,25 +96,25 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SCombiListAckMessage : IChatMessage
+    public class CombiListAckMessage : IChatMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public CombiDto[] Combies { get; set; }
 
-        public SCombiListAckMessage()
+        public CombiListAckMessage()
         {
             Combies = Array.Empty<CombiDto>();
         }
 
-        public SCombiListAckMessage(CombiDto[] combies)
+        public CombiListAckMessage(CombiDto[] combies)
         {
             Combies = combies;
         }
     }
 
     [BlubContract]
-    public class SCheckCombiNameAckMessage : IChatMessage
+    public class CombiCheckNameAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -127,12 +122,12 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(1)]
         public string Unk2 { get; set; }
 
-        public SCheckCombiNameAckMessage()
+        public CombiCheckNameAckMessage()
         {
             Unk2 = "";
         }
 
-        public SCheckCombiNameAckMessage(uint unk1, string unk2)
+        public CombiCheckNameAckMessage(uint unk1, string unk2)
         {
             Unk1 = unk1;
             Unk2 = unk2;
@@ -140,7 +135,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SDenyChatAckMessage : IChatMessage
+    public class DenyActionAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
@@ -151,12 +146,12 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(2)]
         public DenyDto Deny { get; set; }
 
-        public SDenyChatAckMessage()
+        public DenyActionAckMessage()
         {
             Deny = new DenyDto();
         }
 
-        public SDenyChatAckMessage(int result, DenyAction action, DenyDto deny)
+        public DenyActionAckMessage(int result, DenyAction action, DenyDto deny)
         {
             Result = result;
             Action = action;
@@ -165,158 +160,76 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SDenyChatListAckMessage : IChatMessage
+    public class DenyListAckMessage : IChatMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public DenyDto[] Denies { get; set; }
 
-        public SDenyChatListAckMessage()
+        public DenyListAckMessage()
         {
             Denies = Array.Empty<DenyDto>();
         }
 
-        public SDenyChatListAckMessage(DenyDto[] denies)
+        public DenyListAckMessage(DenyDto[] denies)
         {
             Denies = denies;
         }
     }
 
     [BlubContract]
-    public class SUserDataAckMessage : IChatMessage
-    {
-        [BlubMember(0)]
-        public uint Unk { get; set; }
-
-        [BlubMember(1)]
-        public UserDataDto UserData { get; set; }
-
-        public SUserDataAckMessage()
-        {
-            UserData = new UserDataDto();
-        }
-
-        public SUserDataAckMessage(UserDataDto userData)
-        {
-            UserData = userData;
-        }
-    }
-
-    [BlubContract]
-    public class SUserDataListAckMessage : IChatMessage
+    public class ChannelPlayerListAckMessage : IChatMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
-        public UserDataDto[] UserData { get; set; }
+        public PlayerInfoShortDto[] UserData { get; set; }
 
-        public SUserDataListAckMessage()
+        public ChannelPlayerListAckMessage()
         {
-            UserData = Array.Empty<UserDataDto>();
+            UserData = Array.Empty<PlayerInfoShortDto>();
         }
 
-        public SUserDataListAckMessage(UserDataDto[] userData)
+        public ChannelPlayerListAckMessage(PlayerInfoShortDto[] userData)
         {
             UserData = userData;
         }
     }
 
     [BlubContract]
-    [BlubSerializer(typeof(Serializer))]
-    public class SChannelPlayerListAckMessage : IChatMessage
-    {
-        public UserDataWithNickDto[] UserData { get; set; }
-
-        public SChannelPlayerListAckMessage()
-        {
-            UserData = Array.Empty<UserDataWithNickDto>();
-        }
-
-        public SChannelPlayerListAckMessage(UserDataWithNickDto[] userData)
-        {
-            UserData = userData;
-        }
-
-        internal class Serializer : ISerializer<SChannelPlayerListAckMessage>
-        {
-            public bool CanHandle(Type type)
-            {
-                return type == typeof(SChannelPlayerListAckMessage);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Serialize(BlubSerializer serializer, BinaryWriter writer, SChannelPlayerListAckMessage value)
-            {
-                using (var w2 = new BinaryWriter(new MemoryStream()))
-                {
-                    w2.Write((ushort)value.UserData.Length);
-
-                    var userDataSerializer = serializer.GetSerializer<UserDataWithNickDto>();
-                    foreach (var userData in value.UserData)
-                        userDataSerializer.Serialize(serializer, w2, userData);
-
-                    var data = w2.ToArray();
-                    var compressed = data.CompressLZO();
-                    writer.WriteStruct(compressed);
-                    writer.Write(compressed.Length);
-                }
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public SChannelPlayerListAckMessage Deserialize(BlubSerializer serializer, BinaryReader reader)
-            {
-                var compressed = reader.ReadStruct();
-                reader.ReadInt32(); // length
-
-                var decompressed = compressed.DecompressLZO(compressed.Length * 10);
-
-                using (var r2 = decompressed.ToBinaryReader())
-                {
-                    var userDataSerializer = serializer.GetSerializer<UserDataWithNickDto>();
-                    var userData = new UserDataWithNickDto[r2.ReadInt16()];
-                    for (var i = 0; i < userData.Length; i++)
-                        userData[i] = userDataSerializer.Deserialize(serializer, r2);
-
-                    return new SChannelPlayerListAckMessage(userData);
-                }
-            }
-        }
-    }
-
-    [BlubContract]
-    public class SChannelEnterPlayerAckMessage : IChatMessage
+    public class ChannelEnterPlayerAckMessage : IChatMessage
     {
         [BlubMember(0)]
-        public UserDataWithNickDto UserData { get; set; }
+        public PlayerInfoShortDto UserData { get; set; }
 
-        public SChannelEnterPlayerAckMessage()
+        public ChannelEnterPlayerAckMessage()
         {
-            UserData = new UserDataWithNickDto();
+            UserData = new PlayerInfoShortDto();
         }
 
-        public SChannelEnterPlayerAckMessage(UserDataWithNickDto userData)
+        public ChannelEnterPlayerAckMessage(PlayerInfoShortDto userData)
         {
             UserData = userData;
         }
     }
 
     [BlubContract]
-    public class SChannelLeavePlayerAckMessage : IChatMessage
+    public class ChannelLeavePlayerAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }
 
-        public SChannelLeavePlayerAckMessage()
+        public ChannelLeavePlayerAckMessage()
         {
         }
 
-        public SChannelLeavePlayerAckMessage(ulong accountId)
+        public ChannelLeavePlayerAckMessage(ulong accountId)
         {
             AccountId = accountId;
         }
     }
 
     [BlubContract]
-    public class SChatMessageAckMessage : IChatMessage
+    public class MessageChatAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ChatType ChatType { get; set; }
@@ -330,13 +243,13 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(3)]
         public string Message { get; set; }
 
-        public SChatMessageAckMessage()
+        public MessageChatAckMessage()
         {
             Nickname = "";
             Message = "";
         }
 
-        public SChatMessageAckMessage(ChatType chatType, ulong accountId, string nick, string message)
+        public MessageChatAckMessage(ChatType chatType, ulong accountId, string nick, string message)
         {
             ChatType = chatType;
             AccountId = accountId;
@@ -346,7 +259,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SWhisperChatMessageAckMessage : IChatMessage
+    public class MessageWhisperChatAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
@@ -363,14 +276,14 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(4)]
         public string Message { get; set; }
 
-        public SWhisperChatMessageAckMessage()
+        public MessageWhisperChatAckMessage()
         {
             ToNickname = "";
             Nickname = "";
             Message = "";
         }
 
-        public SWhisperChatMessageAckMessage(uint unk, string toNickname, ulong accountId, string nick, string message)
+        public MessageWhisperChatAckMessage(uint unk, string toNickname, ulong accountId, string nick, string message)
         {
             Unk = unk;
             ToNickname = toNickname;
@@ -381,7 +294,7 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SInvitationPlayerAckMessage : IChatMessage
+    public class RoomInvitationPlayerAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -390,42 +303,45 @@ namespace Netsphere.Network.Message.Chat
         public string Unk2 { get; set; }
 
         [BlubMember(2)]
-        public UserDataDto UserData { get; set; }
+        public PlayerLocationDto Location { get; set; }
 
-        public SInvitationPlayerAckMessage()
+        [BlubMember(3)]
+        public int Unk3 { get; set; }
+
+        public RoomInvitationPlayerAckMessage()
         {
             Unk2 = "";
-            UserData = new UserDataDto();
+            Location = new PlayerLocationDto();
         }
 
-        public SInvitationPlayerAckMessage(ulong unk1, string unk2, UserDataDto userData)
+        public RoomInvitationPlayerAckMessage(ulong unk1, string unk2, PlayerLocationDto location)
         {
             Unk1 = unk1;
             Unk2 = unk2;
-            UserData = userData;
+            Location = location;
         }
     }
 
     [BlubContract]
-    public class SClanMemberListAckMessage : IChatMessage
+    public class ClanMemberListAckMessage : IChatMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
-        public UserDataWithNickLongDto[] Players { get; set; }
+        public PlayerInfoDto[] Players { get; set; }
 
-        public SClanMemberListAckMessage()
+        public ClanMemberListAckMessage()
         {
-            Players = Array.Empty<UserDataWithNickLongDto>();
+            Players = Array.Empty<PlayerInfoDto>();
         }
 
-        public SClanMemberListAckMessage(UserDataWithNickLongDto[] players)
+        public ClanMemberListAckMessage(PlayerInfoDto[] players)
         {
             Players = players;
         }
     }
 
     [BlubContract]
-    public class SNoteListAckMessage : IChatMessage
+    public class NoteListAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int PageCount { get; set; }
@@ -440,12 +356,12 @@ namespace Netsphere.Network.Message.Chat
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public NoteDto[] Notes { get; set; }
 
-        public SNoteListAckMessage()
+        public NoteListAckMessage()
         {
             Notes = Array.Empty<NoteDto>();
         }
 
-        public SNoteListAckMessage(int pageCount, byte currentPage, NoteDto[] notes)
+        public NoteListAckMessage(int pageCount, byte currentPage, NoteDto[] notes)
         {
             PageCount = pageCount;
             CurrentPage = currentPage;
@@ -455,23 +371,23 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SSendNoteAckMessage : IChatMessage
+    public class NoteSendAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Result { get; set; }
 
-        public SSendNoteAckMessage()
+        public NoteSendAckMessage()
         {
         }
 
-        public SSendNoteAckMessage(int result)
+        public NoteSendAckMessage(int result)
         {
             Result = result;
         }
     }
 
     [BlubContract]
-    public class SReadNoteAckMessage : IChatMessage
+    public class NoteReadAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public ulong Id { get; set; }
@@ -482,12 +398,12 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(2)]
         public int Unk { get; set; }
 
-        public SReadNoteAckMessage()
+        public NoteReadAckMessage()
         {
             Note = new NoteContentDto();
         }
 
-        public SReadNoteAckMessage(ulong id, NoteContentDto note, int unk)
+        public NoteReadAckMessage(ulong id, NoteContentDto note, int unk)
         {
             Id = id;
             Note = note;
@@ -496,41 +412,41 @@ namespace Netsphere.Network.Message.Chat
     }
 
     [BlubContract]
-    public class SDeleteNoteAckMessage : IChatMessage
+    public class NoteDeleteAckMessage : IChatMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public DeleteNoteDto[] Notes { get; set; }
 
-        public SDeleteNoteAckMessage()
+        public NoteDeleteAckMessage()
         {
             Notes = Array.Empty<DeleteNoteDto>();
         }
 
-        public SDeleteNoteAckMessage(DeleteNoteDto[] notes)
+        public NoteDeleteAckMessage(DeleteNoteDto[] notes)
         {
             Notes = notes;
         }
     }
 
     [BlubContract]
-    public class SNoteErrorAckMessage : IChatMessage
+    public class NoteErrorAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public int Unk { get; set; }
 
-        public SNoteErrorAckMessage()
+        public NoteErrorAckMessage()
         {
         }
 
-        public SNoteErrorAckMessage(int unk)
+        public NoteErrorAckMessage(int unk)
         {
             Unk = unk;
         }
     }
 
     [BlubContract]
-    public class SNoteReminderInfoAckMessage : IChatMessage
+    public class NoteCountAckMessage : IChatMessage
     {
         [BlubMember(0)]
         public byte NoteCount { get; set; }
@@ -541,15 +457,210 @@ namespace Netsphere.Network.Message.Chat
         [BlubMember(2)]
         public byte Unk3 { get; set; }
 
-        public SNoteReminderInfoAckMessage()
+        public NoteCountAckMessage()
         {
         }
 
-        public SNoteReminderInfoAckMessage(byte noteCount, byte unk2, byte unk3)
+        public NoteCountAckMessage(byte noteCount, byte unk2, byte unk3)
         {
             NoteCount = noteCount;
             Unk2 = unk2;
             Unk3 = unk3;
         }
+    }
+
+    [BlubContract]
+    public class PlayerInfoAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public PlayerInfoDto Player { get; set; }
+
+        public PlayerInfoAckMessage()
+        {
+        }
+
+        public PlayerInfoAckMessage(PlayerInfoDto player)
+        {
+            Player = player;
+        }
+    }
+
+    [BlubContract]
+    public class PlayerPositionAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public ulong AccountId { get; set; }
+
+        [BlubMember(1)]
+        public PlayerLocationDto Player { get; set; }
+
+        public PlayerPositionAckMessage()
+        {
+            Player = new PlayerLocationDto();
+        }
+
+        public PlayerPositionAckMessage(ulong accountId, PlayerLocationDto player)
+        {
+            AccountId = accountId;
+            Player = player;
+        }
+    }
+
+    [BlubContract]
+    public class PlayerPlayerInfoListAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        public PlayerInfoDto[] Players { get; set; }
+
+        public PlayerPlayerInfoListAckMessage()
+        {
+            Players = Array.Empty<PlayerInfoDto>();
+        }
+
+        public PlayerPlayerInfoListAckMessage(PlayerInfoDto[] players)
+        {
+            Players = players;
+        }
+    }
+
+    [BlubContract]
+    public class UserDataTwoReqMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public ulong AccountId { get; set; }
+
+        [BlubMember(1)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class UserDataFourAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+
+        [BlubMember(1)]
+        public UserDataDto UserData { get; set; }
+
+        public UserDataFourAckMessage()
+        {
+            UserData = new UserDataDto();
+        }
+    }
+
+    [BlubContract]
+    public class ClanChangeNoticeAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public string Unk { get; set; }
+
+        public ClanChangeNoticeAckMessage()
+        {
+            Unk = "";
+        }
+    }
+
+    [BlubContract]
+    public class NoteRejectImportuneAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubSystemMessageMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public string Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubNewsRemindMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubNoteSendAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubMemberListAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        public ClubMemberDto[] Members { get; set; }
+
+        public ClubMemberListAckMessage()
+        {
+            Members = Array.Empty<ClubMemberDto>();
+        }
+    }
+
+    [BlubContract]
+    public class ClubMemberLoginStateAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public ulong Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class ChannelPlayerNameTagListAckMessage : IChatMessage
+    {
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        public NameTagDto[] NameTags { get; set; }
+
+        public ChannelPlayerNameTagListAckMessage()
+        {
+            NameTags = Array.Empty<NameTagDto>();
+        }
+    }
+
+    [BlubContract]
+    public class ClubClubMemberInfoAck2Message : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+
+        [BlubMember(1)]
+        public ClubMember2Dto ClubMember { get; set; }
+
+        public ClubClubMemberInfoAck2Message()
+        {
+            ClubMember = new ClubMember2Dto();
+        }
+    }
+
+    [BlubContract]
+    public class ClubMemberListAck2Message : IChatMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+
+        [BlubMember(1)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        public ClubMember2Dto[] Members { get; set; }
+
+        public ClubMemberListAck2Message()
+        {
+            Members = Array.Empty<ClubMember2Dto>();
+        }
+    }
+
+    [BlubContract]
+    public class BroadcastClubCloseMessage : IChatMessage
+    {
     }
 }
