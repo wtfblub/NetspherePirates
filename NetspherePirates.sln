@@ -57,6 +57,7 @@ ProjectSection(SolutionItems) = preProject
 	src\plugins\AuthPluginBase.targets = src\plugins\AuthPluginBase.targets
 	src\plugins\ChatPluginBase.targets = src\plugins\ChatPluginBase.targets
 	src\plugins\RelayPluginBase.targets = src\plugins\RelayPluginBase.targets
+	src\plugins\WorkaroundSDKIssue1366.targets = src\plugins\WorkaroundSDKIssue1366.targets
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "src\plugins\WebApi\WebApi.csproj", "{98A91E11-7BBB-4202-AF53-70BE92023B64}"
