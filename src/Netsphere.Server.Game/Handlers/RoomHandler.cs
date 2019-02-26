@@ -318,13 +318,19 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeInRoom))]
-        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
         public Task<bool> OnHandle(MessageContext context, CItemsChangeReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
             var room = plr.Room;
             var logger = plr.AddContextToLogger(_logger);
+
+            // Can only change items in lobby
+            if (plr.State != PlayerState.Lobby)
+            {
+                plr.Disconnect();
+                return Task.FromResult(true);
+            }
 
             logger.Debug("Item sync unk1={Unk1}", message.Unk1);
 
@@ -336,13 +342,19 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeInRoom))]
-        // [Firewall(typeof(MustBeGameState), GameState.Waiting)]
         public Task<bool> OnHandle(MessageContext context, CAvatarChangeReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
             var room = plr.Room;
             var logger = plr.AddContextToLogger(_logger);
+
+            // Can only change characters in lobby or during half time
+            if (plr.State != PlayerState.Lobby && room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime)
+            {
+                plr.Disconnect();
+                return Task.FromResult(true);
+            }
 
             logger.Debug("Avatar sync unk1={Unk1}", message.Unk1);
 
