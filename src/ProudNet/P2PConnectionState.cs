@@ -14,6 +14,7 @@ namespace ProudNet
         public bool PeerUdpHolepunchSuccess { get; set; }
         public bool HolepunchSuccess { get; set; }
         public DateTimeOffset LastHolepunch { get; set; }
+        public int RetryCount { get; set; }
 
         public IPEndPoint EndPoint { get; set; }
         public IPEndPoint LocalEndPoint { get; set; }

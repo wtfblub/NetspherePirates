@@ -139,6 +139,9 @@ namespace ProudNet.Handlers
 
                 remotePeerA.Send(notify);
                 remotePeerB.Send(notify);
+
+                stateA.RetryCount = 0;
+                stateB.RetryCount = 0;
             }
 
             return true;
