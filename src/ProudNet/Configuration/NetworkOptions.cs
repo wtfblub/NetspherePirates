@@ -13,6 +13,7 @@ namespace ProudNet.Configuration
         public Guid Version { get; set; }
         public TimeSpan ConnectTimeout { get; set; }
         public TimeSpan HolepunchTimeout { get; set; }
+        public int HolepunchMaxRetryCount { get; set; }
         public TimeSpan PingTimeout { get; }
 
         public bool EnableServerLog { get; set; }
@@ -34,7 +35,8 @@ namespace ProudNet.Configuration
         public NetworkOptions()
         {
             ConnectTimeout = TimeSpan.FromSeconds(10);
-            HolepunchTimeout = TimeSpan.FromSeconds(30);
+            HolepunchTimeout = TimeSpan.FromSeconds(15);
+            HolepunchMaxRetryCount = 10;
             // Client sends a ping every 10 seconds
             PingTimeout = TimeSpan.FromSeconds(20);
             ServerAsP2PGroupMemberHack = false;

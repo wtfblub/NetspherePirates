@@ -314,7 +314,9 @@ namespace ProudNet.Hosting.Services
                                 if (stateToTarget.IsInitialized)
                                 {
                                     var diff = now - stateToTarget.LastHolepunch;
-                                    if (!stateToTarget.HolepunchSuccess && diff >= configuration.HolepunchTimeout)
+                                    if (!stateToTarget.HolepunchSuccess &&
+                                        diff >= configuration.HolepunchTimeout &&
+                                        stateToTarget.RetryCount < configuration.HolepunchMaxRetryCount)
                                     {
                                         session.Logger
                                             .ForContext("P2PState", new
@@ -342,6 +344,8 @@ namespace ProudNet.Hosting.Services
                                             .Information("Trying to reconnect P2P to {TargetHostId}",
                                                 member.HostId);
 
+                                        stateToTarget.RetryCount++;
+                                        stateFromTarget.RetryCount++;
                                         stateToTarget.JitTriggered = stateFromTarget.JitTriggered = false;
                                         stateToTarget.PeerUdpHolepunchSuccess =
                                             stateFromTarget.PeerUdpHolepunchSuccess = false;
