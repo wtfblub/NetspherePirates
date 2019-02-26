@@ -134,6 +134,7 @@ namespace Netsphere.Server.Auth
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+            host.Dispose();
             pluginHost.Dispose();
         }
     }

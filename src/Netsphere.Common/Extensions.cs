@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BlubLib.Threading.Tasks;
@@ -115,6 +116,27 @@ namespace Netsphere.Common
             var address = addresses.FirstOrDefault(x => This.AddressFamily == AddressFamily.Unspecified ||
                                                         x.AddressFamily == This.AddressFamily);
             return new IPEndPoint(address, This.Port);
+        }
+    }
+
+    public static class TimeSpanExtensions
+    {
+        public static string ToHumanReadable(this TimeSpan value)
+        {
+            var uptime = new StringBuilder();
+            if (value.Days > 0)
+                uptime.AppendFormat(value.Days > 1 ? "{0} days " : "{0} day ", value.Days);
+
+            if (value.Days > 0 || value.Hours > 0)
+                uptime.AppendFormat(value.Hours > 1 ? "{0} hours " : "{0} hour ", value.Hours);
+
+            if (value.Hours > 0 || value.Minutes > 0)
+                uptime.AppendFormat(value.Minutes > 1 ? "{0} minutes " : "{0} minute ", value.Minutes);
+
+            if (value.Seconds > 0)
+                uptime.AppendFormat(value.Seconds > 1 ? "{0} seconds " : "{0} second ", value.Seconds);
+
+            return uptime.ToString();
         }
     }
 }

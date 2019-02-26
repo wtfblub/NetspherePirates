@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
 using Foundatio.Caching;
@@ -191,6 +192,7 @@ namespace Netsphere.Server.Game
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+            host.Dispose();
             pluginHost.Dispose();
         }
 
