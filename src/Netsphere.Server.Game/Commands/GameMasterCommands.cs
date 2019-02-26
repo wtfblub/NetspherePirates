@@ -35,7 +35,7 @@ namespace Netsphere.Server.Game.Commands
                 return false;
 
             foreach (var p in _playerManager)
-                p.SendNotice(string.Join("", args));
+                p.SendNotice(string.Join(" ", args));
 
             return true;
         }
