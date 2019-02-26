@@ -170,6 +170,11 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
             var room = plr.Room;
 
+            // No reason for gm mode to change teams
+            // so just block it to make sure the clients dont break
+            if (plr.IsInGMMode)
+                return true;
+
             var error = room.TeamManager.ChangeTeam(plr, message.Team);
             switch (error)
             {
@@ -192,6 +197,10 @@ namespace Netsphere.Server.Game.Handlers
             var session = context.GetSession<Session>();
             var plr = session.Player;
             var room = plr.Room;
+
+            // gm mode should also be spectator
+            if (plr.IsInGMMode)
+                return true;
 
             var error = room.TeamManager.ChangeMode(plr, message.Mode);
             switch (error)
@@ -367,6 +376,14 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
             var room = plr.Room;
 
+            var targetPlr = room.Players.GetValueOrDefault(message.AccountId);
+            if (targetPlr == null)
+                return Task.FromResult(true);
+
+            // Cant kick people in gm mode also disables AFK kick
+            if (targetPlr.IsInGMMode)
+                return Task.FromResult(true);
+
             switch (message.Reason)
             {
                 case RoomLeaveReason.Kicked:
@@ -387,10 +404,6 @@ namespace Netsphere.Server.Game.Handlers
                     // Dont allow any other reasons for now
                     return Task.FromResult(true);
             }
-
-            var targetPlr = room.Players.GetValueOrDefault(message.AccountId);
-            if (targetPlr == null)
-                return Task.FromResult(true);
 
             room.Leave(targetPlr, message.Reason);
             return Task.FromResult(true);
