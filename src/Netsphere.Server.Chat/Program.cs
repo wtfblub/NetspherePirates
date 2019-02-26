@@ -155,6 +155,7 @@ namespace Netsphere.Server.Chat
             host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStarted.Register(() =>
                 Log.Information("Press Ctrl + C to shutdown"));
             host.Run();
+            host.Dispose();
             pluginHost.Dispose();
         }
 
