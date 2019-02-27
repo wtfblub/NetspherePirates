@@ -86,7 +86,7 @@ namespace ProudNet.DotNetty.Handlers
                     UdpEndPoint = message.EndPoint
                 };
 
-                session.Channel.Pipeline.Context<MessageContextDecoder>().FireChannelRead(recvContext);
+                session?.Channel?.Pipeline?.Context<MessageContextDecoder>()?.FireChannelRead(recvContext);
             }
             finally
             {
