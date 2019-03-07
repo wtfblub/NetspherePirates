@@ -53,7 +53,7 @@ namespace Netsphere.Network.Data.Game
         public byte MaxLevel { get; set; }
 
         [BlubMember(15)]
-        public byte EquipLimit { get; set; }
+        public EquipLimit EquipLimit { get; set; }
 
         [BlubMember(16)]
         public bool IsNoIntrusion { get; set; }

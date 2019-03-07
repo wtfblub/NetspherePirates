@@ -150,7 +150,7 @@ namespace WebApi
                 .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
                 .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
                 .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
-                .Member(dest => dest.ItemLimit, src => src.Options.ItemLimit)
+                .Member(dest => dest.EquipLimit, src => src.Options.EquipLimit)
                 .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
                 .Function(dest => dest.Players,
                     src => src.Players.Values.Select(x => x.Map<Player, RoomPlayerDto>()).ToArray());

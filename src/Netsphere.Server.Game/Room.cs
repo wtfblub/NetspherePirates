@@ -227,6 +227,7 @@ namespace Netsphere.Server.Game
             _idRecycler.Return(plr.Slot);
             plr.Room = null;
             plr.PeerId = null;
+            plr.IsReady = false;
             plr.Session.Send(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id));
 
             OnPlayerLeft(plr);
@@ -288,7 +289,7 @@ namespace Netsphere.Server.Game
                 Password = options.Password,
                 IsFriendly = options.IsFriendly,
                 IsBalanced = options.IsBalanced,
-                ItemLimit = options.ItemLimit,
+                EquipLimit = options.EquipLimit,
                 IsNoIntrusion = options.IsNoIntrusion
             }))
             {
@@ -315,7 +316,7 @@ namespace Netsphere.Server.Game
             Options.Password = options.Password;
             Options.IsFriendly = options.IsFriendly;
             Options.IsBalanced = options.IsBalanced;
-            Options.ItemLimit = options.ItemLimit;
+            Options.EquipLimit = options.EquipLimit;
             Options.IsNoIntrusion = options.IsNoIntrusion;
 
             Broadcast(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));

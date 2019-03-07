@@ -270,108 +270,6 @@ namespace Netsphere.Server.Game.Services
                 }
             }
 
-            ItemLicense ParseItemLicense(string license)
-            {
-                bool Equals(string str)
-                {
-                    return license.Equals(str, StringComparison.InvariantCultureIgnoreCase);
-                }
-
-                if (Equals("license_none"))
-                    return ItemLicense.None;
-
-                if (Equals("LICENSE_CHECK_NONE"))
-                    return ItemLicense.None;
-
-                if (Equals("LICENSE_PLASMA_SWORD"))
-                    return ItemLicense.PlasmaSword;
-
-                if (Equals("license_counter_sword"))
-                    return ItemLicense.CounterSword;
-
-                if (Equals("LICENSE_STORM_BAT"))
-                    return ItemLicense.StormBat;
-
-                if (Equals("LICENSE_ASSASSIN_CLAW"))
-                    return ItemLicense.None; // ToDo
-
-                if (Equals("LICENSE_SUBMACHINE_GUN"))
-                    return ItemLicense.SubmachineGun;
-
-                if (Equals("license_revolver"))
-                    return ItemLicense.Revolver;
-
-                if (Equals("license_semi_rifle"))
-                    return ItemLicense.SemiRifle;
-
-                if (Equals("LICENSE_SMG3"))
-                    return ItemLicense.None; // ToDo
-
-                if (Equals("license_HAND_GUN"))
-                    return ItemLicense.None; // ToDo
-
-                if (Equals("LICENSE_SMG4"))
-                    return ItemLicense.None; // ToDo
-
-                if (Equals("LICENSE_HEAVYMACHINE_GUN"))
-                    return ItemLicense.HeavymachineGun;
-
-                if (Equals("LICENSE_GAUSS_RIFLE"))
-                    return ItemLicense.GaussRifle;
-
-                if (Equals("license_rail_gun"))
-                    return ItemLicense.RailGun;
-
-                if (Equals("license_cannonade"))
-                    return ItemLicense.Cannonade;
-
-                if (Equals("LICENSE_CENTRYGUN"))
-                    return ItemLicense.Sentrygun;
-
-                if (Equals("license_centi_force"))
-                    return ItemLicense.SentiForce;
-
-                if (Equals("LICENSE_SENTINEL"))
-                    return ItemLicense.SentiNel;
-
-                if (Equals("license_mine_gun"))
-                    return ItemLicense.MineGun;
-
-                if (Equals("LICENSE_MIND_ENERGY"))
-                    return ItemLicense.MindEnergy;
-
-                if (Equals("license_mind_shock"))
-                    return ItemLicense.MindShock;
-
-                // SKILLS
-
-                if (Equals("LICENSE_ANCHORING"))
-                    return ItemLicense.Anchoring;
-
-                if (Equals("LICENSE_FLYING"))
-                    return ItemLicense.Flying;
-
-                if (Equals("LICENSE_INVISIBLE"))
-                    return ItemLicense.Invisible;
-
-                if (Equals("license_detect"))
-                    return ItemLicense.Detect;
-
-                if (Equals("LICENSE_SHIELD"))
-                    return ItemLicense.Shield;
-
-                if (Equals("LICENSE_BLOCK"))
-                    return ItemLicense.Block;
-
-                if (Equals("LICENSE_BIND"))
-                    return ItemLicense.Bind;
-
-                if (Equals("LICENSE_METALLIC"))
-                    return ItemLicense.Metallic;
-
-                throw new Exception("Invalid license " + license);
-            }
-
             Gender ParseGender(string gender)
             {
                 bool Equals(string str)
@@ -532,7 +430,7 @@ namespace Netsphere.Server.Game.Services
 
         public void LoadGameTempos()
         {
-            _logger.Information("Loading default game tempos...");
+            _logger.Information("Loading game tempos...");
             var dto = Deserialize<ConstantInfoDto>("xml/constant_info.x7");
             GameTempos = Transform().ToImmutableDictionary(x => x.Name, x => x);
             _logger.Information("Loaded {Count} game tempos", GameTempos.Count);
@@ -558,6 +456,58 @@ namespace Netsphere.Server.Game.Services
             }
         }
 
+        public void LoadEquipLimits()
+        {
+            _logger.Information("Loading equip limits...");
+            var dto = Deserialize<EquipLimitDto>("xml/equip_limit.x7");
+            EquipLimits = Transform().ToImmutableDictionary(x => x.Rule, x => x);
+            _logger.Information("Loaded {Count} equip limits", GameTempos.Count);
+
+            IEnumerable<EquipLimitInfo> Transform()
+            {
+                yield return new EquipLimitInfo
+                {
+                    Rule = EquipLimit.S4League,
+                    Whitelist = ParseLicenses(dto.preset.s4)
+                };
+
+                yield return new EquipLimitInfo
+                {
+                    Rule = EquipLimit.SuperLeague,
+                    Whitelist = ParseLicenses(dto.preset.super)
+                };
+
+                yield return new EquipLimitInfo
+                {
+                    Rule = EquipLimit.RookieLeague,
+                    Whitelist = ParseLicenses(dto.preset.rookie)
+                };
+
+                yield return new EquipLimitInfo
+                {
+                    Rule = EquipLimit.SwordMatch,
+                    Whitelist = ParseLicenses(dto.preset.sword)
+                };
+
+                yield return new EquipLimitInfo
+                {
+                    Rule = EquipLimit.Arcade,
+                    Whitelist = ParseLicenses(dto.preset.arcade)
+                };
+
+                yield return new EquipLimitInfo
+                {
+                    Rule = EquipLimit.Chaser,
+                    Whitelist = ParseLicenses(dto.preset.slaughter)
+                };
+
+                ItemLicense[] ParseLicenses(EquipLimitPresetDto preset)
+                {
+                    return preset.require_license.Select(x => ParseItemLicense(x.name)).ToArray();
+                }
+            }
+        }
+
         public async Task LoadLevelRewards()
         {
             using (var db = _databaseService.Open<GameContext>())
@@ -567,6 +517,108 @@ namespace Netsphere.Server.Game.Services
                 LevelRewards = rewards.ToImmutableDictionary(x => x.Level, x => new LevelReward(x));
                 _logger.Information("Loaded {Count} level rewards", LevelRewards.Count);
             }
+        }
+
+        private ItemLicense ParseItemLicense(string license)
+        {
+            bool Equals(string str)
+            {
+                return license.Equals(str, StringComparison.InvariantCultureIgnoreCase);
+            }
+
+            if (Equals("license_none"))
+                return ItemLicense.None;
+
+            if (Equals("LICENSE_CHECK_NONE"))
+                return ItemLicense.None;
+
+            if (Equals("LICENSE_PLASMA_SWORD"))
+                return ItemLicense.PlasmaSword;
+
+            if (Equals("license_counter_sword"))
+                return ItemLicense.CounterSword;
+
+            if (Equals("LICENSE_STORM_BAT"))
+                return ItemLicense.StormBat;
+
+            if (Equals("LICENSE_ASSASSIN_CLAW"))
+                return ItemLicense.None; // ToDo
+
+            if (Equals("LICENSE_SUBMACHINE_GUN"))
+                return ItemLicense.SubmachineGun;
+
+            if (Equals("license_revolver"))
+                return ItemLicense.Revolver;
+
+            if (Equals("license_semi_rifle"))
+                return ItemLicense.SemiRifle;
+
+            if (Equals("LICENSE_SMG3"))
+                return ItemLicense.None; // ToDo
+
+            if (Equals("license_HAND_GUN"))
+                return ItemLicense.None; // ToDo
+
+            if (Equals("LICENSE_SMG4"))
+                return ItemLicense.None; // ToDo
+
+            if (Equals("LICENSE_HEAVYMACHINE_GUN"))
+                return ItemLicense.HeavymachineGun;
+
+            if (Equals("LICENSE_GAUSS_RIFLE"))
+                return ItemLicense.GaussRifle;
+
+            if (Equals("license_rail_gun"))
+                return ItemLicense.RailGun;
+
+            if (Equals("license_cannonade"))
+                return ItemLicense.Cannonade;
+
+            if (Equals("LICENSE_CENTRYGUN"))
+                return ItemLicense.Sentrygun;
+
+            if (Equals("license_centi_force"))
+                return ItemLicense.SentiForce;
+
+            if (Equals("LICENSE_SENTINEL"))
+                return ItemLicense.SentiNel;
+
+            if (Equals("license_mine_gun"))
+                return ItemLicense.MineGun;
+
+            if (Equals("LICENSE_MIND_ENERGY"))
+                return ItemLicense.MindEnergy;
+
+            if (Equals("license_mind_shock"))
+                return ItemLicense.MindShock;
+
+            // SKILLS
+
+            if (Equals("LICENSE_ANCHORING"))
+                return ItemLicense.Anchoring;
+
+            if (Equals("LICENSE_FLYING"))
+                return ItemLicense.Flying;
+
+            if (Equals("LICENSE_INVISIBLE"))
+                return ItemLicense.Invisible;
+
+            if (Equals("license_detect"))
+                return ItemLicense.Detect;
+
+            if (Equals("LICENSE_SHIELD"))
+                return ItemLicense.Shield;
+
+            if (Equals("LICENSE_BLOCK"))
+                return ItemLicense.Block;
+
+            if (Equals("LICENSE_BIND"))
+                return ItemLicense.Bind;
+
+            if (Equals("LICENSE_METALLIC"))
+                return ItemLicense.Metallic;
+
+            throw new Exception("Invalid license " + license);
         }
     }
 }
