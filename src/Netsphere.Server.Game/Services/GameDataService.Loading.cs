@@ -461,7 +461,7 @@ namespace Netsphere.Server.Game.Services
             _logger.Information("Loading equip limits...");
             var dto = Deserialize<EquipLimitDto>("xml/equip_limit.x7");
             EquipLimits = Transform().ToImmutableDictionary(x => x.Rule, x => x);
-            _logger.Information("Loaded {Count} equip limits", GameTempos.Count);
+            _logger.Information("Loaded {Count} equip limits", EquipLimits.Count);
 
             IEnumerable<EquipLimitInfo> Transform()
             {
@@ -542,7 +542,13 @@ namespace Netsphere.Server.Game.Services
                 return ItemLicense.StormBat;
 
             if (Equals("LICENSE_ASSASSIN_CLAW"))
-                return ItemLicense.None; // ToDo
+                return ItemLicense.VitalShock;
+
+            if (Equals("LICENSE_SPYDAGGER"))
+                return ItemLicense.SpyDagger;
+
+            if (Equals("LICENSE_DOUBLE_SWORD"))
+                return ItemLicense.DoubleSword;
 
             if (Equals("LICENSE_SUBMACHINE_GUN"))
                 return ItemLicense.SubmachineGun;
@@ -554,13 +560,13 @@ namespace Netsphere.Server.Game.Services
                 return ItemLicense.SemiRifle;
 
             if (Equals("LICENSE_SMG3"))
-                return ItemLicense.None; // ToDo
+                return ItemLicense.SmashRifle;
 
             if (Equals("license_HAND_GUN"))
-                return ItemLicense.None; // ToDo
+                return ItemLicense.HandGun;
 
             if (Equals("LICENSE_SMG4"))
-                return ItemLicense.None; // ToDo
+                return ItemLicense.BurstShotgun;
 
             if (Equals("LICENSE_HEAVYMACHINE_GUN"))
                 return ItemLicense.HeavymachineGun;
@@ -617,6 +623,15 @@ namespace Netsphere.Server.Game.Services
 
             if (Equals("LICENSE_METALLIC"))
                 return ItemLicense.Metallic;
+
+            if (Equals("LICENSE_HEALTH_MASTERY"))
+                return ItemLicense.HealthMastery;
+
+            if (Equals("LICENSE_SKILL_MASTERY"))
+                return ItemLicense.SkillMastery;
+
+            if (Equals("LICENSE_SPEED_MASTERY"))
+                return ItemLicense.SpeedMastery;
 
             throw new Exception("Invalid license " + license);
         }
