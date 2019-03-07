@@ -258,18 +258,16 @@ namespace Netsphere
         PlasmaSword = 1,
         CounterSword = 2,
         StormBat = 26,
-
-        // AssssinClaw ToDo
+        VitalShock = 29,
+        SpyDagger = 33,
+        DoubleSword = 34, // What weapon is this?
         SubmachineGun = 3,
-
         Revolver = 4,
         SemiRifle = 25,
-
-        // SMG3 - DualGun
-        // HandGun
-        // SMG4 BurstShotGun
+        HandGun = 30,
+        SmashRifle = 31,
+        BurstShotgun = 32,
         HeavymachineGun = 5,
-
         GaussRifle = 27,
         RailGun = 6,
         Cannonade = 7,
@@ -282,7 +280,6 @@ namespace Netsphere
 
         // Skills
         Anchoring = 13,
-
         Flying = 14,
         Invisible = 15,
         Detect = 16,
@@ -290,7 +287,9 @@ namespace Netsphere
         Block = 18,
         Bind = 19,
         Metallic = 20,
-        Berserk = 21
+        HealthMastery = 22,
+        SkillMastery = 23,
+        SpeedMastery = 24
     }
 
     public enum ChannelCategory : byte
