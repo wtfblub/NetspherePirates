@@ -595,4 +595,14 @@ namespace Netsphere
         PEN = 0,
         AP = 1
     }
+
+    public enum EquipLimit : byte
+    {
+        S4League = 0,
+        SuperLeague = 1,
+        RookieLeague = 2,
+        SwordMatch = 3,
+        Arcade = 4,
+        Chaser = 5
+    }
 }

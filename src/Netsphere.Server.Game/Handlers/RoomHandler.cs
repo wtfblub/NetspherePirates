@@ -26,11 +26,13 @@ namespace Netsphere.Server.Game.Handlers
           IHandle<CScoreDefenseAssistReqMessage>, IHandle<CMissionScoreReqMessage>
     {
         private readonly ILogger<RoomHandler> _logger;
+        private readonly EquipValidator _equipValidator;
         private readonly AppOptions _appOptions;
 
-        public RoomHandler(ILogger<RoomHandler> logger, IOptions<AppOptions> appOptions)
+        public RoomHandler(ILogger<RoomHandler> logger, IOptions<AppOptions> appOptions, EquipValidator equipValidator)
         {
             _logger = logger;
+            _equipValidator = equipValidator;
             _appOptions = appOptions.Value;
         }
 
@@ -77,7 +79,7 @@ namespace Netsphere.Server.Game.Handlers
                 IsBalanced = message.Room.IsBalanced,
                 MinLevel = message.Room.MinLevel,
                 MaxLevel = message.Room.MaxLevel,
-                ItemLimit = message.Room.EquipLimit,
+                EquipLimit = message.Room.EquipLimit,
                 IsNoIntrusion = message.Room.IsNoIntrusion,
                 RelayEndPoint = _appOptions.RelayEndPoint
             });
@@ -268,6 +270,12 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
             var room = plr.Room;
 
+            if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
+            {
+                session.Send(new SServerResultInfoAckMessage(ServerResult.WearingUnusableItem));
+                return true;
+            }
+
             if (!room.GameRule.StateMachine.StartGame())
                 session.Send(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
 
@@ -282,6 +290,12 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
             var room = plr.Room;
 
+            if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
+            {
+                session.Send(new SServerResultInfoAckMessage(ServerResult.WearingUnusableItem));
+                return Task.FromResult(true);
+            }
+
             plr.IsReady = !plr.IsReady;
             room.Broadcast(new SReadyRoundAckMessage(plr.Account.Id, plr.IsReady));
             return Task.FromResult(true);
@@ -294,12 +308,15 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
             var room = plr.Room;
 
-            room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id,
-                message.Unk1, message.Value, ""));
-
             // Client is trying to enter the game while its running
             if (room.GameRule.StateMachine.GameState == GameState.Playing && plr.State == PlayerState.Lobby)
             {
+                if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
+                {
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.WearingUnusableItem));
+                    return Task.FromResult(true);
+                }
+
                 for (var i = 0; i < plr.CharacterStartPlayTime.Length; ++i)
                     plr.CharacterStartPlayTime[i] = default;
 
@@ -314,6 +331,9 @@ namespace Netsphere.Server.Game.Handlers
                 room.BroadcastBriefing();
             }
 
+            room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id,
+                message.Unk1, message.Value, ""));
+
             return Task.FromResult(true);
         }
 
@@ -325,8 +345,8 @@ namespace Netsphere.Server.Game.Handlers
             var room = plr.Room;
             var logger = plr.AddContextToLogger(_logger);
 
-            // Can only change items in lobby
-            if (plr.State != PlayerState.Lobby)
+            // Can only change items in lobby and when not ready
+            if (plr.State != PlayerState.Lobby || plr.IsReady)
             {
                 plr.Disconnect();
                 return Task.FromResult(true);
@@ -349,8 +369,10 @@ namespace Netsphere.Server.Game.Handlers
             var room = plr.Room;
             var logger = plr.AddContextToLogger(_logger);
 
-            // Can only change characters in lobby or during half time
-            if (plr.State != PlayerState.Lobby && room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime)
+            // Can only change characters in lobby, during half time or when not ready
+            if (plr.State != PlayerState.Lobby &&
+                room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime ||
+                plr.IsReady)
             {
                 plr.Disconnect();
                 return Task.FromResult(true);

@@ -148,6 +148,7 @@ namespace Netsphere.Server.Game
                         .AddTransient<Touchdown>()
                         .AddTransient<BattleRoyal>()
                         .AddTransient<Practice>()
+                        .AddSingleton<EquipValidator>()
                         .AddCommands(typeof(Program).Assembly)
                         .AddService<IdGeneratorService>()
                         .AddHostedServiceEx<ServerlistService>()
@@ -231,7 +232,7 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
                 .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
                 .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
-                .Member(dest => dest.EquipLimit, src => src.Options.ItemLimit)
+                .Member(dest => dest.EquipLimit, src => src.Options.EquipLimit)
                 .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
                 .Member(dest => dest.ConnectingCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
                 .Member(dest => dest.PlayerCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
@@ -263,7 +264,7 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
                 .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
                 .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
-                .Member(dest => dest.ItemLimit, src => src.Options.ItemLimit)
+                .Member(dest => dest.EquipLimit, src => src.Options.EquipLimit)
                 .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
                 .Member(dest => dest.RelayEndPoint, src => src.Options.RelayEndPoint)
                 .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState)
@@ -282,7 +283,7 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
                 .Member(dest => dest.IsFriendly, src => src.IsFriendly)
                 .Member(dest => dest.IsBalanced, src => src.IsBalanced)
-                .Member(dest => dest.ItemLimit, src => src.ItemLimit)
+                .Member(dest => dest.EquipLimit, src => src.EquipLimit)
                 .Member(dest => dest.IsNoIntrusion, src => src.IsNoIntrusion);
 
             Mapper.Compile(CompilationTypes.Source);

@@ -129,7 +129,7 @@ namespace Netsphere.Server.Game
         public bool IsBalanced { get; set; }
         public byte MinLevel { get; set; }
         public byte MaxLevel { get; set; }
-        public byte ItemLimit { get; set; }
+        public EquipLimit EquipLimit { get; set; }
         public bool IsNoIntrusion { get; set; }
         public IPEndPoint RelayEndPoint { get; set; }
     }

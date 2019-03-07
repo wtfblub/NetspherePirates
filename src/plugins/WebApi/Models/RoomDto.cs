@@ -25,7 +25,7 @@ namespace WebApi.Models
         public bool IsBalanced { get; set; }
         public int MinLevel { get; set; }
         public int MaxLevel { get; set; }
-        public int ItemLimit { get; set; }
+        public EquipLimit EquipLimit { get; set; }
         public bool IsNoIntrusion { get; set; }
 
         public RoomPlayerDto[] Players { get; set; }

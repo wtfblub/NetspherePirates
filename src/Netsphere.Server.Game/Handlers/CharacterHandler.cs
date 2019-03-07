@@ -12,10 +12,12 @@ namespace Netsphere.Server.Game.Handlers
         : IHandle<CCreateCharacterReqMessage>, IHandle<CDeleteCharacterReqMessage>, IHandle<CSelectCharacterReqMessage>
     {
         private readonly ILogger _logger;
+        private readonly EquipValidator _equipValidator;
 
-        public CharacterHandler(ILogger<CharacterHandler> logger)
+        public CharacterHandler(ILogger<CharacterHandler> logger, EquipValidator equipValidator)
         {
             _logger = logger;
+            _equipValidator = equipValidator;
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
@@ -66,6 +68,25 @@ namespace Netsphere.Server.Game.Handlers
             {
                 session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
                 return true;
+            }
+
+            // Cant switch characters when ready
+            if (plr.Room != null && plr.IsReady)
+            {
+                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                return true;
+            }
+
+            // Validate equip
+            if (plr.Room != null && plr.State != PlayerState.Lobby &&
+                plr.Room.GameRule.StateMachine.TimeState == GameTimeState.HalfTime)
+            {
+                var character = plr.CharacterManager[message.Slot];
+                if (character != null && !_equipValidator.IsValid(character))
+                {
+                    session.Send(new SServerResultInfoAckMessage(ServerResult.WearingUnusableItem));
+                    return true;
+                }
             }
 
             if (!plr.CharacterManager.Select(message.Slot))
