@@ -40,11 +40,7 @@ namespace Netsphere.Server.Game.Commands
             {
                 if (_isInShutdown)
                 {
-                    if (plr != null)
-                        plr.SendConsoleMessage("Server is already in shutdown mode");
-                    else
-                        Console.WriteLine("Server is already in shutdown mode");
-
+                    this.Reply(plr, "Server is already in shutdown mode");
                     return true;
                 }
 
@@ -99,11 +95,11 @@ namespace Netsphere.Server.Game.Commands
         )]
         public async Task<bool> ReloadShop(Player plr, string[] args)
         {
-            plr?.SendConsoleMessage("Reloading shop...");
+            this.Reply(plr, "Reloading shop...");
             _playerManager.ForEach(x => x.SendNotice("Reloading shop - Game might lag for a minute"));
             await _gameDataService.LoadShop();
             _playerManager.ForEach(x => x.Session.Send(new SNewShopUpdateRequestAckMessage()));
-            plr?.SendConsoleMessage("Reloaded!");
+            this.Reply(plr, "Reloaded shop!");
             return true;
         }
 
