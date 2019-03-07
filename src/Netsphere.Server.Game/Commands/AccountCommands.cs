@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Netsphere.Common.Cryptography;
 using Netsphere.Database;
@@ -41,12 +40,7 @@ namespace Netsphere.Server.Game.Commands
                 };
                 db.Accounts.Add(accountEntity);
                 await db.SaveChangesAsync();
-
-                var msg = $"Created account with username={username} id={accountEntity.Id}";
-                if (plr != null)
-                    plr.SendConsoleMessage(S4Color.Green + msg);
-                else
-                    Console.WriteLine(msg);
+                this.Reply(plr, $"Created account with username={username} id={accountEntity.Id}");
             }
 
             return true;

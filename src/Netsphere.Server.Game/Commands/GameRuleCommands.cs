@@ -18,7 +18,7 @@ namespace Netsphere.Server.Game.Commands
 
             if (plr.Room == null)
             {
-                plr.SendConsoleMessage(S4Color.Red + "You need to be a in a room");
+                this.ReplyError(plr, "You need to be a in a room");
                 return false;
             }
 
@@ -31,8 +31,7 @@ namespace Netsphere.Server.Game.Commands
             var team = plr.Room.TeamManager[(TeamId)teamId];
             if (team == null)
             {
-                plr.SendConsoleMessage(
-                    S4Color.Red +
+                this.ReplyError(plr,
                     "Invalid team. Valid teams are: " +
                     string.Join(", ", plr.Room.TeamManager.Select(x => (int)x.Key))
                 );
@@ -56,7 +55,7 @@ namespace Netsphere.Server.Game.Commands
 
             if (plr.Room == null)
             {
-                plr.SendConsoleMessage(S4Color.Red + "You need to be a in a room");
+                this.ReplyError(plr, "You need to be a in a room");
                 return false;
             }
 
@@ -68,7 +67,7 @@ namespace Netsphere.Server.Game.Commands
             {
                 case "start":
                     if (stateMachine.GameState != Netsphere.GameState.Waiting)
-                        plr.SendConsoleMessage(S4Color.Red + "This state is currently not possible");
+                        this.ReplyError(plr, "This state is currently not possible");
 
                     if (!stateMachine.StartGame())
                     {
@@ -89,19 +88,19 @@ namespace Netsphere.Server.Game.Commands
 
                 case "halftime":
                     if (!plr.Room.GameRule.StateMachine.StartHalfTime())
-                        plr.SendConsoleMessage(S4Color.Red + "This state is currently not possible");
+                        this.ReplyError(plr, "This state is currently not possible");
 
                     break;
 
                 case "result":
                     if (!plr.Room.GameRule.StateMachine.StartResult())
-                        plr.SendConsoleMessage(S4Color.Red + "This state is currently not possible");
+                        this.ReplyError(plr, "This state is currently not possible");
 
                     break;
 
                 default:
-                    plr.SendConsoleMessage(
-                        S4Color.Red +
+                    this.ReplyError(
+                        plr,
                         "Invalid state. Valid values are: start, halftime, result"
                     );
                     return false;
@@ -119,7 +118,7 @@ namespace Netsphere.Server.Game.Commands
         {
             if (plr.Room == null)
             {
-                plr.SendConsoleMessage(S4Color.Red + "You need to be a in a room");
+                this.ReplyError(plr, "You need to be a in a room");
                 return false;
             }
 
