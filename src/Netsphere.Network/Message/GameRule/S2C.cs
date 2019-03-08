@@ -871,6 +871,15 @@ namespace Netsphere.Network.Message.GameRule
     {
         [BlubMember(0)]
         public float Value { get; set; }
+
+        public SChangeHPAckMessage()
+        {
+        }
+
+        public SChangeHPAckMessage(float value)
+        {
+            Value = value;
+        }
     }
 
     [BlubContract]
@@ -878,6 +887,15 @@ namespace Netsphere.Network.Message.GameRule
     {
         [BlubMember(0)]
         public float Value { get; set; }
+
+        public SChangeMPAckMessage()
+        {
+        }
+
+        public SChangeMPAckMessage(float value)
+        {
+            Value = value;
+        }
     }
 
     [BlubContract]
