@@ -1,5 +1,8 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
+using BlubLib.Collections.Generic;
+using Netsphere.Network.Message.GameRule;
 using Netsphere.Server.Game.Services;
 
 namespace Netsphere.Server.Game.Commands
@@ -123,6 +126,100 @@ namespace Netsphere.Server.Game.Commands
             }
 
             plr.Room.BroadcastBriefing();
+            return true;
+        }
+
+        [Command(
+            CommandUsage.Player,
+            SecurityLevel.Developer,
+            "Usage: changehp <value> [target nickname or id]"
+        )]
+        public async Task<bool> ChangeHP(Player plr, string[] args)
+        {
+            if (args.Length < 1)
+                return false;
+
+            if (plr.Room == null)
+            {
+                this.ReplyError(plr, "You need to be in a room");
+                return true;
+            }
+
+            if (!float.TryParse(args[0], out var value))
+                return false;
+
+            var target = plr;
+            if (args.Length > 1)
+            {
+                if (ulong.TryParse(args[1], out var id))
+                {
+                    target = plr.Room.Players.GetValueOrDefault(id);
+                    if (target == null)
+                    {
+                        this.ReplyError(plr, "Target not found in current room");
+                        return true;
+                    }
+                }
+                else
+                {
+                    target = plr.Room.Players.Values.FirstOrDefault(x =>
+                        x.Account.Nickname.Equals(args[1], StringComparison.OrdinalIgnoreCase));
+                    if (target == null)
+                    {
+                        this.ReplyError(plr, "Target not found in current room");
+                        return true;
+                    }
+                }
+            }
+
+            target.Session.Send(new SChangeHPAckMessage(value));
+            return true;
+        }
+
+        [Command(
+            CommandUsage.Player,
+            SecurityLevel.Developer,
+            "Usage: changesp <value> [target nickname or id]"
+        )]
+        public async Task<bool> ChangeSP(Player plr, string[] args)
+        {
+            if (args.Length < 1)
+                return false;
+
+            if (plr.Room == null)
+            {
+                this.ReplyError(plr, "You need to be in a room");
+                return true;
+            }
+
+            if (!float.TryParse(args[0], out var value))
+                return false;
+
+            var target = plr;
+            if (args.Length > 1)
+            {
+                if (ulong.TryParse(args[1], out var id))
+                {
+                    target = plr.Room.Players.GetValueOrDefault(id);
+                    if (target == null)
+                    {
+                        this.ReplyError(plr, "Target not found in current room");
+                        return true;
+                    }
+                }
+                else
+                {
+                    target = plr.Room.Players.Values.FirstOrDefault(x =>
+                        x.Account.Nickname.Equals(args[1], StringComparison.OrdinalIgnoreCase));
+                    if (target == null)
+                    {
+                        this.ReplyError(plr, "Target not found in current room");
+                        return true;
+                    }
+                }
+            }
+
+            target.Session.Send(new SChangeMPAckMessage(value));
             return true;
         }
     }
