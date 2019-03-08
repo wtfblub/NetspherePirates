@@ -40,14 +40,28 @@ namespace Netsphere.Server.Game
             if (equipLimitInfo == null)
                 return false;
 
-            foreach (var item in character.Weapons.GetItems())
+            var items = character.Weapons.GetItems();
+
+            // Need at least one weapon
+            if (items.All(x => x == null))
+                return false;
+
+            // Check room equip limit
+            foreach (var item in items.Where(x => x != null))
             {
                 var license = item.GetShopItem().License;
                 if (license != ItemLicense.None && !equipLimitInfo.Whitelist.Contains(license))
                     return false;
             }
 
-            foreach (var item in character.Skills.GetItems())
+            items = character.Skills.GetItems();
+
+            // Need a skill
+            if (items.All(x => x == null))
+                return false;
+
+            // Check room equip limit
+            foreach (var item in items.Where(x => x != null))
             {
                 var license = item.GetShopItem().License;
                 if (license != ItemLicense.None && !equipLimitInfo.Whitelist.Contains(license))
