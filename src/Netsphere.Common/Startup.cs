@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq.Expressions;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Netsphere.Common.Configuration;
@@ -42,6 +40,7 @@ namespace Netsphere.Common
             TypeDescriptor.AddAttributes(typeof(DnsEndPoint), new TypeConverterAttribute(typeof(DnsEndPointTypeConverter)));
             TypeDescriptor.AddAttributes(typeof(TimeSpan), new TypeConverterAttribute(typeof(TimeSpanTypeConverter)));
             TypeDescriptor.AddAttributes(typeof(Version), new TypeConverterAttribute(typeof(VersionTypeConverter)));
+            TypeDescriptor.AddAttributes(typeof(ItemNumber), new TypeConverterAttribute(typeof(ItemNumberTypeConverter)));
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
