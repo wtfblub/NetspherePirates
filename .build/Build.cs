@@ -130,6 +130,10 @@ internal class Build : NukeBuild
                 ("src/plugins/SoloMode", "plugins/SoloMode", "netcoreapp2.1", true, new[]
                 {
                     "SoloMode.deps.json", "SoloMode.dll", "SoloMode.pdb", "solomode.hjson"
+                }),
+                ("src/plugins/EquipLimitExtended", "plugins/EquipLimitExtended", "netcoreapp2.1", true, new[]
+                {
+                    "EquipLimitExtended.deps.json", "EquipLimitExtended.dll", "EquipLimitExtended.pdb", "equiplimitextended.hjson"
                 })
             };
 
