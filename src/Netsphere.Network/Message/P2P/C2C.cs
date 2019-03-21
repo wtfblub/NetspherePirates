@@ -584,7 +584,7 @@ namespace Netsphere.Network.Message.P2P
         public Vector3 Position { get; set; }
 
         [BlubMember(3)]
-        public Vector3 Unk4 { get; set; }
+        public Vector3 Velocity { get; set; }
 
         [BlubMember(4)]
         [BlubSerializer(typeof(CompressedFloatSerializer))]
@@ -595,15 +595,15 @@ namespace Netsphere.Network.Message.P2P
         public float Unk6 { get; set; }
 
         [BlubMember(6)]
-        public string Unk7 { get; set; }
+        public string LuaInitFunction { get; set; }
 
         public GrenadeSpawnMessage()
         {
             Id = 0;
             Owner = 0;
             Position = Vector3.Zero;
-            Unk4 = Vector3.Zero;
-            Unk7 = "";
+            Velocity = Vector3.Zero;
+            LuaInitFunction = "StandardMineInit";
         }
     }
 
@@ -627,6 +627,7 @@ namespace Netsphere.Network.Message.P2P
             Id = 0;
             Position = Vector3.Zero;
             Unk2 = Vector3.Zero;
+            Unk3 = 1;
         }
     }
 

@@ -9,7 +9,7 @@ namespace Netsphere.Network.Data.Game
         public uint Id { get; set; }
 
         [BlubMember(1)]
-        public byte Unk { get; set; }
+        public byte Slot { get; set; }
 
         [BlubMember(2)]
         public ushort Progress { get; set; }

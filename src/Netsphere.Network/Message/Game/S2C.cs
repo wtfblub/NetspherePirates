@@ -1100,6 +1100,11 @@ namespace Netsphere.Network.Message.Game
         {
             Tasks = Array.Empty<TaskDto>();
         }
+
+        public STaskInfoAckMessage(TaskDto[] tasks)
+        {
+            Tasks = tasks;
+        }
     }
 
     [BlubContract]
