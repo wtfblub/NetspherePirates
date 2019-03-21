@@ -9,5 +9,6 @@
 
         public bool Encrypt { get; set; }
         public bool Compress { get; set; }
+        public uint RelayFrom { get; set; }
     }
 }

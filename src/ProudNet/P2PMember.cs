@@ -10,6 +10,8 @@ namespace ProudNet
         uint HostId { get; }
 
         void Send(object message);
+
+        void Send(object message, SendOptions options);
     }
 
     internal interface IP2PMemberInternal : IP2PMember
