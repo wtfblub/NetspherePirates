@@ -9,17 +9,17 @@ namespace Netsphere.Network.Data.P2P
         public ItemNumber ItemNumber { get; set; }
 
         [BlubMember(1)]
-        public int Unk2 { get; set; }
+        public int Color { get; set; }
 
         public ItemDto()
         {
             ItemNumber = 0;
         }
 
-        public ItemDto(ItemNumber itemNumber, int unk2)
+        public ItemDto(ItemNumber itemNumber, int color)
         {
             ItemNumber = itemNumber;
-            Unk2 = unk2;
+            Color = color;
         }
 
         public override string ToString()

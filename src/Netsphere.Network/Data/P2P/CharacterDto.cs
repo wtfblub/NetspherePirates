@@ -50,7 +50,7 @@ namespace Netsphere.Network.Data.P2P
         public byte Unk1 { get; set; }
 
         [BlubMember(12)]
-        public string Unk2 { get; set; }
+        public string Country { get; set; }
 
         [BlubMember(13)]
         [BlubSerializer(typeof(CompressedFloatSerializer))]
@@ -77,7 +77,7 @@ namespace Netsphere.Network.Data.P2P
             Skills = Array.Empty<ItemDto>();
             Weapons = Array.Empty<ItemDto>();
             Name = "";
-            Unk2 = "";
+            Country = "";
             Values = Array.Empty<ValueDto>();
         }
     }

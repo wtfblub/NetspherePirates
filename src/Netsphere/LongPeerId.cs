@@ -44,7 +44,7 @@ namespace Netsphere
 
         public override string ToString()
         {
-            return $"AccountId:{AccountId}, {PeerId}";
+            return $"<AccountId:{AccountId}, {PeerId}>";
         }
 
         private ulong GetValue()
@@ -123,7 +123,7 @@ namespace Netsphere
 
         public override string ToString()
         {
-            return $"Id:{Id}, Slot:{Slot}, Unk:{ObjectType}";
+            return $"<Id:{Id}, Slot:{Slot}, Unk:{ObjectType}>";
         }
 
         private ushort GetValue()
