@@ -28,24 +28,32 @@ namespace ProudNet.DotNetty.Codecs
                 var data = buffer.GetIoBuffer().ToArray();
                 ICoreMessage coreMessage = new RmiMessage(data);
 
-                if (message.SendOptions.Compress)
+                if (message.SendOptions.RelayFrom > 0)
                 {
                     data = CoreMessageEncoder.Encode(_serializer, coreMessage);
-                    coreMessage = new CompressedMessage(data.Length, data.CompressZLib());
+                    coreMessage = new UnreliableRelay2Message(message.SendOptions.RelayFrom, data);
                 }
-
-                if (message.SendOptions.Encrypt)
+                else
                 {
-                    data = CoreMessageEncoder.Encode(_serializer, coreMessage);
-                    var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
-                    using (var src = new MemoryStream(data))
-                    using (var dst = new MemoryStream())
+                    if (message.SendOptions.Compress)
                     {
-                        session.Crypt.Encrypt(context.Allocator, EncryptMode.Secure, src, dst, true);
-                        data = dst.ToArray();
+                        data = CoreMessageEncoder.Encode(_serializer, coreMessage);
+                        coreMessage = new CompressedMessage(data.Length, data.CompressZLib());
                     }
 
-                    coreMessage = new EncryptedReliableMessage(data, EncryptMode.Secure);
+                    if (message.SendOptions.Encrypt)
+                    {
+                        data = CoreMessageEncoder.Encode(_serializer, coreMessage);
+                        var session = context.Channel.GetAttribute(ChannelAttributes.Session).Get();
+                        using (var src = new MemoryStream(data))
+                        using (var dst = new MemoryStream())
+                        {
+                            session.Crypt.Encrypt(context.Allocator, EncryptMode.Secure, src, dst, true);
+                            data = dst.ToArray();
+                        }
+
+                        coreMessage = new EncryptedReliableMessage(data, EncryptMode.Secure);
+                    }
                 }
 
                 output.Add(coreMessage);
