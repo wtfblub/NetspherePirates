@@ -359,7 +359,7 @@ namespace Netsphere.Network.Message.P2P
     public class BGEffectMessage : IP2PMessage
     {
         [BlubMember(0)]
-        public int Unk1 { get; set; }
+        public uint GameTime { get; set; }
 
         [BlubMember(1)]
         public byte Unk2 { get; set; }
@@ -367,6 +367,7 @@ namespace Netsphere.Network.Message.P2P
         [BlubMember(2)]
         public Vector3 Position { get; set; }
 
+        // Object of 3 bytes
         [BlubMember(3)]
         public byte Unk3 { get; set; }
 
@@ -377,7 +378,7 @@ namespace Netsphere.Network.Message.P2P
         public byte Unk5 { get; set; }
 
         [BlubMember(6)]
-        public short Unk6 { get; set; }
+        public PeerId Owner { get; set; }
 
         [BlubMember(7)]
         public byte Unk7 { get; set; }

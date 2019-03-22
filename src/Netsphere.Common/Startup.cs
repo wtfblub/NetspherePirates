@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Netsphere.Common.Configuration;
@@ -72,6 +73,8 @@ namespace Netsphere.Common
             Log.Logger = new LoggerConfiguration()
                 .Destructure.ByTransforming<IPEndPoint>(endPoint => endPoint.ToString())
                 .Destructure.ByTransforming<EndPoint>(endPoint => endPoint.ToString())
+                .Destructure.ByTransforming<Vector3>(x => x.ToString())
+                .Destructure.ByTransforming<Vector2>(x => x.ToString())
                 .WriteTo.File(
                     new JsonFormatter(),
                     jsonlog,
