@@ -9,6 +9,7 @@ namespace Netsphere.Server.Relay
     {
         public Session Session { get; private set; }
         public Account Account { get; private set; }
+        public Room Room { get; internal set; }
 
         public event EventHandler<PlayerEventArgs> Disconnected;
 

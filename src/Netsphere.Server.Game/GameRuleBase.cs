@@ -56,7 +56,7 @@ namespace Netsphere.Server.Game
             Room.PlayerLeft -= OnPlayerLeft;
         }
 
-        internal BriefingPlayer[] CreateBriefingPlayers()
+        protected internal virtual BriefingPlayer[] CreateBriefingPlayers()
         {
             return Room.Players.Values.Select(CreateBriefingPlayer).ToArray();
         }

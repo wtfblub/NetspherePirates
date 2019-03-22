@@ -38,7 +38,7 @@ namespace Netsphere.Server.Relay
             }
 
             Group.Join(plr.Session.HostId);
-
+            plr.Room = this;
             plr.Disconnected += Player_OnDisconnected;
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,6 +17,19 @@ namespace Netsphere.Server.Relay
         public int Count => _rooms.Count;
         public Room this[uint id] => _rooms.GetValueOrDefault(id);
 
+        public static event EventHandler<RoomEventArgs> RoomCreated;
+        public static event EventHandler<RoomEventArgs> RoomRemoved;
+
+        private static void OnRoomCreated(RoomManager roomManager, Room room)
+        {
+            RoomCreated?.Invoke(roomManager, new RoomEventArgs(room));
+        }
+
+        private static void OnRoomRemoved(RoomManager roomManager, Room room)
+        {
+            RoomRemoved?.Invoke(roomManager, new RoomEventArgs(room));
+        }
+
         public RoomManager(ILogger<RoomManager> logger, P2PGroupManager groupManager)
         {
             _logger = logger;
@@ -32,6 +46,7 @@ namespace Netsphere.Server.Relay
                 var group = _groupManager.Create(true);
                 room = new Room(this, id, group);
                 _rooms[id] = room;
+                OnRoomCreated(this, room);
             }
 
             return room;
@@ -41,7 +56,13 @@ namespace Netsphere.Server.Relay
         {
             _logger.Information("Removing p2pgroup for room={RoomId}...", room.Id);
             _groupManager.Remove(room.Group);
-            return _rooms.Remove(room.Id);
+            if (_rooms.Remove(room.Id))
+            {
+                OnRoomRemoved(this, room);
+                return true;
+            }
+
+            return false;
         }
 
         public IEnumerator<Room> GetEnumerator()

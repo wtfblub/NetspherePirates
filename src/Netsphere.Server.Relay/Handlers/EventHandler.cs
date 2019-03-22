@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using BlubLib;
 using BlubLib.IO;
 using BlubLib.Serialization;
+using Logging;
 using Netsphere.Network;
 using Netsphere.Network.Message.Event;
 using Netsphere.Network.Message.P2P;
@@ -12,10 +13,12 @@ namespace Netsphere.Server.Relay.Handlers
 {
     internal class EventHandler : IHandle<PacketMessage>
     {
+        private readonly ILogger<EventHandler> _logger;
         private readonly BlubSerializer _serializer;
 
-        public EventHandler(BlubSerializer serializer)
+        public EventHandler(ILogger<EventHandler> logger, BlubSerializer serializer)
         {
+            _logger = logger;
             _serializer = serializer;
         }
 
@@ -41,7 +44,7 @@ namespace Netsphere.Server.Relay.Handlers
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
+                        _logger.Error(ex, "Failed to deserialize P2PMessage");
                         break;
                     }
                 }
