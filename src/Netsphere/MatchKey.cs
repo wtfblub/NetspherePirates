@@ -6,7 +6,7 @@ namespace Netsphere
     {
         private readonly byte[] _key;
 
-        public uint Key { get; }
+        public uint Key => BitConverter.ToUInt32(_key, 0);
         public byte GameType => (byte)(_key[0] & 1);
         public byte PublicType => (byte)((_key[0] >> 1) & 1);
         public byte JoinAuth => (byte)((_key[0] >> 2) & 1);
@@ -18,7 +18,12 @@ namespace Netsphere
             set => _key[3] = (byte)(value ? 1 : 0);
         }
 
-        public GameRule GameRule => (GameRule)(byte)(_key[0] >> 4);
+        public GameRule GameRule
+        {
+            get => (GameRule)(byte)(_key[0] >> 4);
+            set => _key[0] = (byte)(_key[0] & 0x0F | (byte)value << 4);
+        }
+
         public byte Map
         {
             get => _key[1];
@@ -89,8 +94,7 @@ namespace Netsphere
 
         public MatchKey(uint key)
         {
-            Key = key;
-            _key = BitConverter.GetBytes(Key);
+            _key = BitConverter.GetBytes(key);
         }
 
         public override bool Equals(object obj)
