@@ -307,6 +307,9 @@ namespace ProudNet.Hosting.Services
                                 if (stateFromTarget == null)
                                     continue;
 
+                                if (!stateToTarget.IsJoined || !stateFromTarget.IsJoined)
+                                    continue;
+
                                 if (!(stateToTarget.RemotePeer is ProudSession targetSession) || !targetSession.UdpEnabled ||
                                     !session.UdpEnabled)
                                     continue;
