@@ -199,6 +199,8 @@ namespace Netsphere.Server.Game
                     room.Broadcast(new SChangeStateAckMessage(GameState.Playing));
                     if (_gameRule.HasHalfTime)
                         room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
+                    else
+                        room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.None));
 
                     var delay = _hasHalfTime
                         ? TimeSpan.FromSeconds(room.Options.TimeLimit.TotalSeconds / 2)
