@@ -176,6 +176,7 @@ namespace Netsphere
 
     public enum GameTimeState : uint
     {
+        None = 0,
         FirstHalf = 1,
         HalfTime = 2,
         SecondHalf = 3
