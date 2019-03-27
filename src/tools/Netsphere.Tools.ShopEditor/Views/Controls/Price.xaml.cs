@@ -1,4 +1,5 @@
-﻿using Netsphere.Tools.ShopEditor.Models;
+﻿using System;
+using Netsphere.Tools.ShopEditor.Models;
 using Netsphere.Tools.ShopEditor.ViewModels.Controls;
 
 namespace Netsphere.Tools.ShopEditor.Views.Controls
@@ -6,16 +7,15 @@ namespace Netsphere.Tools.ShopEditor.Views.Controls
     public sealed class Price : View<PriceViewModel>
     {
         public Price()
-            : base(null, true)
         {
+            InitializeComponent();
         }
 
-        protected override PriceViewModel GetViewModelFromDataContext(object dataContext)
+        protected override void OnDataContextChanged(EventArgs e)
         {
-            if (dataContext is ShopPrice price)
-                return new PriceViewModel(price);
-
-            return null;
+            base.OnDataContextChanged(e);
+            if (DataContext is ShopPrice price)
+                DataContext = ViewModel = new PriceViewModel(price);
         }
     }
 }

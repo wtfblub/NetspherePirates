@@ -19,7 +19,7 @@ using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels
 {
-    public class ConnectViewModel : ReactiveObject
+    public class ConnectViewModel : ViewModel
     {
         public ReactiveCommand Connect { get; }
         public ReactiveCommand Exit { get; }

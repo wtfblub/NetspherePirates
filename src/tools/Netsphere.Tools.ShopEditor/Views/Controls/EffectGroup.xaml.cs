@@ -1,4 +1,5 @@
-﻿using Netsphere.Tools.ShopEditor.Models;
+﻿using System;
+using Netsphere.Tools.ShopEditor.Models;
 using Netsphere.Tools.ShopEditor.ViewModels.Controls;
 
 namespace Netsphere.Tools.ShopEditor.Views.Controls
@@ -6,16 +7,15 @@ namespace Netsphere.Tools.ShopEditor.Views.Controls
     public sealed class EffectGroup : View<EffectGroupViewModel>
     {
         public EffectGroup()
-            : base(null, true)
         {
+            InitializeComponent();
         }
 
-        protected override EffectGroupViewModel GetViewModelFromDataContext(object dataContext)
+        protected override void OnDataContextChanged(EventArgs e)
         {
-            if (dataContext is ShopEffectGroup effectGroup)
-                return new EffectGroupViewModel(effectGroup);
-
-            return null;
+            base.OnDataContextChanged(e);
+            if (DataContext is ShopEffectGroup effectGroup)
+                DataContext = ViewModel = new EffectGroupViewModel(effectGroup);
         }
     }
 }

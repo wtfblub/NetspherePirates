@@ -9,7 +9,7 @@ using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class EffectViewModel : ReactiveObject
+    public class EffectViewModel : ViewModel
     {
         public ShopEffect Effect { get; }
         public ReactiveCommand Change { get; }
@@ -21,6 +21,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
             Change = ReactiveCommand.CreateFromTask(ChangeImpl);
             Delete = ReactiveCommand.CreateFromTask(DeleteImpl);
             Effect.WhenAnyValue(x => x.Effect.Value)
+                .Where(x => IsInitialized.Value)
                 .Throttle(TimeSpan.FromSeconds(2))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateImpl());

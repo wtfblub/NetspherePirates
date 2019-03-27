@@ -6,7 +6,7 @@ using ReactiveUI;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels
 {
-    public class MainViewModel : ReactiveObject
+    public class MainViewModel : ViewModel
     {
         public TabItem[] TabPages { get; }
         public ReactiveProperty<int> CurrentIndex { get; }

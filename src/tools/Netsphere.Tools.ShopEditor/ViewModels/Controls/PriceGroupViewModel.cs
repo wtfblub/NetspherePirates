@@ -8,7 +8,7 @@ using ReactiveUI;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class PriceGroupViewModel : ReactiveObject
+    public class PriceGroupViewModel : ViewModel
     {
         public ShopPriceGroup PriceGroup { get; }
         public ReactiveCommand AddPrice { get; }
@@ -20,6 +20,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
             AddPrice = ReactiveCommand.CreateFromTask(AddPriceImpl);
             Delete = ReactiveCommand.CreateFromTask(DeleteImpl);
             PriceGroup.WhenAnyValue(x => x.Name.Value, x => x.PriceType.Value)
+                .Where(x => IsInitialized.Value)
                 .Throttle(TimeSpan.FromSeconds(2))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateImpl());

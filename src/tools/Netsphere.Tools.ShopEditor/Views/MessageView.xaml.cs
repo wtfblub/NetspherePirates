@@ -14,9 +14,8 @@ namespace Netsphere.Tools.ShopEditor.Views
         private Button Confirm => this.Get<Button>(nameof(Confirm));
 
         public MessageView(string title, string message, Exception ex)
-            : base(new MessageViewModel(title, message, ex))
         {
-            AvaloniaXamlLoader.Load(this);
+            DataContext = ViewModel = new MessageViewModel(title, message, ex);
             this.WhenActivated(_ =>
             {
                 _(this.OneWayBind(ViewModel, x => x.Title, x => x.Title));
@@ -40,6 +39,7 @@ namespace Netsphere.Tools.ShopEditor.Views
                     .BindTo(this, x => x.Exception.Text));
             });
 
+            InitializeComponent();
             Confirm.Click += (_, __) => Close();
         }
     }
