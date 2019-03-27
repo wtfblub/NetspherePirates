@@ -1,5 +1,4 @@
-﻿using Avalonia.Markup.Xaml;
-using Netsphere.Tools.ShopEditor.ViewModels;
+﻿using Netsphere.Tools.ShopEditor.ViewModels;
 
 namespace Netsphere.Tools.ShopEditor.Views
 {
@@ -7,7 +6,8 @@ namespace Netsphere.Tools.ShopEditor.Views
     {
         public PricesView()
         {
-            AvaloniaXamlLoader.Load(this);
+            DataContext = ViewModel = new PricesViewModel();
+            InitializeComponent();
         }
     }
 }

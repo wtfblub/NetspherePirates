@@ -13,20 +13,18 @@ namespace Netsphere.Tools.ShopEditor.Views
         private bool _fixedStartPosition;
 
         protected BaseWindow()
-            : this(Activator.CreateInstance<TViewModel>())
         {
+            FontFamily = new FontFamily(System.Drawing.SystemFonts.DefaultFont.FontFamily.Name);
+            Initialized += OnInitialized;
+            PositionChanged += OnPositionChanged;
         }
 
-        protected BaseWindow(TViewModel vm)
+        protected void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
 #if DEBUG
             this.AttachDevTools();
 #endif
-            DataContext = ViewModel = vm;
-            FontFamily = new FontFamily(System.Drawing.SystemFonts.DefaultFont.FontFamily.Name);
-            Initialized += OnInitialized;
-            PositionChanged += OnPositionChanged;
         }
 
         private void OnInitialized(object sender, EventArgs e)

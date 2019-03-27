@@ -10,8 +10,12 @@ namespace Netsphere.Tools.ShopEditor.Views
     {
         protected View()
         {
-            AvaloniaXamlLoader.Load(this);
             Initialized += OnInitialized;
+        }
+
+        protected void InitializeComponent()
+        {
+            AvaloniaXamlLoader.Load(this);
         }
 
         private void OnInitialized(object sender, EventArgs e)
