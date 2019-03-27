@@ -1,8 +1,6 @@
-﻿using ReactiveUI;
-
-namespace Netsphere.Tools.ShopEditor.ViewModels
+﻿namespace Netsphere.Tools.ShopEditor.ViewModels
 {
-    public abstract class TabViewModel : ReactiveObject
+    public abstract class TabViewModel : ViewModel
     {
         public abstract string Header { get; }
     }

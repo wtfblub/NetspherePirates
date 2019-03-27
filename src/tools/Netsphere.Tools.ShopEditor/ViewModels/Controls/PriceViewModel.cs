@@ -9,7 +9,7 @@ using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class PriceViewModel : ReactiveObject
+    public class PriceViewModel : ViewModel
     {
         public ShopPrice Price { get; }
         public ReactiveCommand Delete { get; }
@@ -20,6 +20,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
             Delete = ReactiveCommand.CreateFromTask(DeleteImpl);
             Price.WhenAnyValue(_ => _.PeriodType.Value, _ => _.Period.Value, _ => _.Price.Value,
                     _ => _.IsRefundable.Value, _ => _.Durability.Value, _ => _.IsEnabled.Value)
+                .Where(x => IsInitialized.Value)
                 .Throttle(TimeSpan.FromSeconds(2))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateImpl());
