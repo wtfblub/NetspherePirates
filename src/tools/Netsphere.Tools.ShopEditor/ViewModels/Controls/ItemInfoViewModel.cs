@@ -9,7 +9,7 @@ using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class ItemInfoViewModel : ReactiveObject
+    public class ItemInfoViewModel : ViewModel
     {
         public ShopService ShopService => ShopService.Instance;
         public ShopItemInfo ItemInfo { get; }
@@ -24,6 +24,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
                     x => x.EffectGroup.Value,
                     x => x.DiscountPercentage.Value,
                     x => x.IsEnabled.Value)
+                .Where(x => IsInitialized.Value)
                 .Throttle(TimeSpan.FromSeconds(2))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateImpl());

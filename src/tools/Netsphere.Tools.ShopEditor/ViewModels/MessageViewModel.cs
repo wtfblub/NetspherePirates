@@ -3,7 +3,7 @@ using ReactiveUI;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels
 {
-    public class MessageViewModel : ReactiveObject
+    public class MessageViewModel : ViewModel
     {
         private string _title;
         private string _message;

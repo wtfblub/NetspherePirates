@@ -8,7 +8,7 @@ using ReactiveUI;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 {
-    public class ItemViewModel : ReactiveObject
+    public class ItemViewModel : ViewModel
     {
         public ShopItem Item { get; }
         public ReactiveCommand AddItemInfo { get; }
@@ -32,6 +32,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
                     x => x.IsOneTimeUse.Value,
                     x => x.IsDestroyable.Value,
                     (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) => default(object))
+                .Where(x => IsInitialized.Value)
                 .Throttle(TimeSpan.FromSeconds(2))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => UpdateImpl());

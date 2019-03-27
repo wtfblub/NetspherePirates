@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
-using BlubLib;
 using Netsphere.Tools.ShopEditor.Services;
 using Reactive.Bindings;
 using ReactiveUI;
@@ -10,7 +9,7 @@ using ReactiveCommand = ReactiveUI.ReactiveCommand;
 
 namespace Netsphere.Tools.ShopEditor.ViewModels
 {
-    public class SelectEffectViewModel : ReactiveObject
+    public class SelectEffectViewModel : ViewModel
     {
         public ReactiveCommand Select { get; }
         public ReactiveCommand Cancel { get; }

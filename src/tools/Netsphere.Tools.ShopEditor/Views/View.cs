@@ -5,12 +5,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
+using Netsphere.Tools.ShopEditor.ViewModels;
 using ReactiveUI;
 
 namespace Netsphere.Tools.ShopEditor.Views
 {
     public abstract class View<TViewModel> : UserControl, IViewFor<TViewModel>, ICanActivate
-        where TViewModel : class
+        where TViewModel : ViewModel
     {
         public static readonly StyledProperty<TViewModel> ViewModelProperty =
             AvaloniaProperty.Register<View<TViewModel>, TViewModel>(nameof(ViewModel));
@@ -54,6 +55,7 @@ namespace Netsphere.Tools.ShopEditor.Views
                 x => AttachedToLogicalTree -= x).Select(_ => Unit.Default);
             _deactivated = Observable.FromEventPattern<LogicalTreeAttachmentEventArgs>(x => DetachedFromLogicalTree += x,
                 x => DetachedFromLogicalTree -= x).Select(_ => Unit.Default);
+            Initialized += OnInitialized;
         }
 
         protected override void OnDataContextChanged(EventArgs e)
@@ -72,6 +74,12 @@ namespace Netsphere.Tools.ShopEditor.Views
         protected virtual TViewModel GetViewModelFromDataContext(object dataContext)
         {
             return dataContext as TViewModel;
+        }
+
+        private void OnInitialized(object sender, EventArgs e)
+        {
+            if (ViewModel != null)
+                ViewModel.IsInitialized.Value = true;
         }
     }
 }
