@@ -1,36 +1,16 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
-using ReactiveUI;
+using Netsphere.Tools.ShopEditor.ViewModels;
 
 namespace Netsphere.Tools.ShopEditor.Views
 {
-    public abstract class BaseWindow<TViewModel> : Window, IViewFor<TViewModel>, ICanActivate
-        where TViewModel : class
+    public abstract class BaseWindow<TViewModel> : ReactiveWindow<TViewModel>
+        where TViewModel : ViewModel
     {
-        private readonly IObservable<Unit> _activated;
-        private readonly IObservable<Unit> _deactivated;
-        private TViewModel _viewModel;
         private bool _fixedStartPosition;
-
-        public TViewModel ViewModel
-        {
-            get => _viewModel;
-            set => DataContext = _viewModel = value;
-        }
-
-        object IViewFor.ViewModel
-        {
-            get => ViewModel;
-            set => ViewModel = (TViewModel)value;
-        }
-
-        IObservable<Unit> ICanActivate.Activated => _activated;
-        IObservable<Unit> ICanActivate.Deactivated => _deactivated;
 
         protected BaseWindow()
             : this(Activator.CreateInstance<TViewModel>())
@@ -43,11 +23,16 @@ namespace Netsphere.Tools.ShopEditor.Views
 #if DEBUG
             this.AttachDevTools();
 #endif
-            ViewModel = vm;
+            DataContext = ViewModel = vm;
             FontFamily = new FontFamily(System.Drawing.SystemFonts.DefaultFont.FontFamily.Name);
-            _activated = Observable.FromEventPattern(x => Activated += x, x => Activated -= x).Select(_ => Unit.Default);
-            _deactivated = Observable.FromEventPattern(x => Deactivated += x, x => Deactivated -= x).Select(_ => Unit.Default);
+            Initialized += OnInitialized;
             PositionChanged += OnPositionChanged;
+        }
+
+        private void OnInitialized(object sender, EventArgs e)
+        {
+            if (ViewModel != null)
+                ViewModel.IsInitialized.Value = true;
         }
 
         private void OnPositionChanged(object sender, PointEventArgs e)
