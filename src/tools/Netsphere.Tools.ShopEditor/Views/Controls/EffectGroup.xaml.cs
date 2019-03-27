@@ -6,6 +6,11 @@ namespace Netsphere.Tools.ShopEditor.Views.Controls
 {
     public sealed class EffectGroup : View<EffectGroupViewModel>
     {
+        public EffectGroup()
+        {
+            InitializeComponent();
+        }
+
         protected override void OnDataContextChanged(EventArgs e)
         {
             base.OnDataContextChanged(e);

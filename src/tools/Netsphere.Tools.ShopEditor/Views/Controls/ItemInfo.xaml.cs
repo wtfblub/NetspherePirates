@@ -6,6 +6,11 @@ namespace Netsphere.Tools.ShopEditor.Views.Controls
 {
     public sealed class ItemInfo : View<ItemInfoViewModel>
     {
+        public ItemInfo()
+        {
+            InitializeComponent();
+        }
+
         protected override void OnDataContextChanged(EventArgs e)
         {
             base.OnDataContextChanged(e);

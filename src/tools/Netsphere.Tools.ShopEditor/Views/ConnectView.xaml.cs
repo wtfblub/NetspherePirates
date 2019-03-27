@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Markup.Xaml;
 using Netsphere.Tools.ShopEditor.ViewModels;
 using ReactiveUI;
 
@@ -15,6 +16,7 @@ namespace Netsphere.Tools.ShopEditor.Views
 
         public ConnectView()
         {
+            DataContext = ViewModel = new ConnectViewModel();
             this.WhenActivated(_ =>
             {
                 _(this.BindCommand(ViewModel, x => x.Connect, x => x.Connect));
@@ -26,6 +28,8 @@ namespace Netsphere.Tools.ShopEditor.Views
                     .Select(x => Unit.Default)
                     .InvokeCommand(ViewModel, x => x.SelectResourceFile));
             });
+
+            InitializeComponent();
         }
     }
 }

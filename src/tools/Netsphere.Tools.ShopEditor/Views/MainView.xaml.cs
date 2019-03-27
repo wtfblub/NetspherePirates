@@ -8,7 +8,9 @@ namespace Netsphere.Tools.ShopEditor.Views
     {
         public MainView()
         {
+            DataContext = ViewModel = new MainViewModel();
             this.WhenActivated(_ => Application.Current.MainWindow = this);
+            InitializeComponent();
         }
     }
 }
