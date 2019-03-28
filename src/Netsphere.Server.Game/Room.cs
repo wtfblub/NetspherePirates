@@ -343,14 +343,12 @@ namespace Netsphere.Server.Game
 
         public void BroadcastBriefing()
         {
-            var briefing = new Briefing
-            {
-                Teams = GameRule.CreateBriefingTeams(),
-                Players = GameRule.CreateBriefingPlayers(),
-                Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray()
-            };
+            var briefing = GameRule.CreateBriefing();
+            briefing.Teams = GameRule.CreateBriefingTeams();
+            briefing.Players = GameRule.CreateBriefingPlayers();
+            briefing.Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray();
 
-            Broadcast(new SBriefingAckMessage(false, false, briefing.Serialize()));
+            Broadcast(new SBriefingAckMessage(false, false, briefing.GetData()));
         }
 
         private Player GetPlayerWithLowestPing(IEnumerable<Player> players = null)

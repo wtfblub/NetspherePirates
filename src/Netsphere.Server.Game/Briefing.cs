@@ -3,35 +3,39 @@ using BlubLib.IO;
 
 namespace Netsphere.Server.Game
 {
-    internal class Briefing
+    public class Briefing
     {
         public TeamId WinnerTeam { get; set; }
         public BriefingTeam[] Teams { get; set; }
         public BriefingPlayer[] Players { get; set; }
         public ulong[] Spectators { get; set; }
 
-        public byte[] Serialize()
+        public byte[] GetData()
         {
             using (var w = new MemoryStream().ToBinaryWriter(false))
             {
-                w.Write((int)WinnerTeam);
-                w.Write(Teams.Length);
-                w.Write(Players.Length);
-                w.Write(Spectators.Length);
-
-                foreach (var team in Teams)
-                    team.Serialize(w);
-
-                foreach (var plr in Players)
-                    plr.Serialize(w);
-
-                foreach (var spectator in Spectators)
-                {
-                    w.Write(spectator);
-                    w.Write((long)0);
-                }
-
+                Serialize(w);
                 return w.ToArray();
+            }
+        }
+
+        protected virtual void Serialize(BinaryWriter w)
+        {
+            w.Write((int)WinnerTeam);
+            w.Write(Teams.Length);
+            w.Write(Players.Length);
+            w.Write(Spectators.Length);
+
+            foreach (var team in Teams)
+                team.Serialize(w);
+
+            foreach (var plr in Players)
+                plr.Serialize(w);
+
+            foreach (var spectator in Spectators)
+            {
+                w.Write(spectator);
+                w.Write((long)0);
             }
         }
     }

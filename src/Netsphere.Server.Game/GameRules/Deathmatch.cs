@@ -58,17 +58,6 @@ namespace Netsphere.Server.Game.GameRules
             return new DeathmatchPlayerScore(_options);
         }
 
-        protected internal override BriefingTeam[] CreateBriefingTeams()
-        {
-            return GetTeams().ToArray();
-
-            IEnumerable<BriefingTeam> GetTeams()
-            {
-                foreach (var team in TeamManager.Values)
-                    yield return new BriefingTeam(team.Id, team.Score);
-            }
-        }
-
         protected override BriefingPlayer CreateBriefingPlayer(Player plr)
         {
             return new BriefingPlayerDeathmatch(plr);
