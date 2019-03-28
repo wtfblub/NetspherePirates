@@ -119,15 +119,13 @@ namespace Netsphere.Server.Game
                 }
             }
 
-            var briefing = new Briefing
-            {
-                WinnerTeam = GetWinnerTeam().Id,
-                Teams = teams,
-                Players = players,
-                Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray()
-            };
+            var briefing = CreateBriefing();
+            briefing.WinnerTeam = GetWinnerTeam().Id;
+            briefing.Teams = teams;
+            briefing.Players = players;
+            briefing.Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray();
 
-            Room.Broadcast(new SBriefingAckMessage(true, false, briefing.Serialize()));
+            Room.Broadcast(new SBriefingAckMessage(true, false, briefing.GetData()));
         }
 
         protected internal virtual Team GetWinnerTeam()
@@ -156,9 +154,28 @@ namespace Netsphere.Server.Game
 
         protected abstract bool HasEnoughPlayers();
 
+        protected internal virtual Briefing CreateBriefing()
+        {
+            return new Briefing();
+        }
+
         protected abstract PlayerScore CreateScore(Player plr);
 
-        protected internal abstract BriefingTeam[] CreateBriefingTeams();
+        protected internal virtual BriefingTeam[] CreateBriefingTeams()
+        {
+            return GetTeams().ToArray();
+
+            IEnumerable<BriefingTeam> GetTeams()
+            {
+                foreach (var team in TeamManager.Values)
+                    yield return CreateBriefingTeam(team);
+            }
+        }
+
+        protected internal virtual BriefingTeam CreateBriefingTeam(Team team)
+        {
+            return new BriefingTeam(team.Id, team.Score);
+        }
 
         protected abstract BriefingPlayer CreateBriefingPlayer(Player plr);
 
