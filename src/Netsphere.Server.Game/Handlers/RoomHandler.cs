@@ -193,14 +193,17 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeInRoom))]
-        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
         public async Task<bool> OnHandle(MessageContext context, CPlayerGameModeChangeReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
             var room = plr.Room;
 
-            // gm mode should also be spectator
+            // Can only change between modes in lobby
+            if (plr.State != PlayerState.Lobby)
+                return true;
+
+            // gm mode should always be spectator
             if (plr.IsInGMMode)
                 return true;
 
