@@ -258,7 +258,7 @@ namespace ProudNet.Hosting.Services
                     if (!udpSocketManager.IsRunning || server.IsShuttingDown || !server.IsRunning)
                         return;
 
-                    log.Debug("RetryUdpOrHolepunchIfRequired");
+                    log.Verbose("RetryUdpOrHolepunchIfRequired");
                     foreach (var group in groupManager.Values)
                     {
                         var now = DateTimeOffset.Now;

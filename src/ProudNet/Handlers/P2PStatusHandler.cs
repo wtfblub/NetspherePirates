@@ -7,7 +7,7 @@ namespace ProudNet.Handlers
 {
     internal class P2PStatusHandler
         : IHandle<P2P_NotifyDirectP2PDisconnectedMessage>,
-          IHandle<NotifyUdpToTcpFallbackByClientMessage>
+          IHandle<NotifyUdpToTcpFallbackByClientMessage>, IHandle<ReportC2CUdpMessageCountMessage>
     {
         private readonly IInternalSessionManager<uint> _udpSessionManager;
 
@@ -48,6 +48,11 @@ namespace ProudNet.Handlers
             session.Logger.Debug("Fallback to tcp relay by client");
             session.UdpEnabled = false;
             _udpSessionManager.RemoveSession(session.UdpSessionId);
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> OnHandle(MessageContext context, ReportC2CUdpMessageCountMessage message)
+        {
             return Task.FromResult(true);
         }
     }
