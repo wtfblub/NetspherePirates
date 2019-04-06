@@ -92,6 +92,7 @@
     {
         ClubCreateReq = 4001,
         ClubCloseReq = 4002,
+        ClubJoinReq = 4003,
         ClubUnjoinReq = 4004,
         ClubNameCheckReq = 4005,
         ClubRestoreReq = 4006,
@@ -106,6 +107,7 @@
         ClubAdminJoinConditionModifyReq = 4015,
         ClubAdminBoardModifyReq = 4016,
         ClubSearchReq = 4017,
+        ClubInfoReq = 4018,
         ClubJoinWaiterInfoReq = 4019,
         ClubNewJoinMemberInfoReq = 4020,
         ClubJoinConditionInfoReq = 4021,
@@ -136,6 +138,7 @@
 
         ClubCreateAck = 5001,
         ClubCloseAck = 5002,
+        ClubJoinAck = 5003,
         ClubUnjoinAck = 5004,
         ClubNameCheckAck = 5005,
         ClubRestoreAck = 5006,
@@ -150,6 +153,7 @@
         ClubAdminJoinConditionModifyAck = 5015,
         ClubAdminBoardModifyAck = 5016,
         ClubSearchAck = 5017,
+        ClubInfoAck = 5018,
         ClubJoinWaiterInfoAck = 5019,
         ClubNewJoinMemberInfoAck = 5020,
         ClubJoinConditionInfoAck = 5021,
