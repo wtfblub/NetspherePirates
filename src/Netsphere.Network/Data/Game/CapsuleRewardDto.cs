@@ -24,9 +24,12 @@ namespace Netsphere.Network.Data.Game
         public uint Period { get; set; }
 
         [BlubMember(6)]
-        public byte Unk { get; set; }
+        public byte Unk1 { get; set; }
 
         [BlubMember(7)]
         public uint Effect { get; set; }
+
+        [BlubMember(8)]
+        public byte Unk2 { get; set; }
     }
 }

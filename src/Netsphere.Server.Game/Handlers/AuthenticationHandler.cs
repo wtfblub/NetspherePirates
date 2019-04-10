@@ -24,9 +24,9 @@ using Constants = Netsphere.Common.Constants;
 namespace Netsphere.Server.Game.Handlers
 {
     internal class AuthenticationHandler
-        : IHandle<CLoginReqMessage>,
+        : IHandle<LoginRequestReqMessage>,
           IHandle<CCheckNickReqMessage>,
-          IHandle<CCreateNickReqMessage>
+          IHandle<NickCheckReqMessage>
     {
         private readonly ILogger _logger;
         private readonly NetworkOptions _networkOptions;
@@ -58,7 +58,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeLoggedIn), Invert = true)]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CLoginReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, LoginRequestReqMessage message)
         {
             var session = context.GetSession<Session>();
             var logger = _logger.ForContext(
@@ -207,7 +207,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustNotHaveANickname))]
-        public async Task<bool> OnHandle(MessageContext context, CCreateNickReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, NickCheckReqMessage message)
         {
             var session = (Session)context.Session;
             var logger = _logger.ForContext(

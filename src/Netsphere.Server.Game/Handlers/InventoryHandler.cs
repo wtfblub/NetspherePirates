@@ -7,8 +7,8 @@ using ProudNet;
 namespace Netsphere.Server.Game.Handlers
 {
     internal class InventoryHandler
-        : IHandle<CUseItemReqMessage>, IHandle<CRepairItemReqMessage>, IHandle<CRefundItemReqMessage>,
-          IHandle<CDiscardItemReqMessage>
+        : IHandle<ItemUseItemReqMessage>, IHandle<ItemRepairItemReqMessage>, IHandle<ItemRefundItemReqMessage>,
+          IHandle<ItemDiscardItemReqMessage>
     {
         private readonly ILogger _logger;
 
@@ -18,7 +18,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CUseItemReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ItemUseItemReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -46,7 +46,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CRepairItemReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ItemRepairItemReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -101,7 +101,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CRefundItemReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ItemRefundItemReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -140,7 +140,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CDiscardItemReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ItemDiscardItemReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;

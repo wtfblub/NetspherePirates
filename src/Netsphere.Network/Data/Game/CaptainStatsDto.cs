@@ -3,7 +3,7 @@
 namespace Netsphere.Network.Data.Game
 {
     [BlubContract]
-    public class CPTStatsDto
+    public class CaptainStatsDto
     {
         [BlubMember(0)]
         public uint Won { get; set; }

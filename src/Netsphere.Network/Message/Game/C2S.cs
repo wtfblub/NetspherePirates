@@ -1,12 +1,13 @@
 ﻿using System;
 using BlubLib.Serialization;
+using BlubLib.Serialization.Serializers;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Serializers;
 
 namespace Netsphere.Network.Message.Game
 {
     [BlubContract]
-    public class CCreateCharacterReqMessage : IGameMessage
+    public class CharacterCreateReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
@@ -16,21 +17,21 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CSelectCharacterReqMessage : IGameMessage
+    public class CharacterSelectReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
     }
 
     [BlubContract]
-    public class CDeleteCharacterReqMessage : IGameMessage
+    public class CharacterDeleteReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Slot { get; set; }
     }
 
     [BlubContract]
-    public class CLoginReqMessage : IGameMessage
+    public class LoginRequestReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -55,38 +56,40 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(7)]
         public bool KickConnection { get; set; }
+
+        [BlubMember(8)]
+        public string Unk5 { get; set; }
+
+        [BlubMember(9)]
+        public uint Unk6 { get; set; }
+
+        [BlubMember(10)]
+        public Data.Auth.AeriaTokenDto AeriaToken { get; set; }
     }
 
     [BlubContract]
-    public class CQuickStartReqMessage : IGameMessage
+    public class RoomQuickStartReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte GameRule { get; set; }
     }
 
     [BlubContract]
-    public class CMakeRoomReqMessage : IGameMessage
+    public class RoomMakeReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public MakeRoomDto Room { get; set; }
     }
 
     [BlubContract]
-    public class CCreateNickReqMessage : IGameMessage
+    public class NickCheckReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string Nickname { get; set; }
     }
 
     [BlubContract]
-    public class CCheckNickReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        public string Nickname { get; set; }
-    }
-
-    [BlubContract]
-    public class CUseItemReqMessage : IGameMessage
+    public class ItemUseItemReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public UseItemAction Action { get; set; }
@@ -102,72 +105,52 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CJoinTunnelInfoReqMessage : IGameMessage
+    public class RoomLeaveReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class CTimeSyncReqMessage : IGameMessage
+    public class TimeSyncReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Time { get; set; }
     }
 
     [BlubContract]
-    public class CGameArgPingReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        public uint Unk { get; set; }
-    }
-
-    [BlubContract]
-    public class CAdminShowWindowReqMessage : IGameMessage
+    public class AdminShowWindowReqMessage : IGameMessage
     {
     }
 
     [BlubContract]
-    public class CClubInfoReqMessage : IGameMessage
+    public class ClubInfoReqMessage : IGameMessage
     {
     }
 
     [BlubContract]
-    public class CIngameEquipCheckReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
-        public ulong[] ItemIds { get; set; }
-    }
-
-    [BlubContract]
-    public class CUseCoinRandomShopChanceReqMessage : IGameMessage
-    {
-    }
-
-    [BlubContract]
-    public class CChannelEnterReqMessage : IGameMessage
+    public class ChannelEnterReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Channel { get; set; }
     }
 
     [BlubContract]
-    public class CChannelLeaveReqMessage : IGameMessage
+    public class ChannelLeaveReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Channel { get; set; }
     }
 
     [BlubContract]
-    public class CGetChannelInfoReqMessage : IGameMessage
+    public class ChannelInfoReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ChannelInfoRequest Request { get; set; }
     }
 
     [BlubContract]
-    public class CGameRoomEnterReqMessage : IGameMessage
+    public class RoomEnterReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint RoomId { get; set; }
@@ -184,14 +167,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CGetPlayerInfoReqMessage : IGameMessage
+    public class PlayerInfoReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class CBuyItemReqMessage : IGameMessage
+    public class ItemBuyItemReqMessage : IGameMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
@@ -199,7 +182,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CRepairItemReqMessage : IGameMessage
+    public class ItemRepairItemReqMessage : IGameMessage
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
@@ -207,63 +190,63 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CRefundItemReqMessage : IGameMessage
+    public class ItemRefundItemReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
     }
 
     [BlubContract]
-    public class CAdminActionReqMessage : IGameMessage
+    public class AdminActionReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string Command { get; set; }
     }
 
     [BlubContract]
-    public class CActiveEquipPresetReqMessage : IGameMessage
+    public class CharacterActiveEquipPresetReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk { get; set; }
     }
 
     [BlubContract]
-    public class CLicensedReqMessage : IGameMessage
+    public class LicenseGainReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ItemLicense License { get; set; }
     }
 
     [BlubContract]
-    public class CClubNoticeChangeReqMessage : IGameMessage
+    public class ClubNoticeChangeReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string Unk { get; set; }
     }
 
     [BlubContract]
-    public class CGetClubInfoReqMessage : IGameMessage
+    public class ClubInfoByIdReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string Unk { get; set; }
     }
 
     [BlubContract]
-    public class CGetClubInfoByNameReqMessage : IGameMessage
+    public class ClubInfoByNameReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string Unk { get; set; }
     }
 
     [BlubContract]
-    public class CGetInventoryItemReqMessage : IGameMessage
+    public class ItemInventoryInfoReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
     }
 
     [BlubContract]
-    public class CTaskNotifyReqMessage : IGameMessage
+    public class TaskNotifyReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint TaskId { get; set; }
@@ -273,7 +256,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CTaskRequestReqMessage : IGameMessage
+    public class TaskReguestReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -286,63 +269,21 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CRandomShopRollingStartReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        public bool IsWeapon { get; set; }
-
-        [BlubMember(1)]
-        public byte Unk2 { get; set; }
-
-        [BlubMember(2)]
-        public byte Unk3 { get; set; }
-
-        [BlubMember(3)]
-        public byte Unk4 { get; set; }
-
-        [BlubMember(4)]
-        public byte Unk5 { get; set; }
-
-        [BlubMember(5)]
-        public uint Unk6 { get; set; }
-
-        [BlubMember(6)]
-        public int Unk7 { get; set; }
-
-        [BlubMember(7)]
-        public int Unk8 { get; set; }
-    }
-
-    [BlubContract]
-    public class CRandomShopItemGetReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        public byte Unk { get; set; }
-    }
-
-    [BlubContract]
-    public class CRandomShopItemSaleReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        public byte Unk { get; set; }
-    }
-
-    [BlubContract]
-    public class CExerciseLicenceReqMessage : IGameMessage
+    public class LicenseExerciseReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ItemLicense License { get; set; }
     }
 
     [BlubContract]
-    public class CUseCoinReqGSMessage : IGameMessage
+    public class ItemUseCoinReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class CApplyEsperChipItemReqMessage : IGameMessage
+    public class ItemUseEsperChipReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong Unk1 { get; set; }
@@ -352,14 +293,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CBadUserReqMessage : IGameMessage
+    public class PlayerBadUserReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint Unk { get; set; }
     }
 
     [BlubContract]
-    public class CClubJoinReqMessage : IGameMessage
+    public class ClubJoinReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public byte Unk1 { get; set; }
@@ -369,14 +310,14 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CClubUnJoinReqMessage : IGameMessage
+    public class ClubUnJoinReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string Unk { get; set; }
     }
 
     [BlubContract]
-    public class CNewShopUpdateCheckReqMessage : IGameMessage
+    public class NewShopUpdateCheckReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string PriceVersion { get; set; }
@@ -404,7 +345,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CUseChangeNickNameItemReqMessage : IGameMessage
+    public class ItemUseChangeNickReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
@@ -414,66 +355,42 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CUseResetRecordItemReqMessage : IGameMessage
+    public class ItemUseRecordResetReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
     }
 
     [BlubContract]
-    public class CUseCoinFillingItemReqMessage : IGameMessage
+    public class ItemUseCoinFillingReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
     }
 
     [BlubContract]
-    public class CGetUserInfoListReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        public uint Unk1 { get; set; }
-
-        [BlubMember(1)]
-        public byte Unk2 { get; set; }
-
-        [BlubMember(2)]
-        public uint Unk3 { get; set; }
-
-        [BlubMember(3)]
-        public uint Unk4 { get; set; }
-    }
-
-    [BlubContract]
-    public class CFindUserReqMessage : IGameMessage
+    public class PlayerFindInfoReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public string Nickname { get; set; }
     }
 
     [BlubContract]
-    public class CDiscardItemReqMessage : IGameMessage
+    public class ItemDiscardItemReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
     }
 
     [BlubContract]
-    public class CUseCapsuleReqMessage : IGameMessage
+    public class ItemUseCapsuleReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public ulong ItemId { get; set; }
     }
 
     [BlubContract]
-    public class CSaveConfigPermissionNotifyReqMessage : IGameMessage
-    {
-        [BlubMember(0)]
-        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
-        public uint[] Settings { get; set; }
-    }
-
-    [BlubContract]
-    public class CClubAddressReqMessage : IGameMessage
+    public class ClubAddressReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint RequestId { get; set; }
@@ -486,29 +403,572 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class CSmallLoudSpeakerReqMessage : IGameMessage
+    public class ClubHistoryReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class ItemUseChangeNickCancelReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class TutorialCompletedReqMessage : IGameMessage
     {
         [BlubMember(0)]
-        public uint Unk1 { get; set; }
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class CharacterFirstCreateReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public string Nickname { get; set; }
+
+        [BlubMember(1)]
+        public int Unk { get; set; } // Probably gender
+
+        [BlubMember(1)]
+        [BlubSerializer(typeof(FixedArraySerializer), 8)]
+        public ItemNumber[] Items { get; set; }
+    }
+
+    [BlubContract]
+    public class ShoppingBasketActionReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public int Unk3 { get; set; }
+
+        [BlubMember(3)]
+        public int Unk4 { get; set; }
+
+        [BlubMember(4)]
+        public short Unk5 { get; set; }
+
+        [BlubMember(5)]
+        public byte Unk6 { get; set; }
+
+        [BlubMember(6)]
+        public int Unk7 { get; set; }
+    }
+
+    [BlubContract]
+    public class ShoppingBasketDeleteReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        public ulong[] Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class RandomShopUpdateCheckReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public string Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class RandomShopRollingStartReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class RoomInfoReqeustReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public uint RoomId { get; set; }
+    }
+
+    [BlubContract]
+    public class NoteGiftItemReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk1 { get; set; }
 
         [BlubMember(1)]
         public string Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public string Unk3 { get; set; }
+
+        [BlubMember(3)]
+        public string Unk4 { get; set; }
+
+        [BlubMember(4)]
+        public string Unk5 { get; set; }
+
+        [BlubMember(5)]
+        public ShopItemDto ShopItem { get; set; }
+
+        [BlubMember(6)]
+        public ulong Unk7 { get; set; }
+
+        public NoteGiftItemReqMessage()
+        {
+            ShopItem = new ShopItemDto();
+        }
     }
 
     [BlubContract]
-    public class CClubHistoryReqMessage : IGameMessage
-    {
-    }
-
-    [BlubContract]
-    public class CChangeNickCancelReqMessage : IGameMessage
-    {
-    }
-
-    [BlubContract]
-    public class CEnableAccountStatusAckMessage : IGameMessage
+    public class NoteImportuneItemReqMessage : IGameMessage
     {
         [BlubMember(0)]
-        public uint Unk { get; set; }
+        public string Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public ulong Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public string Unk3 { get; set; }
+
+        [BlubMember(3)]
+        public string Unk4 { get; set; }
+
+        [BlubMember(4)]
+        public int Unk5 { get; set; }
+
+        [BlubMember(5)]
+        public ShopItemDto ShopItem { get; set; }
+
+        public NoteImportuneItemReqMessage()
+        {
+            ShopItem = new ShopItemDto();
+        }
+    }
+
+    [BlubContract]
+    public class NoteGiftItemGainReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class RoomQuickJoinReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class MoneyRefreshCashInfoReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class CardGambleReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class PromotionAttendanceGiftItemReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class PromotionCoinEventUseCoinReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class ItemEnchanReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public long Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public long Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class CPromotionCardShuffleReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class BillingCashInfoReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class XTrapDetourMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public byte Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class PromotionCouponEventReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class CollectBookUpdateCheckReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public string Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class CollectBookInventoryInfoReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class CollectBookItemRegistReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        public BookItemDto[] Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class CollectBookUseRewardReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class UseInstantItemReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public ulong Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class UseInstantItemRemoveEffectReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public ulong Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public ulong Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public int Unk3 { get; set; }
+    }
+
+    [BlubContract]
+    public class PromotionRouletteMachineStartReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class GameGuardCSAuthReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public byte[] Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class GameGuardHackReportReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public byte[] Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class PromotionXMasCardUseReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public byte Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class PromotionNewYearCardUseReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class HackShieldMakeResponseMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public byte[] Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class RoomMakeReq2Message : IGameMessage
+    {
+        [BlubMember(0)]
+        public MakeRoom2Dto Room { get; set; }
+
+        public RoomMakeReq2Message()
+        {
+            Room = new MakeRoom2Dto();
+        }
+    }
+
+    [BlubContract]
+    public class AlchemyCombinationReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
+        public AlchemyCombinationDto[] Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public int Unk3 { get; set; }
+    }
+
+    [BlubContract]
+    public class AlchemyDecompositionReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class PromotionItemPaymentReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class ItemUseFillExpReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public long Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class DailyMissionRewardReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class DailyMissionInitReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class DailyMissionNextStepReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class AchieveMissionReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class AchieveMissionRewardReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class BtcClearReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class NewItemEnchanReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public long Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public long Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class ItemUseJewelItemReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public long Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public long Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public byte Unk3 { get; set; }
+    }
+
+    [BlubContract]
+    public class XignCodeAliveReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public long Unk1 { get; set; }
+
+        [BlubMember(1)]
+        [BlubSerializer(typeof(FixedArraySerializer), 512)]
+        public byte[] Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class EsperEnchantReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public long Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class MatchStartReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class MatchStopReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class MatchListReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class MatchInviteReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class BattleInvitesReceivedResultMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class ReMatchReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+    }
+
+    [BlubContract]
+    public class MatchVoteBeginMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class MatchClubMarkReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class MatchPointReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class MatchRoomQuitReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class ClubNoticePointRefreshReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class ClubNoticeRecordRefreshReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class ClubSearchRoomReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public byte Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubStadiumEditMapDataReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubStadiumEditBlastinfoEditReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk1 { get; set; }
+
+        [BlubMember(1)]
+        public int Unk2 { get; set; }
+
+        [BlubMember(2)]
+        public int Unk3 { get; set; }
+
+        [BlubMember(3)]
+        public byte Unk4 { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubStadiumInfoReqMessage : IGameMessage
+    {
+    }
+
+    [BlubContract]
+    public class ClubStadiumSelectReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public int Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class ClubOtherClubinfoReqMessage : IGameMessage
+    {
+        [BlubMember(0)]
+        public string Unk { get; set; }
     }
 }

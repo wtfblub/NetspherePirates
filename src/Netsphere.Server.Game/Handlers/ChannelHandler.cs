@@ -12,7 +12,7 @@ using ProudNet;
 namespace Netsphere.Server.Game.Handlers
 {
     internal class ChannelHandler
-        : IHandle<CGetChannelInfoReqMessage>, IHandle<CChannelEnterReqMessage>, IHandle<CChannelLeaveReqMessage>
+        : IHandle<ChannelInfoReqMessage>, IHandle<ChannelEnterReqMessage>, IHandle<ChannelLeaveReqMessage>
     {
         private readonly ILogger _logger;
         private readonly ChannelService _channelService;
@@ -24,7 +24,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeLoggedIn))]
-        public async Task<bool> OnHandle(MessageContext context, CGetChannelInfoReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ChannelInfoReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -60,7 +60,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeInChannel), Invert = true)]
-        public async Task<bool> OnHandle(MessageContext context, CChannelEnterReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ChannelEnterReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -93,7 +93,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInChannel))]
         [Firewall(typeof(MustBeInRoom), Invert = true)]
-        public async Task<bool> OnHandle(MessageContext context, CChannelLeaveReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ChannelLeaveReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;

@@ -4,7 +4,7 @@ using BlubLib.Serialization.Serializers;
 namespace Netsphere.Network.Data.Game
 {
     [BlubContract]
-    public class RoomDto
+    public class Room2Dto
     {
         [BlubMember(0)]
         public byte RoomId { get; set; }
@@ -45,5 +45,11 @@ namespace Netsphere.Network.Data.Game
 
         [BlubMember(12)]
         public int Unk4 { get; set; }
+
+        [BlubMember(13)]
+        public int Unk5 { get; set; }
+
+        [BlubMember(14)]
+        public int Unk6 { get; set; }
     }
 }

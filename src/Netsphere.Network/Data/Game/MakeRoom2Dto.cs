@@ -5,7 +5,7 @@ using Netsphere.Network.Serializers;
 namespace Netsphere.Network.Data.Game
 {
     [BlubContract]
-    public class MakeRoomDto
+    public class MakeRoom2Dto
     {
         [BlubMember(0)]
         public Netsphere.GameRule GameRule { get; set; }
@@ -33,10 +33,10 @@ namespace Netsphere.Network.Data.Game
         public string Password { get; set; }
 
         [BlubMember(8)]
-        public byte Unk1 { get; set; }
+        public bool IsObservingEnabled { get; set; }
 
         [BlubMember(9)]
-        public byte Unk2 { get; set; }
+        public byte ObserverLimit { get; set; }
 
         [BlubMember(10)]
         public byte Unk3 { get; set; }
@@ -50,7 +50,13 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(13)]
         public byte Unk6 { get; set; }
 
-        public MakeRoomDto()
+        [BlubMember(14)]
+        public RoomRandomSettings RandomSettings { get; set; }
+
+        [BlubMember(15)]
+        public RoomSettings Settings { get; set; }
+
+        public MakeRoom2Dto()
         {
             Name = "";
             Password = "";

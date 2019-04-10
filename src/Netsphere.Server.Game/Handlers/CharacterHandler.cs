@@ -9,7 +9,7 @@ using ProudNet;
 namespace Netsphere.Server.Game.Handlers
 {
     internal class CharacterHandler
-        : IHandle<CCreateCharacterReqMessage>, IHandle<CDeleteCharacterReqMessage>, IHandle<CSelectCharacterReqMessage>
+        : IHandle<CharacterCreateReqMessage>, IHandle<CharacterDeleteReqMessage>, IHandle<CharacterSelectReqMessage>
     {
         private readonly ILogger _logger;
         private readonly EquipValidator _equipValidator;
@@ -22,7 +22,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeLoggedIn))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CCreateCharacterReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, CharacterCreateReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -44,7 +44,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeLoggedIn))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CDeleteCharacterReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, CharacterDeleteReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -57,7 +57,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeLoggedIn))]
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CSelectCharacterReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, CharacterSelectReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;

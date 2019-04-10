@@ -618,4 +618,18 @@ namespace Netsphere
         MonsterStatus = 8,
         MonsterMapMiddle = 9
     }
+
+    [Flags]
+    public enum RoomSettings : uint
+    {
+        IsFriendly = 1,
+        EnableBurningBuff = 2,
+    }
+
+    public enum RoomRandomSettings : uint
+    {
+        None = 0,
+        Map = 1,
+        ModeAndMap = 2
+    }
 }

@@ -1,9 +1,9 @@
-﻿using BlubLib.Serialization;
+using BlubLib.Serialization;
 
 namespace Netsphere.Network.Data.Game
 {
     [BlubContract]
-    public class RandomShopItemDto
+    public class ArcadeMapInfoDto
     {
         [BlubMember(0)]
         public uint Unk1 { get; set; }
@@ -21,6 +21,12 @@ namespace Netsphere.Network.Data.Game
         public uint Unk5 { get; set; }
 
         [BlubMember(5)]
-        public ushort Unk6 { get; set; }
+        public uint Unk6 { get; set; }
+
+        [BlubMember(6)]
+        public uint Unk7 { get; set; }
+
+        [BlubMember(7)]
+        public byte Unk8 { get; set; }
     }
 }

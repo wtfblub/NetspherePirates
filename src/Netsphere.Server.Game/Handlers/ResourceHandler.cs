@@ -11,7 +11,7 @@ using ProudNet;
 
 namespace Netsphere.Server.Game.Handlers
 {
-    internal class ResourceHandler : IHandle<CNewShopUpdateCheckReqMessage>
+    internal class ResourceHandler : IHandle<NewShopUpdateCheckReqMessage>
     {
         private readonly GameDataService _gameDataService;
         private readonly BlubSerializer _serializer;
@@ -30,7 +30,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CNewShopUpdateCheckReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, NewShopUpdateCheckReqMessage message)
         {
             var session = context.Session;
 

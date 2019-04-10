@@ -5,7 +5,7 @@ using ProudNet.Serialization.Serializers;
 namespace Netsphere.Network.Data.Game
 {
     [BlubContract]
-    public class EnterRoomInfoDto
+    public class EnterRoomInfo2Dto
     {
         [BlubMember(0)]
         public uint RoomId { get; set; }
@@ -53,7 +53,16 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(14)]
         public int Unk4 { get; set; }
 
-        public EnterRoomInfoDto()
+        [BlubMember(15)]
+        public int Unk5 { get; set; }
+
+        [BlubMember(16)]
+        public int Unk6 { get; set; }
+
+        [BlubMember(17)]
+        public byte Unk7 { get; set; }
+
+        public EnterRoomInfo2Dto()
         {
             RelayEndPoint = new IPEndPoint(0, 0);
         }

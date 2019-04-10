@@ -14,7 +14,7 @@ using ProudNet;
 
 namespace Netsphere.Server.Game.Handlers
 {
-    internal class ShopHandler : IHandle<CLicensedReqMessage>, IHandle<CExerciseLicenceReqMessage>, IHandle<CBuyItemReqMessage>
+    internal class ShopHandler : IHandle<LicenseGainReqMessage>, IHandle<LicenseExerciseReqMessage>, IHandle<ItemBuyItemReqMessage>
     {
         private readonly GameDataService _gameDataService;
         private readonly ILogger _logger;
@@ -29,7 +29,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeLoggedIn))]
         [Inline]
-        public Task<bool> OnHandle(MessageContext context, CLicensedReqMessage message)
+        public Task<bool> OnHandle(MessageContext context, LicenseGainReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -40,7 +40,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeLoggedIn))]
         [Inline]
-        public Task<bool> OnHandle(MessageContext context, CExerciseLicenceReqMessage message)
+        public Task<bool> OnHandle(MessageContext context, LicenseExerciseReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -50,7 +50,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Inline]
-        public async Task<bool> OnHandle(MessageContext context, CBuyItemReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, ItemBuyItemReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;

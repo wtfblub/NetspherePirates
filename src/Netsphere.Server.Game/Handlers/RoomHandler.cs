@@ -14,8 +14,8 @@ using ProudNet;
 namespace Netsphere.Server.Game.Handlers
 {
     internal class RoomHandler
-        : IHandle<CMakeRoomReqMessage>, IHandle<CEnterPlayerReqMessage>, IHandle<CGameRoomEnterReqMessage>,
-          IHandle<CJoinTunnelInfoReqMessage>, IHandle<CChangeTeamReqMessage>, IHandle<CPlayerGameModeChangeReqMessage>,
+        : IHandle<RoomMakeReqMessage>, IHandle<CEnterPlayerReqMessage>, IHandle<RoomEnterReqMessage>,
+          IHandle<RoomLeaveReqMessage>, IHandle<CChangeTeamReqMessage>, IHandle<CPlayerGameModeChangeReqMessage>,
           IHandle<CMixChangeTeamReqMessage>, IHandle<CBeginRoundReqMessage>, IHandle<CReadyRoundReqMessage>,
           IHandle<CEventMessageReqMessage>, IHandle<CItemsChangeReqMessage>, IHandle<CAvatarChangeReqMessage>,
           IHandle<CChangeRuleNotifyReqMessage>, IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
@@ -57,7 +57,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInChannel))]
         [Firewall(typeof(MustBeInRoom), Invert = true)]
-        public async Task<bool> OnHandle(MessageContext context, CMakeRoomReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, RoomMakeReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -112,7 +112,7 @@ namespace Netsphere.Server.Game.Handlers
 
         [Firewall(typeof(MustBeInChannel))]
         [Firewall(typeof(MustBeInRoom), Invert = true)]
-        public async Task<bool> OnHandle(MessageContext context, CGameRoomEnterReqMessage message)
+        public async Task<bool> OnHandle(MessageContext context, RoomEnterReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
@@ -154,7 +154,7 @@ namespace Netsphere.Server.Game.Handlers
         }
 
         [Firewall(typeof(MustBeInRoom))]
-        public Task<bool> OnHandle(MessageContext context, CJoinTunnelInfoReqMessage message)
+        public Task<bool> OnHandle(MessageContext context, RoomLeaveReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;

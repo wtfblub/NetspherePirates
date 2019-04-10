@@ -32,5 +32,8 @@ namespace Netsphere.Network.Data.Game
 
         [BlubMember(8)]
         public uint Unk9 { get; set; }
+
+        [BlubMember(9)]
+        public uint Unk10 { get; set; }
     }
 }
