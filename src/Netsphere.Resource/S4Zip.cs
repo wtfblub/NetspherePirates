@@ -294,7 +294,7 @@ namespace Netsphere.Resource
             Length = data.Length;
 
             S4Crypt.OldCapped32.Encrypt(data);
-            if (data.Length < 1048576)
+            if (data.Length < 1024000)
                 data = MiniLzo.Instance.Compress(data);
             data.SwapBytes();
 
@@ -304,7 +304,7 @@ namespace Netsphere.Resource
         private byte[] Decrypt(byte[] data)
         {
             data.SwapBytes();
-            if (data.Length < 1048576)
+            if (data.Length < 1024000)
                 data = MiniLzo.Instance.Decompress(data, Length);
             S4Crypt.OldCapped32.Decrypt(data);
 
