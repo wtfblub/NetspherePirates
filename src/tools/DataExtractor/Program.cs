@@ -10,25 +10,27 @@ namespace DataExtractor
     {
         private static void Main()
         {
-            var filesToExtract = new []
+            var filesToExtract = new[]
             {
-                "language/xml/channel_setting_string_table.x7",
                 "language/xml/gameinfo_string_table.x7",
                 "language/xml/item_effect_string_table.x7",
                 "language/xml/iteminfo_string_table.x7",
 
                 "resources/mapinfo/(.*).ini$",
 
-                "xml/_eu_channel_setting.x7",
                 "xml/_eu_gameinfo.x7",
-                "xml/_eu_task_list.x7",
-                "xml/coin_info.x7",
                 "xml/constant_info.x7",
                 "xml/default_item.x7",
                 "xml/equip_limit.x7",
                 "xml/experience.x7",
-                "xml/item_effect.x7",
-                "xml/iteminfo.x7",
+                "xml/effect_list.x7",
+                "xml/effect_match_list.x7",
+                "xml/action.x7",
+                "xml/_eu_weapon.x7",
+                "xml/item.x7",
+                "xml/enchant_data.x7",
+                "xml/monster_status.x7",
+                "xml/monster_wave/monster_map_middle.x7"
             };
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resource.s4hd");
             if (!File.Exists(path))
@@ -58,7 +60,7 @@ namespace DataExtractor
             {
                 var entries = zip.Where(pair => Regex.IsMatch(pair.Key, toExtract)).Select(pair => pair.Value).ToArray();
 
-                if(entries.Length == 0)
+                if (entries.Length == 0)
                 {
                     Warn($"'{toExtract}' not found!");
                     continue;
