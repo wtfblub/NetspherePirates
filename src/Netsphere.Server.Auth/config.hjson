@@ -17,4 +17,5 @@
     Directory: logs
     Level: Debug
   }
+  DataDir: ../data
 }

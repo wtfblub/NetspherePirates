@@ -104,5 +104,16 @@ namespace Netsphere.Network.Message.Auth
 
         [BlubMember(2)]
         public int TotalLength { get; set; }
+
+        public GameDataXBNAckMessage()
+        {
+        }
+
+        public GameDataXBNAckMessage(XBNType xbnType, byte[] data, int totalLength)
+        {
+            XBNType = xbnType;
+            Data = data;
+            TotalLength = totalLength;
+        }
     }
 }

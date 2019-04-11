@@ -69,8 +69,8 @@ namespace Netsphere.Server.Auth
                             Subscriber = x.GetRequiredService<ConnectionMultiplexer>().GetSubscriber(),
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
-                        .AddSingleton<ServerlistService>()
-                        .AddSingleton<IHostedService>(x => x.GetRequiredService<ServerlistService>());
+                        .AddHostedServiceEx<ServerlistService>()
+                        .AddHostedServiceEx<XbnService>();
 
                     pluginHost.OnConfigure(services);
                 })

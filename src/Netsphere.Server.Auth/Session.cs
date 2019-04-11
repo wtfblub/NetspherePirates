@@ -7,6 +7,7 @@ namespace Netsphere.Server.Auth
     internal class Session : ProudSession
     {
         public bool Authenticated { get; set; }
+        public bool XbnSent { get; set; }
 
         public Session(ILogger logger, uint hostId, IChannel channel)
             : base(logger, hostId, channel)
