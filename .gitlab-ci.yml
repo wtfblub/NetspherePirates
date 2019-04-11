@@ -18,6 +18,8 @@ build_docker:
   services:
     - docker:dind
   stage: build_docker
+  only:
+    - dev
   before_script:
     - chmod +x build.sh
     # This is a workaround for https://gitlab.com/gitlab-org/gitlab-ce/issues/27436
