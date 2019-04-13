@@ -4,49 +4,22 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Logging;
-using Microsoft.Extensions.Options;
-using Netsphere.Common.Configuration;
 using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Data;
-using Netsphere.Server.Game.Rules;
 using Netsphere.Server.Game.Services;
 using ProudNet;
 
 namespace Netsphere.Server.Game.Handlers
 {
-    internal class ShopHandler : IHandle<LicenseGainReqMessage>, IHandle<LicenseExerciseReqMessage>, IHandle<ItemBuyItemReqMessage>
+    internal class ShopHandler : IHandle<ItemBuyItemReqMessage>
     {
         private readonly GameDataService _gameDataService;
         private readonly ILogger _logger;
-        private readonly GameOptions _gameOptions;
 
-        public ShopHandler(GameDataService gameDataService, IOptions<GameOptions> gameOptions, ILogger<ShopHandler> logger)
+        public ShopHandler(GameDataService gameDataService, ILogger<ShopHandler> logger)
         {
             _gameDataService = gameDataService;
             _logger = logger;
-            _gameOptions = gameOptions.Value;
-        }
-
-        [Firewall(typeof(MustBeLoggedIn))]
-        [Inline]
-        public Task<bool> OnHandle(MessageContext context, LicenseGainReqMessage message)
-        {
-            var session = context.GetSession<Session>();
-            var plr = session.Player;
-
-            plr.LicenseManager.Acquire(message.License);
-            return Task.FromResult(true);
-        }
-
-        [Firewall(typeof(MustBeLoggedIn))]
-        [Inline]
-        public Task<bool> OnHandle(MessageContext context, LicenseExerciseReqMessage message)
-        {
-            var session = context.GetSession<Session>();
-            var plr = session.Player;
-
-            plr.LicenseManager.Acquire(message.License);
-            return Task.FromResult(true);
         }
 
         [Inline]
@@ -66,21 +39,20 @@ namespace Netsphere.Server.Game.Handlers
                 var itemToBuy = group.Key;
                 var count = group.Count();
                 var itemInfo = _gameDataService.Items.GetValueOrDefault(itemToBuy.ItemNumber);
-                var hasLicense = !_gameOptions.EnableLicenseRequirement || plr.LicenseManager.Contains(itemInfo.License);
 
                 logger.Debug("Trying to buy item");
 
-                if (itemInfo.License != ItemLicense.None && !hasLicense)
+                if (itemInfo.License != ItemLicense.None)
                 {
                     logger.Warning("Trying to buy item without required license");
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (itemInfo.Level > plr.Level)
                 {
                     logger.Warning("Trying to buy item without required level playerLevel={PlayerLevel}", plr.Level);
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -90,14 +62,14 @@ namespace Netsphere.Server.Game.Handlers
                 if (shopItem == null)
                 {
                     logger.Warning("Trying to buy non-existant item");
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (itemToBuy.Color > shopItem.ColorGroup)
                 {
                     logger.Warning("Trying to buy item with invalid color");
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -105,14 +77,14 @@ namespace Netsphere.Server.Game.Handlers
                 if (shopItemInfo == null)
                 {
                     logger.Warning("Trying to buy non-existant item");
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (!shopItemInfo.IsEnabled)
                 {
                     logger.Warning("Trying to buy disabled item");
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -120,14 +92,14 @@ namespace Netsphere.Server.Game.Handlers
                 if (priceInfo == null)
                 {
                     logger.Warning("Trying to buy item with invalid price info");
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
                 if (!priceInfo.IsEnabled)
                 {
                     logger.Warning("Trying to buy item with disabled price info");
-                    session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
 
@@ -142,7 +114,7 @@ namespace Netsphere.Server.Game.Handlers
                         if (plr.PEN < cost)
                         {
                             logger.Warning("Trying to buy item without enough PEN currentPEN={CurrentPEN}", plr.PEN);
-                            session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
+                            session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
                             return true;
                         }
 
@@ -155,7 +127,7 @@ namespace Netsphere.Server.Game.Handlers
                         if (plr.AP < cost)
                         {
                             logger.Warning("Trying to buy item without enough AP currentAP={CurrentAP}", plr.AP);
-                            session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
+                            session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.NotEnoughMoney));
                             return true;
                         }
 
@@ -167,7 +139,7 @@ namespace Netsphere.Server.Game.Handlers
 
                     default:
                         logger.Warning("Trying to buy item with invalid price type");
-                        session.Send(new SBuyItemAckMessage(itemToBuy, ItemBuyResult.DBError));
+                        session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.DBError));
                         return true;
                 }
 
@@ -186,7 +158,7 @@ namespace Netsphere.Server.Game.Handlers
                 }
 
                 var newItemIds = newItems.Select(x => x.Id).ToArray();
-                session.Send(new SBuyItemAckMessage(newItemIds, itemToBuy));
+                session.Send(new ItemBuyItemAckMessage(newItemIds, itemToBuy));
                 newItems.Clear();
 
                 plr.SendMoneyUpdate();

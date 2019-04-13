@@ -98,7 +98,7 @@ namespace Netsphere.Server.Game.Commands
             this.Reply(plr, "Reloading shop...");
             _playerManager.ForEach(x => x.SendNotice("Reloading shop - Game might lag for a minute"));
             await _gameDataService.LoadShop();
-            _playerManager.ForEach(x => x.Session.Send(new SNewShopUpdateRequestAckMessage()));
+            _playerManager.ForEach(x => x.Session.Send(new NewShopUpdateEndAckMessage()));
             this.Reply(plr, "Reloaded shop!");
             return true;
         }

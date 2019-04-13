@@ -34,7 +34,6 @@ namespace Netsphere.Database.Game
         public List<PlayerCharacterEntity> Characters { get; set; } = new List<PlayerCharacterEntity>();
         public List<PlayerDenyEntity> Ignores { get; set; } = new List<PlayerDenyEntity>();
         public List<PlayerItemEntity> Items { get; set; } = new List<PlayerItemEntity>();
-        public List<PlayerLicenseEntity> Licenses { get; set; } = new List<PlayerLicenseEntity>();
         public List<PlayerMailEntity> Inbox { get; set; } = new List<PlayerMailEntity>();
         public List<PlayerSettingEntity> Settings { get; set; } = new List<PlayerSettingEntity>();
     }

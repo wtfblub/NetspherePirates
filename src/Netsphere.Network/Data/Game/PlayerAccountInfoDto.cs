@@ -42,7 +42,7 @@ namespace Netsphere.Network.Data.Game
         public byte Unk4 { get; set; }
 
         [BlubMember(11)]
-        public uint TotalExp { get; set; }
+        public uint TotalExperience { get; set; }
 
         [BlubMember(12)]
         public uint AP { get; set; }

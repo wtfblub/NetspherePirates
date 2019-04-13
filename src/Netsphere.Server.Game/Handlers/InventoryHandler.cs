@@ -27,7 +27,7 @@ namespace Netsphere.Server.Game.Handlers
 
             if (character == null || item == null || plr.Room != null && plr.State != PlayerState.Lobby)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.FailedToRequestTask));
+                session.Send(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
                 return true;
             }
 
@@ -58,21 +58,21 @@ namespace Netsphere.Server.Game.Handlers
                 if (item == null)
                 {
                     logger.Warning("Item={ItemId} not found", id);
-                    session.Send(new SRepairItemAckMessage(ItemRepairResult.Error0, 0));
+                    session.Send(new ItemRepairItemAckMessage(ItemRepairResult.Error0, 0));
                     return true;
                 }
 
                 if (item.Durability == -1)
                 {
                     logger.Warning("Item={ItemId} can not be repaired", id);
-                    session.Send(new SRepairItemAckMessage(ItemRepairResult.Error1, 0));
+                    session.Send(new ItemRepairItemAckMessage(ItemRepairResult.Error1, 0));
                     return true;
                 }
 
                 var cost = item.CalculateRepair();
                 if (plr.PEN < cost)
                 {
-                    session.Send(new SRepairItemAckMessage(ItemRepairResult.NotEnoughMoney, 0));
+                    session.Send(new ItemRepairItemAckMessage(ItemRepairResult.NotEnoughMoney, 0));
                     return true;
                 }
 
@@ -80,20 +80,20 @@ namespace Netsphere.Server.Game.Handlers
                 if (price == null)
                 {
                     logger.Warning("No shop entry found item={ItemId}", id);
-                    session.Send(new SRepairItemAckMessage(ItemRepairResult.Error2, 0));
+                    session.Send(new ItemRepairItemAckMessage(ItemRepairResult.Error2, 0));
                     return true;
                 }
 
                 if (item.Durability >= price.Durability)
                 {
-                    session.Send(new SRepairItemAckMessage(ItemRepairResult.OK, item.Id));
+                    session.Send(new ItemRepairItemAckMessage(ItemRepairResult.OK, item.Id));
                     continue;
                 }
 
                 item.Durability = price.Durability;
                 plr.PEN -= cost;
 
-                session.Send(new SRepairItemAckMessage(ItemRepairResult.OK, item.Id));
+                session.Send(new ItemRepairItemAckMessage(ItemRepairResult.OK, item.Id));
                 plr.SendMoneyUpdate();
             }
 
@@ -111,7 +111,7 @@ namespace Netsphere.Server.Game.Handlers
             if (item == null)
             {
                 logger.Warning("Item={ItemId} not found", message.ItemId);
-                session.Send(new SRefundItemAckMessage(ItemRefundResult.Failed, 0));
+                session.Send(new ItemRefundItemAckMessage(ItemRefundResult.Failed, 0));
                 return true;
             }
 
@@ -119,21 +119,21 @@ namespace Netsphere.Server.Game.Handlers
             if (price == null)
             {
                 logger.Warning("No shop entry found item={ItemId}", message.ItemId);
-                session.Send(new SRefundItemAckMessage(ItemRefundResult.Failed, 0));
+                session.Send(new ItemRefundItemAckMessage(ItemRefundResult.Failed, 0));
                 return true;
             }
 
             if (!price.CanRefund)
             {
                 logger.Warning("Cannot refund item={ItemId}", message.ItemId);
-                session.Send(new SRefundItemAckMessage(ItemRefundResult.Failed, 0));
+                session.Send(new ItemRefundItemAckMessage(ItemRefundResult.Failed, 0));
                 return true;
             }
 
             plr.PEN += item.CalculateRefund();
             plr.Inventory.Remove(item);
 
-            session.Send(new SRefundItemAckMessage(ItemRefundResult.OK, item.Id));
+            session.Send(new ItemRefundItemAckMessage(ItemRefundResult.OK, item.Id));
             plr.SendMoneyUpdate();
 
             return true;
@@ -150,7 +150,7 @@ namespace Netsphere.Server.Game.Handlers
             if (item == null)
             {
                 logger.Warning("Item={ItemId} not found", message.ItemId);
-                session.Send(new SDiscardItemAckMessage(2, 0));
+                session.Send(new ItemDiscardItemAckMessage(2, 0));
                 return true;
             }
 
@@ -158,19 +158,19 @@ namespace Netsphere.Server.Game.Handlers
             if (shopItem == null)
             {
                 logger.Warning("No shop entry found item={ItemId}", message.ItemId);
-                session.Send(new SDiscardItemAckMessage(2, 0));
+                session.Send(new ItemDiscardItemAckMessage(2, 0));
                 return true;
             }
 
             if (!shopItem.IsDestroyable)
             {
                 logger.Warning("Cannot discard item={ItemId}", message.ItemId);
-                session.Send(new SDiscardItemAckMessage(2, 0));
+                session.Send(new ItemDiscardItemAckMessage(2, 0));
                 return true;
             }
 
             plr.Inventory.Remove(item);
-            session.Send(new SDiscardItemAckMessage(0, item.Id));
+            session.Send(new ItemDiscardItemAckMessage(0, item.Id));
 
             return true;
         }

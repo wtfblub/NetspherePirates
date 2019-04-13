@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -40,33 +41,48 @@ namespace Netsphere.Server.Game.Services
 
         public void LoadChannels()
         {
-            _logger.Information("Loading channels...");
-            var dto = Deserialize<ChannelSettingDto>("xml/_eu_channel_setting.x7");
-            var stringTable = Deserialize<StringTableDto>("language/xml/channel_setting_string_table.x7");
-            Channels = Transform().ToImmutableArray();
-            _logger.Information("Loaded {Count} channels", Channels.Length);
-
-            IEnumerable<ChannelInfo> Transform()
+            Channels = new []
             {
-                foreach (var channelDto in dto.channel_info)
+                new ChannelInfo
                 {
-                    var channel = new ChannelInfo
-                    {
-                        Id = channelDto.id,
-                        Category = (ChannelCategory)channelDto.category,
-                        PlayerLimit = dto.setting.limit_player,
-                        Type = channelDto.type
-                    };
-
-                    var name = stringTable.@string.First(x =>
-                        x.key.Equals(channelDto.name_key, StringComparison.InvariantCultureIgnoreCase));
-                    if (string.IsNullOrWhiteSpace(name.eng))
-                        throw new Exception("Missing english translation for " + channelDto.name_key);
-
-                    channel.Name = name.eng;
-                    yield return channel;
+                    Id = 0,
+                    Category = ChannelCategory.Speed,
+                    PlayerLimit = 10,
+                    Name = "Hi",
+                    Description = "Something",
+                    Rank = "FREE",
+                    Color = Color.Red,
+                    TooltipColor = Color.Blue
                 }
-            }
+            }.ToImmutableArray();
+            // TODO Load from database
+            // _logger.Information("Loading channels...");
+            // var dto = Deserialize<ChannelSettingDto>("xml/_eu_channel_setting.x7");
+            // var stringTable = Deserialize<StringTableDto>("language/xml/channel_setting_string_table.x7");
+            // Channels = Transform().ToImmutableArray();
+            // _logger.Information("Loaded {Count} channels", Channels.Length);
+            //
+            // IEnumerable<ChannelInfo> Transform()
+            // {
+            //     foreach (var channelDto in dto.channel_info)
+            //     {
+            //         var channel = new ChannelInfo
+            //         {
+            //             Id = channelDto.id,
+            //             Category = (ChannelCategory)channelDto.category,
+            //             PlayerLimit = dto.setting.limit_player,
+            //             Type = channelDto.type
+            //         };
+            //
+            //         var name = stringTable.@string.First(x =>
+            //             x.key.Equals(channelDto.name_key, StringComparison.InvariantCultureIgnoreCase));
+            //         if (string.IsNullOrWhiteSpace(name.eng))
+            //             throw new Exception("Missing english translation for " + channelDto.name_key);
+            //
+            //         channel.Name = name.eng;
+            //         yield return channel;
+            //     }
+            // }
         }
 
         public void LoadMaps()
@@ -410,11 +426,6 @@ namespace Netsphere.Server.Game.Services
                 var items = await db.Items.Include(x => x.ItemInfos).ToArrayAsync();
                 ShopItems = items.ToImmutableDictionary(x => (ItemNumber)x.Id, x => new ShopItem(x, this));
                 _logger.Information("Loaded {Count} shop items", ShopItems.Count);
-
-                _logger.Information("Loading license rewards...");
-                var licenseRewards = await db.LicenseRewards.ToArrayAsync();
-                LicenseRewards = licenseRewards.ToImmutableDictionary(x => (ItemLicense)x.Id, x => new LicenseReward(x, this));
-                _logger.Information("Loaded {Count} license rewards", LicenseRewards.Count);
 
                 var version = await db.ShopVersion.FirstOrDefaultAsync();
                 if (version == null)

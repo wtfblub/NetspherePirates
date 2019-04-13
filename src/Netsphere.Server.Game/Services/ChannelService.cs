@@ -52,8 +52,7 @@ namespace Netsphere.Server.Game.Services
 
             _channels = _gameDataService.Channels.Select(x =>
             {
-                var channel = new Channel(x.Id, x.Category, x.Name, x.PlayerLimit, x.Type,
-                    _serviceProvider.GetRequiredService<RoomManager>());
+                var channel = new Channel(x, _serviceProvider.GetRequiredService<RoomManager>());
                 channel.PlayerJoined += (s, e) => OnPlayerJoined(e.Channel, e.Player);
                 channel.PlayerLeft += (s, e) => OnPlayerLeft(e.Channel, e.Player);
                 return channel;

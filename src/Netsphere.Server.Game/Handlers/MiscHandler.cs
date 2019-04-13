@@ -21,7 +21,7 @@ namespace Netsphere.Server.Game.Handlers
         [Inline]
         public async Task<bool> OnHandle(MessageContext context, TimeSyncReqMessage message)
         {
-            context.Session.Send(new STimeSyncAckMessage
+            context.Session.Send(new TimeSyncAckMessage
             {
                 ClientTime = message.Time,
                 ServerTime = (uint)Environment.TickCount
@@ -37,7 +37,7 @@ namespace Netsphere.Server.Game.Handlers
             var session = context.GetSession<Session>();
             var plr = session.Player;
 
-            session.Send(new SAdminShowWindowAckMessage(plr.Account.SecurityLevel <= SecurityLevel.User));
+            session.Send(new AdminShowWindowAckMessage(plr.Account.SecurityLevel <= SecurityLevel.User));
             return true;
         }
 

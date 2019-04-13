@@ -86,7 +86,7 @@ namespace Netsphere.Server.Game
             var item = new PlayerItem(_gameDataService, this,
                 itemId, shopItemInfo, price, color, effect, DateTimeOffset.Now, count);
             _items.TryAdd(item.Id, item);
-            Player.Session.Send(new SInventoryActionAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>()));
+            Player.Session.Send(new ItemUpdateInventoryAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>()));
             return item;
         }
 
@@ -111,7 +111,7 @@ namespace Netsphere.Server.Game
             if (item.Exists)
                 _itemsToRemove.Push(item);
 
-            Player.Session.Send(new SDeleteItemInventoryAckMessage(item.Id));
+            Player.Session.Send(new ItemInventroyDeleteAckMessage(item.Id));
             return true;
         }
 

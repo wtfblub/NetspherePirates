@@ -20,8 +20,6 @@ namespace Netsphere.Server.Game
 {
     public class Player : DatabaseObject, ISaveable
     {
-        private static readonly uint[] s_licensesCompleted;
-
         private ILogger _logger;
         private readonly GameOptions _gameOptions;
         private readonly DatabaseService _databaseService;
@@ -37,7 +35,6 @@ namespace Netsphere.Server.Game
         public Session Session { get; private set; }
         public Account Account { get; private set; }
         public CharacterManager CharacterManager { get; }
-        public LicenseManager LicenseManager { get; }
         public PlayerInventory Inventory { get; }
         public byte TutorialState
         {
@@ -118,23 +115,15 @@ namespace Netsphere.Server.Game
             NicknameCreated?.Invoke(this, new NicknameEventArgs(this, nickname));
         }
 
-        static Player()
-        {
-            s_licensesCompleted = new uint[100];
-            for (uint i = 0; i < 100; ++i)
-                s_licensesCompleted[i] = i;
-        }
-
         public Player(ILogger<Player> logger, IOptions<GameOptions> gameOptions, DatabaseService databaseService,
             GameDataService gameDataService,
-            CharacterManager characterManager, LicenseManager licenseManager, PlayerInventory inventory)
+            CharacterManager characterManager, PlayerInventory inventory)
         {
             _logger = logger;
             _gameOptions = gameOptions.Value;
             _databaseService = databaseService;
             _gameDataService = gameDataService;
             CharacterManager = characterManager;
-            LicenseManager = licenseManager;
             Inventory = inventory;
             CharacterStartPlayTime = new DateTimeOffset[3];
         }
@@ -150,7 +139,6 @@ namespace Netsphere.Server.Game
             _ap = (uint)entity.AP;
             _coins1 = (uint)entity.Coins1;
             _coins2 = (uint)entity.Coins2;
-            LicenseManager.Initialize(this, entity.Licenses);
             Inventory.Initialize(this, entity);
             CharacterManager.Initialize(this, entity);
         }
@@ -301,17 +289,12 @@ namespace Netsphere.Server.Game
 
         public async Task SendAccountInformation()
         {
-            var licenses = _gameOptions.EnableLicenseRequirement
-                ? LicenseManager.Select(x => (uint)x.ItemLicense).ToArray()
-                : s_licensesCompleted;
-
-            Session.Send(new SMyLicenseInfoAckMessage(licenses));
-            Session.Send(new SInventoryInfoAckMessage
+            Session.Send(new ItemInventoryInfoAckMessage
             {
                 Items = Inventory.Select(x => x.Map<PlayerItem, ItemDto>()).ToArray()
             });
 
-            Session.Send(new SCharacterSlotInfoAckMessage
+            Session.Send(new CharacterCurrentSlotInfoAckMessage
             {
                 ActiveCharacter = CharacterManager.CurrentSlot,
                 CharacterCount = (byte)CharacterManager.Count,
@@ -320,7 +303,7 @@ namespace Netsphere.Server.Game
 
             foreach (var character in CharacterManager)
             {
-                Session.Send(new SOpenCharacterInfoAckMessage
+                Session.Send(new CharacterCurrentInfoAckMessage
                 {
                     Slot = character.Slot,
                     Style = new CharacterStyle(character.Gender, character.Slot,
@@ -328,7 +311,7 @@ namespace Netsphere.Server.Game
                         character.Shirt.Variation, character.Pants.Variation)
                 });
 
-                var message = new SCharacterEquipInfoAckMessage
+                var message = new CharacterCurrentItemInfoAckMessage
                 {
                     Slot = character.Slot,
                     Weapons = character.Weapons.GetItems().Select(x => x?.Id ?? 0).ToArray(),
@@ -339,20 +322,19 @@ namespace Netsphere.Server.Game
                 Session.Send(message);
             }
 
-            Session.Send(new SRefreshCashInfoAckMessage(PEN, AP));
-            Session.Send(new SSetCoinAckMessage(Coins1, Coins2));
-            Session.Send(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World));
-            Session.Send(new SBeginAccountInfoAckMessage
+            SendMoneyUpdate();
+            Session.Send(new ServerResultAckMessage(ServerResult.WelcomeToS4World));
+            Session.Send(new PlayerAccountInfoAckMessage(new PlayerAccountInfoDto
             {
                 Level = (byte)Level,
-                TotalExp = TotalExperience,
+                TotalExperience = TotalExperience,
                 AP = AP,
                 PEN = PEN,
                 TutorialState = (uint)(_gameOptions.EnableTutorial ? TutorialState : 2),
                 Nickname = Account.Nickname
-            });
+            }));
 
-            Session.Send(new SServerResultInfoAckMessage(ServerResult.WelcomeToS4World2));
+            Session.Send(new ServerResultAckMessage(ServerResult.WelcomeToS4World2));
 
             if (Inventory.Count == 0)
             {
@@ -409,7 +391,8 @@ namespace Netsphere.Server.Game
 
         public void SendMoneyUpdate()
         {
-            Session.Send(new SRefreshCashInfoAckMessage(PEN, AP));
+            Session.Send(new MoneyRefreshCashInfoAckMessage(PEN, AP));
+            Session.Send(new MoenyRefreshCoinInfoAckMessage(Coins1, Coins2));
         }
 
         /// <summary>
@@ -418,7 +401,7 @@ namespace Netsphere.Server.Game
         /// <param name="message">The message to send</param>
         public void SendConsoleMessage(string message)
         {
-            Session.Send(new SAdminActionAckMessage(message));
+            Session.Send(new AdminActionAckMessage(0, message));
         }
 
         /// <summary>
@@ -427,7 +410,7 @@ namespace Netsphere.Server.Game
         /// <param name="message">The message to send</param>
         public void SendNotice(string message)
         {
-            Session.Send(new SNoticeMessageAckMessage(message));
+            Session.Send(new NoticeAdminMessageAckMessage(message));
         }
 
         public async Task Save(GameContext db)
@@ -449,7 +432,6 @@ namespace Netsphere.Server.Game
                 SetDirtyState(false);
             }
 
-            await LicenseManager.Save(db);
             await Inventory.Save(db);
             await CharacterManager.Save(db);
         }

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using Netsphere.Network.Message.Game;
+using Netsphere.Server.Game.Data;
 
 namespace Netsphere.Server.Game
 {
@@ -15,9 +17,14 @@ namespace Netsphere.Server.Game
 
         public uint Id { get; }
         public ChannelCategory Category { get; }
-        public string Name { get; }
         public int PlayerLimit { get; }
-        public byte Type { get; }
+        public string Name { get; }
+        public string Description { get; }
+        public string Rank { get; }
+        public Color Color { get; }
+        public Color TooltipColor { get; }
+        public uint MinLevel { get; }
+        public uint MaxLevel { get; }
         public IReadOnlyDictionary<ulong, Player> Players => (IReadOnlyDictionary<ulong, Player>)_players;
         public RoomManager RoomManager { get; }
 
@@ -39,13 +46,18 @@ namespace Netsphere.Server.Game
             PlayerLeft?.Invoke(this, new ChannelEventArgs(this, plr));
         }
 
-        public Channel(uint id, ChannelCategory category, string name, int playerLimit, byte type, RoomManager roomManager)
+        public Channel(ChannelInfo channelInfo, RoomManager roomManager)
         {
-            Id = id;
-            Category = category;
-            Name = name;
-            PlayerLimit = playerLimit;
-            Type = type;
+            Id = channelInfo.Id;
+            Category = channelInfo.Category;
+            PlayerLimit = channelInfo.PlayerLimit;
+            Name = channelInfo.Name;
+            Description = channelInfo.Description;
+            Rank = channelInfo.Rank;
+            Color = channelInfo.Color;
+            TooltipColor = channelInfo.TooltipColor;
+            MinLevel = channelInfo.MinLevel;
+            MaxLevel = channelInfo.MaxLevel;
             RoomManager = roomManager;
             RoomManager.Initialize(this);
         }

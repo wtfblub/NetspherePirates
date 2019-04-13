@@ -142,7 +142,7 @@ namespace Netsphere.Server.Game
             var charStyle = new CharacterStyle(character.Gender, character.Slot,
                 character.Hair.Variation, character.Face.Variation,
                 character.Shirt.Variation, character.Pants.Variation);
-            Player.Session.Send(new SSuccessCreateCharacterAckMessage(character.Slot, charStyle));
+            Player.Session.Send(new CSuccessCreateCharacterAckMessage(character.Slot, charStyle));
 
             return (character, CharacterCreateResult.Success);
         }
@@ -160,7 +160,7 @@ namespace Netsphere.Server.Game
                 Player.SetDirtyState(true);
 
             CurrentSlot = slot;
-            Player.Session.Send(new SSuccessSelectCharacterAckMessage(CurrentSlot));
+            Player.Session.Send(new CharacterSelectAckMessage(CurrentSlot));
             return true;
         }
 
@@ -188,7 +188,7 @@ namespace Netsphere.Server.Game
             character.Weapons.Clear();
             character.Skills.Clear();
             character.Costumes.Clear();
-            Player.Session.Send(new SSuccessDeleteCharacterAckMessage(slot));
+            Player.Session.Send(new CharacterDeleteAckMessage(slot));
             return true;
         }
 

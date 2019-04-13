@@ -132,7 +132,8 @@ namespace Netsphere.Network.Message.Game
         public byte Slot { get; set; }
 
         public CharacterDeleteAckMessage()
-        { }
+        {
+        }
 
         public CharacterDeleteAckMessage(byte slot)
         {
@@ -147,7 +148,8 @@ namespace Netsphere.Network.Message.Game
         public byte Slot { get; set; }
 
         public CharacterSelectAckMessage()
-        { }
+        {
+        }
 
         public CharacterSelectAckMessage(byte slot)
         {
@@ -191,7 +193,8 @@ namespace Netsphere.Network.Message.Game
         public ServerResult Result { get; set; }
 
         public ServerResultAckMessage()
-        { }
+        {
+        }
 
         public ServerResultAckMessage(ServerResult result)
         {
@@ -207,7 +210,8 @@ namespace Netsphere.Network.Message.Game
         public bool IsTaken { get; set; }
 
         public NickCheckAckMessage()
-        { }
+        {
+        }
 
         public NickCheckAckMessage(bool isTaken)
         {
@@ -231,9 +235,10 @@ namespace Netsphere.Network.Message.Game
         public UseItemAction Action { get; set; }
 
         public ItemUseItemAckMessage()
-        { }
+        {
+        }
 
-        public ItemUseItemAckMessage(UseItemAction action, byte characterSlot, byte equipSlot, ulong itemId)
+        public ItemUseItemAckMessage(byte characterSlot, byte equipSlot, ulong itemId, UseItemAction action)
         {
             CharacterSlot = characterSlot;
             EquipSlot = equipSlot;
@@ -273,7 +278,8 @@ namespace Netsphere.Network.Message.Game
         public byte Slot { get; set; }
 
         public RoomCurrentCharacterSlotAckMessage()
-        { }
+        {
+        }
 
         public RoomCurrentCharacterSlotAckMessage(uint unk, byte slot)
         {
@@ -366,7 +372,8 @@ namespace Netsphere.Network.Message.Game
         public ulong AccountId { get; set; }
 
         public RoomLeavePlayerInfoAckMessage()
-        { }
+        {
+        }
 
         public RoomLeavePlayerInfoAckMessage(ulong accountId)
         {
@@ -403,7 +410,8 @@ namespace Netsphere.Network.Message.Game
 
     [BlubContract]
     public class NewShopUpdateEndAckMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class ChannelListInfoAckMessage : IGameMessage
@@ -447,7 +455,8 @@ namespace Netsphere.Network.Message.Game
         public uint RoomId { get; set; }
 
         public RoomDisposeAckMessage()
-        { }
+        {
+        }
 
         public RoomDisposeAckMessage(uint roomId)
         {
@@ -579,9 +588,10 @@ namespace Netsphere.Network.Message.Game
             Item = new ShopItemDto();
         }
 
-        public ItemBuyItemAckMessage(ItemBuyResult result)
+        public ItemBuyItemAckMessage(ShopItemDto item, ItemBuyResult result)
             : this()
         {
+            Item = item;
             Result = result;
         }
 
@@ -601,6 +611,16 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(1)]
         public ulong ItemId { get; set; }
+
+        public ItemRepairItemAckMessage()
+        {
+        }
+
+        public ItemRepairItemAckMessage(ItemRepairResult result, ulong itemId)
+        {
+            Result = result;
+            ItemId = itemId;
+        }
     }
 
     [BlubContract]
@@ -619,7 +639,6 @@ namespace Netsphere.Network.Message.Game
         {
             Items = items;
         }
-
     }
 
     [BlubContract]
@@ -630,6 +649,16 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(1)]
         public ItemRefundResult Result { get; set; }
+
+        public ItemRefundItemAckMessage()
+        {
+        }
+
+        public ItemRefundItemAckMessage(ItemRefundResult result, ulong itemId)
+        {
+            ItemId = itemId;
+            Result = result;
+        }
     }
 
     [BlubContract]
@@ -642,7 +671,8 @@ namespace Netsphere.Network.Message.Game
         public uint AP { get; set; }
 
         public MoneyRefreshCashInfoAckMessage()
-        { }
+        {
+        }
 
         public MoneyRefreshCashInfoAckMessage(uint pen, uint ap)
         {
@@ -664,6 +694,12 @@ namespace Netsphere.Network.Message.Game
         {
             Message = "";
         }
+
+        public AdminActionAckMessage(byte result, string message)
+        {
+            Result = result;
+            Message = message;
+        }
     }
 
     [BlubContract]
@@ -673,7 +709,8 @@ namespace Netsphere.Network.Message.Game
         public bool DisableConsole { get; set; }
 
         public AdminShowWindowAckMessage()
-        { }
+        {
+        }
 
         public AdminShowWindowAckMessage(bool disableConsole)
         {
@@ -691,6 +728,7 @@ namespace Netsphere.Network.Message.Game
         {
             Message = "";
         }
+
         public NoticeAdminMessageAckMessage(string message)
         {
             Message = message;
@@ -869,6 +907,16 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(1)]
         public uint BuffCoins { get; set; }
+
+        public MoenyRefreshCoinInfoAckMessage()
+        {
+        }
+
+        public MoenyRefreshCoinInfoAckMessage(uint arcadeCoins, uint buffCoins)
+        {
+            ArcadeCoins = arcadeCoins;
+            BuffCoins = buffCoins;
+        }
     }
 
     [BlubContract]
@@ -990,26 +1038,36 @@ namespace Netsphere.Network.Message.Game
     public class NewShopUpdateCheckAckMessage : IGameMessage
     {
         [BlubMember(0)]
-        public uint Unk { get; set; }
+        [BlubSerializer(typeof(EnumSerializer), typeof(uint))]
+        public ShopResourceType Flags { get; set; }
 
         [BlubMember(1)]
-        public string Date01 { get; set; }
+        public string PriceVersion { get; set; }
 
         [BlubMember(2)]
-        public string Date02 { get; set; }
+        public string EffectVersion { get; set; }
 
         [BlubMember(3)]
-        public string Date03 { get; set; }
+        public string ItemVersion { get; set; }
 
         [BlubMember(4)]
-        public string Date04 { get; set; }
+        public string UniqueItemVersion { get; set; }
 
         public NewShopUpdateCheckAckMessage()
         {
-            Date01 = "";
-            Date02 = "";
-            Date03 = "";
-            Date04 = "";
+            PriceVersion = "";
+            EffectVersion = "";
+            ItemVersion = "";
+            UniqueItemVersion = "";
+        }
+
+        public NewShopUpdateCheckAckMessage(ShopResourceType flags, string version)
+        {
+            Flags = flags;
+            PriceVersion = version;
+            EffectVersion = version;
+            ItemVersion = version;
+            UniqueItemVersion = version;
         }
     }
 
@@ -1023,19 +1081,30 @@ namespace Netsphere.Network.Message.Game
         public byte[] Data { get; set; }
 
         [BlubMember(2)]
-        public uint Unk1 { get; set; } // size of Data?
+        public uint CompressedLength { get; set; }
 
         [BlubMember(3)]
-        public uint Unk2 { get; set; } // checksum?
+        public uint DecompressedLength { get; set; }
 
         [BlubMember(4)]
-        public string Date { get; set; }
+        public string Version { get; set; }
 
         public NewShopUpdataInfoAckMessage()
         {
             Data = Array.Empty<byte>();
-            Date = "";
+            Version = "";
         }
+
+        public NewShopUpdataInfoAckMessage(ShopResourceType type, byte[] data,
+            uint compressedLength, uint decompressedLength, string version)
+        {
+            Type = type;
+            Data = data;
+            CompressedLength = compressedLength;
+            DecompressedLength = decompressedLength;
+            Version = version;
+        }
+
     }
 
     [BlubContract]
@@ -1106,6 +1175,16 @@ namespace Netsphere.Network.Message.Game
 
         [BlubMember(1)]
         public ulong ItemId { get; set; }
+
+        public ItemDiscardItemAckMessage()
+        {
+        }
+
+        public ItemDiscardItemAckMessage(uint result, ulong itemId)
+        {
+            Result = result;
+            ItemId = itemId;
+        }
     }
 
     [BlubContract]
@@ -1115,7 +1194,8 @@ namespace Netsphere.Network.Message.Game
         public ulong ItemId { get; set; }
 
         public ItemInventroyDeleteAckMessage()
-        { }
+        {
+        }
 
         public ItemInventroyDeleteAckMessage(ulong itemId)
         {
@@ -1232,7 +1312,8 @@ namespace Netsphere.Network.Message.Game
 
     [BlubContract]
     public class RandomShopUpdateRequestAckMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class RandomShopUpdateCheckAckMessage : IGameMessage
@@ -1486,7 +1567,8 @@ namespace Netsphere.Network.Message.Game
 
     [BlubContract]
     public class KRShutDownAckMessage : IGameMessage
-    { }
+    {
+    }
 
     [BlubContract]
     public class RequitalChallengeAckMessage : IGameMessage

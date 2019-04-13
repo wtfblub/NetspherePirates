@@ -11,7 +11,7 @@ namespace Netsphere.Network.Data.Game
         public ushort Id { get; set; }
 
         [BlubMember(1)]
-        public ushort PlayersOnline { get; set; }
+        public ushort PlayerCount { get; set; }
 
         [BlubMember(2)]
         public ushort PlayerLimit { get; set; }

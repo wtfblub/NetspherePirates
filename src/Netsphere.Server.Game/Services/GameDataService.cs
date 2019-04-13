@@ -30,7 +30,6 @@ namespace Netsphere.Server.Game.Services
         public ImmutableDictionary<ItemNumber, ShopItem> ShopItems { get; private set; }
         public ImmutableDictionary<int, ShopEffectGroup> ShopEffects { get; private set; }
         public ImmutableDictionary<int, ShopPriceGroup> ShopPrices { get; private set; }
-        public ImmutableDictionary<ItemLicense, LicenseReward> LicenseRewards { get; private set; }
         public ImmutableDictionary<int, LevelReward> LevelRewards { get; private set; }
         public string ShopVersion { get; private set; }
 

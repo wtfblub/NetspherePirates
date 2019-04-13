@@ -9,7 +9,6 @@ namespace Netsphere.Database
         public DbSet<PlayerCharacterEntity> PlayerCharacters { get; set; }
         public DbSet<PlayerDenyEntity> PlayerIgnores { get; set; }
         public DbSet<PlayerItemEntity> PlayerItems { get; set; }
-        public DbSet<PlayerLicenseEntity> PlayerLicenses { get; set; }
         public DbSet<PlayerMailEntity> PlayerMails { get; set; }
         public DbSet<PlayerSettingEntity> PlayerSettings { get; set; }
         public DbSet<ShopEffectGroupEntity> EffectGroups { get; set; }
@@ -20,7 +19,6 @@ namespace Netsphere.Database
         public DbSet<ShopItemInfoEntity> ItemInfos { get; set; }
         public DbSet<ShopVersionEntity> ShopVersion { get; set; }
         public DbSet<StartItemEntity> StartItems { get; set; }
-        public DbSet<LicenseRewardEntity> LicenseRewards { get; set; }
         public DbSet<LevelRewardEntity> LevelRewards { get; set; }
 
         public GameContext(DbContextOptions<GameContext> options)

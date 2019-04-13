@@ -3,7 +3,6 @@
     public class GameOptions
     {
         public bool EnableTutorial { get; set; }
-        public bool EnableLicenseRequirement { get; set; }
         public int MaxLevel { get; set; }
         public int StartLevel { get; set; }
         public int StartPEN { get; set; }

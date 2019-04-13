@@ -36,7 +36,7 @@ namespace Netsphere.Server.Game.Handlers
             if (result != CharacterCreateResult.Success)
             {
                 logger.Information("Failed to create character result={Result}", result);
-                session.Send(new SServerResultInfoAckMessage(ServerResult.CreateCharacterFailed));
+                session.Send(new ServerResultAckMessage(ServerResult.CreateCharacterFailed));
             }
 
             return true;
@@ -50,7 +50,7 @@ namespace Netsphere.Server.Game.Handlers
             var plr = session.Player;
 
             if (!plr.CharacterManager.Remove(message.Slot))
-                session.Send(new SServerResultInfoAckMessage(ServerResult.DeleteCharacterFailed));
+                session.Send(new ServerResultAckMessage(ServerResult.DeleteCharacterFailed));
 
             return true;
         }
@@ -66,14 +66,14 @@ namespace Netsphere.Server.Game.Handlers
             if (plr.Room != null && plr.State != PlayerState.Lobby &&
                 plr.Room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                session.Send(new ServerResultAckMessage(ServerResult.SelectCharacterFailed));
                 return true;
             }
 
             // Cant switch characters when ready
             if (plr.Room != null && plr.IsReady)
             {
-                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                session.Send(new ServerResultAckMessage(ServerResult.SelectCharacterFailed));
                 return true;
             }
 
@@ -84,13 +84,13 @@ namespace Netsphere.Server.Game.Handlers
                 var character = plr.CharacterManager[message.Slot];
                 if (character != null && !_equipValidator.IsValid(character))
                 {
-                    session.Send(new SServerResultInfoAckMessage(ServerResult.WearingUnusableItem));
+                    session.Send(new ServerResultAckMessage(ServerResult.WearingUnusableItem));
                     return true;
                 }
             }
 
             if (!plr.CharacterManager.Select(message.Slot))
-                session.Send(new SServerResultInfoAckMessage(ServerResult.SelectCharacterFailed));
+                session.Send(new ServerResultAckMessage(ServerResult.SelectCharacterFailed));
 
             return true;
         }

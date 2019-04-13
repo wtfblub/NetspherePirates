@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BlubLib.Threading.Tasks;
 using DotNetty.Transport.Channels;
 using ExpressMapper;
 using Foundatio.Caching;
@@ -17,7 +16,6 @@ using Netsphere.Common.Configuration;
 using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Game;
-using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
@@ -136,7 +134,6 @@ namespace Netsphere.Server.Game
                             Serializer = x.GetRequiredService<ISerializer>()
                         })
                         .AddTransient<Player>()
-                        .AddTransient<LicenseManager>()
                         .AddTransient<CharacterManager>()
                         .AddTransient<PlayerInventory>()
                         .AddSingleton<PlayerManager>()
@@ -200,91 +197,91 @@ namespace Netsphere.Server.Game
         private static void ConfigureMapper()
         {
             Mapper.Register<Channel, ChannelInfoDto>()
-                .Member(dest => dest.ChannelId, src => src.Id)
-                .Member(dest => dest.PlayerCount, src => src.Players.Count);
+                .Member(dest => dest.PlayerCount, src => src.Players.Count)
+                .Function(dest => dest.IsClanChannel, src => src.Category == ChannelCategory.Club);
 
-            Mapper.Register<PlayerItem, ItemDto>()
-                .Member(dest => dest.Refund, src => src.CalculateRefund())
-                .Member(dest => dest.PurchaseTime, src => src.PurchaseDate.ToUnixTimeSeconds())
-                .Member(dest => dest.ExpireTime,
-                    src => src.ExpireDate == DateTimeOffset.MinValue ? -1 : src.ExpireDate.ToUnixTimeSeconds())
-
-                // ToDo
-                .Value(dest => dest.TimeLeft, 0)
-                .Value(dest => dest.Unk1, (uint)0)
-                .Value(dest => dest.Unk2, 0)
-                .Value(dest => dest.Unk3, 0)
-                .Value(dest => dest.Unk4, 0)
-                .Value(dest => dest.Unk5, (uint)0)
-                .Value(dest => dest.Unk6, (uint)0);
+            // Mapper.Register<PlayerItem, ItemDto>()
+            //     .Member(dest => dest.Refund, src => src.CalculateRefund())
+            //     .Member(dest => dest.PurchaseTime, src => src.PurchaseDate.ToUnixTimeSeconds())
+            //     .Member(dest => dest.ExpireTime,
+            //         src => src.ExpireDate == DateTimeOffset.MinValue ? -1 : src.ExpireDate.ToUnixTimeSeconds())
+            //
+            //     // ToDo
+            //     .Value(dest => dest.TimeLeft, 0)
+            //     .Value(dest => dest.Unk1, (uint)0)
+            //     .Value(dest => dest.Unk2, 0)
+            //     .Value(dest => dest.Unk3, 0)
+            //     .Value(dest => dest.Unk4, 0)
+            //     .Value(dest => dest.Unk5, (uint)0)
+            //     .Value(dest => dest.Unk6, (uint)0);
 
             Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
                 .Member(dest => dest.ItemId, src => src.Id);
 
-            Mapper.Register<Room, RoomDto>()
-                .Member(dest => dest.RoomId, src => src.Id)
-                .Member(dest => dest.MatchKey, src => src.Options.MatchKey)
-                .Member(dest => dest.Name, src => src.Options.Name)
-                .Member(dest => dest.HasPassword, src => !string.IsNullOrWhiteSpace(src.Options.Password))
-                .Member(dest => dest.TimeLimit, src => src.Options.TimeLimit.TotalMilliseconds)
-                .Member(dest => dest.ScoreLimit, src => src.Options.ScoreLimit)
-                .Member(dest => dest.IsFriendly, src => src.Options.IsFriendly)
-                .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
-                .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
-                .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
-                .Member(dest => dest.EquipLimit, src => src.Options.EquipLimit)
-                .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
-                .Member(dest => dest.ConnectingCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
-                .Member(dest => dest.PlayerCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
-                .Function(dest => dest.Latency, src =>
-                {
-                    const int good = 30;
-                    const int bad = 190;
-
-                    var averagePing = src.GetAveragePing();
-
-                    if (averagePing <= good)
-                        return 100;
-
-                    if (averagePing >= bad)
-                        return 0;
-
-                    var result = (uint)(100f * averagePing / bad);
-                    return (byte)(100 - result);
-                })
-                .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState);
-
-            Mapper.Register<Room, EnterRoomInfoDto>()
-                .Member(dest => dest.RoomId, src => src.Id)
-                .Member(dest => dest.MatchKey, src => src.Options.MatchKey)
-                .Member(dest => dest.TimeLimit, src => src.Options.TimeLimit.TotalMilliseconds)
-                .Member(dest => dest.TimeSync, src => src.GameRule.StateMachine.RoundTime.TotalMilliseconds)
-                .Member(dest => dest.ScoreLimit, src => src.Options.ScoreLimit)
-                .Member(dest => dest.IsFriendly, src => src.Options.IsFriendly)
-                .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
-                .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
-                .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
-                .Member(dest => dest.EquipLimit, src => src.Options.EquipLimit)
-                .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
-                .Member(dest => dest.RelayEndPoint, src => src.Options.RelayEndPoint)
-                .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState)
-                .Function(dest => dest.TimeState, src => src.GameRule.StateMachine.TimeState);
-
-            Mapper.Register<Player, RoomPlayerDto>()
-                .Member(dest => dest.AccountId, src => src.Account.Id)
-                .Member(dest => dest.Nickname, src => src.Account.Nickname)
-                .Value(dest => dest.Unk1, (byte)144);
-
-            Mapper.Register<RoomCreationOptions, ChangeRuleDto>()
-                .Member(dest => dest.Name, src => src.Name)
-                .Member(dest => dest.Password, src => src.Password)
-                .Function(dest => dest.MatchKey, src => src.MatchKey)
-                .Member(dest => dest.TimeLimit, src => src.TimeLimit)
-                .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
-                .Member(dest => dest.IsFriendly, src => src.IsFriendly)
-                .Member(dest => dest.IsBalanced, src => src.IsBalanced)
-                .Member(dest => dest.EquipLimit, src => src.EquipLimit)
-                .Member(dest => dest.IsNoIntrusion, src => src.IsNoIntrusion);
+            // Mapper.Register<Room, RoomDto>()
+            //     .Member(dest => dest.RoomId, src => src.Id)
+            //     .Member(dest => dest.MatchKey, src => src.Options.MatchKey)
+            //     .Member(dest => dest.Name, src => src.Options.Name)
+            //     .Member(dest => dest.HasPassword, src => !string.IsNullOrWhiteSpace(src.Options.Password))
+            //     .Member(dest => dest.TimeLimit, src => src.Options.TimeLimit.TotalMilliseconds)
+            //     .Member(dest => dest.ScoreLimit, src => src.Options.ScoreLimit)
+            //     .Member(dest => dest.IsFriendly, src => src.Options.IsFriendly)
+            //     .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
+            //     .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
+            //     .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
+            //     .Member(dest => dest.EquipLimit, src => src.Options.EquipLimit)
+            //     .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
+            //     .Member(dest => dest.ConnectingCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
+            //     .Member(dest => dest.PlayerCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
+            //     .Function(dest => dest.Latency, src =>
+            //     {
+            //         const int good = 30;
+            //         const int bad = 190;
+            //
+            //         var averagePing = src.GetAveragePing();
+            //
+            //         if (averagePing <= good)
+            //             return 100;
+            //
+            //         if (averagePing >= bad)
+            //             return 0;
+            //
+            //         var result = (uint)(100f * averagePing / bad);
+            //         return (byte)(100 - result);
+            //     })
+            //     .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState);
+            //
+            // Mapper.Register<Room, EnterRoomInfoDto>()
+            //     .Member(dest => dest.RoomId, src => src.Id)
+            //     .Member(dest => dest.MatchKey, src => src.Options.MatchKey)
+            //     .Member(dest => dest.TimeLimit, src => src.Options.TimeLimit.TotalMilliseconds)
+            //     .Member(dest => dest.TimeSync, src => src.GameRule.StateMachine.RoundTime.TotalMilliseconds)
+            //     .Member(dest => dest.ScoreLimit, src => src.Options.ScoreLimit)
+            //     .Member(dest => dest.IsFriendly, src => src.Options.IsFriendly)
+            //     .Member(dest => dest.IsBalanced, src => src.Options.IsBalanced)
+            //     .Member(dest => dest.MinLevel, src => src.Options.MinLevel)
+            //     .Member(dest => dest.MaxLevel, src => src.Options.MaxLevel)
+            //     .Member(dest => dest.EquipLimit, src => src.Options.EquipLimit)
+            //     .Member(dest => dest.IsNoIntrusion, src => src.Options.IsNoIntrusion)
+            //     .Member(dest => dest.RelayEndPoint, src => src.Options.RelayEndPoint)
+            //     .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState)
+            //     .Function(dest => dest.TimeState, src => src.GameRule.StateMachine.TimeState);
+            //
+            // Mapper.Register<Player, RoomPlayerDto>()
+            //     .Member(dest => dest.AccountId, src => src.Account.Id)
+            //     .Member(dest => dest.Nickname, src => src.Account.Nickname)
+            //     .Value(dest => dest.Unk1, (byte)144);
+            //
+            // Mapper.Register<RoomCreationOptions, ChangeRuleDto>()
+            //     .Member(dest => dest.Name, src => src.Name)
+            //     .Member(dest => dest.Password, src => src.Password)
+            //     .Function(dest => dest.MatchKey, src => src.MatchKey)
+            //     .Member(dest => dest.TimeLimit, src => src.TimeLimit)
+            //     .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
+            //     .Member(dest => dest.IsFriendly, src => src.IsFriendly)
+            //     .Member(dest => dest.IsBalanced, src => src.IsBalanced)
+            //     .Member(dest => dest.EquipLimit, src => src.EquipLimit)
+            //     .Member(dest => dest.IsNoIntrusion, src => src.IsNoIntrusion);
 
             Mapper.Compile(CompilationTypes.Source);
         }

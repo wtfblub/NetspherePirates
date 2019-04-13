@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using ExpressMapper.Extensions;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
@@ -123,8 +122,12 @@ namespace Netsphere.Server.Game
             if (Durability < 0)
                 Durability = 0;
 
-            Inventory.Player.Session.Send(new SItemDurabilityInfoAckMessage(
-                new[] { this.Map<PlayerItem, ItemDurabilityInfoDto>() }));
+            Inventory.Player.Session.Send(new ItemDurabilityItemAckMessage(
+                new[]
+                {
+                    this.Map<PlayerItem, ItemDurabilityInfoDto>()
+                })
+            );
         }
 
         // TODO Calculate refund/repair cost

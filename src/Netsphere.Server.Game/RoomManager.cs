@@ -86,7 +86,7 @@ namespace Netsphere.Server.Game
             var room = _serviceProvider.GetRequiredService<Room>();
             room.Initialize(this, _idRecycler.GetId(), options);
             _rooms.TryAdd(room.Id, room);
-            Channel.Broadcast(new SDeployGameRoomAckMessage(room.Map<Room, RoomDto>()));
+            Channel.Broadcast(new RoomDeployAckMessage(room.Map<Room, RoomDto>()));
             OnRoomCreated(this, room);
             return (room, RoomCreateError.OK);
         }
@@ -98,7 +98,7 @@ namespace Netsphere.Server.Game
 
             _rooms.Remove(room.Id);
             _idRecycler.Return(room.Id);
-            Channel.Broadcast(new SDisposeGameRoomAckMessage(room.Id));
+            Channel.Broadcast(new RoomDisposeAckMessage(room.Id));
             OnRoomRemoved(this, room);
             return true;
         }

@@ -64,7 +64,7 @@ namespace Netsphere.Server.Game
         protected virtual void OnPlayerJoining(Player plr)
         {
             PlayerJoining?.Invoke(this, new RoomPlayerEventArgs(this, plr));
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
             _messageBus.PublishAsync(new PlayerUpdateMessage(plr.Account.Id, plr.TotalExperience, Id, TeamId.Neutral));
         }
 
@@ -84,7 +84,7 @@ namespace Netsphere.Server.Game
         protected virtual void OnPlayerLeft(Player plr)
         {
             PlayerLeft?.Invoke(this, new RoomPlayerEventArgs(this, plr));
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
             _messageBus.PublishAsync(new PlayerUpdateMessage(plr.Account.Id, plr.TotalExperience, 0, TeamId.Neutral));
         }
 
@@ -92,7 +92,7 @@ namespace Netsphere.Server.Game
         {
             OptionsChanged?.Invoke(this, new RoomEventArgs(this));
             Broadcast(new SChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
         }
 
         public Room(ILogger<Room> logger, GameRuleResolver gameRuleResolver, GameDataService gameDataService,
@@ -200,11 +200,12 @@ namespace Netsphere.Server.Game
                 ChangeHost(plr);
             }
 
-            Broadcast(new SEnteredPlayerAckMessage(plr.Map<Player, RoomPlayerDto>()));
-            plr.Session.Send(new SSuccessEnterRoomAckMessage(this.Map<Room, EnterRoomInfoDto>()));
-            plr.Session.Send(new SIdsInfoAckMessage(0, plr.Slot));
-            plr.Session.Send(new SEnteredPlayerListAckMessage(
-                _players.Values.Select(x => x.Map<Player, RoomPlayerDto>()).ToArray()));
+            Broadcast(new RoomEnterPlayerInfoAckMessage(plr.Map<Player, RoomPlayerDto>()));
+            plr.Session.Send(new RoomEnterRoomInfoAckMessage(this.Map<Room, EnterRoomInfoDto>()));
+            plr.Session.Send(new RoomCurrentCharacterSlotAckMessage(0, plr.Slot));
+            plr.Session.Send(new RoomPlayerInfoListForEnterPlayerAckMessage(
+                _players.Values.Select(x => x.Map<Player, RoomPlayerDto>()).ToArray())
+            );
             OnPlayerJoining(plr);
 
             return RoomJoinError.OK;
@@ -215,7 +216,7 @@ namespace Netsphere.Server.Game
             if (plr.Room != this)
                 return;
 
-            Broadcast(new Network.Message.GameRule.SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
+            Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
 
             if (roomLeaveReason == RoomLeaveReason.Kicked ||
                 roomLeaveReason == RoomLeaveReason.ModeratorKick ||
@@ -228,7 +229,8 @@ namespace Netsphere.Server.Game
             plr.Room = null;
             plr.PeerId = null;
             plr.IsReady = false;
-            plr.Session.Send(new Network.Message.Game.SLeavePlayerAckMessage(plr.Account.Id));
+
+            plr.Session.Send(new RoomLeavePlayerInfoAckMessage(plr.Account.Id));
 
             OnPlayerLeft(plr);
 
@@ -363,7 +365,7 @@ namespace Netsphere.Server.Game
 
         private void OnGameStateChanged(object sender, EventArgs e)
         {
-            RoomManager.Channel.Broadcast(new SChangeGameRoomAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
             if (GameRule.StateMachine.GameState == GameState.Result)
             {
                 foreach (var plr in Players.Values)
