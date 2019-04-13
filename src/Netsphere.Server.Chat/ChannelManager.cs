@@ -7,6 +7,7 @@ namespace Netsphere.Server.Chat
 {
     public class ChannelManager : IReadOnlyCollection<Channel>
     {
+        private readonly PlayerManager _playerManager;
         private readonly IDictionary<uint, Channel> _channels;
 
         public Channel this[uint id] => GetChannel(id);
@@ -24,8 +25,9 @@ namespace Netsphere.Server.Chat
             PlayerLeft?.Invoke(this, new ChannelEventArgs(channel, plr));
         }
 
-        public ChannelManager()
+        public ChannelManager(PlayerManager playerManager)
         {
+            _playerManager = playerManager;
             _channels = new ConcurrentDictionary<uint, Channel>();
         }
 
@@ -41,7 +43,7 @@ namespace Netsphere.Server.Chat
             if (channel != null)
                 return channel;
 
-            channel = new Channel(id);
+            channel = new Channel(id, _playerManager);
             if (_channels.TryAdd(id, channel))
             {
                 channel.PlayerJoined += (_, e) => OnPlayerJoined(e.Channel, e.Player);

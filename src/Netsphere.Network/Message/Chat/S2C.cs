@@ -547,6 +547,12 @@ namespace Netsphere.Network.Message.Chat
         {
             UserData = new UserDataDto();
         }
+
+        public UserDataFourAckMessage(int unk, UserDataDto userData)
+        {
+            Unk = unk;
+            UserData = userData;
+        }
     }
 
     [BlubContract]

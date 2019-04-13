@@ -96,7 +96,7 @@ namespace Netsphere.Network.Data.Chat
         public ArenaUserDataDto ArenaStats { get; set; }
 
         [BlubMember(29)]
-        public byte Unk8 { get; set; }
+        public CharacterGender Gender { get; set; }
 
         [BlubMember(30)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]

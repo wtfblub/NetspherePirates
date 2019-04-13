@@ -15,7 +15,7 @@ namespace Netsphere.Network.Data.Chat
         public int Unk { get; set; }
 
         [BlubMember(3)]
-        public uint TotalExp { get; set; }
+        public uint TotalExperience { get; set; }
 
         [BlubMember(4)]
         public bool IsGM { get; set; }

@@ -102,8 +102,11 @@ namespace Netsphere.Server.Chat.Services
             plr.RoomId = message.RoomId;
             plr.TeamId = message.TeamId;
 
-            var channel = plr.Channel;
-            channel.Broadcast(new SUserDataAckMessage(plr.Map<Player, UserDataDto>()));
+            if (plr.RoomId != 0)
+                plr.Channel.Broadcast(new ChannelLeavePlayerAckMessage(plr.Account.Id));
+            else if (plr.RoomId == 0)
+                plr.Channel.Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
+
             return Task.CompletedTask;
         }
     }

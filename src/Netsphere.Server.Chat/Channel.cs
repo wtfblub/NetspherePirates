@@ -10,6 +10,7 @@ namespace Netsphere.Server.Chat
 {
     public class Channel
     {
+        private readonly PlayerManager _playerManager;
         private readonly IDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
 
         public uint Id { get; }
@@ -28,8 +29,9 @@ namespace Netsphere.Server.Chat
             PlayerLeft?.Invoke(this, new ChannelEventArgs(this, plr));
         }
 
-        public Channel(uint id)
+        public Channel(uint id, PlayerManager playerManager)
         {
+            _playerManager = playerManager;
             Id = id;
         }
 
@@ -37,7 +39,10 @@ namespace Netsphere.Server.Chat
         {
             _players.Add(plr.Account.Id, plr);
             plr.Channel = this;
-            Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, UserDataWithNickDto>()));
+            Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
+            foreach (var p in _playerManager.Where(x => x.Channel == null))
+                p.Session.Send(new ChannelLeavePlayerAckMessage(plr.Account.Id));
+
             OnPlayerJoined(plr);
         }
 
@@ -47,6 +52,9 @@ namespace Netsphere.Server.Chat
             plr.Channel = null;
             plr.SentPlayerList = false;
             Broadcast(new ChannelLeavePlayerAckMessage(plr.Account.Id));
+            foreach (var p in _playerManager.Where(x => x.Channel == null))
+                p.Session.Send(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
+
             OnPlayerLeft(plr);
         }
 
