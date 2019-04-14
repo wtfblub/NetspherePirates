@@ -6,133 +6,105 @@ namespace Netsphere.Resource.xml
     [XmlRoot(Namespace = "", IsNullable = false, ElementName = "gameinfo")]
     public class GameInfoDto
     {
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoMapDto[] map { get; set; }
-
-        public GameInfoTutorialDto tutorial { get; set; }
-
-        public GameInfoScoreDto score { get; set; }
-
-        public GameInfoTimeDto time { get; set; }
-
         [XmlAttribute]
         public string string_table { get; set; }
+
+        public GameInfoGameModeDto[] game_mode { get; set; }
     }
 
     [XmlType(AnonymousType = true)]
-    public class GameInfoMapDto
+    public class GameInfoGameModeDto
     {
         [XmlAttribute]
-        public short id { get; set; }
+        public int id { get; set; }
 
         [XmlAttribute]
-        public string map_name_key { get; set; }
+        public bool use { get; set; }
 
         [XmlAttribute]
-        public byte require_level { get; set; }
+        public string image { get; set; }
 
         [XmlAttribute]
-        public byte require_server { get; set; }
+        public string tip_key { get; set; }
 
         [XmlAttribute]
-        public byte require_channel { get; set; }
+        public string tag { get; set; }
 
         [XmlAttribute]
-        public byte respawn_type { get; set; }
+        public int category { get; set; }
 
-        [XmlAttribute]
-        public string bginfo_path { get; set; }
-
-        [XmlAttribute]
-        public bool dev_mode { get; set; }
+        public GameInfoGameModeScoreTimeDto score_time { get; set; }
+        public GameInfoGameModeLimitPlayerDto limit_player { get; set; }
+        public GameInfoGameModeWeaponDropDto player_weapon_drop { get; set; }
+        public GameInfoGameModeWeaponUnlimitDto player_weapon_unlimit { get; set; }
     }
 
     [XmlType(AnonymousType = true)]
-    public class GameInfoTutorialDto
+    public class GameInfoGameModeScoreTimeDto
     {
         [XmlAttribute]
-        public byte map_id { get; set; }
+        public int select { get; set; }
+
+        [XmlElement("data")]
+        public GameInfoGameModeScoreTimeDataDto[] data { get; set; }
     }
 
     [XmlType(AnonymousType = true)]
-    public class GameInfoScoreDto
-    {
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] death_match { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] touch_down { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] survival { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] mission { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] semi_td { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] arcade { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] slaughter { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] free_for_all { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoScoreDataDto[] captain { get; set; }
-    }
-
-    [XmlType(AnonymousType = true)]
-    public class GameInfoScoreDataDto
+    public class GameInfoGameModeScoreTimeDataDto
     {
         [XmlAttribute]
-        public short score { get; set; }
+        public string score { get; set; }
 
         [XmlAttribute]
         public string score_string_key { get; set; }
-    }
 
-    [XmlType(AnonymousType = true)]
-    public class GameInfoTimeDto
-    {
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] death_match { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] touch_down { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] survival { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] mission { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] semi_td { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] arcade { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] slaughter { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] free_for_all { get; set; }
-
-        [XmlArrayItem("data", IsNullable = false)]
-        public GameInfoTimeDataDto[] captain { get; set; }
-    }
-
-    [XmlType(AnonymousType = true)]
-    public class GameInfoTimeDataDto
-    {
         [XmlAttribute]
-        public short time { get; set; }
+        public string time { get; set; }
 
         [XmlAttribute]
         public string time_string_key { get; set; }
+    }
+
+    [XmlType(AnonymousType = true)]
+    public class GameInfoGameModeLimitPlayerDto
+    {
+        [XmlAttribute]
+        public int select { get; set; }
+
+        [XmlElement("data")]
+        public GameInfoGameModeLimitPlayerDataDto[] data { get; set; }
+    }
+
+    [XmlType(AnonymousType = true)]
+    public class GameInfoGameModeLimitPlayerDataDto
+    {
+        [XmlAttribute]
+        public int player { get; set; }
+
+        [XmlAttribute]
+        public string player_string_key { get; set; }
+    }
+
+    [XmlType(AnonymousType = true)]
+    public class GameInfoGameModeWeaponDropDto
+    {
+        [XmlAttribute]
+        public bool active { get; set; }
+
+        [XmlAttribute]
+        public int prob { get; set; }
+
+        [XmlAttribute]
+        public int remove_time { get; set; }
+
+        [XmlAttribute]
+        public bool respone_reset { get; set; }
+    }
+
+    [XmlType(AnonymousType = true)]
+    public class GameInfoGameModeWeaponUnlimitDto
+    {
+        [XmlAttribute]
+        public bool active { get; set; }
     }
 }
