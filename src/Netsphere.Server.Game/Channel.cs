@@ -2,9 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using Netsphere.Database.Game;
 using Netsphere.Network.Message.Game;
-using Netsphere.Server.Game.Data;
 
 namespace Netsphere.Server.Game
 {
@@ -46,18 +47,17 @@ namespace Netsphere.Server.Game
             PlayerLeft?.Invoke(this, new ChannelEventArgs(this, plr));
         }
 
-        public Channel(ChannelInfo channelInfo, RoomManager roomManager)
+        public Channel(ChannelEntity channelEntity, RoomManager roomManager)
         {
-            Id = channelInfo.Id;
-            Category = channelInfo.Category;
-            PlayerLimit = channelInfo.PlayerLimit;
-            Name = channelInfo.Name;
-            Description = channelInfo.Description;
-            Rank = channelInfo.Rank;
-            Color = channelInfo.Color;
-            TooltipColor = channelInfo.TooltipColor;
-            MinLevel = channelInfo.MinLevel;
-            MaxLevel = channelInfo.MaxLevel;
+            Id = (uint)channelEntity.Id;
+            Category = ChannelCategory.Speed;
+            PlayerLimit = channelEntity.PlayerLimit;
+            Name = channelEntity.Name;
+            Description = channelEntity.Description;
+            Rank = "FREE";
+            Color = Color.FromArgb(int.Parse(channelEntity.Color, NumberStyles.HexNumber));
+            MinLevel = (uint)channelEntity.MinLevel;
+            MaxLevel = (uint)channelEntity.MaxLevel;
             RoomManager = roomManager;
             RoomManager.Initialize(this);
         }

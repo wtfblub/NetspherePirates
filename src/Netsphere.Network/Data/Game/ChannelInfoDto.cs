@@ -43,8 +43,7 @@ namespace Netsphere.Network.Data.Game
         public int Unk2 { get; set; }
 
         [BlubMember(11)]
-        [BlubSerializer(typeof(ColorSerializer))]
-        public Color TooltipColor { get; set; }
+        public int Unk3 { get; set; }
 
         public ChannelInfoDto()
         {
@@ -52,7 +51,6 @@ namespace Netsphere.Network.Data.Game
             Rank = "";
             Description = "";
             Color = Color.Black;
-            TooltipColor = Color.Black;
         }
     }
 }

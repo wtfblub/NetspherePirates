@@ -6,16 +6,18 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Logging;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Netsphere.Database;
 
 namespace Netsphere.Server.Game.Services
 {
     public class ChannelService : IHostedService, IReadOnlyCollection<Channel>
     {
         private readonly ILogger _logger;
-        private readonly GameDataService _gameDataService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly DatabaseService _databaseService;
         private ImmutableDictionary<uint, Channel> _channels;
 
         public Channel this[uint id] => GetChannel(id);
@@ -33,10 +35,11 @@ namespace Netsphere.Server.Game.Services
             PlayerLeft?.Invoke(this, new ChannelEventArgs(channel, plr));
         }
 
-        public ChannelService(ILogger<ChannelService> logger, GameDataService gameDataService, IServiceProvider serviceProvider)
+        public ChannelService(ILogger<ChannelService> logger, DatabaseService databaseService,
+            IServiceProvider serviceProvider)
         {
             _logger = logger;
-            _gameDataService = gameDataService;
+            _databaseService = databaseService;
             _serviceProvider = serviceProvider;
         }
 
@@ -46,19 +49,25 @@ namespace Netsphere.Server.Game.Services
             return channel;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.Information("Creating channels...");
 
-            _channels = _gameDataService.Channels.Select(x =>
+            using (var db = _databaseService.Open<GameContext>())
             {
-                var channel = new Channel(x, _serviceProvider.GetRequiredService<RoomManager>());
-                channel.PlayerJoined += (s, e) => OnPlayerJoined(e.Channel, e.Player);
-                channel.PlayerLeft += (s, e) => OnPlayerLeft(e.Channel, e.Player);
-                return channel;
-            }).ToImmutableDictionary(x => x.Id, x => x);
+                var entities = await db.Channels.ToArrayAsync();
+                _channels = entities
+                    .Select(x =>
+                    {
+                        var channel = new Channel(x, _serviceProvider.GetRequiredService<RoomManager>());
+                        channel.PlayerJoined += (s, e) => OnPlayerJoined(e.Channel, e.Player);
+                        channel.PlayerLeft += (s, e) => OnPlayerLeft(e.Channel, e.Player);
+                        return channel;
+                    })
+                    .ToImmutableDictionary(x => x.Id, x => x);
+            }
 
-            return Task.CompletedTask;
+            _logger.Information("Created {Count} channels", _channels.Count);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

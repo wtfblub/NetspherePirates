@@ -18,7 +18,6 @@ namespace Netsphere.Server.Game.Services
         private readonly string _resourcePath;
 
         public ImmutableDictionary<int, LevelInfo> Levels { get; private set; }
-        public ImmutableArray<ChannelInfo> Channels { get; private set; }
         public ImmutableArray<MapInfo> Maps { get; private set; }
         public ImmutableDictionary<uint, ItemEffect> Effects { get; private set; }
         public ImmutableDictionary<ItemNumber, ItemInfo> Items { get; private set; }
@@ -71,15 +70,14 @@ namespace Netsphere.Server.Game.Services
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             LoadLevels();
-            LoadChannels();
-            LoadMaps();
-            LoadEffects();
-            LoadItems();
+            // LoadMaps();
+            // LoadEffects();
+            // LoadItems();
             LoadDefaultItems();
             LoadGameTempos();
-            LoadEquipLimits();
-            await LoadShop();
-            await LoadLevelRewards();
+            // LoadEquipLimits();
+            // await LoadShop();
+            // await LoadLevelRewards();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

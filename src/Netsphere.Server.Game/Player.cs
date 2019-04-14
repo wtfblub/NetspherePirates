@@ -334,7 +334,7 @@ namespace Netsphere.Server.Game
                 Nickname = Account.Nickname
             }));
 
-            Session.Send(new ServerResultAckMessage(ServerResult.WelcomeToS4World2));
+            // Session.Send(new ServerResultAckMessage(ServerResult.WelcomeToS4World2));
 
             if (Inventory.Count == 0)
             {

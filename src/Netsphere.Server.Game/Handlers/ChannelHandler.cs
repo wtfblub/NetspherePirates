@@ -91,14 +91,14 @@ namespace Netsphere.Server.Game.Handlers
             return true;
         }
 
-        [Firewall(typeof(MustBeInChannel))]
+        [Firewall(typeof(MustBeLoggedIn))]
         [Firewall(typeof(MustBeInRoom), Invert = true)]
         public async Task<bool> OnHandle(MessageContext context, ChannelLeaveReqMessage message)
         {
             var session = context.GetSession<Session>();
             var plr = session.Player;
 
-            plr.Channel.Leave(plr);
+            plr.Channel?.Leave(plr);
             plr.Session.Send(new ServerResultAckMessage(ServerResult.ChannelLeave));
             return true;
         }

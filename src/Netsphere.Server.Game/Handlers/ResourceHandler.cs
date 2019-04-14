@@ -32,6 +32,7 @@ namespace Netsphere.Server.Game.Handlers
         [Inline]
         public async Task<bool> OnHandle(MessageContext context, NewShopUpdateCheckReqMessage message)
         {
+            return true;
             var session = context.Session;
 
             var version = _gameDataService.ShopVersion;

@@ -25,6 +25,20 @@ namespace Netsphere.Server.Game.Handlers
             var character = plr.CharacterManager[message.CharacterSlot];
             var item = plr.Inventory[message.ItemId];
 
+            // This is a weird thing since newer seasons
+            // The client sends a request with itemid 0 on login
+            // and requires an answer to it for equipment to work properly
+            if (message.Action == UseItemAction.UnEquip && message.ItemId == 0)
+            {
+                session.Send(new ItemUseItemAckMessage(
+                    message.CharacterSlot,
+                    message.EquipSlot,
+                    message.ItemId,
+                    message.Action
+                ));
+                return true;
+            }
+
             if (character == null || item == null || plr.Room != null && plr.State != PlayerState.Lobby)
             {
                 session.Send(new ServerResultAckMessage(ServerResult.FailedToRequestTask));

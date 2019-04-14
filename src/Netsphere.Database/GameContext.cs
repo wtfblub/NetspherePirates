@@ -20,6 +20,7 @@ namespace Netsphere.Database
         public DbSet<ShopVersionEntity> ShopVersion { get; set; }
         public DbSet<StartItemEntity> StartItems { get; set; }
         public DbSet<LevelRewardEntity> LevelRewards { get; set; }
+        public DbSet<ChannelEntity> Channels { get; set; }
 
         public GameContext(DbContextOptions<GameContext> options)
             : base(options)

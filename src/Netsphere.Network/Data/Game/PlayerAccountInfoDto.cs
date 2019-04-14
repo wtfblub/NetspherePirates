@@ -77,25 +77,25 @@ namespace Netsphere.Network.Data.Game
         [BlubMember(22)]
         public SiegeStatsDto SiegeStats { get; set; }
 
-        [BlubMember(22)]
+        [BlubMember(23)]
         public ArenaStatsDto ArenaStats { get; set; }
 
-        [BlubMember(23)]
+        [BlubMember(24)]
         public uint Unk6 { get; set; }
 
-        [BlubMember(24)]
+        [BlubMember(25)]
         public uint Unk7 { get; set; }
 
-        [BlubMember(25)]
+        [BlubMember(26)]
         public uint Unk8 { get; set; }
 
-        [BlubMember(26)]
+        [BlubMember(27)]
         public uint Unk9 { get; set; }
 
-        [BlubMember(27)]
+        [BlubMember(28)]
         public uint Unk10 { get; set; }
 
-        [BlubMember(28)]
+        [BlubMember(29)]
         public uint Unk11 { get; set; }
 
         public PlayerAccountInfoDto()
