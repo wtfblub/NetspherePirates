@@ -80,7 +80,7 @@ namespace Netsphere.Server.Game
             if (map == null)
                 return (null, RoomCreateError.InvalidMap);
 
-            if (!map.GameRules.Contains(options.MatchKey.GameRule))
+            if (map.GameRule != options.MatchKey.GameRule)
                 return (null, RoomCreateError.InvalidGameRule);
 
             var room = _serviceProvider.GetRequiredService<Room>();

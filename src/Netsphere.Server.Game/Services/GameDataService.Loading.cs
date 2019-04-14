@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using BlubLib.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -41,90 +39,37 @@ namespace Netsphere.Server.Game.Services
         public void LoadMaps()
         {
             _logger.Information("Loading maps...");
-            var dto = Deserialize<GameInfoDto>("xml/_eu_gameinfo.x7");
+            var dto = Deserialize<MapListDto>("xml/map.x7");
             var stringTable = Deserialize<StringTableDto>("language/xml/gameinfo_string_table.x7");
             Maps = Transform().ToImmutableArray();
             _logger.Information("Loaded {Count} maps", Maps.Length);
 
             IEnumerable<MapInfo> Transform()
             {
-                foreach (var mapDto in dto.map.Where(map => map.id != -1 && !map.dev_mode))
+                foreach (var mapDto in dto.map)
                 {
-                    mapDto.bginfo_path = mapDto.bginfo_path.ToLower();
-
                     var map = new MapInfo
                     {
                         Id = (byte)mapDto.id,
-                        MinLevel = mapDto.require_level,
-                        ServerId = mapDto.require_server,
-                        ChannelId = mapDto.require_channel,
-                        RespawnType = mapDto.respawn_type
+                        GameRule = (GameRule)mapDto.@base.mode_number,
+                        PlayerLimit = mapDto.@base.limit_player
                     };
-                    var data = GetBytes(mapDto.bginfo_path);
-                    if (data == null)
+
+                    if (!string.IsNullOrWhiteSpace(mapDto.@switch.eu) &&
+                        mapDto.@switch.eu != "off" &&
+                        mapDto.@switch.eu != "dev")
                     {
-                        _logger.Warning("bginfo_path:{biginfo} not found", mapDto.bginfo_path);
-                        continue;
+                        map.IsEnabled = true;
                     }
 
-                    using (var ms = new MemoryStream(data))
-                        map.Config = IniFile.Load(ms);
-
-                    foreach (var enabledMode in map.Config["MAPINFO"]
-                        .Where(pair => pair.Key.StartsWith("enableMode1", StringComparison.InvariantCultureIgnoreCase))
-                        .Select(pair => pair.Value))
-                    {
-                        switch (enabledMode.Value.ToLower())
-                        {
-                            case "sl":
-                                map.GameRules.Add(GameRule.Chaser);
-                                break;
-
-                            case "t":
-                                map.GameRules.Add(GameRule.Touchdown);
-                                break;
-
-                            case "c":
-                                map.GameRules.Add(GameRule.Captain);
-                                break;
-
-                            case "f":
-                                map.GameRules.Add(GameRule.BattleRoyal);
-                                break;
-
-                            case "d":
-                                map.GameRules.Add(GameRule.Deathmatch);
-                                break;
-
-                            case "s":
-                                map.GameRules.Add(GameRule.Survival);
-                                break;
-
-                            case "m":
-                                map.GameRules.Add(GameRule.Practice);
-                                break;
-
-                            case "a":
-                                map.GameRules.Add(GameRule.Arcade);
-                                break;
-
-                            // wtf is this?
-                            // probably s:survival, t:touchdown, d:deathmatch
-                            // this is also on enableMode2 while others are on enableMode1
-                            // case "std":
-                            //     break;
-
-                            default:
-                                throw new Exception("Invalid game rule " + enabledMode);
-                        }
-                    }
-
-                    var name = stringTable.@string.FirstOrDefault(s =>
-                        s.key.Equals(mapDto.map_name_key, StringComparison.InvariantCultureIgnoreCase));
+                    var name = stringTable.@string.FirstOrDefault(s => s.key.Equals(
+                        mapDto.@base.map_name_key,
+                        StringComparison.InvariantCultureIgnoreCase
+                    ));
                     if (string.IsNullOrWhiteSpace(name?.eng))
                     {
-                        _logger.Warning("Missing english translation for {MapKey}", mapDto.map_name_key);
-                        map.Name = mapDto.map_name_key;
+                        _logger.Warning("Missing english translation for {MapKey}", mapDto.@base.map_name_key);
+                        map.Name = mapDto.@base.map_name_key;
                     }
                     else
                     {

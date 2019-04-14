@@ -302,7 +302,7 @@ namespace Netsphere.Server.Game
             if (map == null)
                 return RoomChangeRulesError.InvalidMap;
 
-            if (!map.GameRules.Contains(options.MatchKey.GameRule))
+            if (map.GameRule != options.MatchKey.GameRule)
                 return RoomChangeRulesError.InvalidGameRule;
 
             if (options.MatchKey.PlayerLimit + options.MatchKey.SpectatorLimit < Players.Count)

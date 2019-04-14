@@ -70,7 +70,7 @@ namespace Netsphere.Server.Game.Services
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             LoadLevels();
-            // LoadMaps();
+            LoadMaps();
             // LoadEffects();
             // LoadItems();
             LoadDefaultItems();

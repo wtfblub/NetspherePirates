@@ -30,7 +30,8 @@ namespace DataExtractor
                 "xml/item.x7",
                 "xml/enchant_data.x7",
                 "xml/monster_status.x7",
-                "xml/monster_wave/monster_map_middle.x7"
+                "xml/monster_wave/monster_map_middle.x7",
+                "xml/map.x7"
             };
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resource.s4hd");
             if (!File.Exists(path))

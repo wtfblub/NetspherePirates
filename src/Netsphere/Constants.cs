@@ -159,12 +159,12 @@ namespace Netsphere
         Arcade = 7,
         Chaser = 8,
         BattleRoyal = 9,
-        Captain = 10
-
-        //Siege = 11,
-        //Horde = 12,
-        //Challenge = 13,
-        //Random = 14,
+        Captain = 10,
+        Siege = 11,
+        Horde = 12,
+        Challenge = 13,
+        Random = 14,
+        Arena = 20
     }
 
     public enum GameState : uint
