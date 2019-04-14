@@ -47,12 +47,8 @@ namespace Netsphere.Server.Game
                 return false;
 
             // Check room equip limit
-            foreach (var item in items.Where(x => x != null))
-            {
-                var license = item.GetShopItem().License;
-                if (license != ItemLicense.None && !equipLimitInfo.Whitelist.Contains(license))
-                    return false;
-            }
+            if (items.Any(x => equipLimitInfo.Blacklist.Contains(x.ItemNumber)))
+                return false;
 
             items = character.Skills.GetItems();
 
@@ -61,12 +57,8 @@ namespace Netsphere.Server.Game
                 return false;
 
             // Check room equip limit
-            foreach (var item in items.Where(x => x != null))
-            {
-                var license = item.GetShopItem().License;
-                if (license != ItemLicense.None && !equipLimitInfo.Whitelist.Contains(license))
-                    return false;
-            }
+            if (items.Any(x => equipLimitInfo.Blacklist.Contains(x.ItemNumber)))
+                return false;
 
             return true;
         }

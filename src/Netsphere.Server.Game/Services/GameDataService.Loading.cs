@@ -369,50 +369,18 @@ namespace Netsphere.Server.Game.Services
         {
             _logger.Information("Loading equip limits...");
             var dto = Deserialize<EquipLimitDto>("xml/equip_limit.x7");
-            EquipLimits = Transform().ToImmutableDictionary(x => x.Rule, x => x);
+            EquipLimits = Transform().ToImmutableDictionary(x => x.Id, x => x);
             _logger.Information("Loaded {Count} equip limits", EquipLimits.Count);
 
             IEnumerable<EquipLimitInfo> Transform()
             {
-                yield return new EquipLimitInfo
+                foreach (var limitDto in dto.preset)
                 {
-                    Rule = EquipLimit.S4League,
-                    Whitelist = ParseLicenses(dto.preset.s4)
-                };
-
-                yield return new EquipLimitInfo
-                {
-                    Rule = EquipLimit.SuperLeague,
-                    Whitelist = ParseLicenses(dto.preset.super)
-                };
-
-                yield return new EquipLimitInfo
-                {
-                    Rule = EquipLimit.RookieLeague,
-                    Whitelist = ParseLicenses(dto.preset.rookie)
-                };
-
-                yield return new EquipLimitInfo
-                {
-                    Rule = EquipLimit.SwordMatch,
-                    Whitelist = ParseLicenses(dto.preset.sword)
-                };
-
-                yield return new EquipLimitInfo
-                {
-                    Rule = EquipLimit.Arcade,
-                    Whitelist = ParseLicenses(dto.preset.arcade)
-                };
-
-                yield return new EquipLimitInfo
-                {
-                    Rule = EquipLimit.Chaser,
-                    Whitelist = ParseLicenses(dto.preset.slaughter)
-                };
-
-                ItemLicense[] ParseLicenses(EquipLimitPresetDto preset)
-                {
-                    return preset.require_license.Select(x => ParseItemLicense(x.name)).ToArray();
+                    yield return new EquipLimitInfo
+                    {
+                        Id = limitDto.id,
+                        Blacklist = limitDto.require_Item.Select(x => new ItemNumber(x.Item_Id)).ToArray()
+                    };
                 }
             }
         }

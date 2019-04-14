@@ -36,7 +36,7 @@ namespace Netsphere.Network.Data.GameRule
         public bool IsBalanced { get; set; }
 
         [BlubMember(9)]
-        public EquipLimit EquipLimit { get; set; }
+        public int EquipLimit { get; set; }
 
         [BlubMember(10)]
         public bool IsNoIntrusion { get; set; }

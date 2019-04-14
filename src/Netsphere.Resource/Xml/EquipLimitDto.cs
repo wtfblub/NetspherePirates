@@ -6,37 +6,30 @@ namespace Netsphere.Resource.Xml
     [XmlRoot(Namespace = "", IsNullable = false, ElementName = "equip_limit")]
     public class EquipLimitDto
     {
-        public EquipLimitPresetsDto preset { get; set; }
+        [XmlArrayItem("limit", IsNullable = false)]
+        public EquipLimitLimitDto[] preset { get; set; }
 
         [XmlAttribute]
         public string string_table { get; set; }
     }
 
     [XmlType(AnonymousType = true)]
-    public class EquipLimitPresetsDto
+    public class EquipLimitLimitDto
     {
-        public EquipLimitPresetDto sword { get; set; }
-        public EquipLimitPresetDto rookie { get; set; }
-        public EquipLimitPresetDto super { get; set; }
-        public EquipLimitPresetDto s4 { get; set; }
-        public EquipLimitPresetDto arcade { get; set; }
-        public EquipLimitPresetDto slaughter { get; set; }
+        [XmlElement("require_Item")]
+        public EquipLimitLimitRequireItemDto[] require_Item { get; set; }
+
+        [XmlAttribute]
+        public int id { get; set; }
+
+        [XmlAttribute]
+        public string string_key { get; set; }
     }
 
     [XmlType(AnonymousType = true)]
-    public class EquipLimitPresetDto
-    {
-        [XmlElement("require_license")]
-        public EquipLimitPresetRequireLicenseDto[] require_license { get; set; }
-
-        [XmlAttribute]
-        public string feature_key { get; set; }
-    }
-
-    [XmlType(AnonymousType = true)]
-    public class EquipLimitPresetRequireLicenseDto
+    public class EquipLimitLimitRequireItemDto
     {
         [XmlAttribute]
-        public string name { get; set; }
+        public uint Item_Id { get; set; }
     }
 }
