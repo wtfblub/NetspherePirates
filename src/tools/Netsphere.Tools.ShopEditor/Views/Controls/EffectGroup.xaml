@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:Netsphere.Tools.ShopEditor.Views.Controls">
+             xmlns:controls="clr-namespace:Netsphere.Tools.ShopEditor.Views.Controls"
+             x:Class="Netsphere.Tools.ShopEditor.Views.Controls.EffectGroup">
 
   <DockPanel>
     <Grid DockPanel.Dock="Top">

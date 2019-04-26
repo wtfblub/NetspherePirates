@@ -12,11 +12,11 @@
     <ProjectReference Include="..\..\Netsphere.Resource\Netsphere.Resource.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="0.7.0" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.7.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.8.0" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.0" />
     <PackageReference Include="Magick.NET-Q16-HDRI-AnyCPU" Version="7.9.0.2" />
     <!--<PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-27124-01" />-->
-    <PackageReference Include="ReactiveProperty" Version="4.2.2" />
+    <PackageReference Include="ReactiveProperty" Version="5.4.0" />
     <PackageReference Include="SharpLzo" Version="0.1.2" />
     <PackageReference Include="Valit" Version="1.0.0" />
   </ItemGroup>
@@ -24,10 +24,10 @@
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="**\*.xaml">
+    <AvaloniaResource Include="**\*.xaml">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Assets\*" />
+    </AvaloniaResource>
+    <AvaloniaResource Include="Assets\*"/>
   </ItemGroup>
   <!--<ItemGroup>-->
   <!--<TrimFilesRootFiles Include="mscorlib.dll" />-->

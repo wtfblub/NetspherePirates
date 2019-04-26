@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Netsphere.Tools.ShopEditor.App">
     <Application.Styles>
         <!-- ReSharper disable Xaml.PathError -->
         <!-- ReSharper disable Xaml.ConstructorWarning -->
