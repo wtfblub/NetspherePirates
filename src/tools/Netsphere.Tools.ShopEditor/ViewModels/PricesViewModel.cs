@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Avalonia;
 using Netsphere.Tools.ShopEditor.Services;
 using Netsphere.Tools.ShopEditor.Views;
 using ReactiveCommand = ReactiveUI.ReactiveCommand;
@@ -27,7 +28,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to add price group", ex).ShowDialog();
+                await new MessageView("Error", "Unable to add price group", ex).ShowDialog(Application.Current.MainWindow);
             }
         }
     }

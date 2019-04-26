@@ -7,11 +7,15 @@ namespace Netsphere.Tools.ShopEditor
     {
         private static void Main()
         {
-            AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .UseReactiveUI()
-                .Start<ConnectView>();
+            BuildAvaloniaApp().Start<ConnectView>();
+        }
 
+        private static AppBuilder BuildAvaloniaApp()
+        {
+            return AppBuilder
+                .Configure<App>()
+                .UsePlatformDetect()
+                .UseReactiveUI();
         }
     }
 }

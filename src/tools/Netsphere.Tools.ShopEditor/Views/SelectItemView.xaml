@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:Netsphere.Tools.ShopEditor.Converters"
+             x:Class="Netsphere.Tools.ShopEditor.Views.SelectItemView"
              Width="500" Height="320">
 
   <UserControl.Resources>

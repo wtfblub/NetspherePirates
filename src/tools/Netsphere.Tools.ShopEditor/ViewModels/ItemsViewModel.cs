@@ -30,7 +30,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to add item", ex).ShowDialog();
+                await new MessageView("Error", "Unable to add item", ex).ShowDialog(Application.Current.MainWindow);
             }
         }
     }

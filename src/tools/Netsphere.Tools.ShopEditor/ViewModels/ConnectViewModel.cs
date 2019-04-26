@@ -94,7 +94,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to connect to database", ex).ShowDialog();
+                await new MessageView("Error", "Unable to connect to database", ex).ShowDialog(Application.Current.MainWindow);
                 return;
             }
             finally

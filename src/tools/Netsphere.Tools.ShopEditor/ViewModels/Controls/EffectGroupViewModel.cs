@@ -1,6 +1,7 @@
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Netsphere.Tools.ShopEditor.Models;
 using Netsphere.Tools.ShopEditor.Services;
 using Netsphere.Tools.ShopEditor.Views;
@@ -35,7 +36,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to add effect", ex).ShowDialog();
+                await new MessageView("Error", "Unable to add effect", ex).ShowDialog(Application.Current.MainWindow);
             }
         }
 
@@ -47,7 +48,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to delete effect group", ex).ShowDialog();
+                await new MessageView("Error", "Unable to delete effect group", ex).ShowDialog(Application.Current.MainWindow);
             }
         }
 
@@ -59,7 +60,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
             }
             catch (Exception ex)
             {
-                await new MessageView("Error", "Unable to update effect group", ex).ShowDialog();
+                await new MessageView("Error", "Unable to update effect group", ex).ShowDialog(Application.Current.MainWindow);
             }
         }
     }

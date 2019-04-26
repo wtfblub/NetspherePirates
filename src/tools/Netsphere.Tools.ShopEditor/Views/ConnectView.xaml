@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Netsphere.Tools.ShopEditor.Views.ConnectView"
         xmlns:converters="clr-namespace:Netsphere.Tools.ShopEditor.Converters"
         Title="Shop Editor - Connect"
         MinHeight="370" MinWidth="290" MaxHeight="370" MaxWidth="290"

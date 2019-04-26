@@ -2,7 +2,6 @@
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
 using Netsphere.Tools.ShopEditor.ViewModels;
 using ReactiveUI;
 
