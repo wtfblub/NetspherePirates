@@ -4,9 +4,25 @@
              xmlns:controls="clr-namespace:Netsphere.Tools.ShopEditor.Views.Controls">
 
   <DockPanel>
-    <Button DockPanel.Dock="Top" Content="Add item" Command="{Binding AddItem}" />
+    <Grid DockPanel.Dock="Top" Margin="5">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <Button Grid.Column="0" Content="Add item" Command="{Binding AddItem}" />
+
+      <TextBox Grid.Column="1" Watermark="Search..." Margin="5 0 5 0" />
+
+      <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Content="&lt;" Margin="0 0 5 0" Command="{Binding PrevPage}" />
+        <TextBlock VerticalAlignment="Center" Margin="0 0 5 0" Text="{Binding PageString}" />
+        <Button Content="&gt;" Command="{Binding NextPage}" />
+      </StackPanel>
+    </Grid>
     <ScrollViewer DockPanel.Dock="Bottom">
-      <ItemsControl Grid.Column="0" Items="{Binding ShopService.Items,Mode=OneWay}">
+      <ItemsControl Grid.Column="0" Items="{Binding Items,Mode=OneWay}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <Border BorderThickness="1" BorderBrush="Black" Margin="5">
