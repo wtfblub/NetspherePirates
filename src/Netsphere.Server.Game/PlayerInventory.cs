@@ -136,7 +136,7 @@ namespace Netsphere.Server.Game
                         PlayerId = (int)Player.Account.Id,
                         ShopItemInfoId = item.GetShopItemInfo().Id,
                         ShopPriceId = item.GetShopItemInfo().PriceGroup.GetPrice(item.PeriodType, item.Period).Id,
-                        Effect = item.Effect,
+                        Effect = item.Effects.FirstOrDefault(),
                         Color = item.Color,
                         PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
                         Durability = item.Durability,
@@ -157,7 +157,7 @@ namespace Netsphere.Server.Game
                         PlayerId = (int)Player.Account.Id,
                         ShopItemInfoId = item.GetShopItemInfo().Id,
                         ShopPriceId = item.GetShopPrice().Id,
-                        Effect = item.Effect,
+                        Effect = item.Effects.FirstOrDefault(),
                         Color = item.Color,
                         PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
                         Durability = item.Durability

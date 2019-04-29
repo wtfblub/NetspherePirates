@@ -26,7 +26,7 @@ namespace Netsphere.Server.Game
         public ItemPeriodType PeriodType { get; }
         public ushort Period { get; }
         public byte Color { get; }
-        public uint Effect { get; }
+        public PlayerItemEffectCollection Effects { get; }
         public DateTimeOffset PurchaseDate { get; }
         public int Durability
         {
@@ -64,7 +64,7 @@ namespace Netsphere.Server.Game
             PeriodType = price.PeriodType;
             Period = price.Period;
             Color = entity.Color;
-            Effect = entity.Effect;
+            Effects = new PlayerItemEffectCollection(this, new[] { entity.Effect });
             PurchaseDate = DateTimeOffset.FromUnixTimeSeconds(entity.PurchaseDate);
             _durability = entity.Durability;
             _enchantMP = (uint)entity.MP;
@@ -85,17 +85,18 @@ namespace Netsphere.Server.Game
             PeriodType = price.PeriodType;
             Period = price.Period;
             Color = color;
-            Effect = effect;
+            Effects = new PlayerItemEffectCollection(this, new[] { effect });
             PurchaseDate = purchaseDate;
             _durability = price.Durability;
         }
 
+        // TODO Update to array
         public ItemEffect GetItemEffect()
         {
-            if (Effect == 0)
+            if (Effects.Count == 0)
                 return null;
 
-            return _gameDataService.Effects.GetValueOrDefault(Effect);
+            return _gameDataService.Effects.GetValueOrDefault(Effects.First());
         }
 
         public ShopItem GetShopItem()
