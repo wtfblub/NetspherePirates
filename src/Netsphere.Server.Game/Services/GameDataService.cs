@@ -71,7 +71,7 @@ namespace Netsphere.Server.Game.Services
         {
             LoadLevels();
             LoadMaps();
-            // LoadEffects();
+            LoadEffects();
             LoadItems();
             LoadDefaultItems();
             LoadGameTempos();

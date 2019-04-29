@@ -32,12 +32,12 @@ namespace Netsphere.Tools.ShopEditor.Services
 
         public void Load()
         {
-            var itemEffectDto = Deserialize<ItemEffectDto>("xml/item_effect.x7");
+            var itemEffectDto = Deserialize<EffectListDto>("xml/item_effect.x7");
             var stringTableDto = Deserialize<StringTableDto>("language/xml/item_effect_string_table.x7");
-            Effects = itemEffectDto.item.Select(effectDto =>
+            Effects = itemEffectDto.item_effect.Select(effectDto =>
             {
-                var id = effectDto.id;
-                var name = stringTableDto.@string.FirstOrDefault(x => x.key == effectDto.text_key)?.eng ?? effectDto.NAME;
+                var id = effectDto.effect_id;
+                var name = stringTableDto.@string.FirstOrDefault(x => x.key == effectDto.name_key)?.eng ?? effectDto.name_key;
                 return new Effect(id, name);
             }).ToArray();
 

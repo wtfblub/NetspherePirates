@@ -84,39 +84,44 @@ namespace Netsphere.Server.Game.Services
         public void LoadEffects()
         {
             _logger.Information("Loading effects...");
-            var dto = Deserialize<ItemEffectDto>("xml/item_effect.x7");
+            var dto = Deserialize<EffectListDto>("xml/effect_list.x7");
             var stringTable = Deserialize<StringTableDto>("language/xml/item_effect_string_table.x7");
             Effects = Transform().ToImmutableDictionary(x => x.Id, x => x);
             _logger.Information("Loaded {Count} effects", Effects.Count);
 
             IEnumerable<ItemEffect> Transform()
             {
-                foreach (var itemEffectDto in dto.item.Where(itemEffect => itemEffect.id != 0))
+                foreach (var itemEffectDto in dto.item_effect.Where(itemEffect => itemEffect.effect_id != 0))
                 {
                     var itemEffect = new ItemEffect
                     {
-                        Id = itemEffectDto.id
+                        Id = itemEffectDto.effect_id
                     };
 
-                    foreach (var attributeDto in itemEffectDto.attribute)
+                    var nameDto = stringTable.@string.FirstOrDefault(x =>
+                        x.key.Equals(itemEffectDto.name_key, StringComparison.InvariantCultureIgnoreCase)
+                    );
+                    var name = nameDto?.eng;
+                    if (string.IsNullOrWhiteSpace(name))
                     {
-                        itemEffect.Attributes.Add(new ItemEffectAttribute
-                        {
-                            Attribute = (Attribute)Enum.Parse(typeof(Attribute), attributeDto.effect.Replace("_", ""), true),
-                            Value = float.Parse(attributeDto.value, CultureInfo.InvariantCulture),
-                            Rate = float.Parse(attributeDto.rate, CultureInfo.InvariantCulture)
-                        });
+                        _logger.Warning("Missing english translation for item effect {Key}", itemEffectDto.name_key);
+                        name = itemEffectDto.name_key;
                     }
 
-                    var name = stringTable.@string.First(s =>
-                        s.key.Equals(itemEffectDto.text_key, StringComparison.InvariantCultureIgnoreCase));
-                    if (string.IsNullOrWhiteSpace(name.eng))
+                    itemEffect.Name = name;
+
+                    if (Enum.IsDefined(typeof(EffectType), itemEffectDto.effect_type))
                     {
-                        _logger.Warning("Missing english translation for item effect {textKey}", itemEffectDto.text_key);
-                        name.eng = itemEffectDto.NAME;
+                        itemEffect.EffectType = (EffectType)itemEffectDto.effect_type;
+                        itemEffect.Value = itemEffectDto.value_min;
+                        itemEffect.Rate = itemEffectDto.rate_min / 10f;
+                    }
+                    else
+                    {
+                        _logger.Warning("Unknown effect type {EffectType} for Effect {EffectName}",
+                            itemEffectDto.effect_type, itemEffect.Name);
                     }
 
-                    itemEffect.Name = name.eng;
                     yield return itemEffect;
                 }
             }

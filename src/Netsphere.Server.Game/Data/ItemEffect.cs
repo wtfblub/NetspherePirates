@@ -1,28 +1,16 @@
-using System.Collections.Generic;
-
 namespace Netsphere.Server.Game.Data
 {
     public class ItemEffect
     {
         public uint Id { get; set; }
         public string Name { get; set; }
-        public IList<ItemEffectAttribute> Attributes { get; set; }
-
-        public ItemEffect()
-        {
-            Attributes = new List<ItemEffectAttribute>();
-        }
+        public EffectType EffectType { get; set; }
+        public float Value { get; set; }
+        public float Rate { get; set; }
 
         public override string ToString()
         {
             return $"{Id}-{Name}";
         }
-    }
-
-    public class ItemEffectAttribute
-    {
-        public Attribute Attribute { get; set; }
-        public float Value { get; set; }
-        public float Rate { get; set; }
     }
 }

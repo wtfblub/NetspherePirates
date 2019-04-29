@@ -248,7 +248,7 @@ namespace Netsphere.Server.Game
         public float GetMaxHP()
         {
             return _gameDataService.GameTempos["GAMETEMPO_FREE"].ActorDefaultHPMax +
-                   GetAttributeValue(Attribute.HP);
+                   GetAttributeValue(EffectType.HP);
         }
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace Netsphere.Server.Game
         /// </summary>
         /// <param name="attribute">The attribute to retrieve</param>
         /// <returns></returns>
-        public float GetAttributeValue(Attribute attribute)
+        public float GetAttributeValue(EffectType attribute)
         {
             if (CharacterManager.CurrentCharacter == null)
                 return 0;
@@ -274,7 +274,7 @@ namespace Netsphere.Server.Game
         /// </summary>
         /// <param name="attribute">The attribute to retrieve</param>
         /// <returns></returns>
-        public float GetAttributeRate(Attribute attribute)
+        public float GetAttributeRate(EffectType attribute)
         {
             if (CharacterManager.CurrentCharacter == null)
                 return 0;
@@ -434,24 +434,30 @@ namespace Netsphere.Server.Game
                 ("EndPoint", Session.RemoteEndPoint.ToString()));
         }
 
-        private static float GetAttributeValueFromItems(Attribute attribute, IEnumerable<PlayerItem> items)
+        private static float GetAttributeValueFromItems(EffectType attribute, IEnumerable<PlayerItem> items)
         {
-            return items.Where(item => item != null)
-                .Select(item => item.GetItemEffect())
-                .Where(effect => effect != null)
-                .SelectMany(effect => effect.Attributes)
-                .Where(attrib => attrib.Attribute == attribute)
-                .Sum(attrib => attrib.Value);
+            // TODO Update for season 8
+            return 0;
+
+            // return items.Where(item => item != null)
+            //     .Select(item => item.GetItemEffect())
+            //     .Where(effect => effect != null)
+            //     .SelectMany(effect => effect.Attributes)
+            //     .Where(attrib => attrib.Attribute == attribute)
+            //     .Sum(attrib => attrib.Value);
         }
 
-        private static float GetAttributeRateFromItems(Attribute attribute, IEnumerable<PlayerItem> items)
+        private static float GetAttributeRateFromItems(EffectType attribute, IEnumerable<PlayerItem> items)
         {
-            return items.Where(item => item != null)
-                .Select(item => item.GetItemEffect())
-                .Where(effect => effect != null)
-                .SelectMany(effect => effect.Attributes)
-                .Where(attrib => attrib.Attribute == attribute)
-                .Sum(attrib => attrib.Rate);
+            // TODO Update for season 8
+            return 0;
+
+            // return items.Where(item => item != null)
+            //     .Select(item => item.GetItemEffect())
+            //     .Where(effect => effect != null)
+            //     .SelectMany(effect => effect.Attributes)
+            //     .Where(attrib => attrib.Attribute == attribute)
+            //     .Sum(attrib => attrib.Rate);
         }
     }
 }
