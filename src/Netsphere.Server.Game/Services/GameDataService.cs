@@ -72,12 +72,12 @@ namespace Netsphere.Server.Game.Services
             LoadLevels();
             LoadMaps();
             // LoadEffects();
-            // LoadItems();
+            LoadItems();
             LoadDefaultItems();
             LoadGameTempos();
             LoadEquipLimits();
             // await LoadShop();
-            // await LoadLevelRewards();
+            await LoadLevelRewards();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

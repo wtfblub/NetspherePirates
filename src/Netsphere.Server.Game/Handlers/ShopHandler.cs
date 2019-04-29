@@ -42,19 +42,19 @@ namespace Netsphere.Server.Game.Handlers
 
                 logger.Debug("Trying to buy item");
 
-                if (itemInfo.License != ItemLicense.None)
-                {
-                    logger.Warning("Trying to buy item without required license");
-                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
-                    continue;
-                }
-
-                if (itemInfo.Level > plr.Level)
-                {
-                    logger.Warning("Trying to buy item without required level playerLevel={PlayerLevel}", plr.Level);
-                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
-                    continue;
-                }
+                // if (itemInfo.License != ItemLicense.None)
+                // {
+                //     logger.Warning("Trying to buy item without required license");
+                //     session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                //     continue;
+                // }
+                //
+                // if (itemInfo.Level > plr.Level)
+                // {
+                //     logger.Warning("Trying to buy item without required level playerLevel={PlayerLevel}", plr.Level);
+                //     session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                //     continue;
+                // }
 
                 // TODO master level
 

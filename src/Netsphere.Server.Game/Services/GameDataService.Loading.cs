@@ -125,62 +125,63 @@ namespace Netsphere.Server.Game.Services
         public void LoadItems()
         {
             _logger.Information("Loading items...");
-            var dto = Deserialize<ItemInfoDto>("xml/iteminfo.x7");
+            var costumesDto = Deserialize<ItemListDto>("xml/item.x7");
+            var weaponsDto = Deserialize<WeaponListDto>("xml/_eu_weapon.x7");
+            var actionsDto = Deserialize<ActionListDto>("xml/action.x7");
             var stringTable = Deserialize<StringTableDto>("language/xml/iteminfo_string_table.x7");
-            Items = Transform().ToImmutableDictionary(x => x.ItemNumber, x => x);
+
+            // Ugly hack because S4 League devs are shit. Sometimes they add ids multiple times
+            var items = Transform().ToArray();
+            var dict = new Dictionary<ItemNumber, ItemInfo>();
+            foreach (var item in items)
+                dict[item.ItemNumber] = item;
+
+            Items = dict.ToImmutableDictionary();
             _logger.Information("Loaded {Count} items", Items.Count);
 
             IEnumerable<ItemInfo> Transform()
             {
-                foreach (var categoryDto in dto.category)
+                foreach (var itemDto in costumesDto.item)
                 {
-                    foreach (var subCategoryDto in categoryDto.sub_category)
+                    var id = new ItemNumber(itemDto.item_key);
+                    ItemInfo item = null;
+
+                    switch (id.Category)
                     {
-                        foreach (var itemDto in subCategoryDto.item)
-                        {
-                            var id = new ItemNumber(categoryDto.id, subCategoryDto.id, itemDto.number);
-                            ItemInfo item;
+                        case ItemCategory.Weapon:
+                            item = LoadWeapon(id);
+                            break;
 
-                            switch (id.Category)
-                            {
-                                case ItemCategory.Skill:
-                                    item = LoadAction(id, itemDto);
-                                    break;
+                        case ItemCategory.Skill:
+                            item = LoadAction(id);
+                            break;
 
-                                case ItemCategory.Weapon:
-                                    item = LoadWeapon(id, itemDto);
-                                    break;
-
-                                default:
-                                    item = new ItemInfo();
-                                    break;
-                            }
-
-                            item.ItemNumber = id;
-                            item.Level = itemDto.@base.base_info.require_level;
-                            item.MasterLevel = itemDto.@base.base_info.require_master;
-                            item.Gender = ParseGender(itemDto.SEX);
-                            item.Image = itemDto.client.icon.image;
-
-                            if (itemDto.@base.license != null)
-                                item.License = ParseItemLicense(itemDto.@base.license.require);
-
-                            var name = stringTable.@string.FirstOrDefault(s =>
-                                s.key.Equals(itemDto.@base.base_info.name_key, StringComparison.InvariantCultureIgnoreCase));
-                            if (string.IsNullOrWhiteSpace(name?.eng))
-                            {
-                                _logger.Warning("Missing english translation for {id}",
-                                    name != null ? itemDto.@base.base_info.name_key : id.ToString());
-                                item.Name = name != null ? name.key : itemDto.NAME;
-                            }
-                            else
-                            {
-                                item.Name = name.eng;
-                            }
-
-                            yield return item;
-                        }
+                        default:
+                            item = new ItemInfo();
+                            break;
                     }
+
+                    item.ItemNumber = id;
+                    item.Gender = ParseGender(itemDto.@base.sex);
+                    item.Image = itemDto.graphic.icon_image;
+
+                    var name = stringTable.@string.FirstOrDefault(s =>
+                        s.key.Equals(itemDto.@base.name_key, StringComparison.InvariantCultureIgnoreCase)
+                    );
+                    if (string.IsNullOrWhiteSpace(name?.eng))
+                    {
+                        _logger.Warning(
+                            "Missing english translation for item {id}",
+                            name != null ? itemDto.@base.name_key : id.ToString()
+                        );
+                        item.Name = name != null ? name.key : itemDto.@base.name;
+                    }
+                    else
+                    {
+                        item.Name = name.eng;
+                    }
+
+                    yield return item;
                 }
             }
 
@@ -191,7 +192,10 @@ namespace Netsphere.Server.Game.Services
                     return gender.Equals(str, StringComparison.InvariantCultureIgnoreCase);
                 }
 
-                if (Equals("all"))
+                if (string.IsNullOrWhiteSpace(gender))
+                    return Gender.None;
+
+                if (Equals("unisex"))
                     return Gender.None;
 
                 if (Equals("woman"))
@@ -203,9 +207,10 @@ namespace Netsphere.Server.Game.Services
                 throw new Exception("Invalid gender " + gender);
             }
 
-            ItemInfo LoadAction(ItemNumber id, ItemInfoItemDto itemDto)
+            ItemInfo LoadAction(ItemNumber id)
             {
-                if (itemDto.action == null)
+                var actionDto = actionsDto.Action.FirstOrDefault(x => x.name == id);
+                if (actionDto == null)
                 {
                     _logger.Warning("Missing action for item {id}", id);
                     return new ItemInfoAction();
@@ -213,35 +218,52 @@ namespace Netsphere.Server.Game.Services
 
                 var item = new ItemInfoAction
                 {
-                    RequiredMP = float.Parse(itemDto.action.ability.required_mp, CultureInfo.InvariantCulture),
-                    DecrementMP = float.Parse(itemDto.action.ability.decrement_mp, CultureInfo.InvariantCulture),
-                    DecrementMPDelay = float.Parse(itemDto.action.ability.decrement_mp_delay, CultureInfo.InvariantCulture)
+                    RequiredMP = float.Parse(actionDto.ability.required_mp, CultureInfo.InvariantCulture),
+                    DecrementMP = float.Parse(actionDto.ability.decrement_mp, CultureInfo.InvariantCulture),
+                    DecrementMPDelay = float.Parse(actionDto.ability.decrement_mp_delay, CultureInfo.InvariantCulture)
                 };
 
-                if (itemDto.action.@float != null)
+                if (actionDto.Float != null)
                 {
-                    item.ValuesF = itemDto.action.@float
-                        .Select(f => float.Parse(f.value.Replace("f", ""), CultureInfo.InvariantCulture)).ToList();
+                    item.ValuesF = new List<float>();
+
+                    var props = actionDto.Float.GetType().GetProperties();
+                    foreach (var prop in props)
+                    {
+                        var value = (string)prop.GetValue(actionDto.Float);
+                        if (!string.IsNullOrWhiteSpace(value))
+                            item.ValuesF.Add(float.Parse(value, CultureInfo.InvariantCulture));
+                    }
                 }
 
-                if (itemDto.action.integer != null)
-                    item.Values = itemDto.action.integer.Select(i => i.value).ToList();
+                if (actionDto.Integer != null)
+                {
+                    item.Values = new List<int>();
+
+                    var props = actionDto.Integer.GetType().GetProperties();
+                    foreach (var prop in props)
+                    {
+                        var value = (int)prop.GetValue(actionDto.Integer);
+                        item.Values.Add(value);
+                    }
+                }
 
                 return item;
             }
 
-            ItemInfo LoadWeapon(ItemNumber id, ItemInfoItemDto itemDto)
+            ItemInfo LoadWeapon(ItemNumber id)
             {
-                if (itemDto.weapon == null)
+                var weaponDto = weaponsDto.weapon.FirstOrDefault(x => x.item_key == id);
+                if (weaponDto == null)
                 {
                     _logger.Warning("Missing weapon for item {id}", id);
                     return new ItemInfoWeapon();
                 }
 
-                var ability = itemDto.weapon.ability;
+                var ability = weaponDto.ability;
                 var item = new ItemInfoWeapon
                 {
-                    Type = ability.type,
+                    Type = (byte)ability.type,
                     RateOfFire = float.Parse(ability.rate_of_fire, CultureInfo.InvariantCulture),
                     Power = float.Parse(ability.power, CultureInfo.InvariantCulture),
                     MoveSpeedRate = float.Parse(ability.move_speed_rate, CultureInfo.InvariantCulture),
@@ -255,19 +277,10 @@ namespace Netsphere.Server.Game.Services
                         : float.Parse(ability.range, CultureInfo.InvariantCulture),
                     SupportSniperMode = ability.support_sniper_mode > 0,
                     SniperModeFov = ability.sniper_mode_fov > 0,
-                    AutoTargetDistance = ability.auto_target_distance == null
+                    AutoTargetDistance = string.IsNullOrWhiteSpace(ability.auto_target_distance)
                         ? 0
                         : float.Parse(ability.auto_target_distance, CultureInfo.InvariantCulture)
                 };
-
-                if (itemDto.weapon.@float != null)
-                {
-                    item.ValuesF = itemDto.weapon.@float
-                        .Select(f => float.Parse(f.value.Replace("f", ""), CultureInfo.InvariantCulture)).ToList();
-                }
-
-                if (itemDto.weapon.integer != null)
-                    item.Values = itemDto.weapon.integer.Select(i => i.value).ToList();
 
                 return item;
             }
@@ -379,7 +392,8 @@ namespace Netsphere.Server.Game.Services
                     yield return new EquipLimitInfo
                     {
                         Id = limitDto.id,
-                        Blacklist = limitDto.require_Item.Select(x => new ItemNumber(x.Item_Id)).ToArray()
+                        Blacklist = limitDto.require_Item?.Select(x => new ItemNumber(x.Item_Id)).ToArray()
+                                    ?? Array.Empty<ItemNumber>()
                     };
                 }
             }
@@ -394,123 +408,6 @@ namespace Netsphere.Server.Game.Services
                 LevelRewards = rewards.ToImmutableDictionary(x => x.Level, x => new LevelReward(x));
                 _logger.Information("Loaded {Count} level rewards", LevelRewards.Count);
             }
-        }
-
-        private ItemLicense ParseItemLicense(string license)
-        {
-            bool Equals(string str)
-            {
-                return license.Equals(str, StringComparison.InvariantCultureIgnoreCase);
-            }
-
-            if (Equals("license_none"))
-                return ItemLicense.None;
-
-            if (Equals("LICENSE_CHECK_NONE"))
-                return ItemLicense.None;
-
-            if (Equals("LICENSE_PLASMA_SWORD"))
-                return ItemLicense.PlasmaSword;
-
-            if (Equals("license_counter_sword"))
-                return ItemLicense.CounterSword;
-
-            if (Equals("LICENSE_STORM_BAT"))
-                return ItemLicense.StormBat;
-
-            if (Equals("LICENSE_ASSASSIN_CLAW"))
-                return ItemLicense.VitalShock;
-
-            if (Equals("LICENSE_SPYDAGGER"))
-                return ItemLicense.SpyDagger;
-
-            if (Equals("LICENSE_DOUBLE_SWORD"))
-                return ItemLicense.DoubleSword;
-
-            if (Equals("LICENSE_SUBMACHINE_GUN"))
-                return ItemLicense.SubmachineGun;
-
-            if (Equals("license_revolver"))
-                return ItemLicense.Revolver;
-
-            if (Equals("license_semi_rifle"))
-                return ItemLicense.SemiRifle;
-
-            if (Equals("LICENSE_SMG3"))
-                return ItemLicense.SmashRifle;
-
-            if (Equals("license_HAND_GUN"))
-                return ItemLicense.HandGun;
-
-            if (Equals("LICENSE_SMG4"))
-                return ItemLicense.BurstShotgun;
-
-            if (Equals("LICENSE_HEAVYMACHINE_GUN"))
-                return ItemLicense.HeavymachineGun;
-
-            if (Equals("LICENSE_GAUSS_RIFLE"))
-                return ItemLicense.GaussRifle;
-
-            if (Equals("license_rail_gun"))
-                return ItemLicense.RailGun;
-
-            if (Equals("license_cannonade"))
-                return ItemLicense.Cannonade;
-
-            if (Equals("LICENSE_CENTRYGUN"))
-                return ItemLicense.Sentrygun;
-
-            if (Equals("license_centi_force"))
-                return ItemLicense.SentiForce;
-
-            if (Equals("LICENSE_SENTINEL"))
-                return ItemLicense.SentiNel;
-
-            if (Equals("license_mine_gun"))
-                return ItemLicense.MineGun;
-
-            if (Equals("LICENSE_MIND_ENERGY"))
-                return ItemLicense.MindEnergy;
-
-            if (Equals("license_mind_shock"))
-                return ItemLicense.MindShock;
-
-            // SKILLS
-
-            if (Equals("LICENSE_ANCHORING"))
-                return ItemLicense.Anchoring;
-
-            if (Equals("LICENSE_FLYING"))
-                return ItemLicense.Flying;
-
-            if (Equals("LICENSE_INVISIBLE"))
-                return ItemLicense.Invisible;
-
-            if (Equals("license_detect"))
-                return ItemLicense.Detect;
-
-            if (Equals("LICENSE_SHIELD"))
-                return ItemLicense.Shield;
-
-            if (Equals("LICENSE_BLOCK"))
-                return ItemLicense.Block;
-
-            if (Equals("LICENSE_BIND"))
-                return ItemLicense.Bind;
-
-            if (Equals("LICENSE_METALLIC"))
-                return ItemLicense.Metallic;
-
-            if (Equals("LICENSE_HEALTH_MASTERY"))
-                return ItemLicense.HealthMastery;
-
-            if (Equals("LICENSE_SKILL_MASTERY"))
-                return ItemLicense.SkillMastery;
-
-            if (Equals("LICENSE_SPEED_MASTERY"))
-                return ItemLicense.SpeedMastery;
-
-            throw new Exception("Invalid license " + license);
         }
     }
 }

@@ -6,9 +6,6 @@ namespace Netsphere.Server.Game.Data
     {
         public ItemNumber ItemNumber { get; set; }
         public string Name { get; set; }
-        public int Level { get; set; }
-        public int MasterLevel { get; set; }
-        public ItemLicense License { get; set; }
         public Gender Gender { get; set; }
 
         public string Image { get; set; }
@@ -49,7 +46,5 @@ namespace Netsphere.Server.Game.Data
         public bool SupportSniperMode { get; set; }
         public bool SniperModeFov { get; set; }
         public float AutoTargetDistance { get; set; }
-        public IList<float> ValuesF { get; set; }
-        public IList<int> Values { get; set; }
     }
 }
