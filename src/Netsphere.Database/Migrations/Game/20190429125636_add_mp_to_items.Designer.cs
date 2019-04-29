@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Netsphere.Database;
 
 namespace Netsphere.Database.Migrations.Game
 {
     [DbContext(typeof(GameContext))]
-    partial class GameContextModelSnapshot : ModelSnapshot
+    [Migration("20190429125636_add_mp_to_items")]
+    partial class add_mp_to_items
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,6 +178,8 @@ namespace Netsphere.Database.Migrations.Game
                         .ValueGeneratedOnAdd();
 
                     b.Property<byte>("Color");
+
+                    b.Property<int>("Count");
 
                     b.Property<int>("Durability");
 
@@ -414,6 +418,8 @@ namespace Netsphere.Database.Migrations.Game
                         .ValueGeneratedOnAdd();
 
                     b.Property<byte>("Color");
+
+                    b.Property<int>("Count");
 
                     b.Property<byte>("RequiredSecurityLevel");
 

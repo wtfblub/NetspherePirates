@@ -26,9 +26,6 @@ namespace Netsphere.Database.Game
         public byte Color { get; set; }
 
         [Column]
-        public int Count { get; set; }
-
-        [Column]
         public byte RequiredSecurityLevel { get; set; }
     }
 }

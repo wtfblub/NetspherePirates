@@ -148,7 +148,7 @@ namespace Netsphere.Server.Game.Handlers
                     for (var i = 0; i < count; ++i)
                     {
                         var newItem = plr.Inventory.Create(shopItemInfo, priceInfo, itemToBuy.Color,
-                            effectInfo?.Effect ?? 0, 0);
+                            effectInfo?.Effect ?? 0);
                         newItems.Add(newItem);
                     }
                 }

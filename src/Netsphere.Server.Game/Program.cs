@@ -200,20 +200,10 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.PlayerCount, src => src.Players.Count)
                 .Function(dest => dest.IsClanChannel, src => src.Category == ChannelCategory.Club);
 
-            // Mapper.Register<PlayerItem, ItemDto>()
-            //     .Member(dest => dest.Refund, src => src.CalculateRefund())
-            //     .Member(dest => dest.PurchaseTime, src => src.PurchaseDate.ToUnixTimeSeconds())
-            //     .Member(dest => dest.ExpireTime,
-            //         src => src.ExpireDate == DateTimeOffset.MinValue ? -1 : src.ExpireDate.ToUnixTimeSeconds())
-            //
-            //     // ToDo
-            //     .Value(dest => dest.TimeLeft, 0)
-            //     .Value(dest => dest.Unk1, (uint)0)
-            //     .Value(dest => dest.Unk2, 0)
-            //     .Value(dest => dest.Unk3, 0)
-            //     .Value(dest => dest.Unk4, 0)
-            //     .Value(dest => dest.Unk5, (uint)0)
-            //     .Value(dest => dest.Unk6, (uint)0);
+            Mapper.Register<PlayerItem, ItemDto>()
+                .Member(dest => dest.ExpireTime,
+                    src => src.ExpireDate == DateTimeOffset.MinValue ? -1 : src.ExpireDate.ToUnixTimeSeconds())
+            ;
 
             Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
                 .Member(dest => dest.ItemId, src => src.Id);

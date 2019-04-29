@@ -15,7 +15,8 @@ namespace Netsphere.Server.Game
     {
         private readonly GameDataService _gameDataService;
         private int _durability;
-        private uint _count;
+        private uint _enchantMP;
+        private uint _enchantLevel;
 
         public PlayerInventory Inventory { get; }
 
@@ -32,13 +33,18 @@ namespace Netsphere.Server.Game
             get => _durability;
             set => SetIfChanged(ref _durability, value);
         }
-        public uint Count
-        {
-            get => _count;
-            set => SetIfChanged(ref _count, value);
-        }
         public DateTimeOffset ExpireDate =>
             PeriodType == ItemPeriodType.Days ? PurchaseDate.AddDays(Period) : DateTimeOffset.MinValue;
+        public uint EnchantMP
+        {
+            get => _enchantMP;
+            set => SetIfChanged(ref _enchantMP, value);
+        }
+        public uint EnchantLevel
+        {
+            get => _enchantLevel;
+            set => SetIfChanged(ref _enchantLevel, value);
+        }
 
         public CharacterInventory CharacterInventory { get; internal set; }
 
@@ -61,14 +67,15 @@ namespace Netsphere.Server.Game
             Effect = entity.Effect;
             PurchaseDate = DateTimeOffset.FromUnixTimeSeconds(entity.PurchaseDate);
             _durability = entity.Durability;
-            _count = (uint)entity.Count;
+            _enchantMP = (uint)entity.MP;
+            _enchantLevel = (uint)entity.MPLevel;
 
             SetExistsState(true);
         }
 
         internal PlayerItem(GameDataService gameDataService, PlayerInventory inventory, long id,
             ShopItemInfo itemInfo, ShopPrice price,
-            byte color, uint effect, DateTimeOffset purchaseDate, uint count)
+            byte color, uint effect, DateTimeOffset purchaseDate)
         {
             _gameDataService = gameDataService;
             Inventory = inventory;
@@ -81,7 +88,6 @@ namespace Netsphere.Server.Game
             Effect = effect;
             PurchaseDate = purchaseDate;
             _durability = price.Durability;
-            _count = count;
         }
 
         public ItemEffect GetItemEffect()

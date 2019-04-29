@@ -74,17 +74,17 @@ namespace Netsphere.Server.Game
             if (price == null)
                 throw new ArgumentException("Price not found");
 
-            return Create(shopItemInfo, price, color, effect, count);
+            return Create(shopItemInfo, price, color, effect);
         }
 
         /// <summary>
         /// Creates a new item
         /// </summary>
-        public PlayerItem Create(ShopItemInfo shopItemInfo, ShopPrice price, byte color, uint effect, uint count)
+        public PlayerItem Create(ShopItemInfo shopItemInfo, ShopPrice price, byte color, uint effect)
         {
             var itemId = _idGeneratorService.GetNextId(IdKind.Item);
             var item = new PlayerItem(_gameDataService, this,
-                itemId, shopItemInfo, price, color, effect, DateTimeOffset.Now, count);
+                itemId, shopItemInfo, price, color, effect, DateTimeOffset.Now);
             _items.TryAdd(item.Id, item);
             Player.Session.Send(new ItemUpdateInventoryAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>()));
             return item;
@@ -140,7 +140,8 @@ namespace Netsphere.Server.Game
                         Color = item.Color,
                         PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
                         Durability = item.Durability,
-                        Count = (int)item.Count
+                        MP = (int)item.EnchantMP,
+                        MPLevel = (int)item.EnchantLevel
                     });
 
                     item.SetExistsState(true);
@@ -159,8 +160,7 @@ namespace Netsphere.Server.Game
                         Effect = item.Effect,
                         Color = item.Color,
                         PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
-                        Durability = item.Durability,
-                        Count = (int)item.Count
+                        Durability = item.Durability
                     });
 
                     item.SetDirtyState(false);

@@ -34,6 +34,9 @@ namespace Netsphere.Database.Game
         public int Durability { get; set; }
 
         [Column]
-        public int Count { get; set; }
+        public int MP { get; set; }
+
+        [Column]
+        public int MPLevel { get; set; }
     }
 }

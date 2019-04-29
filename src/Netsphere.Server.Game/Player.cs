@@ -374,17 +374,7 @@ namespace Netsphere.Server.Game
                         color = 0;
                     }
 
-                    var count = startItem.Count;
-                    if (count > 0 && item.ItemNumber.Category <= ItemCategory.Skill)
-                    {
-                        _logger.Warning("Start item {startItemId} cant have stacks(quantity={count})", startItem.Id, count);
-                        count = 0;
-                    }
-
-                    if (count < 0)
-                        count = 0;
-
-                    Inventory.Create(itemInfo, price, color, effect.Effect, (uint)count);
+                    Inventory.Create(itemInfo, price, color, effect.Effect);
                 }
             }
         }
