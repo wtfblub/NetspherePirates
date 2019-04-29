@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
         public ReactiveProperty<int> CurrentPage { get; }
         public ReactiveProperty<int> PageCount { get; }
         public string PageString => _pageString.Value;
+        public ReactiveProperty<string> Search { get; }
 
         public ItemsViewModel()
         {
@@ -34,8 +36,14 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
             Items = new ReactiveList<ShopItem>();
             CurrentPage = new ReactiveProperty<int>(1);
             PageCount = new ReactiveProperty<int>(ShopService.Instance.Items.Count);
+            Search = new ReactiveProperty<string>("");
 
-            ShopService.Instance.Items.Changed.Subscribe(_ => PageCount.Value = ShopService.Instance.Items.Count);
+            ShopService.Instance.Items.Changed.Subscribe(_ =>
+            {
+                PageCount.Value = GetFilteredItems().Count() / ItemsPerPage;
+                UpdateItems();
+            });
+            
             _pageString = this.WhenAnyValue(x => x.CurrentPage.Value, x => x.PageCount.Value)
                 .Select(x => $"{x.Item1} / {x.Item2}")
                 .ToProperty(this, x => x.PageString);
@@ -46,8 +54,16 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
                     if (CurrentPage.Value > x)
                         CurrentPage.Value = x;
 
-                    Items.Clear();
-                    Items.AddRange(ShopService.Instance.Items.Skip(ItemsPerPage * (CurrentPage.Value - 1)).Take(ItemsPerPage));
+                    UpdateItems();
+                });
+
+            this.WhenAnyValue(x => x.Search.Value)
+                .Throttle(TimeSpan.FromSeconds(2))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+                {
+                    PageCount.Value = GetFilteredItems().Count() / ItemsPerPage;
+                    UpdateItems();
                 });
 
             var canNextPage = this.WhenAnyValue(x => x.CurrentPage.Value, x => x.PageCount.Value)
@@ -78,15 +94,32 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
         private async Task NextPageImpl()
         {
             CurrentPage.Value++;
-            Items.Clear();
-            Items.AddRange(ShopService.Instance.Items.Skip(ItemsPerPage * (CurrentPage.Value - 1)).Take(ItemsPerPage));
+            UpdateItems();
         }
 
         private async Task PrevPageImpl()
         {
             CurrentPage.Value--;
+            UpdateItems();
+        }
+
+        private void UpdateItems()
+        {
             Items.Clear();
-            Items.AddRange(ShopService.Instance.Items.Skip(ItemsPerPage * (CurrentPage.Value - 1)).Take(ItemsPerPage));
+            Items.AddRange(GetFilteredItems().Skip(ItemsPerPage * (CurrentPage.Value - 1)).Take(ItemsPerPage));
+        }
+
+        private IEnumerable<ShopItem> GetFilteredItems()
+        {
+            return ShopService.Instance.Items
+                .Where(x =>
+                {
+                    if (string.IsNullOrWhiteSpace(Search.Value))
+                        return true;
+
+                    var words = Search.Value.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    return words.All(word => x.DisplayName.Contains(word, StringComparison.OrdinalIgnoreCase));
+                });
         }
     }
 }

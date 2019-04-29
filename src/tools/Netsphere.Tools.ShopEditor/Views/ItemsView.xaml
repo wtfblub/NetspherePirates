@@ -13,7 +13,7 @@
 
       <Button Grid.Column="0" Content="Add item" Command="{Binding AddItem}" />
 
-      <TextBox Grid.Column="1" Watermark="Search..." Margin="5 0 5 0" />
+      <TextBox Grid.Column="1" Watermark="Search..." Margin="5 0 5 0" Text="{Binding Path=Search.Value,Mode=TwoWay}" />
 
       <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
         <Button Content="&lt;" Margin="0 0 5 0" Command="{Binding PrevPage}" />
