@@ -76,7 +76,7 @@ namespace Netsphere.Server.Game.Services
             LoadDefaultItems();
             LoadGameTempos();
             LoadEquipLimits();
-            // await LoadShop();
+            await LoadShop();
             await LoadLevelRewards();
         }
 
