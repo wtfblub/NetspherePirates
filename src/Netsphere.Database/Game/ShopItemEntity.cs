@@ -37,6 +37,12 @@ namespace Netsphere.Database.Game
         [Column]
         public bool IsDestroyable { get; set; }
 
+        [Column]
+        public byte MainTab { get; set; }
+
+        [Column]
+        public byte SubTab { get; set; }
+
         public List<ShopItemInfoEntity> ItemInfos { get; set; } = new List<ShopItemInfoEntity>();
     }
 }

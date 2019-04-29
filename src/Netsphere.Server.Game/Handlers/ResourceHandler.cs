@@ -71,7 +71,7 @@ namespace Netsphere.Server.Game.Handlers
                     var data = w.ToArray();
                     var decompressedLength = data.Length;
                     var compressed = data.CompressLZO();
-                    session.Send(new NewShopUpdataInfoAckMessage(pair.Key,
+                    session.Send(new NewShopUpdateInfoAckMessage(pair.Key,
                         compressed, (uint)compressed.Length, (uint)decompressedLength, version));
                 }
             }

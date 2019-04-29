@@ -24,7 +24,6 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
             Item.WhenAnyValue(
                     x => x.ItemNumber,
                     x => x.RequiredGender.Value,
-                    x => x.RequiredLicense.Value,
                     x => x.Colors.Value,
                     x => x.UniqueColors.Value,
                     x => x.RequiredLevel.Value,
@@ -32,7 +31,9 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
                     x => x.RequiredMasterLevel.Value,
                     x => x.IsOneTimeUse.Value,
                     x => x.IsDestroyable.Value,
-                    (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10) => default(object))
+                    x => x.MainTab.Value,
+                    x => x.SubTab.Value,
+                    (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11) => default(object))
                 .Where(x => IsInitialized.Value)
                 .Throttle(TimeSpan.FromSeconds(2))
                 .ObserveOn(RxApp.MainThreadScheduler)

@@ -14,17 +14,12 @@ namespace Netsphere.Tools.ShopEditor.Models
         private static readonly IEnumerable<Gender> s_genders =
             Enum.GetValues(typeof(Gender)).Cast<Gender>();
 
-        private static readonly IEnumerable<ItemLicense> s_licenses =
-            Enum.GetValues(typeof(ItemLicense)).Cast<ItemLicense>();
-
         public IEnumerable<Gender> Genders => s_genders;
-        public IEnumerable<ItemLicense> Licenses => s_licenses;
 
         public Item Item { get; }
         public long ItemNumber { get; }
         public string DisplayName => $"{Item.Name} ({ItemNumber})";
         public ReactiveProperty<Gender> RequiredGender { get; }
-        public ReactiveProperty<ItemLicense> RequiredLicense { get; }
         public ReactiveProperty<byte> Colors { get; }
         public ReactiveProperty<byte> UniqueColors { get; }
         public ReactiveProperty<byte> RequiredLevel { get; }
@@ -32,6 +27,8 @@ namespace Netsphere.Tools.ShopEditor.Models
         public ReactiveProperty<byte> RequiredMasterLevel { get; }
         public ReactiveProperty<bool> IsOneTimeUse { get; }
         public ReactiveProperty<bool> IsDestroyable { get; }
+        public ReactiveProperty<byte> MainTab { get; set; }
+        public ReactiveProperty<byte> SubTab { get; set; }
         public IReactiveList<ShopItemInfo> ItemInfos { get; }
 
         public ShopItem(ShopItemEntity entity)
@@ -39,7 +36,6 @@ namespace Netsphere.Tools.ShopEditor.Models
             Item = ResourceService.Instance.Items.First(x => x.ItemNumber == entity.Id);
             ItemNumber = entity.Id;
             RequiredGender = new ReactiveProperty<Gender>((Gender)entity.RequiredGender);
-            RequiredLicense = new ReactiveProperty<ItemLicense>((ItemLicense)entity.RequiredLicense);
             Colors = new ReactiveProperty<byte>(entity.Colors);
             UniqueColors = new ReactiveProperty<byte>(entity.UniqueColors);
             RequiredLevel = new ReactiveProperty<byte>(entity.RequiredLevel);
@@ -47,6 +43,8 @@ namespace Netsphere.Tools.ShopEditor.Models
             RequiredMasterLevel = new ReactiveProperty<byte>(entity.RequiredMasterLevel);
             IsOneTimeUse = new ReactiveProperty<bool>(entity.IsOneTimeUse);
             IsDestroyable = new ReactiveProperty<bool>(entity.IsDestroyable);
+            MainTab = new ReactiveProperty<byte>(entity.MainTab);
+            SubTab = new ReactiveProperty<byte>(entity.SubTab);
             ItemInfos = new ReactiveList<ShopItemInfo>(entity.ItemInfos.Select(x => new ShopItemInfo(this, x)));
         }
     }

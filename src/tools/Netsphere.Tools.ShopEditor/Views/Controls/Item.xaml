@@ -8,7 +8,8 @@
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="*" />
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="*" />
@@ -25,25 +26,26 @@
 
       <TextBlock Grid.Column="0" Grid.Row="0" Text="Name(Number)" />
       <TextBlock Grid.Column="1" Grid.Row="0" Text="Gender" />
-      <TextBlock Grid.Column="2" Grid.Row="0" Text="License" />
-      <TextBlock Grid.Column="3" Grid.Row="0" Text="Colors" />
-      <TextBlock Grid.Column="4" Grid.Row="0" Text="UniqueColors" />
-      <TextBlock Grid.Column="5" Grid.Row="0" Text="LevelLimit" />
-      <TextBlock Grid.Column="6" Grid.Row="0" Text="MasterLevel" />
-      <TextBlock Grid.Column="7" Grid.Row="0" Text="IsOneTimeUse" />
-      <TextBlock Grid.Column="8" Grid.Row="0" Text="IsDestroyable" />
+      <TextBlock Grid.Column="2" Grid.Row="0" Text="Colors" />
+      <TextBlock Grid.Column="3" Grid.Row="0" Text="UniqueColors" />
+      <TextBlock Grid.Column="4" Grid.Row="0" Text="LevelLimit" />
+      <TextBlock Grid.Column="5" Grid.Row="0" Text="MasterLevel" />
+      <TextBlock Grid.Column="6" Grid.Row="0" Text="IsOneTimeUse" />
+      <TextBlock Grid.Column="7" Grid.Row="0" Text="IsDestroyable" />
+      <TextBlock Grid.Column="8" Grid.Row="0" Text="MainTab" />
+      <TextBlock Grid.Column="9" Grid.Row="0" Text="SubTab" />
 
       <TextBlock Grid.Column="0" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.DisplayName,Mode=OneWay}" />
       <DropDown Grid.Column="1" Grid.Row="1" Margin="0 0 5 0" Items="{Binding Item.Genders,Mode=OneWay}"
                 SelectedItem="{Binding Item.RequiredGender.Value}" />
-      <DropDown Grid.Column="2" Grid.Row="1" Margin="0 0 5 0" Items="{Binding Item.Licenses,Mode=OneWay}"
-                SelectedItem="{Binding Item.RequiredLicense.Value}" />
-      <TextBox Grid.Column="3" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.Colors.Value}" />
-      <TextBox Grid.Column="4" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.UniqueColors.Value}" />
-      <TextBox Grid.Column="5" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.LevelLimit.Value}" />
-      <TextBox Grid.Column="6" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.RequiredMasterLevel.Value}" />
-      <CheckBox Grid.Column="7" Grid.Row="1" Margin="0 0 5 0" IsChecked="{Binding Item.IsOneTimeUse.Value}" />
-      <CheckBox Grid.Column="8" Grid.Row="1" Margin="0 0 5 0" IsChecked="{Binding Item.IsDestroyable.Value}" />
+      <TextBox Grid.Column="2" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.Colors.Value}" />
+      <TextBox Grid.Column="3" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.UniqueColors.Value}" />
+      <TextBox Grid.Column="4" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.LevelLimit.Value}" />
+      <TextBox Grid.Column="5" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.RequiredMasterLevel.Value}" />
+      <CheckBox Grid.Column="6" Grid.Row="1" Margin="0 0 5 0" IsChecked="{Binding Item.IsOneTimeUse.Value}" />
+      <CheckBox Grid.Column="7" Grid.Row="1" Margin="0 0 5 0" IsChecked="{Binding Item.IsDestroyable.Value}" />
+      <TextBox Grid.Column="8" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.MainTab.Value}" />
+      <TextBox Grid.Column="9" Grid.Row="1" Margin="0 0 5 0" Text="{Binding Item.SubTab.Value}" />
 
       <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
         <Button Content="Add ItemInfo" Command="{Binding AddItemInfo}" />

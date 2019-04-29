@@ -17,6 +17,8 @@ namespace Netsphere.Server.Game.Data
         public int MasterLevel { get; set; }
         public bool IsOneTimeUse { get; set; }
         public bool IsDestroyable { get; set; }
+        public byte MainTab { get; set; }
+        public byte SubTab { get; set; }
         public IList<ShopItemInfo> ItemInfos { get; set; }
 
         public ShopItem(ShopItemEntity entity, GameDataService gameDataService)
@@ -31,6 +33,8 @@ namespace Netsphere.Server.Game.Data
             MasterLevel = entity.RequiredMasterLevel;
             IsOneTimeUse = entity.IsOneTimeUse;
             IsDestroyable = entity.IsDestroyable;
+            MainTab = entity.MainTab;
+            SubTab = entity.SubTab;
             ItemInfos = entity.ItemInfos.Select(x => new ShopItemInfo(this, x, gameDataService)).ToList();
         }
 

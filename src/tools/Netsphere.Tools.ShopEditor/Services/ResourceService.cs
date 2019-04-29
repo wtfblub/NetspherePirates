@@ -41,7 +41,7 @@ namespace Netsphere.Tools.ShopEditor.Services
                 return new Effect(id, name);
             }).ToArray();
 
-            var itemInfoDto = Deserialize<ItemInfoDto>("xml/iteminfo.x7");
+            var itemInfoDto = Deserialize<ItemListDto>("xml/item.x7");
             stringTableDto = Deserialize<StringTableDto>("language/xml/iteminfo_string_table.x7");
             var items = new List<Item>();
 
@@ -50,15 +50,13 @@ namespace Netsphere.Tools.ShopEditor.Services
                 .Where(x => x.FullName.StartsWith("resources/image/", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            foreach (var categoryDto in itemInfoDto.category)
-            foreach (var subCategoryDto in categoryDto.sub_category)
-            foreach (var itemDto in subCategoryDto.item)
+            foreach (var itemDto in itemInfoDto.item)
             {
-                var itemNumber = new ItemNumber(categoryDto.id, subCategoryDto.id, itemDto.number);
+                var itemNumber = new ItemNumber(itemDto.item_key);
                 var name = stringTableDto.@string.FirstOrDefault(x =>
-                               x.key == itemDto.@base.base_info.name_key)?.eng ?? itemDto.NAME;
+                               x.key == itemDto.@base.name_key)?.eng ?? itemDto.@base.name;
 
-                var imageName = itemDto.client?.icon?.image ?? "";
+                var imageName = itemDto.graphic?.icon_image ?? "";
                 imageName = Path.GetFileNameWithoutExtension(imageName);
                 items.Add(new Item(itemNumber, name, imageName, imageEntries));
             }

@@ -267,14 +267,15 @@ namespace Netsphere.Tools.ShopEditor.Services
                     .UpdateAsync(x => new ShopItemEntity
                     {
                         RequiredGender = (byte)item.RequiredGender.Value,
-                        RequiredLicense = (byte)item.RequiredLicense.Value,
                         Colors = item.Colors.Value,
                         UniqueColors = item.UniqueColors.Value,
                         RequiredLevel = item.RequiredLevel.Value,
                         LevelLimit = item.LevelLimit.Value,
                         RequiredMasterLevel = item.RequiredMasterLevel.Value,
                         IsOneTimeUse = item.IsOneTimeUse.Value,
-                        IsDestroyable = item.IsDestroyable.Value
+                        IsDestroyable = item.IsDestroyable.Value,
+                        MainTab = item.MainTab.Value,
+                        SubTab = item.SubTab.Value
                     });
             }
         }

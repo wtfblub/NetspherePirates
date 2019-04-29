@@ -69,7 +69,7 @@ namespace Netsphere.Network.Message.Game
             Register<ClubJoinAckMessage>(GameOpCode.ClubJoinAck);
             Register<ClubUnJoinAckMessage>(GameOpCode.ClubUnJoinAck);
             Register<NewShopUpdateCheckAckMessage>(GameOpCode.NewShopUpdateCheckAck);
-            Register<NewShopUpdataInfoAckMessage>(GameOpCode.NewShopUpdataInfoAck);
+            Register<NewShopUpdateInfoAckMessage>(GameOpCode.NewShopUpdateInfoAck);
             Register<ItemUseChangeNickAckMessage>(GameOpCode.ItemUseChangeNickAck);
             Register<ItemUseRecordResetAckMessage>(GameOpCode.ItemUseRecordResetAck);
             Register<ItemUseCoinFillingAckMessage>(GameOpCode.ItemUseCoinFillingAck);

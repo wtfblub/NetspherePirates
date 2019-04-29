@@ -360,7 +360,7 @@
         ClubJoinAck = 1056,
         ClubUnJoinAck = 1057,
         NewShopUpdateCheckAck = 1058,
-        NewShopUpdataInfoAck = 1059,
+        NewShopUpdateInfoAck = 1059,
         ItemUseChangeNickAck = 1060,
         ItemUseRecordResetAck = 1061,
         ItemUseCoinFillingAck = 1062,

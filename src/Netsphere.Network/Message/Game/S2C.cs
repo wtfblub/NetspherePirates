@@ -1072,7 +1072,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class NewShopUpdataInfoAckMessage : IGameMessage
+    public class NewShopUpdateInfoAckMessage : IGameMessage
     {
         [BlubMember(0)]
         public ShopResourceType Type { get; set; }
@@ -1089,13 +1089,13 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(4)]
         public string Version { get; set; }
 
-        public NewShopUpdataInfoAckMessage()
+        public NewShopUpdateInfoAckMessage()
         {
             Data = Array.Empty<byte>();
             Version = "";
         }
 
-        public NewShopUpdataInfoAckMessage(ShopResourceType type, byte[] data,
+        public NewShopUpdateInfoAckMessage(ShopResourceType type, byte[] data,
             uint compressedLength, uint decompressedLength, string version)
         {
             Type = type;
