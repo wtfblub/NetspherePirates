@@ -109,32 +109,32 @@ internal class Build : NukeBuild
                 ("src/Netsphere.Server.Auth", "Auth", "netcoreapp2.1", true, null),
                 ("src/Netsphere.Server.Chat", "Chat", "netcoreapp2.1", true, null),
                 ("src/Netsphere.Server.Game", "Game", "netcoreapp2.1", true, null),
-                ("src/Netsphere.Server.Relay", "Relay", "netcoreapp2.1", true, null),
+                // ("src/Netsphere.Server.Relay", "Relay", "netcoreapp2.1", true, null),
                 ("src/tools/DataExtractor", "tools", "net472", false, null),
                 ("src/tools/NetsphereExplorer", "tools", "net472", false, null),
                 ("src/tools/Netsphere.Tools.ShopEditor", "tools/ShopEditor", "netcoreapp2.1", true, null),
-                ("src/plugins/ExamplePlugin", "plugins/ExamplePlugin", "netcoreapp2.1", true, new[]
-                {
-                    "ExamplePlugin.deps.json", "ExamplePlugin.dll", "ExamplePlugin.pdb"
-                }),
-                ("src/plugins/WebApi", "plugins/WebApi", "netcoreapp2.1", true, new[]
-                {
-                    "WebApi.deps.json", "WebApi.dll", "WebApi.pdb", "webapi.hjson",
-                    "Unosquare.Swan.Lite.dll",
-                    "Unosquare.Labs.EmbedIO.dll"
-                }),
-                ("src/plugins/NoPity", "plugins/NoPity", "netcoreapp2.1", true, new[]
-                {
-                    "NoPity.deps.json", "NoPity.dll", "NoPity.pdb", "nopity.hjson"
-                }),
-                ("src/plugins/SoloMode", "plugins/SoloMode", "netcoreapp2.1", true, new[]
-                {
-                    "SoloMode.deps.json", "SoloMode.dll", "SoloMode.pdb", "solomode.hjson"
-                }),
-                ("src/plugins/EquipLimitExtended", "plugins/EquipLimitExtended", "netcoreapp2.1", true, new[]
-                {
-                    "EquipLimitExtended.deps.json", "EquipLimitExtended.dll", "EquipLimitExtended.pdb", "equiplimitextended.hjson"
-                })
+                // ("src/plugins/ExamplePlugin", "plugins/ExamplePlugin", "netcoreapp2.1", true, new[]
+                // {
+                //     "ExamplePlugin.deps.json", "ExamplePlugin.dll", "ExamplePlugin.pdb"
+                // }),
+                // ("src/plugins/WebApi", "plugins/WebApi", "netcoreapp2.1", true, new[]
+                // {
+                //     "WebApi.deps.json", "WebApi.dll", "WebApi.pdb", "webapi.hjson",
+                //     "Unosquare.Swan.Lite.dll",
+                //     "Unosquare.Labs.EmbedIO.dll"
+                // }),
+                // ("src/plugins/NoPity", "plugins/NoPity", "netcoreapp2.1", true, new[]
+                // {
+                //     "NoPity.deps.json", "NoPity.dll", "NoPity.pdb", "nopity.hjson"
+                // }),
+                // ("src/plugins/SoloMode", "plugins/SoloMode", "netcoreapp2.1", true, new[]
+                // {
+                //     "SoloMode.deps.json", "SoloMode.dll", "SoloMode.pdb", "solomode.hjson"
+                // }),
+                // ("src/plugins/EquipLimitExtended", "plugins/EquipLimitExtended", "netcoreapp2.1", true, new[]
+                // {
+                //     "EquipLimitExtended.deps.json", "EquipLimitExtended.dll", "EquipLimitExtended.pdb", "equiplimitextended.hjson"
+                // })
             };
 
             var dist = Path.Combine(Solution.Directory, "dist");
