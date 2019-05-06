@@ -21,8 +21,9 @@ namespace Netsphere.Database.Game
         public int ShopPriceId { get; set; }
         public ShopPriceEntity ShopPrice { get; set; }
 
+        // Effects get stored as a json array of numbers
         [Column]
-        public uint Effect { get; set; }
+        public string Effects { get; set; }
 
         [Column]
         public byte Color { get; set; }

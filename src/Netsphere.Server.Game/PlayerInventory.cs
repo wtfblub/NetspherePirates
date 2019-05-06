@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlubLib.Collections.Concurrent;
 using ExpressMapper.Extensions;
+using Logging;
 using Netsphere.Common;
 using Netsphere.Database;
 using Netsphere.Database.Game;
@@ -13,6 +14,7 @@ using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Data;
 using Netsphere.Server.Game.Services;
+using Newtonsoft.Json;
 using Z.EntityFramework.Plus;
 
 namespace Netsphere.Server.Game
@@ -23,6 +25,7 @@ namespace Netsphere.Server.Game
         private readonly IdGeneratorService _idGeneratorService;
         private readonly ConcurrentDictionary<ulong, PlayerItem> _items;
         private readonly ConcurrentStack<PlayerItem> _itemsToRemove;
+        private ILogger _logger;
 
         public Player Player { get; private set; }
         public int Count => _items.Count;
@@ -32,8 +35,9 @@ namespace Netsphere.Server.Game
         /// </summary>
         public PlayerItem this[ulong id] => GetItem(id);
 
-        public PlayerInventory(GameDataService gameDataService, IdGeneratorService idGeneratorService)
+        public PlayerInventory(ILogger<PlayerInventory> logger, GameDataService gameDataService, IdGeneratorService idGeneratorService)
         {
+            _logger = logger;
             _gameDataService = gameDataService;
             _idGeneratorService = idGeneratorService;
             _items = new ConcurrentDictionary<ulong, PlayerItem>();
@@ -43,8 +47,9 @@ namespace Netsphere.Server.Game
         internal void Initialize(Player plr, PlayerEntity entity)
         {
             Player = plr;
+            _logger = plr.AddContextToLogger(_logger);
 
-            foreach (var item in entity.Items.Select(x => new PlayerItem(_gameDataService, this, x)))
+            foreach (var item in entity.Items.Select(x => new PlayerItem(_logger, _gameDataService, this, x)))
                 _items.TryAdd(item.Id, item);
         }
 
@@ -62,7 +67,7 @@ namespace Netsphere.Server.Game
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public PlayerItem Create(ItemNumber itemNumber, ItemPriceType priceType, ItemPeriodType periodType, ushort period,
-            byte color, uint effect, uint count)
+            byte color, uint[] effects, uint count)
         {
             // TODO Remove exceptions and instead return a error code
 
@@ -74,17 +79,17 @@ namespace Netsphere.Server.Game
             if (price == null)
                 throw new ArgumentException("Price not found");
 
-            return Create(shopItemInfo, price, color, effect);
+            return Create(shopItemInfo, price, color, effects);
         }
 
         /// <summary>
         /// Creates a new item
         /// </summary>
-        public PlayerItem Create(ShopItemInfo shopItemInfo, ShopPrice price, byte color, uint effect)
+        public PlayerItem Create(ShopItemInfo shopItemInfo, ShopPrice price, byte color, uint[] effects)
         {
             var itemId = _idGeneratorService.GetNextId(IdKind.Item);
             var item = new PlayerItem(_gameDataService, this,
-                itemId, shopItemInfo, price, color, effect, DateTimeOffset.Now);
+                itemId, shopItemInfo, price, color, effects, DateTimeOffset.Now);
             _items.TryAdd(item.Id, item);
             Player.Session.Send(new ItemUpdateInventoryAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>()));
             return item;
@@ -136,7 +141,7 @@ namespace Netsphere.Server.Game
                         PlayerId = (int)Player.Account.Id,
                         ShopItemInfoId = item.GetShopItemInfo().Id,
                         ShopPriceId = item.GetShopItemInfo().PriceGroup.GetPrice(item.PeriodType, item.Period).Id,
-                        Effect = item.Effects.FirstOrDefault(),
+                        Effects = JsonConvert.SerializeObject(item.Effects.ToArray()),
                         Color = item.Color,
                         PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
                         Durability = item.Durability,
@@ -157,7 +162,7 @@ namespace Netsphere.Server.Game
                         PlayerId = (int)Player.Account.Id,
                         ShopItemInfoId = item.GetShopItemInfo().Id,
                         ShopPriceId = item.GetShopPrice().Id,
-                        Effect = item.Effects.FirstOrDefault(),
+                        Effects = JsonConvert.SerializeObject(item.Effects.ToArray()),
                         Color = item.Color,
                         PurchaseDate = item.PurchaseDate.ToUnixTimeSeconds(),
                         Durability = item.Durability

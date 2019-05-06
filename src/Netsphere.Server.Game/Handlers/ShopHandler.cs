@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Logging;
 using Netsphere.Network.Message.Game;
-using Netsphere.Server.Game.Data;
 using Netsphere.Server.Game.Services;
 using ProudNet;
 
@@ -38,30 +36,26 @@ namespace Netsphere.Server.Game.Handlers
                 logger = plrLogger.ForContext("@ItemToBuy", group.Key);
                 var itemToBuy = group.Key;
                 var count = group.Count();
-                var itemInfo = _gameDataService.Items.GetValueOrDefault(itemToBuy.ItemNumber);
-
                 logger.Debug("Trying to buy item");
-
-                // if (itemInfo.License != ItemLicense.None)
-                // {
-                //     logger.Warning("Trying to buy item without required license");
-                //     session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
-                //     continue;
-                // }
-                //
-                // if (itemInfo.Level > plr.Level)
-                // {
-                //     logger.Warning("Trying to buy item without required level playerLevel={PlayerLevel}", plr.Level);
-                //     session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
-                //     continue;
-                // }
-
-                // TODO master level
 
                 var shopItem = _gameDataService.GetShopItem(itemToBuy.ItemNumber);
                 if (shopItem == null)
                 {
                     logger.Warning("Trying to buy non-existant item");
+                    session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
+                    continue;
+                }
+
+                // TODO master level
+
+                if (shopItem.MinLevel > plr.Level || shopItem.MaxLevel != 0 && shopItem.MaxLevel < plr.Level)
+                {
+                    logger.Warning(
+                        "Trying to buy item without meeting level requirements MinLevel={Minlevel} MaxLevel={MaxLevel} PlayerLevel={PlayerLevel}",
+                        shopItem.MinLevel,
+                        shopItem.MaxLevel,
+                        plr.Level
+                    );
                     session.Send(new ItemBuyItemAckMessage(itemToBuy, ItemBuyResult.UnkownItem));
                     continue;
                 }
@@ -103,10 +97,6 @@ namespace Netsphere.Server.Game.Handlers
                     continue;
                 }
 
-                ShopEffect effectInfo = null;
-                if (itemToBuy.Effect != 0)
-                    effectInfo = shopItemInfo.EffectGroup.GetEffectByEffect(itemToBuy.Effect);
-
                 var cost = (uint)(priceInfo.Price * count);
                 switch (itemToBuy.PriceType)
                 {
@@ -145,10 +135,18 @@ namespace Netsphere.Server.Game.Handlers
 
                 try
                 {
+                    var effects = Array.Empty<uint>();
+                    if (shopItemInfo.EffectGroup.Effects.Count > 0)
+                        effects = shopItemInfo.EffectGroup.Effects.Select(x => x.Effect).Where(x => x != 0).ToArray();
+
                     for (var i = 0; i < count; ++i)
                     {
-                        var newItem = plr.Inventory.Create(shopItemInfo, priceInfo, itemToBuy.Color,
-                            effectInfo?.Effect ?? 0);
+                        var newItem = plr.Inventory.Create(
+                            shopItemInfo,
+                            priceInfo,
+                            itemToBuy.Color,
+                            effects
+                        );
                         newItems.Add(newItem);
                     }
                 }

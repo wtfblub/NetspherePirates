@@ -203,7 +203,10 @@ namespace Netsphere.Server.Game
             Mapper.Register<PlayerItem, ItemDto>()
                 .Member(dest => dest.ExpireTime,
                     src => src.ExpireDate == DateTimeOffset.MinValue ? -1 : src.ExpireDate.ToUnixTimeSeconds())
-                .Function(dest => dest.Effects, src => src.Effects.Select(x => new ItemEffectDto { Effect = x }).ToArray());
+                .Function(
+                    dest => dest.Effects,
+                    src => src.Effects.Select(x => new ItemEffectDto { Effect = x }).OrderBy(x => x.Effect).ToArray()
+                );
 
             Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
                 .Member(dest => dest.ItemId, src => src.Id);

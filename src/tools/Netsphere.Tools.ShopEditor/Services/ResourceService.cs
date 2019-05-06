@@ -32,7 +32,7 @@ namespace Netsphere.Tools.ShopEditor.Services
 
         public void Load()
         {
-            var itemEffectDto = Deserialize<EffectListDto>("xml/item_effect.x7");
+            var itemEffectDto = Deserialize<EffectListDto>("xml/effect_list.x7");
             var stringTableDto = Deserialize<StringTableDto>("language/xml/item_effect_string_table.x7");
             Effects = itemEffectDto.item_effect.Select(effectDto =>
             {

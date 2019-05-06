@@ -145,7 +145,7 @@ namespace Netsphere.Server.Game
 
         public void Disconnect()
         {
-            var _ = DisconnectAsync();
+            _ = DisconnectAsync();
         }
 
         public Task DisconnectAsync()
@@ -374,7 +374,7 @@ namespace Netsphere.Server.Game
                         color = 0;
                     }
 
-                    Inventory.Create(itemInfo, price, color, effect.Effect);
+                    Inventory.Create(itemInfo, price, color, new[] { effect.Effect });
                 }
             }
         }
@@ -431,33 +431,24 @@ namespace Netsphere.Server.Game
             return logger.ForContext(
                 ("AccountId", Account.Id),
                 ("HostId", Session.HostId),
-                ("EndPoint", Session.RemoteEndPoint.ToString()));
+                ("EndPoint", Session.RemoteEndPoint.ToString())
+            );
         }
 
         private static float GetAttributeValueFromItems(EffectType attribute, IEnumerable<PlayerItem> items)
         {
-            // TODO Update for season 8
-            return 0;
-
-            // return items.Where(item => item != null)
-            //     .Select(item => item.GetItemEffect())
-            //     .Where(effect => effect != null)
-            //     .SelectMany(effect => effect.Attributes)
-            //     .Where(attrib => attrib.Attribute == attribute)
-            //     .Sum(attrib => attrib.Value);
+            return items.Where(item => item != null)
+                .SelectMany(item => item.GetItemEffects())
+                .Where(effect => effect != null && effect.EffectType == attribute)
+                .Sum(attrib => attrib.Value);
         }
 
         private static float GetAttributeRateFromItems(EffectType attribute, IEnumerable<PlayerItem> items)
         {
-            // TODO Update for season 8
-            return 0;
-
-            // return items.Where(item => item != null)
-            //     .Select(item => item.GetItemEffect())
-            //     .Where(effect => effect != null)
-            //     .SelectMany(effect => effect.Attributes)
-            //     .Where(attrib => attrib.Attribute == attribute)
-            //     .Sum(attrib => attrib.Rate);
+            return items.Where(item => item != null)
+                .SelectMany(item => item.GetItemEffects())
+                .Where(effect => effect != null && effect.EffectType == attribute)
+                .Sum(attrib => attrib.Rate);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using BlubLib.Serialization;
 using Netsphere.Server.Game.Data;
 using ProudNet;
@@ -22,7 +23,7 @@ namespace Netsphere.Server.Game.Serializers
                 writer.WriteProudString(group.Id.ToString());
 
                 writer.Write(group.Effects.Count);
-                foreach (var effect in group.Effects)
+                foreach (var effect in group.Effects.OrderBy(x => x.Effect))
                     writer.Write(effect.Effect);
             }
         }
