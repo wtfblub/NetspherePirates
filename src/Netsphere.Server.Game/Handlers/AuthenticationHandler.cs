@@ -25,7 +25,7 @@ namespace Netsphere.Server.Game.Handlers
 {
     internal class AuthenticationHandler
         : IHandle<LoginRequestReqMessage>,
-          IHandle<NickCheckReqMessage>
+          IHandle<CharacterFirstCreateReqMessage>
     {
         private readonly ILogger _logger;
         private readonly NetworkOptions _networkOptions;
@@ -185,36 +185,65 @@ namespace Netsphere.Server.Game.Handlers
 
             if (!string.IsNullOrWhiteSpace(account.Nickname))
                 await session.Player.SendAccountInformation();
+
             return true;
         }
 
-        [Firewall(typeof(MustNotHaveANickname))]
-        public async Task<bool> OnHandle(MessageContext context, NickCheckReqMessage message)
+        [Inline]
+        public async Task<bool> OnHandle(MessageContext context, CharacterFirstCreateReqMessage message)
         {
-            var session = (Session)context.Session;
-            var logger = _logger.ForContext(
-                ("RemoteEndPoint", session.RemoteEndPoint.ToString()),
-                ("Nickname", message.Nickname));
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
 
-            var available = await IsNickAvailableAsync(message.Nickname);
-            if (!available)
+            if (plr == null)
+                return true;
+
+            var logger = plr.AddContextToLogger(_logger);
+
+            if (plr.CharacterManager.Count > 0 && !string.IsNullOrWhiteSpace(plr.Account.Nickname))
+                return true;
+
+            logger.Information("Creating first character {@Message}", message.ToJson());
+
+            if (plr.CharacterManager.Count == 0)
             {
-                logger.Debug("Nickname not available");
-                session.Send(new NickCheckAckMessage(true));
+                var (_, result) = plr.CharacterManager.Create(
+                    0, // Slot
+                    message.Style.Gender,
+                    0, 0, 0, 0, 0, 0
+                );
+
+                if (result != CharacterCreateResult.Success)
+                {
+                    logger.Information("Failed to create first character result={Result}", result);
+                    session.Send(new ServerResultAckMessage(ServerResult.CreateCharacterFailed));
+                }
             }
 
-            session.Player.Account.Nickname = message.Nickname;
-            using (var db = _databaseService.Open<AuthContext>())
+            if (string.IsNullOrWhiteSpace(plr.Account.Nickname))
             {
-                var accountId = (long)session.Player.Account.Id;
-                await db.Accounts
-                    .Where(x => x.Id == accountId)
-                    .UpdateAsync(x => new AccountEntity { Nickname = message.Nickname });
+                var available = await IsNickAvailableAsync(message.Nickname);
+                if (!available)
+                {
+                    logger.Debug("Nickname not available");
+                    session.Send(new NickCheckAckMessage(true));
+                    return true;
+                }
+
+                plr.Account.Nickname = message.Nickname;
+                using (var db = _databaseService.Open<AuthContext>())
+                {
+                    var accountId = (long)plr.Account.Id;
+                    await db.Accounts
+                        .Where(x => x.Id == accountId)
+                        .UpdateAsync(x => new AccountEntity { Nickname = message.Nickname });
+                }
+
+                plr.OnNicknameCreated(message.Nickname);
             }
 
             session.Send(new ServerResultAckMessage(ServerResult.CreateNicknameSuccess));
-            await session.Player.SendAccountInformation();
-            session.Player.OnNicknameCreated(message.Nickname);
+            await plr.SendAccountInformation();
             return true;
         }
 

@@ -426,7 +426,7 @@ namespace Netsphere.Network.Message.Game
         public string Nickname { get; set; }
 
         [BlubMember(1)]
-        public int Unk { get; set; } // Probably gender
+        public CharacterStyle Style { get; set; }
 
         [BlubMember(2)]
         [BlubSerializer(typeof(FixedArraySerializer), 8)]
