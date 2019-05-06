@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ using Netsphere.Database;
 using Netsphere.Database.Auth;
 using Netsphere.Database.Game;
 using Netsphere.Network;
+using Netsphere.Network.Data.Game;
 using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Rules;
 using Netsphere.Server.Game.Services;
@@ -205,6 +207,7 @@ namespace Netsphere.Server.Game.Handlers
 
             logger.Information("Creating first character {@Message}", message.ToJson());
 
+            var items = new List<PlayerItem>();
             if (plr.CharacterManager.Count == 0)
             {
                 var (_, result) = plr.CharacterManager.Create(
@@ -217,6 +220,59 @@ namespace Netsphere.Server.Game.Handlers
                 {
                     logger.Information("Failed to create first character result={Result}", result);
                     session.Send(new ServerResultAckMessage(ServerResult.CreateCharacterFailed));
+                    return true;
+                }
+
+                IEnumerable<StartItemEntity> startItems;
+                using (var db = _databaseService.Open<GameContext>())
+                {
+                    var securityLevel = (byte)plr.Account.SecurityLevel;
+                    startItems = await db.StartItems.Where(x => x.RequiredSecurityLevel <= securityLevel).ToArrayAsync();
+                }
+
+                foreach (var startItem in startItems)
+                {
+                    var item = _gameDataService.ShopItems.Values.First(group =>
+                        group.GetItemInfo(startItem.ShopItemInfoId) != null);
+                    var itemInfo = item.GetItemInfo(startItem.ShopItemInfoId);
+                    var effect = itemInfo.EffectGroup.GetEffect(startItem.ShopEffectId);
+
+                    if (itemInfo == null)
+                    {
+                        _logger.Warning("Cant find ShopItemInfo for Start item {startItemId} - Forgot to reload the cache?",
+                            startItem.Id);
+                        continue;
+                    }
+
+                    var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPriceId);
+                    if (price == null)
+                    {
+                        _logger.Warning("Cant find ShopPrice for Start item {startItemId} - Forgot to reload the cache?",
+                            startItem.Id);
+                        continue;
+                    }
+
+                    var color = startItem.Color;
+                    if (color > item.ColorGroup)
+                    {
+                        _logger.Warning("Start item {startItemId} has an invalid color {color}", startItem.Id, color);
+                        color = 0;
+                    }
+
+                    // Only create items the player chose
+                    if (message.Items.Contains(item.ItemNumber))
+                    {
+                        // Check if gender is correct
+                        if (item.Gender == Gender.Male && message.Style.Gender != CharacterGender.Male ||
+                            item.Gender == Gender.Female && message.Style.Gender != CharacterGender.Female)
+                        {
+                            continue;
+                        }
+
+                        // TODO Multiple effects on start items
+                        var playerItem = plr.Inventory.Create(itemInfo, price, color, new[] { effect.Effect }, false);
+                        items.Add(playerItem);
+                    }
                 }
             }
 
@@ -242,7 +298,13 @@ namespace Netsphere.Server.Game.Handlers
                 plr.OnNicknameCreated(message.Nickname);
             }
 
-            session.Send(new ServerResultAckMessage(ServerResult.CreateNicknameSuccess));
+            if (items.Count > 0)
+            {
+                session.Send(new RequitalGiveItemResultAckMessage(
+                    items.Select(x => new RequitalGiveItemResultDto(x.ItemNumber, 0)).ToArray()
+                ));
+            }
+
             await plr.SendAccountInformation();
             return true;
         }

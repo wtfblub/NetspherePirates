@@ -1286,7 +1286,16 @@ namespace Netsphere.Network.Message.Game
     {
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
-        public RequitalGiveItemResultDto[] Unk { get; set; }
+        public RequitalGiveItemResultDto[] Items { get; set; }
+
+        public RequitalGiveItemResultAckMessage()
+        {
+        }
+
+        public RequitalGiveItemResultAckMessage(RequitalGiveItemResultDto[] items)
+        {
+            Items = items;
+        }
     }
 
     [BlubContract]

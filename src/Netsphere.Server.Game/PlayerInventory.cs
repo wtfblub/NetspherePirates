@@ -35,7 +35,8 @@ namespace Netsphere.Server.Game
         /// </summary>
         public PlayerItem this[ulong id] => GetItem(id);
 
-        public PlayerInventory(ILogger<PlayerInventory> logger, GameDataService gameDataService, IdGeneratorService idGeneratorService)
+        public PlayerInventory(ILogger<PlayerInventory> logger, GameDataService gameDataService,
+            IdGeneratorService idGeneratorService)
         {
             _logger = logger;
             _gameDataService = gameDataService;
@@ -67,7 +68,7 @@ namespace Netsphere.Server.Game
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public PlayerItem Create(ItemNumber itemNumber, ItemPriceType priceType, ItemPeriodType periodType, ushort period,
-            byte color, uint[] effects, uint count)
+            byte color, uint[] effects, uint count, bool sendUpdate = true)
         {
             // TODO Remove exceptions and instead return a error code
 
@@ -79,19 +80,22 @@ namespace Netsphere.Server.Game
             if (price == null)
                 throw new ArgumentException("Price not found");
 
-            return Create(shopItemInfo, price, color, effects);
+            return Create(shopItemInfo, price, color, effects, sendUpdate);
         }
 
         /// <summary>
         /// Creates a new item
         /// </summary>
-        public PlayerItem Create(ShopItemInfo shopItemInfo, ShopPrice price, byte color, uint[] effects)
+        public PlayerItem Create(ShopItemInfo shopItemInfo, ShopPrice price, byte color, uint[] effects, bool sendUpdate = true)
         {
             var itemId = _idGeneratorService.GetNextId(IdKind.Item);
             var item = new PlayerItem(_gameDataService, this,
                 itemId, shopItemInfo, price, color, effects, DateTimeOffset.Now);
             _items.TryAdd(item.Id, item);
-            Player.Session.Send(new ItemUpdateInventoryAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>()));
+
+            if (sendUpdate)
+                Player.Session.Send(new ItemUpdateInventoryAckMessage(InventoryAction.Add, item.Map<PlayerItem, ItemDto>()));
+
             return item;
         }
 

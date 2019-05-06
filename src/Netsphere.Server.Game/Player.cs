@@ -333,50 +333,6 @@ namespace Netsphere.Server.Game
                 TutorialState = (uint)(_gameOptions.EnableTutorial ? TutorialState : 2),
                 Nickname = Account.Nickname
             }));
-
-            // Session.Send(new ServerResultAckMessage(ServerResult.WelcomeToS4World2));
-
-            if (Inventory.Count == 0)
-            {
-                IEnumerable<StartItemEntity> startItems;
-                using (var db = _databaseService.Open<GameContext>())
-                {
-                    var securityLevel = (byte)Account.SecurityLevel;
-                    startItems = await db.StartItems.Where(x => x.RequiredSecurityLevel <= securityLevel).ToArrayAsync();
-                }
-
-                foreach (var startItem in startItems)
-                {
-                    var item = _gameDataService.ShopItems.Values.First(group =>
-                        group.GetItemInfo(startItem.ShopItemInfoId) != null);
-                    var itemInfo = item.GetItemInfo(startItem.ShopItemInfoId);
-                    var effect = itemInfo.EffectGroup.GetEffect(startItem.ShopEffectId);
-
-                    if (itemInfo == null)
-                    {
-                        _logger.Warning("Cant find ShopItemInfo for Start item {startItemId} - Forgot to reload the cache?",
-                            startItem.Id);
-                        continue;
-                    }
-
-                    var price = itemInfo.PriceGroup.GetPrice(startItem.ShopPriceId);
-                    if (price == null)
-                    {
-                        _logger.Warning("Cant find ShopPrice for Start item {startItemId} - Forgot to reload the cache?",
-                            startItem.Id);
-                        continue;
-                    }
-
-                    var color = startItem.Color;
-                    if (color > item.ColorGroup)
-                    {
-                        _logger.Warning("Start item {startItemId} has an invalid color {color}", startItem.Id, color);
-                        color = 0;
-                    }
-
-                    Inventory.Create(itemInfo, price, color, new[] { effect.Effect });
-                }
-            }
         }
 
         public void SendMoneyUpdate()

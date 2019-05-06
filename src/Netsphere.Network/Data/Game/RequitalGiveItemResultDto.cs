@@ -6,9 +6,19 @@ namespace Netsphere.Network.Data.Game
     public class RequitalGiveItemResultDto
     {
         [BlubMember(0)]
-        public int Unk1 { get; set; }
+        public ItemNumber ItemNumber { get; set; }
 
         [BlubMember(1)]
-        public int Unk2 { get; set; }
+        public int Unk { get; set; }
+
+        public RequitalGiveItemResultDto()
+        {
+        }
+
+        public RequitalGiveItemResultDto(ItemNumber itemNumber, int unk)
+        {
+            ItemNumber = itemNumber;
+            Unk = unk;
+        }
     }
 }
