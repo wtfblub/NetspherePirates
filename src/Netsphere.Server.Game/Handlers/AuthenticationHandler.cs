@@ -235,7 +235,6 @@ namespace Netsphere.Server.Game.Handlers
                     var item = _gameDataService.ShopItems.Values.First(group =>
                         group.GetItemInfo(startItem.ShopItemInfoId) != null);
                     var itemInfo = item.GetItemInfo(startItem.ShopItemInfoId);
-                    var effect = itemInfo.EffectGroup.GetEffect(startItem.ShopEffectId);
 
                     if (itemInfo == null)
                     {
@@ -269,8 +268,13 @@ namespace Netsphere.Server.Game.Handlers
                             continue;
                         }
 
-                        // TODO Multiple effects on start items
-                        var playerItem = plr.Inventory.Create(itemInfo, price, color, new[] { effect.Effect }, false);
+                        var playerItem = plr.Inventory.Create(
+                            itemInfo,
+                            price,
+                            color,
+                            itemInfo.EffectGroup.Effects.Select(x => x.Effect).ToArray(),
+                            false
+                        );
                         items.Add(playerItem);
                     }
                 }
