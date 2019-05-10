@@ -13,7 +13,7 @@
     UpdateInterval: 30000
   }
   RelayEndPoint: 127.0.0.1:28005
-  ClientVersions: ["2.8.3.26956"]
+  ClientVersions: ["0.8.32.26995"]
   Database:
   {
     ConnectionStrings:
