@@ -57,6 +57,7 @@ namespace Netsphere.Server.Game
             SetInventoryIfNeeded(entity.GlovesId, (byte)CostumeSlot.Gloves, Costumes);
             SetInventoryIfNeeded(entity.ShoesId, (byte)CostumeSlot.Shoes, Costumes);
             SetInventoryIfNeeded(entity.AccessoryId, (byte)CostumeSlot.Accessory, Costumes);
+            SetInventoryIfNeeded(entity.PetId, (byte)CostumeSlot.Pet, Costumes);
 
             SetInventoryIfNeeded(entity.SkillId, (byte)SkillSlot.Skill, Skills);
 

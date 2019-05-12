@@ -323,6 +323,10 @@ namespace Netsphere.Server.Game
                     case CostumeSlot.Accessory:
                         entity.AccessoryId = itemId;
                         break;
+
+                    case CostumeSlot.Pet:
+                        entity.PetId = itemId;
+                        break;
                 }
             }
         }
