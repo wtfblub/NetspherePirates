@@ -109,7 +109,7 @@ namespace Netsphere.Server.Game
             CharacterManager = characterManager;
             Weapons = new CharacterInventory(this, 3, ItemCategory.Weapon);
             Skills = new CharacterInventory(this, 1, ItemCategory.Skill);
-            Costumes = new CharacterInventory(this, 7, ItemCategory.Costume);
+            Costumes = new CharacterInventory(this, 8, ItemCategory.Costume);
             Id = id;
             Slot = slot;
             Gender = gender;
