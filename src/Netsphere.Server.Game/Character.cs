@@ -57,6 +57,7 @@ namespace Netsphere.Server.Game
             SetInventoryIfNeeded(entity.GlovesId, (byte)CostumeSlot.Gloves, Costumes);
             SetInventoryIfNeeded(entity.ShoesId, (byte)CostumeSlot.Shoes, Costumes);
             SetInventoryIfNeeded(entity.AccessoryId, (byte)CostumeSlot.Accessory, Costumes);
+            SetInventoryIfNeeded(entity.PetId, (byte)CostumeSlot.Pet, Costumes);
 
             SetInventoryIfNeeded(entity.SkillId, (byte)SkillSlot.Skill, Skills);
 
@@ -108,7 +109,7 @@ namespace Netsphere.Server.Game
             CharacterManager = characterManager;
             Weapons = new CharacterInventory(this, 3, ItemCategory.Weapon);
             Skills = new CharacterInventory(this, 1, ItemCategory.Skill);
-            Costumes = new CharacterInventory(this, 7, ItemCategory.Costume);
+            Costumes = new CharacterInventory(this, 8, ItemCategory.Costume);
             Id = id;
             Slot = slot;
             Gender = gender;

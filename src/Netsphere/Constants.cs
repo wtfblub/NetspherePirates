@@ -71,7 +71,8 @@ namespace Netsphere
         Pants = 3,
         Gloves = 4,
         Shoes = 5,
-        Accessory = 6
+        Accessory = 6,
+        Pet = 7
     }
 
     public enum WeaponSlot : byte

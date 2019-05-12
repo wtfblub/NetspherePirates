@@ -74,5 +74,9 @@ namespace Netsphere.Database.Game
         [Column]
         public long? AccessoryId { get; set; }
         public PlayerItemEntity Accessory { get; set; }
+
+        [Column]
+        public long? PetId { get; set; }
+        public PlayerItemEntity Pet { get; set; }
     }
 }
