@@ -6,12 +6,9 @@ namespace Netsphere.Network.Data.GameRule
     public class ChangeAvatarUnk2Dto
     {
         [BlubMember(0)]
-        public byte Unk1 { get; set; }
+        public float Unk1 { get; set; }
 
         [BlubMember(1)]
         public float Unk2 { get; set; }
-
-        [BlubMember(2)]
-        public float Unk3 { get; set; }
     }
 }

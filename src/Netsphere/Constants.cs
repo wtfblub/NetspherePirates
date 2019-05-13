@@ -48,6 +48,15 @@ namespace Netsphere
         VoteKick = 5
     }
 
+    public enum VoteKickReason : byte
+    {
+        Hacking = 0,
+        BadMannger = 1,
+        BugUsing = 2,
+        AFK = 3,
+        Etc = 4
+    }
+
     public enum MissionRewardType : byte
     {
         PEN = 1

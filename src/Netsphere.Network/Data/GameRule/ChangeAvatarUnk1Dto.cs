@@ -43,9 +43,6 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(9)]
         public float HP { get; set; }
 
-        [BlubMember(10)]
-        public byte Unk11 { get; set; }
-
         public ChangeAvatarUnk1Dto()
         {
             Costumes = Array.Empty<ItemNumber>();

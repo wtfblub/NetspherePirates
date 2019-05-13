@@ -5,7 +5,7 @@ using Netsphere.Network.Serializers;
 namespace Netsphere.Network.Data.GameRule
 {
     [BlubContract]
-    public class ChangeRuleDto
+    public class ChangeRule2Dto
     {
         [BlubMember(0)]
         public Netsphere.GameRule GameRule { get; set; }
@@ -52,7 +52,19 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(14)]
         public byte Unk10 { get; set; }
 
-        public ChangeRuleDto()
+        [BlubMember(15)]
+        public int Unk11 { get; set; }
+
+        [BlubMember(16)]
+        public int Unk12 { get; set; }
+
+        [BlubMember(17)]
+        public int Unk13 { get; set; }
+
+        [BlubMember(18)]
+        public byte Unk14 { get; set; }
+
+        public ChangeRule2Dto()
         {
             Name = "";
             Password = "";

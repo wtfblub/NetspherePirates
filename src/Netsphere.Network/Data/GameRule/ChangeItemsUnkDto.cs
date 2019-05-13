@@ -32,9 +32,6 @@ namespace Netsphere.Network.Data.GameRule
         [BlubMember(6)]
         public float HP { get; set; }
 
-        [BlubMember(7)]
-        public byte Unk8 { get; set; }
-
         public ChangeItemsUnkDto()
         {
             Skills = Array.Empty<ItemNumber>();

@@ -274,55 +274,56 @@ namespace Netsphere.Server.Game
 
         public RoomChangeRulesError ChangeRules(ChangeRuleDto options)
         {
-            if (IsChangingRules)
-                return RoomChangeRulesError.AlreadyChangingRules;
+            throw new NotImplementedException();
+            // if (IsChangingRules)
+            //     return RoomChangeRulesError.AlreadyChangingRules;
 
-            var eventArgs = new RoomChangeHookEventArgs(this, options);
-            s_changeRulesHook.Invoke(eventArgs);
-            if (eventArgs.Error != RoomChangeRulesError.OK)
-                return eventArgs.Error;
+            // var eventArgs = new RoomChangeHookEventArgs(this, options);
+            // s_changeRulesHook.Invoke(eventArgs);
+            // if (eventArgs.Error != RoomChangeRulesError.OK)
+            //     return eventArgs.Error;
 
-            if (!_gameRuleResolver.HasGameRule(new RoomCreationOptions
-            {
-                Name = options.Name,
-                MatchKey = options.MatchKey,
-                TimeLimit = options.TimeLimit,
-                ScoreLimit = options.ScoreLimit,
-                Password = options.Password,
-                IsFriendly = options.IsFriendly,
-                IsBalanced = options.IsBalanced,
-                EquipLimit = options.EquipLimit,
-                IsNoIntrusion = options.IsNoIntrusion
-            }))
-            {
-                return RoomChangeRulesError.InvalidGameRule;
-            }
+            // if (!_gameRuleResolver.HasGameRule(new RoomCreationOptions
+            // {
+            //     Name = options.Name,
+            //     MatchKey = options.MatchKey,
+            //     TimeLimit = options.TimeLimit,
+            //     ScoreLimit = options.ScoreLimit,
+            //     Password = options.Password,
+            //     IsFriendly = options.IsFriendly,
+            //     IsBalanced = options.IsBalanced,
+            //     EquipLimit = options.EquipLimit,
+            //     IsNoIntrusion = options.IsNoIntrusion
+            // }))
+            // {
+            //     return RoomChangeRulesError.InvalidGameRule;
+            // }
 
-            var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.MatchKey.Map);
-            if (map == null)
-                return RoomChangeRulesError.InvalidMap;
+            // var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.MatchKey.Map);
+            // if (map == null)
+            //     return RoomChangeRulesError.InvalidMap;
 
-            if (map.GameRule != options.MatchKey.GameRule)
-                return RoomChangeRulesError.InvalidGameRule;
+            // if (map.GameRule != options.MatchKey.GameRule)
+            //     return RoomChangeRulesError.InvalidGameRule;
 
-            if (options.MatchKey.PlayerLimit + options.MatchKey.SpectatorLimit < Players.Count)
-                return RoomChangeRulesError.PlayerLimitTooLow;
+            // if (options.MatchKey.PlayerLimit + options.MatchKey.SpectatorLimit < Players.Count)
+            //     return RoomChangeRulesError.PlayerLimitTooLow;
 
-            IsChangingRules = true;
-            _schedulerService.ScheduleAsync(OnChangeRules, this, null, TimeSpan.FromSeconds(5));
+            // IsChangingRules = true;
+            // _schedulerService.ScheduleAsync(OnChangeRules, this, null, TimeSpan.FromSeconds(5));
 
-            Options.Name = options.Name;
-            Options.MatchKey = options.MatchKey;
-            Options.TimeLimit = options.TimeLimit;
-            Options.ScoreLimit = options.ScoreLimit;
-            Options.Password = options.Password;
-            Options.IsFriendly = options.IsFriendly;
-            Options.IsBalanced = options.IsBalanced;
-            Options.EquipLimit = options.EquipLimit;
-            Options.IsNoIntrusion = options.IsNoIntrusion;
+            // Options.Name = options.Name;
+            // Options.MatchKey = options.MatchKey;
+            // Options.TimeLimit = options.TimeLimit;
+            // Options.ScoreLimit = options.ScoreLimit;
+            // Options.Password = options.Password;
+            // Options.IsFriendly = options.IsFriendly;
+            // Options.IsBalanced = options.IsBalanced;
+            // Options.EquipLimit = options.EquipLimit;
+            // Options.IsNoIntrusion = options.IsNoIntrusion;
 
-            Broadcast(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
-            return RoomChangeRulesError.OK;
+            // Broadcast(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
+            // return RoomChangeRulesError.OK;
         }
 
         public uint GetAveragePing()

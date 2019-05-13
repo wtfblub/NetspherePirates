@@ -540,7 +540,7 @@
         InGameItemDropReq = 2051,
         InGameItemGetReq = 2052,
         InGamePlayerResponseReq = 2053,
-        ChallengeRankinglistReq = 2054,
+        ChallengeRankingListReq = 2054,
         ChallengeResultReq = 2055,
         ChallengeReStartReq = 2056,
         PromotionCouponEventIngameGetReq = 2057,
