@@ -192,15 +192,15 @@ namespace Netsphere.Server.Game
                         plr.State = plr.Mode == PlayerGameMode.Normal
                             ? PlayerState.Alive
                             : PlayerState.Spectating;
-                        plr.Session.Send(new SBeginRoundAckMessage());
+                        plr.Session.Send(new RoomBeginRoundAckMessage());
                     }
 
                     room.BroadcastBriefing();
-                    room.Broadcast(new SChangeStateAckMessage(GameState.Playing));
+                    room.Broadcast(new GameChangeStateAckMessage(GameState.Playing));
                     if (_gameRule.HasHalfTime)
-                        room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.FirstHalf));
+                        room.Broadcast(new GameChangeSubStateAckMessage(GameTimeState.FirstHalf));
                     else
-                        room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.None));
+                        room.Broadcast(new GameChangeSubStateAckMessage(GameTimeState.None));
 
                     var delay = _hasHalfTime
                         ? TimeSpan.FromSeconds(room.Options.TimeLimit.TotalSeconds / 2)
@@ -212,13 +212,13 @@ namespace Netsphere.Server.Game
 
                 case GameRuleState.HalfTime:
                     ScheduleTrigger(GameRuleStateTrigger.StartSecondHalf, s_halfTimeWaitTime);
-                    room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.HalfTime));
+                    room.Broadcast(new GameChangeSubStateAckMessage(GameTimeState.HalfTime));
                     break;
 
                 case GameRuleState.SecondHalf:
                     ScheduleTrigger(GameRuleStateTrigger.StartResult,
                         TimeSpan.FromMinutes(room.Options.TimeLimit.TotalMinutes / 2));
-                    room.Broadcast(new SChangeSubStateAckMessage(GameTimeState.SecondHalf));
+                    room.Broadcast(new GameChangeSubStateAckMessage(GameTimeState.SecondHalf));
                     OnTimeStateChanged();
                     break;
 
@@ -228,7 +228,7 @@ namespace Netsphere.Server.Game
                     foreach (var plr in room.Players.Values.Where(plr => plr.State != PlayerState.Lobby))
                         plr.State = PlayerState.Waiting;
 
-                    room.Broadcast(new SChangeStateAckMessage(GameState.Result));
+                    room.Broadcast(new GameChangeStateAckMessage(GameState.Result));
                     _gameRule.OnResult();
                     OnGameStateChanged();
                     break;
@@ -238,7 +238,7 @@ namespace Netsphere.Server.Game
                     foreach (var plr in room.Players.Values.Where(plr => plr.State != PlayerState.Lobby))
                         plr.State = PlayerState.Lobby;
 
-                    room.Broadcast(new SChangeStateAckMessage(GameState.Waiting));
+                    room.Broadcast(new GameChangeStateAckMessage(GameState.Waiting));
                     room.BroadcastBriefing();
                     OnGameStateChanged();
                     break;
@@ -269,7 +269,7 @@ namespace Netsphere.Server.Game
         {
             if (isFirst)
             {
-                _gameRule.Room.Broadcast(new SEventMessageAckMessage(
+                _gameRule.Room.Broadcast(new GameEventMessageAckMessage(
                     GameEventMessage.HalfTimeIn, 2, 0, 0,
                     Math.Round((s_preHalfTimeWaitTime - RoundTime).TotalSeconds, 0).ToString("0")));
             }
@@ -280,7 +280,7 @@ namespace Netsphere.Server.Game
                 if (!This._stateMachine.IsInState(GameRuleState.EnteringHalfTime))
                     return;
 
-                This._gameRule.Room.Broadcast(new SEventMessageAckMessage(
+                This._gameRule.Room.Broadcast(new GameEventMessageAckMessage(
                     GameEventMessage.HalfTimeIn, 2, 0, 0,
                     Math.Round((s_preHalfTimeWaitTime - This.RoundTime).TotalSeconds, 0).ToString("0")));
 
@@ -292,7 +292,7 @@ namespace Netsphere.Server.Game
         {
             if (isFirst)
             {
-                _gameRule.Room.Broadcast(new SEventMessageAckMessage(
+                _gameRule.Room.Broadcast(new GameEventMessageAckMessage(
                     GameEventMessage.ResultIn, 3, 0, 0,
                     (int)Math.Round((s_preResultWaitTime - RoundTime).TotalSeconds, 0) + " second(s)"));
             }
@@ -303,7 +303,7 @@ namespace Netsphere.Server.Game
                 if (!This._stateMachine.IsInState(GameRuleState.EnteringResult))
                     return;
 
-                This._gameRule.Room.Broadcast(new SEventMessageAckMessage(
+                This._gameRule.Room.Broadcast(new GameEventMessageAckMessage(
                     GameEventMessage.ResultIn, 3, 0, 0,
                     (int)Math.Round((s_preResultWaitTime - This.RoundTime).TotalSeconds, 0) + " second(s)"));
 

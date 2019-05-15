@@ -91,7 +91,7 @@ namespace Netsphere.Server.Game
         protected virtual void OnOptionsChanged()
         {
             OptionsChanged?.Invoke(this, new RoomEventArgs(this));
-            Broadcast(new SChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
+            Broadcast(new RoomChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
             RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
         }
 
@@ -216,7 +216,7 @@ namespace Netsphere.Server.Game
             if (plr.Room != this)
                 return;
 
-            Broadcast(new SLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
+            Broadcast(new RoomLeavePlayerAckMessage(plr.Account.Id, plr.Account.Nickname, roomLeaveReason));
 
             if (roomLeaveReason == RoomLeaveReason.Kicked ||
                 roomLeaveReason == RoomLeaveReason.ModeratorKick ||
@@ -259,7 +259,7 @@ namespace Netsphere.Server.Game
 
             Master = plr;
             Master.IsReady = false;
-            Broadcast(new SChangeMasterAckMessage(Master.Account.Id));
+            Broadcast(new RoomChangeMasterAckMessage(Master.Account.Id));
         }
 
         public void ChangeHost(Player plr)
@@ -269,7 +269,7 @@ namespace Netsphere.Server.Game
 
             _logger.Debug("Changing host to {Nickname} - Ping:{Ping} ms", plr.Account.Nickname, plr.Session.UnreliablePing);
             Host = plr;
-            Broadcast(new SChangeRefeReeAckMessage(Host.Account.Id));
+            Broadcast(new RoomChangeRefereeAckMessage(Host.Account.Id));
         }
 
         public RoomChangeRulesError ChangeRules(ChangeRuleDto options)
@@ -351,7 +351,7 @@ namespace Netsphere.Server.Game
             briefing.Players = GameRule.CreateBriefingPlayers();
             briefing.Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray();
 
-            Broadcast(new SBriefingAckMessage(false, false, briefing.GetData()));
+            Broadcast(new GameBriefingInfoAckMessage(false, false, briefing.GetData()));
         }
 
         private Player GetPlayerWithLowestPing(IEnumerable<Player> players = null)

@@ -164,7 +164,7 @@ namespace Netsphere.Server.Game
             }
 
             plr.Mode = mode;
-            Broadcast(new SPlayerGameModeChangeAckMessage(plr.Account.Id, mode));
+            Broadcast(new RoomPlayModeChangeAckMessage(plr.Account.Id, mode));
             return TeamChangeModeError.OK;
         }
 
@@ -291,7 +291,7 @@ namespace Netsphere.Server.Game
             _players.TryAdd(plr.Slot, plr);
 
             if (isChange)
-                TeamManager.Broadcast(new SChangeTeamAckMessage(plr.Account.Id, Id, plr.Mode));
+                TeamManager.Broadcast(new RoomChangeTeamAckMessage(plr.Account.Id, Id, plr.Mode));
 
             OnPlayerJoined(plr);
             return TeamJoinError.OK;

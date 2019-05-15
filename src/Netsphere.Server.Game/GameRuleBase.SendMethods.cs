@@ -9,7 +9,7 @@ namespace Netsphere.Server.Game
         {
             if (assist != null)
             {
-                Room.Broadcast(new SScoreKillAssistAckMessage(
+                Room.Broadcast(new ScoreKillAssistAckMessage(
                     new ScoreAssistDto(
                         killer.SentryId ?? killer.Player.PeerId,
                         assist.SentryId ?? assist.Player.PeerId,
@@ -17,7 +17,7 @@ namespace Netsphere.Server.Game
             }
             else
             {
-                Room.Broadcast(new SScoreKillAckMessage(
+                Room.Broadcast(new ScoreKillAckMessage(
                     new ScoreDto(
                         killer.SentryId ?? killer.Player.PeerId,
                         target.SentryId ?? target.Player.PeerId, attackAttribute)));
@@ -26,7 +26,7 @@ namespace Netsphere.Server.Game
 
         public void SendScoreTeamKill(ScoreContext killer, ScoreContext target, AttackAttribute attackAttribute)
         {
-            Room.Broadcast(new SScoreTeamKillAckMessage(
+            Room.Broadcast(new ScoreTeamKillAckMessage(
                 new Score2Dto(
                     killer.SentryId ?? killer.Player.PeerId,
                     target.SentryId ?? target.Player.PeerId, attackAttribute)));
@@ -34,25 +34,25 @@ namespace Netsphere.Server.Game
 
         public void SendScoreHeal(Player plr)
         {
-            Room.Broadcast(new SScoreHealAssistAckMessage(plr.PeerId));
+            Room.Broadcast(new ScoreHealAssistAckMessage(plr.PeerId));
         }
 
         public void SendScoreSuicide(Player plr)
         {
-            Room.Broadcast(new SScoreSuicideAckMessage(plr.PeerId, AttackAttribute.KillOneSelf));
+            Room.Broadcast(new ScoreSuicideAckMessage(plr.PeerId, AttackAttribute.KillOneSelf));
         }
 
         public void SendScoreTouchdown(Player plr, Player assist)
         {
             if (assist != null)
-                Room.Broadcast(new SScoreGoalAssistAckMessage(plr.PeerId, assist.PeerId));
+                Room.Broadcast(new ScoreGoalAssistAckMessage(plr.PeerId, assist.PeerId));
             else
-                Room.Broadcast(new SScoreGoalAckMessage(plr.PeerId));
+                Room.Broadcast(new ScoreGoalAckMessage(plr.PeerId));
         }
 
         public void SendScoreFumbi(Player newPlayer, Player oldPlayer)
         {
-            Room.Broadcast(new SScoreReboundAckMessage(newPlayer?.PeerId ?? 0, oldPlayer?.PeerId ?? 0));
+            Room.Broadcast(new ScoreReboundAckMessage(newPlayer?.PeerId ?? 0, oldPlayer?.PeerId ?? 0));
         }
 
         public void SendScoreOffense(ScoreContext killer, ScoreContext assist, ScoreContext target,
@@ -60,7 +60,7 @@ namespace Netsphere.Server.Game
         {
             if (assist != null)
             {
-                Room.Broadcast(new SScoreOffenseAssistAckMessage(
+                Room.Broadcast(new ScoreOffenseAssistAckMessage(
                     new ScoreAssistDto(
                         killer.SentryId ?? killer.Player.PeerId,
                         assist.SentryId ?? assist.Player.PeerId,
@@ -68,7 +68,7 @@ namespace Netsphere.Server.Game
             }
             else
             {
-                Room.Broadcast(new SScoreOffenseAckMessage(
+                Room.Broadcast(new ScoreOffenseAckMessage(
                     new ScoreDto(
                         killer.SentryId ?? killer.Player.PeerId,
                         target.SentryId ?? target.Player.PeerId, attackAttribute)));
@@ -80,7 +80,7 @@ namespace Netsphere.Server.Game
         {
             if (assist != null)
             {
-                Room.Broadcast(new SScoreDefenseAssistAckMessage(
+                Room.Broadcast(new ScoreDefenseAssistAckMessage(
                     new ScoreAssistDto(
                         killer.SentryId ?? killer.Player.PeerId,
                         assist.SentryId ?? assist.Player.PeerId,
@@ -88,7 +88,7 @@ namespace Netsphere.Server.Game
             }
             else
             {
-                Room.Broadcast(new SScoreDefenseAckMessage(
+                Room.Broadcast(new ScoreDefenseAckMessage(
                     new ScoreDto(
                         killer.SentryId ?? killer.Player.PeerId,
                         target.SentryId ?? target.Player.PeerId, attackAttribute)));
@@ -97,7 +97,7 @@ namespace Netsphere.Server.Game
 
         public void SendScoreMission(ScoreContext context, int scoreGained)
         {
-            Room.Broadcast(new SMissionScoreAckMessage(context.Player.Account.Id, scoreGained));
+            Room.Broadcast(new ScoreMissionScoreAckMessage(context.Player.Account.Id, scoreGained));
         }
     }
 }

@@ -125,7 +125,7 @@ namespace Netsphere.Server.Game
             briefing.Players = players;
             briefing.Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray();
 
-            Room.Broadcast(new SBriefingAckMessage(true, false, briefing.GetData()));
+            Room.Broadcast(new GameBriefingInfoAckMessage(true, false, briefing.GetData()));
         }
 
         protected internal virtual Team GetWinnerTeam()

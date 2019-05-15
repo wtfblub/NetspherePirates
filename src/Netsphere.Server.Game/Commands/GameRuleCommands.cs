@@ -172,7 +172,7 @@ namespace Netsphere.Server.Game.Commands
                 }
             }
 
-            target.Session.Send(new SChangeHPAckMessage(value));
+            target.Session.Send(new AdminChangeHPAckMessage(value));
             return true;
         }
 
@@ -219,7 +219,7 @@ namespace Netsphere.Server.Game.Commands
                 }
             }
 
-            target.Session.Send(new SChangeMPAckMessage(value));
+            target.Session.Send(new AdminChangeMPAckMessage(value));
             return true;
         }
     }
