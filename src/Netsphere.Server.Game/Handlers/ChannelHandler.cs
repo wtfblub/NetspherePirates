@@ -35,8 +35,8 @@ namespace Netsphere.Server.Game.Handlers
                 case ChannelInfoRequest.RoomList2:
                     if (plr.Channel != null)
                     {
-                        var rooms = plr.Channel.RoomManager.Select(x => x.Map<Room, RoomDto>()).ToArray();
-                        session.Send(new RoomListInfoAckMessage(rooms));
+                        var rooms = plr.Channel.RoomManager.Select(x => x.Map<Room, Room2Dto>()).ToArray();
+                        session.Send(new RoomListInfoAck2Message(rooms));
                     }
 
                     break;

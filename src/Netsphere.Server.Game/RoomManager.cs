@@ -76,17 +76,17 @@ namespace Netsphere.Server.Game
             if (!_gameRuleResolver.HasGameRule(options))
                 return (null, RoomCreateError.InvalidGameRule);
 
-            var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.MatchKey.Map);
+            var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.Map);
             if (map == null)
                 return (null, RoomCreateError.InvalidMap);
 
-            if (map.GameRule != options.MatchKey.GameRule)
+            if (map.GameRule != options.GameRule)
                 return (null, RoomCreateError.InvalidGameRule);
 
             var room = _serviceProvider.GetRequiredService<Room>();
             room.Initialize(this, _idRecycler.GetId(), options);
             _rooms.TryAdd(room.Id, room);
-            Channel.Broadcast(new RoomDeployAckMessage(room.Map<Room, RoomDto>()));
+            Channel.Broadcast(new RoomDeployAck2Message(room.Map<Room, Room2Dto>()));
             OnRoomCreated(this, room);
             return (room, RoomCreateError.OK);
         }
@@ -121,16 +121,15 @@ namespace Netsphere.Server.Game
     public class RoomCreationOptions
     {
         public string Name { get; set; }
-        public MatchKey MatchKey { get; set; }
+        public bool IsObservingEnabled => SpectatorLimit > 0;
+        public GameRule GameRule { get; set; }
+        public byte Map { get; set; }
+        public int PlayerLimit { get; set; }
+        public int SpectatorLimit { get; set; }
         public TimeSpan TimeLimit { get; set; }
         public ushort ScoreLimit { get; set; }
         public string Password { get; set; }
-        public bool IsFriendly { get; set; }
-        public bool IsBalanced { get; set; }
-        public byte MinLevel { get; set; }
-        public byte MaxLevel { get; set; }
         public int EquipLimit { get; set; }
-        public bool IsNoIntrusion { get; set; }
         public IPEndPoint RelayEndPoint { get; set; }
     }
 }

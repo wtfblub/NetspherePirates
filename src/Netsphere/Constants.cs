@@ -166,14 +166,15 @@ namespace Netsphere
         Practice = 4,
         Tutorial = 5,
         SemiTouchdown = 6, // Dev
-        Arcade = 7,
+        Scenario = 7,
         Chaser = 8,
         BattleRoyal = 9,
         Captain = 10,
         Siege = 11,
-        Horde = 12,
-        Challenge = 13,
+        Conquest = 12,
+        Training = 13,
         Random = 14,
+        Warfare = 15,
         Arena = 20
     }
 
@@ -590,6 +591,7 @@ namespace Netsphere
     [Flags]
     public enum RoomSettings : uint
     {
+        None = 0,
         IsFriendly = 1,
         EnableBurningBuff = 2,
     }

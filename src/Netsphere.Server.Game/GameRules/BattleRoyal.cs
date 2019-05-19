@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Options;
@@ -39,8 +38,8 @@ namespace Netsphere.Server.Game.GameRules
         {
             base.Initialize(room);
 
-            var playersPerTeam = Room.Options.MatchKey.PlayerLimit / 2;
-            var spectatorsPerTeam = Room.Options.MatchKey.SpectatorLimit / 2;
+            var playersPerTeam = Room.Options.PlayerLimit / 2;
+            var spectatorsPerTeam = Room.Options.SpectatorLimit / 2;
             Room.TeamManager.Add(TeamId.Alpha, playersPerTeam, spectatorsPerTeam);
             Room.TeamManager.Add(TeamId.Beta, playersPerTeam, spectatorsPerTeam);
         }

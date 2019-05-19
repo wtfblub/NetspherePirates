@@ -13,14 +13,6 @@ namespace Netsphere.Network.Message.Event
     }
 
     [BlubContract]
-    public class UnkMessage : IEventMessage
-    {
-        [BlubMember(0)]
-        [BlubSerializer(typeof(ReadToEndSerializer))]
-        public byte[] Message { get; set; }
-    }
-
-    [BlubContract]
     public class EventMessageMessage : IEventMessage
     {
         [BlubMember(0)]

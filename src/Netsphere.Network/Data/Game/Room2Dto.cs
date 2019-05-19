@@ -26,7 +26,7 @@ namespace Netsphere.Network.Data.Game
         public byte PlayerLimit { get; set; }
 
         [BlubMember(6)]
-        public uint WeaponLimit { get; set; }
+        public uint ItemLimit { get; set; }
 
         [BlubMember(7)]
         public string Password { get; set; }

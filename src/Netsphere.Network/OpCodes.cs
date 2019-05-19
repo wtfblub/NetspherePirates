@@ -681,13 +681,17 @@
 
     public enum EventOpCode : ushort
     {
-        Chat = 12001,
-        Unk = 20001,
-        EventMessage = 20002,
-        ChangeTarget = 20003,
-        ArcadeSync = 20004,
-        ArcadeSyncReq = 20005,
-        Packet = 20006
+        Chat = 20017,
+        EventMessage = 20018,
+        ChangeTarget = 20019,
+        ArcadeSync = 20020,
+        ArcadeSyncReq = 20021,
+        WaitingRoomActionSync = 20022,
+        SyncWaitingRoomPlayerAction = 20023,
+        FootballBallSync = 20024,
+        Packet = 20025,
+        MonsterSync = 20026,
+        MonsterCommand = 20027
     }
 
     public enum P2POpCode : byte

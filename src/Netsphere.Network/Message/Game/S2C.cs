@@ -1900,14 +1900,32 @@ namespace Netsphere.Network.Message.Game
     public class RoomChangeRoomInfoAck2Message : IGameMessage
     {
         [BlubMember(0)]
-        public Room2Dto Unk { get; set; }
+        public Room2Dto Room { get; set; }
+
+        public RoomChangeRoomInfoAck2Message()
+        {
+        }
+
+        public RoomChangeRoomInfoAck2Message(Room2Dto room)
+        {
+            Room = room;
+        }
     }
 
     [BlubContract]
     public class RoomEnterRoomInfoAck2Message : IGameMessage
     {
         [BlubMember(0)]
-        public EnterRoomInfo2Dto Unk { get; set; }
+        public EnterRoomInfo2Dto Room { get; set; }
+
+        public RoomEnterRoomInfoAck2Message()
+        {
+        }
+
+        public RoomEnterRoomInfoAck2Message(EnterRoomInfo2Dto room)
+        {
+            Room = room;
+        }
     }
 
     [BlubContract]
@@ -1924,6 +1942,15 @@ namespace Netsphere.Network.Message.Game
         [BlubMember(0)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
         public Room2Dto[] Rooms { get; set; }
+
+        public RoomListInfoAck2Message()
+        {
+        }
+
+        public RoomListInfoAck2Message(Room2Dto[] rooms)
+        {
+            Rooms = rooms;
+        }
     }
 
     [BlubContract]
@@ -1931,6 +1958,15 @@ namespace Netsphere.Network.Message.Game
     {
         [BlubMember(0)]
         public Room2Dto Room { get; set; }
+
+        public RoomDeployAck2Message()
+        {
+        }
+
+        public RoomDeployAck2Message(Room2Dto room)
+        {
+            Room = room;
+        }
     }
 
     [BlubContract]

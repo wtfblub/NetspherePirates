@@ -62,9 +62,9 @@ namespace Netsphere.Server.Game.Handlers
         public async Task<bool> OnHandle(MessageContext context, LoginRequestReqMessage message)
         {
             var session = context.GetSession<Session>();
-            var logger = _logger.ForContext(
-                ("RemoteEndPoint", session.RemoteEndPoint.ToString()),
-                ("Message", message.ToJson()));
+            var logger = _logger
+                .ForContext("RemoteEndPoint", session.RemoteEndPoint.ToString())
+                .ForContext("ClientMessage", message, true);
 
             logger.Debug("Login");
 

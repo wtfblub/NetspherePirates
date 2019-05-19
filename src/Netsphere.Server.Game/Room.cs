@@ -64,7 +64,7 @@ namespace Netsphere.Server.Game
         protected virtual void OnPlayerJoining(Player plr)
         {
             PlayerJoining?.Invoke(this, new RoomPlayerEventArgs(this, plr));
-            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAck2Message(this.Map<Room, Room2Dto>()));
             _messageBus.PublishAsync(new PlayerUpdateMessage(plr.Account.Id, plr.TotalExperience, Id, TeamId.Neutral));
         }
 
@@ -84,7 +84,7 @@ namespace Netsphere.Server.Game
         protected virtual void OnPlayerLeft(Player plr)
         {
             PlayerLeft?.Invoke(this, new RoomPlayerEventArgs(this, plr));
-            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAck2Message(this.Map<Room, Room2Dto>()));
             _messageBus.PublishAsync(new PlayerUpdateMessage(plr.Account.Id, plr.TotalExperience, 0, TeamId.Neutral));
         }
 
@@ -92,7 +92,7 @@ namespace Netsphere.Server.Game
         {
             OptionsChanged?.Invoke(this, new RoomEventArgs(this));
             Broadcast(new RoomChangeRuleAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
-            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAck2Message(this.Map<Room, Room2Dto>()));
         }
 
         public Room(ILogger<Room> logger, GameRuleResolver gameRuleResolver, GameDataService gameDataService,
@@ -115,7 +115,7 @@ namespace Netsphere.Server.Game
             RoomManager = roomManager;
             Id = id;
             Options = options;
-            Map = _gameDataService.Maps.First(x => x.Id == options.MatchKey.Map);
+            Map = _gameDataService.Maps.First(x => x.Id == options.Map);
             GameRule = _gameRuleResolver.CreateGameRule(Options);
             GameRule.Initialize(this);
             GameRule.StateMachine.GameStateChanged += OnGameStateChanged;
@@ -137,7 +137,7 @@ namespace Netsphere.Server.Game
             if (plr.Room != null)
                 return RoomJoinError.AlreadyInRoom;
 
-            if (_players.Count(x => !x.Value.IsInGMMode) >= Options.MatchKey.PlayerLimit + Options.MatchKey.SpectatorLimit &&
+            if (_players.Count(x => !x.Value.IsInGMMode) >= Options.PlayerLimit + Options.SpectatorLimit &&
                 !plr.IsInGMMode)
             {
                 return RoomJoinError.RoomFull;
@@ -148,13 +148,6 @@ namespace Netsphere.Server.Game
 
             if (IsChangingRules)
                 return RoomJoinError.ChangingRules;
-
-            if (Options.IsNoIntrusion &&
-                GameRule.StateMachine.GameState == GameState.Playing &&
-                !plr.IsInGMMode)
-            {
-                return RoomJoinError.NoIntrusion;
-            }
 
             if (plr.IsInGMMode)
             {
@@ -201,7 +194,7 @@ namespace Netsphere.Server.Game
             }
 
             Broadcast(new RoomEnterPlayerInfoAckMessage(plr.Map<Player, RoomPlayerDto>()));
-            plr.Session.Send(new RoomEnterRoomInfoAckMessage(this.Map<Room, EnterRoomInfoDto>()));
+            plr.Session.Send(new RoomEnterRoomInfoAck2Message(this.Map<Room, EnterRoomInfo2Dto>()));
             plr.Session.Send(new RoomCurrentCharacterSlotAckMessage(0, plr.Slot));
             plr.Session.Send(new RoomPlayerInfoListForEnterPlayerAckMessage(
                 _players.Values.Select(x => x.Map<Player, RoomPlayerDto>()).ToArray())
@@ -395,7 +388,7 @@ namespace Netsphere.Server.Game
 
             room.GameRule.Cleanup();
 
-            room.Map = room._gameDataService.Maps.First(x => x.Id == room.Options.MatchKey.Map);
+            room.Map = room._gameDataService.Maps.First(x => x.Id == room.Options.Map);
             room.GameRule = room._gameRuleResolver.CreateGameRule(room.Options);
             room.GameRule.Initialize(room);
             room.GameRule.StateMachine.GameStateChanged += room.OnGameStateChanged;
@@ -403,7 +396,7 @@ namespace Netsphere.Server.Game
             foreach (var plr in room.Players.Values)
             {
                 // Move spectators to normal when spectators are disabled
-                if (plr.Mode == PlayerGameMode.Spectate && !room.Options.MatchKey.IsObserveEnabled)
+                if (plr.Mode == PlayerGameMode.Spectate && !room.Options.IsObservingEnabled)
                     plr.Mode = PlayerGameMode.Normal;
 
                 // Try to rejoin the old team first then fallback to default join

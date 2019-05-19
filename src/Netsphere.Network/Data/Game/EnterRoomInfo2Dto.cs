@@ -14,7 +14,7 @@ namespace Netsphere.Network.Data.Game
         public Netsphere.GameRule GameRule { get; set; }
 
         [BlubMember(2)]
-        public byte MapId { get; set; }
+        public byte Map { get; set; }
 
         [BlubMember(3)]
         public byte PlayerLimit { get; set; }

@@ -32,13 +32,14 @@ namespace Netsphere.Network.Message.GameRule
             Nickname = "";
         }
 
-        public RoomEnterPlayerAckMessage(ulong accountId, string nickname, byte unk1, PlayerGameMode mode, int unk3)
+        public RoomEnterPlayerAckMessage(ulong accountId, string nickname, byte unk1, PlayerGameMode mode, int unk3, byte unk4)
         {
             AccountId = accountId;
             Unk1 = unk1;
             PlayerGameMode = mode;
             Unk3 = unk3;
             Nickname = nickname;
+            Unk4 = unk4;
         }
     }
 

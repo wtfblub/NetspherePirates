@@ -64,7 +64,7 @@ namespace Netsphere.Server.Auth.Services
 
         private void OnServerUpdate(ServerUpdateMessage message)
         {
-            var logger = _logger.ForContext("Message", message.ToJson());
+            var logger = _logger.ForContext("ClientMessage", message, true);
             _mutex.EnterWriteLock();
 
             try
@@ -95,7 +95,7 @@ namespace Netsphere.Server.Auth.Services
 
         private void OnServerShutdown(ServerShutdownMessage message)
         {
-            var logger = _logger.ForContext("Message", message.ToJson());
+            var logger = _logger.ForContext("ClientMessage", message, true);
             _mutex.EnterWriteLock();
 
             try

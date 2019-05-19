@@ -112,6 +112,10 @@ namespace Netsphere.Server.Game
             w.Write(0);
             w.Write(0);
             w.Write(0);
+            w.Write((byte)0);
+            w.Write(0);
+            w.Write(0);
+            w.Write(0);
         }
     }
 }

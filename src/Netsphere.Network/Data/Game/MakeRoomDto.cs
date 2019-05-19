@@ -24,7 +24,7 @@ namespace Netsphere.Network.Data.Game
         public TimeSpan TimeLimit { get; set; }
 
         [BlubMember(5)]
-        public uint WeaponLimit { get; set; }
+        public uint ItemLimit { get; set; }
 
         [BlubMember(6)]
         public string Name { get; set; }

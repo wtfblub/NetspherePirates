@@ -2,5 +2,5 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <Import Project="..\..\Rules.targets"/>
+  <Import Project="..\..\Rules.targets" />
 </Project>

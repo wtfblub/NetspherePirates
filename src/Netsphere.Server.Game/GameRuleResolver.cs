@@ -48,7 +48,7 @@ namespace Netsphere.Server.Game
 
         private Type GetGameRuleType(RoomCreationOptions roomCreationOptions)
         {
-            if (!_gameRules.TryGetValue(roomCreationOptions.MatchKey.GameRule, out var entries))
+            if (!_gameRules.TryGetValue(roomCreationOptions.GameRule, out var entries))
                 return null;
 
             foreach (var entry in entries.OrderByDescending(x => x.Priority))
