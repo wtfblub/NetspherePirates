@@ -15,10 +15,10 @@ namespace Netsphere.Server.Game.Handlers
 {
     internal class RoomHandler
         : IHandle<RoomMakeReqMessage>, IHandle<RoomMakeReq2Message>, IHandle<RoomEnterPlayerReqMessage>,
-          IHandle<RoomEnterReqMessage>, IHandle<RoomLeaveReqMessage>
-        //           IHandle<CChangeTeamReqMessage>, IHandle<CPlayerGameModeChangeReqMessage>,
-        //           IHandle<CMixChangeTeamReqMessage>, IHandle<CBeginRoundReqMessage>, IHandle<CReadyRoundReqMessage>,
-        //           IHandle<CEventMessageReqMessage>, IHandle<CItemsChangeReqMessage>, IHandle<CAvatarChangeReqMessage>,
+          IHandle<RoomEnterReqMessage>, IHandle<RoomLeaveReqMessage>, IHandle<RoomTeamChangeReqMessage>,
+          IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
+          IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>
+        //           IHandle<CItemsChangeReqMessage>, IHandle<CAvatarChangeReqMessage>,
         //           IHandle<CChangeRuleNotifyReqMessage>, IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
         //           IHandle<CScoreKillReqMessage>,
         //           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
@@ -176,182 +176,117 @@ namespace Netsphere.Server.Game.Handlers
             return Task.FromResult(true);
         }
 
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Waiting)]
-        //         public async Task<bool> OnHandle(MessageContext context, CChangeTeamReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             // No reason for gm mode to change teams
-        //             // so just block it to make sure the clients dont break
-        //             if (plr.IsInGMMode)
-        //                 return true;
-        //
-        //             var error = room.TeamManager.ChangeTeam(plr, message.Team);
-        //             switch (error)
-        //             {
-        //                 case TeamChangeError.Full:
-        //                     session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
-        //                     break;
-        //
-        //                 case TeamChangeError.PlayerIsReady:
-        //                     session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
-        //                     break;
-        //             }
-        //
-        //             return true;
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         public async Task<bool> OnHandle(MessageContext context, CPlayerGameModeChangeReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             // Can only change between modes in lobby
-        //             if (plr.State != PlayerState.Lobby)
-        //                 return true;
-        //
-        //             // gm mode should always be spectator
-        //             if (plr.IsInGMMode)
-        //                 return true;
-        //
-        //             var error = room.TeamManager.ChangeMode(plr, message.Mode);
-        //             switch (error)
-        //             {
-        //                 case TeamChangeModeError.Full:
-        //                     session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.Full));
-        //                     break;
-        //
-        //                 case TeamChangeModeError.PlayerIsReady:
-        //                     session.Send(new SChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
-        //                     break;
-        //             }
-        //
-        //             return true;
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeMaster))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Waiting)]
-        //         public async Task<bool> OnHandle(MessageContext context, CMixChangeTeamReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //             var plrToMove = room.Players.GetValueOrDefault(message.PlayerToMove);
-        //             var plrToReplace = room.Players.GetValueOrDefault(message.PlayerToReplace);
-        //             var fromTeam = room.TeamManager[message.FromTeam];
-        //             var toTeam = room.TeamManager[message.ToTeam];
-        //
-        //             if (fromTeam == null || toTeam == null || plrToMove == null ||
-        //                 fromTeam != plrToMove.Team ||
-        //                 plrToReplace != null && toTeam != plrToReplace.Team)
-        //             {
-        //                 session.Send(new SMixChangeTeamFailAckMessage());
-        //                 return true;
-        //             }
-        //
-        //             if (plrToReplace == null)
-        //             {
-        //                 var error = toTeam.Join(plrToMove);
-        //
-        //                 if (error != TeamJoinError.OK)
-        //                     session.Send(new SMixChangeTeamFailAckMessage());
-        //             }
-        //             else
-        //             {
-        //                 room.TeamManager.SwapPlayer(plrToMove, plrToReplace);
-        //                 plr.Room.Broadcast(new SMixChangeTeamAckMessage(
-        //                     plrToMove.Account.Id, plrToReplace.Account.Id,
-        //                     fromTeam.Id, toTeam.Id));
-        //
-        //                 // SMixChangeTeamAckMessage alone doesn't seem to change the player list
-        //                 plr.Room.BroadcastBriefing();
-        //             }
-        //
-        //             return true;
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeMaster))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Waiting)]
-        //         public async Task<bool> OnHandle(MessageContext context, CBeginRoundReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
-        //             {
-        //                 session.Send(new ServerResultAckMessage(ServerResult.WearingUnusableItem));
-        //                 return true;
-        //             }
-        //
-        //             if (!room.GameRule.StateMachine.StartGame())
-        //                 session.Send(new SEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
-        //
-        //             return true;
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Waiting)]
-        //         public Task<bool> OnHandle(MessageContext context, CReadyRoundReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
-        //             {
-        //                 session.Send(new ServerResultAckMessage(ServerResult.WearingUnusableItem));
-        //                 return Task.FromResult(true);
-        //             }
-        //
-        //             plr.IsReady = !plr.IsReady;
-        //             room.Broadcast(new SReadyRoundAckMessage(plr.Account.Id, plr.IsReady));
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         public Task<bool> OnHandle(MessageContext context, CEventMessageReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             // Client is trying to enter the game while its running
-        //             if (room.GameRule.StateMachine.GameState == GameState.Playing && plr.State == PlayerState.Lobby)
-        //             {
-        //                 if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
-        //                 {
-        //                     session.Send(new ServerResultAckMessage(ServerResult.WearingUnusableItem));
-        //                     return Task.FromResult(true);
-        //                 }
-        //
-        //                 for (var i = 0; i < plr.CharacterStartPlayTime.Length; ++i)
-        //                     plr.CharacterStartPlayTime[i] = default;
-        //
-        //                 plr.CharacterStartPlayTime[plr.CharacterManager.CurrentSlot] = DateTimeOffset.Now;
-        //                 plr.StartPlayTime = DateTimeOffset.Now;
-        //                 plr.IsReady = false;
-        //                 plr.Score.Reset();
-        //                 plr.State = plr.Mode == PlayerGameMode.Normal
-        //                     ? PlayerState.Alive
-        //                     : PlayerState.Spectating;
-        //
-        //                 room.BroadcastBriefing();
-        //             }
-        //
-        //             room.Broadcast(new SEventMessageAckMessage(message.Event, session.Player.Account.Id,
-        //                 message.Unk1, message.Value, ""));
-        //
-        //             return Task.FromResult(true);
-        //         }
-        //
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
+        public async Task<bool> OnHandle(MessageContext context, RoomTeamChangeReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            // No reason for gm mode to change teams
+            // so just block it to make sure the clients dont break
+            if (plr.IsInGMMode)
+                return true;
+
+            var error = room.TeamManager.ChangeTeam(plr, message.Team);
+            switch (error)
+            {
+                case TeamChangeError.Full:
+                    session.Send(new RoomChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                    break;
+
+                case TeamChangeError.PlayerIsReady:
+                    session.Send(new RoomChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                    break;
+            }
+
+            return true;
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        public async Task<bool> OnHandle(MessageContext context, RoomPlayModeChangeReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            // Can only change between modes in lobby
+            if (plr.State != PlayerState.Lobby)
+                return true;
+
+            // gm mode should always be spectator
+            if (plr.IsInGMMode)
+                return true;
+
+            var error = room.TeamManager.ChangeMode(plr, message.Mode);
+            switch (error)
+            {
+                case TeamChangeModeError.Full:
+                    session.Send(new RoomChangeTeamFailAckMessage(ChangeTeamResult.Full));
+                    break;
+
+                case TeamChangeModeError.PlayerIsReady:
+                    session.Send(new RoomChangeTeamFailAckMessage(ChangeTeamResult.AlreadyReady));
+                    break;
+            }
+
+            return true;
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
+        public async Task<bool> OnHandle(MessageContext context, RoomBeginRoundReq2Message message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
+            {
+                session.Send(new ServerResultAckMessage(ServerResult.WearingUnusableItem));
+                return true;
+            }
+
+            if (!room.GameRule.StateMachine.StartGame())
+                session.Send(new GameEventMessageAckMessage(GameEventMessage.CantStartGame, 0, 0, 0, ""));
+
+            return true;
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
+        public Task<bool> OnHandle(MessageContext context, RoomReadyRoundReq2Message message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (!_equipValidator.IsValid(plr.CharacterManager.CurrentCharacter))
+            {
+                session.Send(new ServerResultAckMessage(ServerResult.WearingUnusableItem));
+                return Task.FromResult(true);
+            }
+
+            plr.IsReady = !plr.IsReady;
+            room.Broadcast(new RoomReadyRoundAckMessage(plr.Account.Id, plr.IsReady));
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        public Task<bool> OnHandle(MessageContext context, GameEventMessageReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            room.Broadcast(new GameEventMessageAckMessage(message.Event, session.Player.Account.Id,
+                message.Unk1, message.Value, ""));
+
+            return Task.FromResult(true);
+        }
+
         //         [Firewall(typeof(MustBeInRoom))]
         //         public Task<bool> OnHandle(MessageContext context, CItemsChangeReqMessage message)
         //         {
