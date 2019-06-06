@@ -63,15 +63,16 @@ namespace Netsphere.Server.Game
 
         protected internal virtual void OnResult()
         {
-            var teams = CreateBriefingTeams();
-            var players = CreateBriefingPlayers();
+            var briefing = Room.GetBriefing();
+            briefing.WinnerTeam = GetWinnerTeam().Id;
 
+            // Result calculations exp, pen, item durability
             foreach (var plr in TeamManager.PlayersPlaying)
             {
                 var (expGain, bonusExpGain) = CalculateExperienceGained(plr);
                 var (penGain, bonusPENGain) = CalculatePENGained(plr);
 
-                var briefingPlayer = players.First(x => x.AccountId == plr.Account.Id);
+                var briefingPlayer = briefing.Players.First(x => x.AccountId == plr.Account.Id);
                 briefingPlayer.ExperienceGained = expGain;
                 briefingPlayer.BonusExperienceGained = bonusExpGain;
                 briefingPlayer.PENGained = penGain;
@@ -118,12 +119,6 @@ namespace Netsphere.Server.Game
                     }
                 }
             }
-
-            var briefing = CreateBriefing();
-            briefing.WinnerTeam = GetWinnerTeam().Id;
-            briefing.Teams = teams;
-            briefing.Players = players;
-            briefing.Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray();
 
             Room.Broadcast(new GameBriefingInfoAckMessage(true, false, briefing.GetData()));
         }

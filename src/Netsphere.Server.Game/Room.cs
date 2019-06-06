@@ -337,13 +337,18 @@ namespace Netsphere.Server.Game
                 plr.Session.Send(message);
         }
 
-        public void BroadcastBriefing()
+        public Briefing GetBriefing()
         {
             var briefing = GameRule.CreateBriefing();
             briefing.Teams = GameRule.CreateBriefingTeams();
             briefing.Players = GameRule.CreateBriefingPlayers();
             briefing.Spectators = TeamManager.Spectators.Select(x => x.Account.Id).ToArray();
+            return briefing;
+        }
 
+        public void BroadcastBriefing()
+        {
+            var briefing = GetBriefing();
             Broadcast(new GameBriefingInfoAckMessage(false, false, briefing.GetData()));
         }
 

@@ -48,11 +48,11 @@ namespace Netsphere.Server.Game.Handlers
                 return true;
 
             room.Broadcast(new RoomEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.Mode, 0, 0));
-            session.Send(new RoomChangeMasterAckMessage(plr.Room.Master.Account.Id));
-            session.Send(new RoomChangeRefereeAckMessage(plr.Room.Host.Account.Id));
-            plr.Room.BroadcastBriefing();
+            session.Send(new RoomChangeMasterAckMessage(room.Master.Account.Id));
+            session.Send(new RoomChangeRefereeAckMessage(room.Host.Account.Id));
+            room.BroadcastBriefing();
             plr.IsConnectingToRoom = false;
-            plr.Room.OnPlayerJoined(plr);
+            room.OnPlayerJoined(plr);
             return true;
         }
 
