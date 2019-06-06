@@ -593,7 +593,7 @@ namespace Netsphere
     {
         None = 0,
         IsFriendly = 1,
-        EnableBurningBuff = 2,
+        EnableBurningBuff = 2
     }
 
     public enum RoomRandomSettings : uint

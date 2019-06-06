@@ -35,7 +35,7 @@ namespace Netsphere.Network.Data.Game
         public string Name { get; set; }
 
         [BlubMember(9)]
-        public byte Unk1 { get; set; }
+        public byte IsSpectatingEnabled { get; set; }
 
         [BlubMember(10)]
         public byte Unk2 { get; set; }
@@ -44,7 +44,7 @@ namespace Netsphere.Network.Data.Game
         public int Unk3 { get; set; }
 
         [BlubMember(12)]
-        public int Unk4 { get; set; }
+        public RoomSettings Settings { get; set; }
 
         [BlubMember(13)]
         public int Unk5 { get; set; }

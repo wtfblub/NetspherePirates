@@ -121,7 +121,7 @@ namespace Netsphere.Server.Game
     public class RoomCreationOptions
     {
         public string Name { get; set; }
-        public bool IsObservingEnabled => SpectatorLimit > 0;
+        public bool IsSpectatingEnabled => SpectatorLimit > 0;
         public GameRule GameRule { get; set; }
         public byte Map { get; set; }
         public int PlayerLimit { get; set; }
@@ -131,5 +131,6 @@ namespace Netsphere.Server.Game
         public string Password { get; set; }
         public int EquipLimit { get; set; }
         public IPEndPoint RelayEndPoint { get; set; }
+        public bool IsFriendly { get; set; }
     }
 }

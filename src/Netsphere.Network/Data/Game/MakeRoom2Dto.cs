@@ -33,10 +33,10 @@ namespace Netsphere.Network.Data.Game
         public string Password { get; set; }
 
         [BlubMember(8)]
-        public bool IsObservingEnabled { get; set; }
+        public bool IsSpectatingEnabled { get; set; }
 
         [BlubMember(9)]
-        public byte ObserverLimit { get; set; }
+        public byte SpectatorLimit { get; set; }
 
         [BlubMember(10)]
         public byte Unk3 { get; set; }

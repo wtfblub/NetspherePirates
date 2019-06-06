@@ -222,7 +222,16 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.ItemLimit, src => src.Options.EquipLimit)
                 .Member(dest => dest.PlayerCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
                 .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState)
-                .Function(dest => dest.Password, src => string.IsNullOrEmpty(src.Options.Password) ? "" : "***");
+                .Member(dest => dest.IsSpectatingEnabled, src => src.Options.IsSpectatingEnabled)
+                .Function(dest => dest.Password, src => string.IsNullOrEmpty(src.Options.Password) ? "" : "***")
+                .Function(dest => dest.Settings, src =>
+                {
+                    RoomSettings settings = RoomSettings.None;
+                    if (src.Options.IsFriendly)
+                        settings |= RoomSettings.IsFriendly;
+
+                    return settings;
+                });
 
             Mapper.Register<Room, EnterRoomInfo2Dto>()
                 .Member(dest => dest.RoomId, src => src.Id)
@@ -234,7 +243,7 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.ScoreLimit, src => src.Options.ScoreLimit)
                 .Member(dest => dest.RelayEndPoint, src => src.Options.RelayEndPoint)
                 .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState)
-                .Function(dest => dest.TimeState, src => src.GameRule.StateMachine.TimeState);
+                .Member(dest => dest.TimeState, src => src.GameRule.StateMachine.TimeState);
 
             Mapper.Register<Player, RoomPlayerDto>()
                 .Member(dest => dest.AccountId, src => src.Account.Id)

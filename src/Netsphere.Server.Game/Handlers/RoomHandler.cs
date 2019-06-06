@@ -88,12 +88,13 @@ namespace Netsphere.Server.Game.Handlers
                 GameRule = message.Room.GameRule,
                 Map = message.Room.Map,
                 PlayerLimit = message.Room.PlayerLimit,
-                SpectatorLimit = message.Room.IsObservingEnabled ? message.Room.ObserverLimit : 0,
+                SpectatorLimit = message.Room.IsSpectatingEnabled ? message.Room.SpectatorLimit : 0,
                 TimeLimit = message.Room.TimeLimit,
                 ScoreLimit = message.Room.ScoreLimit,
                 Password = message.Room.Password,
                 EquipLimit = (int)message.Room.ItemLimit,
-                RelayEndPoint = _appOptions.RelayEndPoint
+                RelayEndPoint = _appOptions.RelayEndPoint,
+                IsFriendly = message.Room.Settings.HasFlag(RoomSettings.IsFriendly)
             });
 
             switch (createError)

@@ -396,7 +396,7 @@ namespace Netsphere.Server.Game
             foreach (var plr in room.Players.Values)
             {
                 // Move spectators to normal when spectators are disabled
-                if (plr.Mode == PlayerGameMode.Spectate && !room.Options.IsObservingEnabled)
+                if (plr.Mode == PlayerGameMode.Spectate && !room.Options.IsSpectatingEnabled)
                     plr.Mode = PlayerGameMode.Normal;
 
                 // Try to rejoin the old team first then fallback to default join
