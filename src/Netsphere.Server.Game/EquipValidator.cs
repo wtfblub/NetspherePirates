@@ -47,7 +47,7 @@ namespace Netsphere.Server.Game
                 return false;
 
             // Check room equip limit
-            if (items.Any(x => equipLimitInfo.Blacklist.Contains(x.ItemNumber)))
+            if (items.Where(x => x != null).Any(x => equipLimitInfo.Blacklist.Contains(x.ItemNumber)))
                 return false;
 
             items = character.Skills.GetItems();
@@ -57,7 +57,7 @@ namespace Netsphere.Server.Game
                 return false;
 
             // Check room equip limit
-            if (items.Any(x => equipLimitInfo.Blacklist.Contains(x.ItemNumber)))
+            if (items.Where(x => x != null).Any(x => equipLimitInfo.Blacklist.Contains(x.ItemNumber)))
                 return false;
 
             return true;
