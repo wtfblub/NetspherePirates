@@ -1973,10 +1973,10 @@ namespace Netsphere.Network.Message.Game
     public class RoomInfoRequestAck2Message : IGameMessage
     {
         [BlubMember(0)]
-        public string Unk1 { get; set; }
+        public string MasterName { get; set; }
 
         [BlubMember(1)]
-        public int Unk2 { get; set; }
+        public int MasterLevel { get; set; }
 
         [BlubMember(2)]
         public string Unk3 { get; set; }
@@ -1985,28 +1985,28 @@ namespace Netsphere.Network.Message.Game
         public byte Unk4 { get; set; }
 
         [BlubMember(4)]
-        public int Unk5 { get; set; }
+        public int ScoreLimit { get; set; }
 
         [BlubMember(5)]
         public int Unk6 { get; set; }
 
         [BlubMember(6)]
-        public int Unk7 { get; set; }
+        public GameState State { get; set; }
 
         [BlubMember(7)]
         public int Unk8 { get; set; }
 
         [BlubMember(8)]
-        public int Unk9 { get; set; }
+        public int PlayersInAlpha { get; set; }
 
         [BlubMember(9)]
-        public int Unk10 { get; set; }
+        public int PlayersInBeta { get; set; }
 
         [BlubMember(10)]
-        public int Unk11 { get; set; }
+        public int Spectators { get; set; }
 
         [BlubMember(11)]
-        public int Unk12 { get; set; }
+        public int SpectatorLimit { get; set; }
 
         [BlubMember(12)]
         public int Unk13 { get; set; }

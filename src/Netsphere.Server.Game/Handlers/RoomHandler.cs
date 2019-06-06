@@ -15,8 +15,8 @@ namespace Netsphere.Server.Game.Handlers
 {
     internal class RoomHandler
         : IHandle<RoomMakeReqMessage>, IHandle<RoomMakeReq2Message>, IHandle<RoomEnterPlayerReqMessage>,
-          IHandle<RoomEnterReqMessage>, IHandle<RoomLeaveReqMessage>, IHandle<RoomTeamChangeReqMessage>,
-          IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
+          IHandle<RoomEnterReqMessage>, IHandle<RoomLeaveReqMessage>, IHandle<RoomInfoRequestReqMessage>,
+          IHandle<RoomTeamChangeReqMessage>, IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
           IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>
         //           IHandle<CItemsChangeReqMessage>, IHandle<CAvatarChangeReqMessage>,
         //           IHandle<CChangeRuleNotifyReqMessage>, IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
@@ -175,6 +175,33 @@ namespace Netsphere.Server.Game.Handlers
 
             room.Leave(plr);
             return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInChannel))]
+        public async Task<bool> OnHandle(MessageContext context, RoomInfoRequestReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var channel = plr.Channel;
+            var room = channel.RoomManager[message.RoomId];
+
+            if (room == null)
+                return true;
+
+            session.Send(new RoomInfoRequestAck2Message
+            {
+                MasterName = room.Master.Account.Nickname,
+                MasterLevel = room.Master.Level,
+                Unk3 = "",
+                ScoreLimit = room.Options.ScoreLimit,
+                State = room.GameRule.StateMachine.GameState,
+                PlayersInAlpha = room.TeamManager.Players.Count(x => x.Team.Id == TeamId.Alpha),
+                PlayersInBeta = room.TeamManager.Players.Count(x => x.Team.Id == TeamId.Beta),
+                Spectators = room.TeamManager.Spectators.Count(),
+                SpectatorLimit = room.Options.SpectatorLimit
+            });
+
+            return true;
         }
 
         [Firewall(typeof(MustBeInRoom))]

@@ -484,7 +484,7 @@ namespace Netsphere.Network.Message.Game
     }
 
     [BlubContract]
-    public class RoomInfoReqeustReqMessage : IGameMessage
+    public class RoomInfoRequestReqMessage : IGameMessage
     {
         [BlubMember(0)]
         public uint RoomId { get; set; }

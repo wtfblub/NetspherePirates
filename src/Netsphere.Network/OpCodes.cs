@@ -238,7 +238,7 @@
         ShoppingBasketDeleteReq = 50,
         RandomShopUpdateCheckReq = 51,
         RandomShopRollingStartReq = 52,
-        RoomInfoReqeustReq = 53,
+        RoomInfoRequestReq = 53,
         NoteGiftItemReq = 54,
         NoteImportuneItemReq = 55,
         NoteGiftItemGainReq = 56,

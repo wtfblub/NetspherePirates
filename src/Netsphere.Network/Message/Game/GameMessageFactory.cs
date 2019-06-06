@@ -242,7 +242,7 @@ namespace Netsphere.Network.Message.Game
             Register<ShoppingBasketDeleteReqMessage>(GameOpCode.ShoppingBasketDeleteReq);
             Register<RandomShopUpdateCheckReqMessage>(GameOpCode.RandomShopUpdateCheckReq);
             Register<RandomShopRollingStartReqMessage>(GameOpCode.RandomShopRollingStartReq);
-            Register<RoomInfoReqeustReqMessage>(GameOpCode.RoomInfoReqeustReq);
+            Register<RoomInfoRequestReqMessage>(GameOpCode.RoomInfoRequestReq);
             Register<NoteGiftItemReqMessage>(GameOpCode.NoteGiftItemReq);
             Register<NoteImportuneItemReqMessage>(GameOpCode.NoteImportuneItemReq);
             Register<NoteGiftItemGainReqMessage>(GameOpCode.NoteGiftItemGainReq);
