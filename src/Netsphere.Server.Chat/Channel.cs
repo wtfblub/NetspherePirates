@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using BlubLib.Collections.Generic;
 using ExpressMapper.Extensions;
 using Netsphere.Network.Data.Chat;
 using Netsphere.Network.Message.Chat;
@@ -40,9 +41,12 @@ namespace Netsphere.Server.Chat
             _players.Add(plr.Account.Id, plr);
             plr.Channel = this;
             Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
-            foreach (var p in _playerManager.Where(x => x.Channel == null))
-                p.Session.Send(new ChannelLeavePlayerAckMessage(plr.Account.Id));
-
+            plr.Session.Send(new ChannelPlayerListAckMessage(
+                Players.Values.Select(x => x.Map<Player, PlayerInfoShortDto>()).ToArray()
+            ));
+            _playerManager.Where(x => x.Channel == null).ForEach(x =>
+                x.Session.Send(new ChannelLeavePlayerAckMessage(plr.Account.Id))
+            );
             OnPlayerJoined(plr);
         }
 
@@ -52,9 +56,12 @@ namespace Netsphere.Server.Chat
             plr.Channel = null;
             plr.SentPlayerList = false;
             Broadcast(new ChannelLeavePlayerAckMessage(plr.Account.Id));
-            foreach (var p in _playerManager.Where(x => x.Channel == null))
-                p.Session.Send(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
-
+            plr.Session.Send(new ChannelPlayerListAckMessage(
+                _playerManager.Where(x => x.Channel == null).Select(x => x.Map<Player, PlayerInfoShortDto>()).ToArray()
+            ));
+            _playerManager.Where(x => x.Channel == null).ForEach(x =>
+                x.Session.Send(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()))
+            );
             OnPlayerLeft(plr);
         }
 

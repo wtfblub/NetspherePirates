@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using BlubLib.Collections.Generic;
 using ExpressMapper.Extensions;
 using Foundatio.Messaging;
 using Logging;
@@ -110,6 +111,9 @@ namespace Netsphere.Server.Chat.Handlers
             session.Send(new ChannelPlayerListAckMessage(
                 _playerManager.Where(x => x.Channel == null).Select(x => x.Map<Player, PlayerInfoShortDto>()).ToArray()
             ));
+            _playerManager.Where(x => x.Channel == null).ForEach(x =>
+                x.Session.Send(new ChannelEnterPlayerAckMessage(session.Player.Map<Player, PlayerInfoShortDto>()))
+            );
 
             return true;
         }

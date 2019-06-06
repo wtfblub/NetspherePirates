@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ExpressMapper.Extensions;
@@ -103,9 +104,16 @@ namespace Netsphere.Server.Chat.Services
             plr.TeamId = message.TeamId;
 
             if (plr.RoomId != 0)
+            {
                 plr.Channel.Broadcast(new ChannelLeavePlayerAckMessage(plr.Account.Id));
+            }
             else if (plr.RoomId == 0)
+            {
+                plr.Session.Send(new ChannelPlayerListAckMessage(
+                    plr.Channel.Players.Values.Select(x => x.Map<Player, PlayerInfoShortDto>()).ToArray()
+                ));
                 plr.Channel.Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
+            }
 
             return Task.CompletedTask;
         }
