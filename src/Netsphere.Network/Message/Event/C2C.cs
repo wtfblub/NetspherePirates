@@ -90,6 +90,18 @@ namespace Netsphere.Network.Message.Event
     }
 
     [BlubContract]
+    public class WaitingRoomActionSyncMessage : IEventMessage
+    {
+        [BlubMember(0)]
+        public byte Unk { get; set; }
+    }
+
+    [BlubContract]
+    public class FootballBallSyncMessage : IEventMessage
+    {
+    }
+
+    [BlubContract]
     public class PacketMessage : IEventMessage
     {
         [BlubMember(0)]
