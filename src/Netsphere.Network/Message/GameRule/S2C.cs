@@ -1298,6 +1298,15 @@ namespace Netsphere.Network.Message.GameRule
     {
         [BlubMember(0)]
         public ChangeRule2Dto Settings { get; set; }
+
+        public RoomChangeRuleNotifyAck2Message()
+        {
+        }
+
+        public RoomChangeRuleNotifyAck2Message(ChangeRule2Dto settings)
+        {
+            Settings = settings;
+        }
     }
 
     [BlubContract]

@@ -11,10 +11,10 @@ namespace Netsphere.Network.Data.GameRule
         public Netsphere.GameRule GameRule { get; set; }
 
         [BlubMember(1)]
-        public byte Unk1 { get; set; }
+        public byte Map { get; set; }
 
         [BlubMember(2)]
-        public byte Unk2 { get; set; }
+        public byte PlayerLimit { get; set; }
 
         [BlubMember(3)]
         public ushort ScoreLimit { get; set; }
@@ -23,22 +23,23 @@ namespace Netsphere.Network.Data.GameRule
         public int Unk3 { get; set; }
 
         [BlubMember(5)]
-        public byte Unk4 { get; set; }
+        [BlubSerializer(typeof(TimeLimitSerializer))]
+        public TimeSpan TimeLimit { get; set; }
 
         [BlubMember(6)]
-        public int WeaponLimit { get; set; }
+        public int ItemLimit { get; set; }
 
         [BlubMember(7)]
-        public string Name { get; set; }
-
-        [BlubMember(8)]
         public string Password { get; set; }
 
+        [BlubMember(8)]
+        public string Name { get; set; }
+
         [BlubMember(9)]
-        public byte Unk5 { get; set; }
+        public bool IsSpectatingEnabled { get; set; }
 
         [BlubMember(10)]
-        public byte Unk6 { get; set; }
+        public byte SpectatorLimit { get; set; }
 
         [BlubMember(11)]
         public byte Unk7 { get; set; }
@@ -53,10 +54,10 @@ namespace Netsphere.Network.Data.GameRule
         public byte Unk10 { get; set; }
 
         [BlubMember(15)]
-        public int Unk11 { get; set; }
+        public RoomRandomSettings RandomSettings { get; set; }
 
         [BlubMember(16)]
-        public int Unk12 { get; set; }
+        public RoomSettings Settings { get; set; }
 
         [BlubMember(17)]
         public int Unk13 { get; set; }
@@ -68,6 +69,8 @@ namespace Netsphere.Network.Data.GameRule
         {
             Name = "";
             Password = "";
+            Unk10 = 144;
+            Unk14 = 176;
         }
     }
 }

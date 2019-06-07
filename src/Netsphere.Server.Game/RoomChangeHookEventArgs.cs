@@ -6,10 +6,10 @@ namespace Netsphere.Server.Game
     public class RoomChangeHookEventArgs : EventArgs
     {
         public Room Room { get; }
-        public ChangeRuleDto Options { get; }
+        public ChangeRule2Dto Options { get; }
         public RoomChangeRulesError Error { get; set; }
 
-        public RoomChangeHookEventArgs(Room room, ChangeRuleDto options)
+        public RoomChangeHookEventArgs(Room room, ChangeRule2Dto options)
         {
             Room = room;
             Options = options;

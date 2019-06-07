@@ -265,58 +265,96 @@ namespace Netsphere.Server.Game
             Broadcast(new RoomChangeRefereeAckMessage(Host.Account.Id));
         }
 
-        public RoomChangeRulesError ChangeRules(ChangeRuleDto options)
+        public RoomChangeRulesError ChangeRules(ChangeRule2Dto options)
         {
-            throw new NotImplementedException();
-            // if (IsChangingRules)
-            //     return RoomChangeRulesError.AlreadyChangingRules;
+            if (IsChangingRules)
+                return RoomChangeRulesError.AlreadyChangingRules;
 
-            // var eventArgs = new RoomChangeHookEventArgs(this, options);
-            // s_changeRulesHook.Invoke(eventArgs);
-            // if (eventArgs.Error != RoomChangeRulesError.OK)
-            //     return eventArgs.Error;
+            var eventArgs = new RoomChangeHookEventArgs(this, options);
+            s_changeRulesHook.Invoke(eventArgs);
+            if (eventArgs.Error != RoomChangeRulesError.OK)
+                return eventArgs.Error;
 
-            // if (!_gameRuleResolver.HasGameRule(new RoomCreationOptions
-            // {
-            //     Name = options.Name,
-            //     MatchKey = options.MatchKey,
-            //     TimeLimit = options.TimeLimit,
-            //     ScoreLimit = options.ScoreLimit,
-            //     Password = options.Password,
-            //     IsFriendly = options.IsFriendly,
-            //     IsBalanced = options.IsBalanced,
-            //     EquipLimit = options.EquipLimit,
-            //     IsNoIntrusion = options.IsNoIntrusion
-            // }))
-            // {
-            //     return RoomChangeRulesError.InvalidGameRule;
-            // }
+            if (!_gameRuleResolver.HasGameRule(new RoomCreationOptions
+            {
+                Name = options.Name,
+                GameRule = options.GameRule,
+                Map = options.Map,
+                PlayerLimit = options.PlayerLimit,
+                SpectatorLimit = options.SpectatorLimit,
+                TimeLimit = options.TimeLimit,
+                ScoreLimit = options.ScoreLimit,
+                Password = options.Password,
+                EquipLimit = options.ItemLimit,
+                IsFriendly = options.Settings.HasFlag(RoomSettings.IsFriendly)
+            }))
+            {
+                return RoomChangeRulesError.InvalidGameRule;
+            }
 
-            // var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.MatchKey.Map);
-            // if (map == null)
-            //     return RoomChangeRulesError.InvalidMap;
+            var map = _gameDataService.Maps.FirstOrDefault(x => x.Id == options.Map);
+            if (map == null)
+                return RoomChangeRulesError.InvalidMap;
 
-            // if (map.GameRule != options.MatchKey.GameRule)
-            //     return RoomChangeRulesError.InvalidGameRule;
+            if (map.GameRule != options.GameRule)
+                return RoomChangeRulesError.InvalidGameRule;
 
-            // if (options.MatchKey.PlayerLimit + options.MatchKey.SpectatorLimit < Players.Count)
-            //     return RoomChangeRulesError.PlayerLimitTooLow;
+            if (options.PlayerLimit + options.SpectatorLimit < Players.Count)
+                return RoomChangeRulesError.PlayerLimitTooLow;
 
-            // IsChangingRules = true;
-            // _schedulerService.ScheduleAsync(OnChangeRules, this, null, TimeSpan.FromSeconds(5));
+            IsChangingRules = true;
 
-            // Options.Name = options.Name;
-            // Options.MatchKey = options.MatchKey;
-            // Options.TimeLimit = options.TimeLimit;
-            // Options.ScoreLimit = options.ScoreLimit;
-            // Options.Password = options.Password;
-            // Options.IsFriendly = options.IsFriendly;
-            // Options.IsBalanced = options.IsBalanced;
-            // Options.EquipLimit = options.EquipLimit;
-            // Options.IsNoIntrusion = options.IsNoIntrusion;
+            Options.Name = options.Name;
+            Options.GameRule = options.GameRule;
+            Options.Map = options.Map;
+            Options.PlayerLimit = options.PlayerLimit;
+            Options.SpectatorLimit = options.SpectatorLimit;
+            Options.TimeLimit = options.TimeLimit;
+            Options.ScoreLimit = options.ScoreLimit;
+            Options.Password = options.Password;
+            Options.Name = options.Name;
+            Options.EquipLimit = options.ItemLimit;
+            Options.IsFriendly = options.Settings.HasFlag(RoomSettings.IsFriendly);
+            Broadcast(new RoomChangeRuleNotifyAck2Message(Options.Map<RoomCreationOptions, ChangeRule2Dto>()));
 
-            // Broadcast(new SChangeRuleNotifyAckMessage(Options.Map<RoomCreationOptions, ChangeRuleDto>()));
-            // return RoomChangeRulesError.OK;
+            GameRule.Cleanup();
+            Map = _gameDataService.Maps.First(x => x.Id == Options.Map);
+            GameRule = _gameRuleResolver.CreateGameRule(Options);
+            GameRule.Initialize(this);
+            GameRule.StateMachine.GameStateChanged += OnGameStateChanged;
+
+            foreach (var plr in Players.Values)
+            {
+                // Move spectators to normal when spectators are disabled
+                if (plr.Mode == PlayerGameMode.Spectate && !Options.IsSpectatingEnabled)
+                    plr.Mode = PlayerGameMode.Normal;
+
+                // Try to rejoin the old team first then fallback to default join
+                var team = TeamManager[plr.Team.Id];
+                TeamJoinError error;
+                if (team != null)
+                {
+                    error = team.Join(plr);
+                    if (error == TeamJoinError.OK)
+                        continue;
+                }
+
+                // Original team was full
+                // Fallback to default join and try to join another team
+                error = TeamManager.Join(plr);
+                if (error != TeamJoinError.OK && plr.Mode == PlayerGameMode.Spectate)
+                {
+                    // Should only happen when the spectator limit got reduced
+                    // Move spectators to normal when spectator slots are filled
+                    plr.Mode = PlayerGameMode.Normal;
+                    TeamManager.Join(plr);
+                }
+            }
+
+            BroadcastBriefing();
+            IsChangingRules = false;
+            OnOptionsChanged();
+            return RoomChangeRulesError.OK;
         }
 
         public uint GetAveragePing()
@@ -385,51 +423,6 @@ namespace Netsphere.Server.Game
             _messageBus.PublishAsync(new PlayerUpdateMessage(
                 plr.Account.Id, plr.TotalExperience, Id, team)
             );
-        }
-
-        private static void OnChangeRules(object This, object _)
-        {
-            var room = (Room)This;
-
-            room.GameRule.Cleanup();
-
-            room.Map = room._gameDataService.Maps.First(x => x.Id == room.Options.Map);
-            room.GameRule = room._gameRuleResolver.CreateGameRule(room.Options);
-            room.GameRule.Initialize(room);
-            room.GameRule.StateMachine.GameStateChanged += room.OnGameStateChanged;
-
-            foreach (var plr in room.Players.Values)
-            {
-                // Move spectators to normal when spectators are disabled
-                if (plr.Mode == PlayerGameMode.Spectate && !room.Options.IsSpectatingEnabled)
-                    plr.Mode = PlayerGameMode.Normal;
-
-                // Try to rejoin the old team first then fallback to default join
-                var team = room.TeamManager[plr.Team.Id];
-                TeamJoinError error;
-                if (team != null)
-                {
-                    error = team.Join(plr);
-                    if (error == TeamJoinError.OK)
-                        continue;
-                }
-
-                // Original team was full
-                // Fallback to default join and try to join another team
-                error = room.TeamManager.Join(plr);
-                if (error != TeamJoinError.OK && plr.Mode == PlayerGameMode.Spectate)
-                {
-                    // Should only happen when the spectator limit got reduced
-                    // Move spectators to normal when spectator slots are filled
-                    plr.Mode = PlayerGameMode.Normal;
-                    room.TeamManager.Join(plr);
-                }
-            }
-
-            room.BroadcastBriefing();
-
-            room.IsChangingRules = false;
-            room.OnOptionsChanged();
         }
     }
 }

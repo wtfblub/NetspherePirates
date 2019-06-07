@@ -16,6 +16,7 @@ using Netsphere.Common.Configuration;
 using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Game;
+using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
@@ -226,7 +227,7 @@ namespace Netsphere.Server.Game
                 .Function(dest => dest.Password, src => string.IsNullOrEmpty(src.Options.Password) ? "" : "***")
                 .Function(dest => dest.Settings, src =>
                 {
-                    RoomSettings settings = RoomSettings.None;
+                    var settings = RoomSettings.None;
                     if (src.Options.IsFriendly)
                         settings |= RoomSettings.IsFriendly;
 
@@ -250,16 +251,37 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.Nickname, src => src.Account.Nickname)
                 .Value(dest => dest.Unk1, 144);
 
-            // Mapper.Register<RoomCreationOptions, ChangeRuleDto>()
-            //     .Member(dest => dest.Name, src => src.Name)
-            //     .Member(dest => dest.Password, src => src.Password)
-            //     .Function(dest => dest.MatchKey, src => src.MatchKey)
-            //     .Member(dest => dest.TimeLimit, src => src.TimeLimit)
-            //     .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
-            //     .Member(dest => dest.IsFriendly, src => src.IsFriendly)
-            //     .Member(dest => dest.IsBalanced, src => src.IsBalanced)
-            //     .Member(dest => dest.EquipLimit, src => src.EquipLimit)
-            //     .Member(dest => dest.IsNoIntrusion, src => src.IsNoIntrusion);
+            Mapper.Register<RoomCreationOptions, ChangeRuleDto>()
+                .Member(dest => dest.GameRule, src => src.GameRule)
+                .Member(dest => dest.Map, src => src.Map)
+                .Member(dest => dest.PlayerLimit, src => src.PlayerLimit)
+                .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
+                .Member(dest => dest.TimeLimit, src => src.TimeLimit)
+                .Member(dest => dest.ItemLimit, src => src.EquipLimit)
+                .Member(dest => dest.Password, src => src.Password)
+                .Member(dest => dest.Name, src => src.Name)
+                .Member(dest => dest.IsSpectatingEnabled, src => src.IsSpectatingEnabled)
+                .Member(dest => dest.SpectatorLimit, src => src.SpectatorLimit);
+
+            Mapper.Register<RoomCreationOptions, ChangeRule2Dto>()
+                .Member(dest => dest.GameRule, src => src.GameRule)
+                .Member(dest => dest.Map, src => src.Map)
+                .Member(dest => dest.PlayerLimit, src => src.PlayerLimit)
+                .Member(dest => dest.ScoreLimit, src => src.ScoreLimit)
+                .Member(dest => dest.TimeLimit, src => src.TimeLimit)
+                .Member(dest => dest.ItemLimit, src => src.EquipLimit)
+                .Member(dest => dest.Password, src => src.Password)
+                .Member(dest => dest.Name, src => src.Name)
+                .Member(dest => dest.IsSpectatingEnabled, src => src.IsSpectatingEnabled)
+                .Member(dest => dest.SpectatorLimit, src => src.SpectatorLimit)
+                .Function(dest => dest.Settings, src =>
+                {
+                    var settings = RoomSettings.None;
+                    if (src.IsFriendly)
+                        settings |= RoomSettings.IsFriendly;
+
+                    return settings;
+                });
 
             Mapper.Compile(CompilationTypes.Source);
         }

@@ -18,8 +18,8 @@ namespace Netsphere.Server.Game.Handlers
           IHandle<RoomEnterReqMessage>, IHandle<RoomLeaveReqMessage>, IHandle<RoomInfoRequestReqMessage>,
           IHandle<RoomTeamChangeReqMessage>, IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
           IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>, IHandle<RoomItemChangeReqMessage>,
-          IHandle<GameAvatarChangeReqMessage>
-        //           IHandle<CChangeRuleNotifyReqMessage>, IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
+          IHandle<GameAvatarChangeReqMessage>, IHandle<RoomChangeRuleNotifyReq2Message>
+        //           IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
         //           IHandle<CScoreKillReqMessage>,
         //           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
         //           IHandle<CScoreSuicideReqMessage>, IHandle<CScoreGoalReqMessage>, IHandle<CScoreReboundReqMessage>,
@@ -365,22 +365,22 @@ namespace Netsphere.Server.Game.Handlers
             return Task.FromResult(true);
         }
 
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeMaster))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Waiting)]
-        //         public async Task<bool> OnHandle(MessageContext context, CChangeRuleNotifyReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             var error = room.ChangeRules(message.Settings);
-        //             if (error != RoomChangeRulesError.OK)
-        //                 session.Send(new ServerResultAckMessage(ServerResult.FailedToRequestTask));
-        //
-        //             return true;
-        //         }
-        //
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
+        public async Task<bool> OnHandle(MessageContext context, RoomChangeRuleNotifyReq2Message message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            var error = room.ChangeRules(message.Settings);
+            if (error != RoomChangeRulesError.OK)
+                session.Send(new RoomChangeRuleFailAckMessage());
+
+            return true;
+        }
+
         //         [Firewall(typeof(MustBeInRoom))]
         //         public Task<bool> OnHandle(MessageContext context, CLeavePlayerRequestReqMessage message)
         //         {
