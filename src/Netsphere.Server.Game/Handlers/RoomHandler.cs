@@ -17,8 +17,8 @@ namespace Netsphere.Server.Game.Handlers
         : IHandle<RoomMakeReqMessage>, IHandle<RoomMakeReq2Message>, IHandle<RoomEnterPlayerReqMessage>,
           IHandle<RoomEnterReqMessage>, IHandle<RoomLeaveReqMessage>, IHandle<RoomInfoRequestReqMessage>,
           IHandle<RoomTeamChangeReqMessage>, IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
-          IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>
-        //           IHandle<CItemsChangeReqMessage>, IHandle<CAvatarChangeReqMessage>,
+          IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>, IHandle<RoomItemChangeReqMessage>,
+          IHandle<GameAvatarChangeReqMessage>
         //           IHandle<CChangeRuleNotifyReqMessage>, IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
         //           IHandle<CScoreKillReqMessage>,
         //           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
@@ -315,56 +315,56 @@ namespace Netsphere.Server.Game.Handlers
             return Task.FromResult(true);
         }
 
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         public Task<bool> OnHandle(MessageContext context, CItemsChangeReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //             var logger = plr.AddContextToLogger(_logger);
-        //
-        //             // Can only change items in lobby and when not ready
-        //             if (plr.State != PlayerState.Lobby || plr.IsReady)
-        //             {
-        //                 plr.Disconnect();
-        //                 return Task.FromResult(true);
-        //             }
-        //
-        //             logger.Debug("Item sync unk1={Unk1}", message.Unk1);
-        //
-        //             if (message.Unk2.Length > 0)
-        //                 logger.Warning("Item sync unk2={Unk2}", (object)message.Unk2);
-        //
-        //             room.Broadcast(new SItemsChangeAckMessage(message.Unk1, message.Unk2));
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         public Task<bool> OnHandle(MessageContext context, CAvatarChangeReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //             var logger = plr.AddContextToLogger(_logger);
-        //
-        //             // Can only change characters in lobby, during half time or when not ready
-        //             if (plr.State != PlayerState.Lobby &&
-        //                 room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime ||
-        //                 plr.IsReady)
-        //             {
-        //                 plr.Disconnect();
-        //                 return Task.FromResult(true);
-        //             }
-        //
-        //             logger.Debug("Avatar sync unk1={Unk1}", message.Unk1);
-        //
-        //             if (message.Unk2.Length > 0)
-        //                 logger.Warning("Avatar sync unk2={Unk2}", (object)message.Unk2);
-        //
-        //             room.Broadcast(new SAvatarChangeAckMessage(message.Unk1, message.Unk2));
-        //             return Task.FromResult(true);
-        //         }
-        //
+        [Firewall(typeof(MustBeInRoom))]
+        public Task<bool> OnHandle(MessageContext context, RoomItemChangeReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+            var logger = plr.AddContextToLogger(_logger);
+
+            // Can only change items in lobby and when not ready
+            if (plr.State != PlayerState.Lobby || plr.IsReady)
+            {
+                plr.Disconnect();
+                return Task.FromResult(true);
+            }
+
+            logger.Debug("Item sync unk1={Unk1}", message.Unk1);
+
+            if (message.Unk2.Length > 0)
+                logger.Warning("Item sync unk2={Unk2}", (object)message.Unk2);
+
+            room.Broadcast(new RoomChangeItemAckMessage(message.Unk1, message.Unk2));
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        public Task<bool> OnHandle(MessageContext context, GameAvatarChangeReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+            var logger = plr.AddContextToLogger(_logger);
+
+            // Can only change characters in lobby, during half time or when not ready
+            if (plr.State != PlayerState.Lobby &&
+                room.GameRule.StateMachine.TimeState != GameTimeState.HalfTime ||
+                plr.IsReady)
+            {
+                plr.Disconnect();
+                return Task.FromResult(true);
+            }
+
+            logger.Debug("Avatar sync unk1={Unk1}", message.Unk1);
+
+            if (message.Unk2.Length > 0)
+                logger.Warning("Avatar sync unk2={Unk2}", (object)message.Unk2);
+
+            room.Broadcast(new GameAvatarChangeAckMessage(message.Unk1, message.Unk2));
+            return Task.FromResult(true);
+        }
+
         //         [Firewall(typeof(MustBeInRoom))]
         //         [Firewall(typeof(MustBeMaster))]
         //         [Firewall(typeof(MustBeGameState), GameState.Waiting)]
