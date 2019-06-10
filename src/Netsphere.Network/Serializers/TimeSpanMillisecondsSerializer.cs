@@ -5,7 +5,7 @@ using BlubLib.Serialization;
 
 namespace Netsphere.Network.Serializers
 {
-    public class TimeSpanSecondsSerializer : ISerializer<TimeSpan>
+    public class TimeSpanMillisecondsSerializer : ISerializer<TimeSpan>
     {
         public bool CanHandle(Type type)
         {
@@ -15,13 +15,13 @@ namespace Netsphere.Network.Serializers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Serialize(BlubSerializer blubSerializer, BinaryWriter writer, TimeSpan value)
         {
-            writer.Write((uint)value.TotalSeconds);
+            writer.Write((uint)value.TotalMilliseconds);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TimeSpan Deserialize(BlubSerializer blubSerializer, BinaryReader reader)
         {
-            return TimeSpan.FromSeconds(reader.ReadUInt32());
+            return TimeSpan.FromMilliseconds(reader.ReadUInt32());
         }
     }
 }

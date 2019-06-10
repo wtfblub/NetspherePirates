@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using BlubLib.Collections.Generic;
 using Logging;
 using Microsoft.Extensions.Options;
-using Netsphere.Common;
 using Netsphere.Network;
 using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
@@ -20,7 +19,7 @@ namespace Netsphere.Server.Game.Handlers
           IHandle<RoomTeamChangeReqMessage>, IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
           IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>, IHandle<RoomItemChangeReqMessage>,
           IHandle<GameAvatarChangeReqMessage>, IHandle<RoomChangeRuleNotifyReq2Message>, IHandle<RoomLeaveRequestReqMessage>,
-          IHandle<RoomAutoMixingTeamReqMessage>
+          IHandle<RoomAutoMixingTeamReqMessage>, IHandle<RoomIntrudeRoundReq2Message>, IHandle<GameLoadingSuccessReqMessage>
         //           IHandle<CScoreKillReqMessage>,
         //           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
         //           IHandle<CScoreSuicideReqMessage>, IHandle<CScoreGoalReqMessage>, IHandle<CScoreReboundReqMessage>,
@@ -454,6 +453,58 @@ namespace Netsphere.Server.Game.Handlers
                 room.Players.Values.Select(x => new MixedTeamBriefingDto(x.Account.Id, x.Team.Id)).ToArray()
             ));
             return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        public async Task<bool> OnHandle(MessageContext context, RoomIntrudeRoundReq2Message message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+
+            plr.IsReady = false;
+            plr.IsLoading = true;
+            plr.State = PlayerState.Waiting;
+            plr.Score.Reset();
+
+            for (var i = 0; i < plr.CharacterStartPlayTime.Length; ++i)
+                plr.CharacterStartPlayTime[i] = default;
+
+            plr.Session.Send(new RoomGameLoadingAckMessage());
+            return true;
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        public async Task<bool> OnHandle(MessageContext context, GameLoadingSuccessReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            var gameState = room.GameRule.StateMachine.GameState;
+            if (gameState != GameState.Loading && gameState != GameState.Playing)
+                return true;
+
+            plr.IsLoading = false;
+            room.Broadcast(new RoomGameEndLoadingAckMessage(plr.Account.Id));
+
+            if (room.Players.Values.Where(x => x.State == PlayerState.Waiting).All(x => !x.IsLoading))
+                room.GameRule.StateMachine.StartGame();
+
+            if (gameState == GameState.Playing)
+            {
+                plr.CharacterStartPlayTime[plr.CharacterManager.CurrentSlot] = DateTimeOffset.Now;
+                plr.StartPlayTime = DateTimeOffset.Now;
+                plr.State = plr.Mode == PlayerGameMode.Normal
+                    ? PlayerState.Alive
+                    : PlayerState.Spectating;
+                session.Send(new RoomGameStartAckMessage());
+                session.Send(new GameRefreshGameRuleInfoAckMessage(
+                    gameState, room.GameRule.StateMachine.TimeState, room.GameRule.StateMachine.RoundTime
+                ));
+            }
+
+            return true;
         }
 
         //         [Firewall(typeof(MustBeInRoom))]

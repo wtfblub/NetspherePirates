@@ -551,9 +551,6 @@ namespace Netsphere.Network.Message.GameRule
     public class RoomIntrudeRoundReq2Message : IGameRuleMessage
     {
         [BlubMember(0)]
-        public ushort Unk { get; set; }
-
-        [BlubMember(1)]
         public EquipCheckDto EquipCheck { get; set; }
     }
 

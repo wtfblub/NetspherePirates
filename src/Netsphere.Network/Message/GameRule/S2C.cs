@@ -722,13 +722,25 @@ namespace Netsphere.Network.Message.GameRule
     public class GameRefreshGameRuleInfoAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
-        public int Unk1 { get; set; }
+        public GameState State { get; set; }
 
         [BlubMember(1)]
-        public int Unk2 { get; set; }
+        public GameTimeState TimeState { get; set; }
 
         [BlubMember(2)]
-        public int Unk3 { get; set; }
+        [BlubSerializer(typeof(TimeSpanMillisecondsSerializer))]
+        public TimeSpan RoundTime { get; set; }
+
+        public GameRefreshGameRuleInfoAckMessage()
+        {
+        }
+
+        public GameRefreshGameRuleInfoAckMessage(GameState state, GameTimeState timeState, TimeSpan roundTime)
+        {
+            State = state;
+            TimeState = timeState;
+            RoundTime = roundTime;
+        }
     }
 
     [BlubContract]
@@ -1197,7 +1209,16 @@ namespace Netsphere.Network.Message.GameRule
     public class RoomGameEndLoadingAckMessage : IGameRuleMessage
     {
         [BlubMember(0)]
-        public long Unk { get; set; }
+        public ulong AccountId { get; set; }
+
+        public RoomGameEndLoadingAckMessage()
+        {
+        }
+
+        public RoomGameEndLoadingAckMessage(ulong accountId)
+        {
+            AccountId = accountId;
+        }
     }
 
     [BlubContract]

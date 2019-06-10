@@ -182,7 +182,8 @@ namespace Netsphere
     {
         Waiting = 1,
         Playing = 2,
-        Result = 3
+        Result = 3,
+        Loading = 4
     }
 
     public enum GameTimeState : uint

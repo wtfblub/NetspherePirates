@@ -402,13 +402,14 @@ namespace Netsphere.Server.Game
 
         private void OnGameStateChanged(object sender, EventArgs e)
         {
-            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAckMessage(this.Map<Room, RoomDto>()));
+            RoomManager.Channel.Broadcast(new RoomChangeRoomInfoAck2Message(this.Map<Room, Room2Dto>()));
             if (GameRule.StateMachine.GameState == GameState.Result)
             {
                 foreach (var plr in Players.Values)
                 {
                     _messageBus.PublishAsync(new PlayerUpdateMessage(
-                        plr.Account.Id, plr.TotalExperience, Id, plr.Team?.Id ?? TeamId.Neutral));
+                        plr.Account.Id, plr.TotalExperience, Id, plr.Team?.Id ?? TeamId.Neutral)
+                    );
                 }
             }
         }
@@ -421,8 +422,8 @@ namespace Netsphere.Server.Game
                 team = plr.Team?.Id ?? TeamId.Neutral;
 
             _messageBus.PublishAsync(new PlayerUpdateMessage(
-                plr.Account.Id, plr.TotalExperience, Id, team)
-            );
+                plr.Account.Id, plr.TotalExperience, Id, team
+            ));
         }
     }
 }

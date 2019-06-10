@@ -92,6 +92,7 @@ namespace Netsphere.Server.Game
         public DateTimeOffset StartPlayTime { get; internal set; }
         public DateTimeOffset[] CharacterStartPlayTime { get; internal set; }
         public bool IsInGMMode { get; set; }
+        public bool IsLoading { get; set; }
 
         public event EventHandler<PlayerEventArgs> Disconnected;
         public event EventHandler<PlayerEventArgs> StateChanged;

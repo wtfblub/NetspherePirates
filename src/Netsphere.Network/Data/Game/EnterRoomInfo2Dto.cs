@@ -20,10 +20,10 @@ namespace Netsphere.Network.Data.Game
         public byte PlayerLimit { get; set; }
 
         [BlubMember(4)]
-        public GameTimeState TimeState { get; set; }
+        public GameState State { get; set; }
 
         [BlubMember(5)]
-        public GameState State { get; set; }
+        public GameTimeState TimeState { get; set; }
 
         [BlubMember(6)]
         public uint TimeLimit { get; set; }
