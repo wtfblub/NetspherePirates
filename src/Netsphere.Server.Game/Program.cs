@@ -222,7 +222,7 @@ namespace Netsphere.Server.Game
                 .Member(dest => dest.Name, src => src.Options.Name)
                 .Member(dest => dest.ItemLimit, src => src.Options.EquipLimit)
                 .Member(dest => dest.PlayerCount, src => src.Players.Count(x => !x.Value.IsInGMMode))
-                .Member(dest => dest.State, src => src.GameRule.StateMachine.GameState)
+                .Function(dest => dest.State, src => src.GameRule.StateMachine.GameState - 1)
                 .Member(dest => dest.IsSpectatingEnabled, src => src.Options.IsSpectatingEnabled)
                 .Function(dest => dest.Password, src => string.IsNullOrEmpty(src.Options.Password) ? "" : "***")
                 .Function(dest => dest.Settings, src =>
