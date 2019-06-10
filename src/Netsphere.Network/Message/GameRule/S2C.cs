@@ -1154,7 +1154,17 @@ namespace Netsphere.Network.Message.GameRule
 
         [BlubMember(1)]
         [BlubSerializer(typeof(ArrayWithIntPrefixSerializer))]
-        public MixedTeamBriefingDto[] Unk2 { get; set; }
+        public MixedTeamBriefingDto[] Players { get; set; }
+
+        public RoomMixedTeamBriefingInfoAckMessage()
+        {
+            Players = Array.Empty<MixedTeamBriefingDto>();
+        }
+
+        public RoomMixedTeamBriefingInfoAckMessage(MixedTeamBriefingDto[] players)
+        {
+            Players = players;
+        }
     }
 
     [BlubContract]

@@ -562,7 +562,7 @@
 
         RoomEnterPlayerAck = 3001,
         RoomLeavePlayerAck = 3002,
-        RoomLeaveReqeustAck = 3003,
+        RoomLeaveRequestAck = 3003,
         RoomChangeTeamAck = 3004,
         RoomChangeTeamFailAck = 3005,
         RoomChoiceTeamChangeAck = 3006,

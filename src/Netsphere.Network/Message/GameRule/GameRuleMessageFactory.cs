@@ -13,7 +13,7 @@ namespace Netsphere.Network.Message.GameRule
             // S2C
             Register<RoomEnterPlayerAckMessage>(GameRuleOpCode.RoomEnterPlayerAck);
             Register<RoomLeavePlayerAckMessage>(GameRuleOpCode.RoomLeavePlayerAck);
-            Register<RoomLeaveReqeustAckMessage>(GameRuleOpCode.RoomLeaveReqeustAck);
+            Register<RoomLeaveReqeustAckMessage>(GameRuleOpCode.RoomLeaveRequestAck);
             Register<RoomChangeTeamAckMessage>(GameRuleOpCode.RoomChangeTeamAck);
             Register<RoomChangeTeamFailAckMessage>(GameRuleOpCode.RoomChangeTeamFailAck);
             Register<RoomChoiceTeamChangeAckMessage>(GameRuleOpCode.RoomChoiceTeamChangeAck);
@@ -120,7 +120,7 @@ namespace Netsphere.Network.Message.GameRule
 
             // C2S
             Register<RoomEnterPlayerReqMessage>(GameRuleOpCode.RoomEnterPlayerReq);
-            Register<RoomLeaveReguestReqMessage>(GameRuleOpCode.RoomLeaveReguestReq);
+            Register<RoomLeaveRequestReqMessage>(GameRuleOpCode.RoomLeaveReguestReq);
             Register<RoomTeamChangeReqMessage>(GameRuleOpCode.RoomTeamChangeReq);
             Register<RoomAutoAssingTeamReqMessage>(GameRuleOpCode.RoomAutoAssingTeamReq);
             Register<RoomAutoMixingTeamReqMessage>(GameRuleOpCode.RoomAutoMixingTeamReq);

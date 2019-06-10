@@ -11,7 +11,7 @@ namespace Netsphere.Network.Message.GameRule
     }
 
     [BlubContract]
-    public class RoomLeaveReguestReqMessage : IGameRuleMessage
+    public class RoomLeaveRequestReqMessage : IGameRuleMessage
     {
         [BlubMember(0)]
         public ulong AccountId { get; set; }

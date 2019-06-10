@@ -6,9 +6,19 @@ namespace Netsphere.Network.Data.GameRule
     public class MixedTeamBriefingDto
     {
         [BlubMember(0)]
-        public ulong Unk1 { get; set; }
+        public ulong AccountId { get; set; }
 
         [BlubMember(1)]
-        public byte Unk2 { get; set; }
+        public TeamId TeamId { get; set; }
+
+        public MixedTeamBriefingDto()
+        {
+        }
+
+        public MixedTeamBriefingDto(ulong accountId, TeamId teamId)
+        {
+            AccountId = accountId;
+            TeamId = teamId;
+        }
     }
 }

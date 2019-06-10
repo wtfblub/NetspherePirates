@@ -6,6 +6,7 @@ using Logging;
 using Microsoft.Extensions.Options;
 using Netsphere.Common;
 using Netsphere.Network;
+using Netsphere.Network.Data.GameRule;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Server.Game.Rules;
@@ -18,8 +19,8 @@ namespace Netsphere.Server.Game.Handlers
           IHandle<RoomEnterReqMessage>, IHandle<RoomLeaveReqMessage>, IHandle<RoomInfoRequestReqMessage>,
           IHandle<RoomTeamChangeReqMessage>, IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
           IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>, IHandle<RoomItemChangeReqMessage>,
-          IHandle<GameAvatarChangeReqMessage>, IHandle<RoomChangeRuleNotifyReq2Message>
-        //           IHandle<CLeavePlayerRequestReqMessage>, IHandle<CAutoMixingTeamReqMessage>,
+          IHandle<GameAvatarChangeReqMessage>, IHandle<RoomChangeRuleNotifyReq2Message>, IHandle<RoomLeaveRequestReqMessage>,
+          IHandle<RoomAutoMixingTeamReqMessage>
         //           IHandle<CScoreKillReqMessage>,
         //           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
         //           IHandle<CScoreSuicideReqMessage>, IHandle<CScoreGoalReqMessage>, IHandle<CScoreReboundReqMessage>,
@@ -381,81 +382,80 @@ namespace Netsphere.Server.Game.Handlers
             return true;
         }
 
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         public Task<bool> OnHandle(MessageContext context, CLeavePlayerRequestReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             var targetPlr = room.Players.GetValueOrDefault(message.AccountId);
-        //             if (targetPlr == null)
-        //                 return Task.FromResult(true);
-        //
-        //             // Cant kick people in gm mode also disables AFK kick
-        //             if (targetPlr.IsInGMMode)
-        //                 return Task.FromResult(true);
-        //
-        //             switch (message.Reason)
-        //             {
-        //                 case RoomLeaveReason.Kicked:
-        //                     // Only the master can kick people and kick is only allowed in the lobby
-        //                     if (room.Master != plr && room.GameRule.StateMachine.GameState != GameState.Waiting)
-        //                         return Task.FromResult(true);
-        //
-        //                     break;
-        //
-        //                 case RoomLeaveReason.AFK:
-        //                     // The client kicks itself when afk is detected
-        //                     if (message.AccountId != plr.Account.Id)
-        //                         return Task.FromResult(true);
-        //
-        //                     break;
-        //
-        //                 default:
-        //                     // Dont allow any other reasons for now
-        //                     return Task.FromResult(true);
-        //             }
-        //
-        //             room.Leave(targetPlr, message.Reason);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeMaster))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Waiting)]
-        //         public Task<bool> OnHandle(MessageContext context, CAutoMixingTeamReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var room = session.Player.Room;
-        //
-        //             var players = room.Players.Values
-        //                 .Where(x => x.Mode == PlayerGameMode.Normal)
-        //                 .Select(x => (plr: x, team: x.Team))
-        //                 .ToList();
-        //             var rng = new Random(Guid.NewGuid().GetHashCode());
-        //
-        //             foreach (var (plr, _) in players)
-        //                 plr.Team.Leave(plr);
-        //
-        //             while (players.Count > 0)
-        //             {
-        //                 var i = rng.Next(0, players.Count);
-        //                 var (plr, oldTeam) = players[i];
-        //                 players.RemoveAt(i);
-        //                 room.TeamManager.Join(plr);
-        //
-        //                 _logger.Debug("Shuffle team PlayerId={PlayerId} OldTeam={OldTeam} NewTeam={NewTeam}",
-        //                     plr.Account.Id, oldTeam?.Id, plr.Team?.Id);
-        //
-        //                 if (plr.Team != oldTeam)
-        //                     room.Broadcast(new SMixChangeTeamAckMessage(plr.Account.Id, 0, oldTeam.Id, plr.Team.Id));
-        //             }
-        //
-        //             room.BroadcastBriefing();
-        //             return Task.FromResult(true);
-        //         }
-        //
+        [Firewall(typeof(MustBeInRoom))]
+        public Task<bool> OnHandle(MessageContext context, RoomLeaveRequestReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            var targetPlr = room.Players.GetValueOrDefault(message.AccountId);
+            if (targetPlr == null)
+                return Task.FromResult(true);
+
+            // Cant kick people in gm mode also disables AFK kick
+            if (targetPlr.IsInGMMode)
+                return Task.FromResult(true);
+
+            switch (message.Reason)
+            {
+                case RoomLeaveReason.Kicked:
+                    // Only the master can kick people and kick is only allowed in the lobby
+                    if (room.Master != plr && room.GameRule.StateMachine.GameState != GameState.Waiting)
+                        return Task.FromResult(true);
+
+                    break;
+
+                case RoomLeaveReason.AFK:
+                    // The client kicks itself when afk is detected
+                    if (message.AccountId != plr.Account.Id)
+                        return Task.FromResult(true);
+
+                    break;
+
+                default:
+                    // Dont allow any other reasons for now
+                    return Task.FromResult(true);
+            }
+
+            room.Leave(targetPlr, message.Reason);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeGameState), GameState.Waiting)]
+        public Task<bool> OnHandle(MessageContext context, RoomAutoMixingTeamReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var room = session.Player.Room;
+
+            var players = room.Players.Values
+                .Where(x => x.Mode == PlayerGameMode.Normal)
+                .Select(x => (plr: x, team: x.Team))
+                .ToList();
+            var rng = new Random(Guid.NewGuid().GetHashCode());
+
+            foreach (var (plr, _) in players)
+                plr.Team.Leave(plr);
+
+            while (players.Count > 0)
+            {
+                var i = rng.Next(0, players.Count);
+                var (plr, oldTeam) = players[i];
+                players.RemoveAt(i);
+                room.TeamManager.Join(plr);
+
+                _logger.Debug("Shuffle team PlayerId={PlayerId} OldTeam={OldTeam} NewTeam={NewTeam}",
+                    plr.Account.Id, oldTeam?.Id, plr.Team?.Id);
+            }
+
+            room.Broadcast(new RoomMixedTeamBriefingInfoAckMessage(
+                room.Players.Values.Select(x => new MixedTeamBriefingDto(x.Account.Id, x.Team.Id)).ToArray()
+            ));
+            return Task.FromResult(true);
+        }
+
         //         [Firewall(typeof(MustBeInRoom))]
         //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
         //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
