@@ -6,7 +6,7 @@ namespace Netsphere.Network.Data.Game
     public class RoomPlayerDto
     {
         [BlubMember(0)]
-        public int Unk1 { get; set; }
+        public int ClubId { get; set; }
 
         [BlubMember(1)]
         public ulong AccountId { get; set; }
@@ -18,9 +18,9 @@ namespace Netsphere.Network.Data.Game
         public string Nickname { get; set; }
 
         [BlubMember(4)]
-        public byte Unk3 { get; set; }
+        public byte Slot { get; set; }
 
         [BlubMember(5)]
-        public byte Unk4 { get; set; }
+        public bool IsGM { get; set; }
     }
 }

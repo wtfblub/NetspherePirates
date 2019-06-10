@@ -19,27 +19,28 @@ namespace Netsphere.Network.Message.GameRule
         public PlayerGameMode PlayerGameMode { get; set; }
 
         [BlubMember(3)]
-        public int Unk3 { get; set; }
+        public int ClubId { get; set; }
 
         [BlubMember(4)]
         public string Nickname { get; set; }
 
         [BlubMember(5)]
-        public byte Unk4 { get; set; }
+        public TeamId Team { get; set; }
 
         public RoomEnterPlayerAckMessage()
         {
             Nickname = "";
         }
 
-        public RoomEnterPlayerAckMessage(ulong accountId, string nickname, byte unk1, PlayerGameMode mode, int unk3, byte unk4)
+        public RoomEnterPlayerAckMessage(ulong accountId, string nickname, byte unk1, PlayerGameMode mode,
+            int clubId, TeamId team)
         {
             AccountId = accountId;
             Unk1 = unk1;
             PlayerGameMode = mode;
-            Unk3 = unk3;
+            ClubId = clubId;
             Nickname = nickname;
-            Unk4 = unk4;
+            Team = team;
         }
     }
 

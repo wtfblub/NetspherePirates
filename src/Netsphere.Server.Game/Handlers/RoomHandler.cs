@@ -48,7 +48,7 @@ namespace Netsphere.Server.Game.Handlers
             if (!plr.IsConnectingToRoom)
                 return true;
 
-            room.Broadcast(new RoomEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.Mode, 0, 0));
+            room.Broadcast(new RoomEnterPlayerAckMessage(plr.Account.Id, plr.Account.Nickname, 0, plr.Mode, 0, plr.Team.Id));
             session.Send(new RoomChangeMasterAckMessage(room.Master.Account.Id));
             session.Send(new RoomChangeRefereeAckMessage(room.Host.Account.Id));
             room.BroadcastBriefing();

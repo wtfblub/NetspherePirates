@@ -249,7 +249,8 @@ namespace Netsphere.Server.Game
             Mapper.Register<Player, RoomPlayerDto>()
                 .Member(dest => dest.AccountId, src => src.Account.Id)
                 .Member(dest => dest.Nickname, src => src.Account.Nickname)
-                .Value(dest => dest.Unk1, 144);
+                .Member(dest => dest.Slot, src => src.Slot)
+                .Value(dest => dest.Unk2, (byte)144);
 
             Mapper.Register<RoomCreationOptions, ChangeRuleDto>()
                 .Member(dest => dest.GameRule, src => src.GameRule)
