@@ -110,7 +110,10 @@ namespace Netsphere.Server.Chat.Services
             else if (plr.RoomId == 0)
             {
                 plr.Session.Send(new ChannelPlayerListAckMessage(
-                    plr.Channel.Players.Values.Select(x => x.Map<Player, PlayerInfoShortDto>()).ToArray()
+                    plr.Channel.Players.Values
+                        .Where(x => x.RoomId == 0)
+                        .Select(x => x.Map<Player, PlayerInfoShortDto>())
+                        .ToArray()
                 ));
                 plr.Channel.Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
             }

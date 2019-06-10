@@ -42,7 +42,7 @@ namespace Netsphere.Server.Chat
             plr.Channel = this;
             Broadcast(new ChannelEnterPlayerAckMessage(plr.Map<Player, PlayerInfoShortDto>()));
             plr.Session.Send(new ChannelPlayerListAckMessage(
-                Players.Values.Select(x => x.Map<Player, PlayerInfoShortDto>()).ToArray()
+                Players.Values.Where(x => x.RoomId == 0).Select(x => x.Map<Player, PlayerInfoShortDto>()).ToArray()
             ));
             _playerManager.Where(x => x.Channel == null).ForEach(x =>
                 x.Session.Send(new ChannelLeavePlayerAckMessage(plr.Account.Id))
