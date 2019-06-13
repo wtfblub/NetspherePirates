@@ -7,6 +7,7 @@ namespace Netsphere.Server.Game
     {
         public void SendScoreKill(ScoreContext killer, ScoreContext assist, ScoreContext target, AttackAttribute attackAttribute)
         {
+            target?.Player.Session.Send(new InGamePlayerResponseOfDeathAckMessage());
             if (assist != null)
             {
                 Room.Broadcast(new ScoreKillAssistAckMessage(
@@ -26,6 +27,7 @@ namespace Netsphere.Server.Game
 
         public void SendScoreTeamKill(ScoreContext killer, ScoreContext target, AttackAttribute attackAttribute)
         {
+            target?.Player.Session.Send(new InGamePlayerResponseOfDeathAckMessage());
             Room.Broadcast(new ScoreTeamKillAckMessage(
                 new Score2Dto(
                     killer.SentryId ?? killer.Player.PeerId,
@@ -39,6 +41,7 @@ namespace Netsphere.Server.Game
 
         public void SendScoreSuicide(Player plr)
         {
+            plr.Session.Send(new InGamePlayerResponseOfDeathAckMessage());
             Room.Broadcast(new ScoreSuicideAckMessage(plr.PeerId, AttackAttribute.KillOneSelf));
         }
 
@@ -58,6 +61,7 @@ namespace Netsphere.Server.Game
         public void SendScoreOffense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
+            target?.Player.Session.Send(new InGamePlayerResponseOfDeathAckMessage());
             if (assist != null)
             {
                 Room.Broadcast(new ScoreOffenseAssistAckMessage(
@@ -78,6 +82,7 @@ namespace Netsphere.Server.Game
         public void SendScoreDefense(ScoreContext killer, ScoreContext assist, ScoreContext target,
             AttackAttribute attackAttribute)
         {
+            target?.Player.Session.Send(new InGamePlayerResponseOfDeathAckMessage());
             if (assist != null)
             {
                 Room.Broadcast(new ScoreDefenseAssistAckMessage(

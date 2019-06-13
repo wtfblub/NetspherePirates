@@ -19,12 +19,11 @@ namespace Netsphere.Server.Game.Handlers
           IHandle<RoomTeamChangeReqMessage>, IHandle<RoomPlayModeChangeReqMessage>, IHandle<RoomBeginRoundReq2Message>,
           IHandle<RoomReadyRoundReq2Message>, IHandle<GameEventMessageReqMessage>, IHandle<RoomItemChangeReqMessage>,
           IHandle<GameAvatarChangeReqMessage>, IHandle<RoomChangeRuleNotifyReq2Message>, IHandle<RoomLeaveRequestReqMessage>,
-          IHandle<RoomAutoMixingTeamReqMessage>, IHandle<RoomIntrudeRoundReq2Message>, IHandle<GameLoadingSuccessReqMessage>
-        //           IHandle<CScoreKillReqMessage>,
-        //           IHandle<CScoreKillAssistReqMessage>, IHandle<CScoreTeamKillReqMessage>, IHandle<CScoreHealAssistReqMessage>,
-        //           IHandle<CScoreSuicideReqMessage>, IHandle<CScoreGoalReqMessage>, IHandle<CScoreReboundReqMessage>,
-        //           IHandle<CScoreOffenseReqMessage>, IHandle<CScoreOffenseAssistReqMessage>, IHandle<CScoreDefenseReqMessage>,
-        //           IHandle<CScoreDefenseAssistReqMessage>, IHandle<CMissionScoreReqMessage>
+          IHandle<RoomAutoMixingTeamReqMessage>, IHandle<RoomIntrudeRoundReq2Message>, IHandle<GameLoadingSuccessReqMessage>,
+          IHandle<ScoreKillReqMessage>, IHandle<ScoreKillAssistReqMessage>, IHandle<ScoreTeamKillReqMessage>,
+          IHandle<ScoreHealAssistReqMessage>, IHandle<ScoreSuicideReqMessage>, IHandle<ScoreGoalReqMessage>,
+          IHandle<ScoreReboundReqMessage>, IHandle<ScoreOffenseReqMessage>, IHandle<ScoreOffenseAssistReqMessage>,
+          IHandle<ScoreDefenseReqMessage>, IHandle<ScoreDefenseAssistReqMessage>, IHandle<ScoreMissionScoreReqMessage>
     {
         private readonly ILogger<RoomHandler> _logger;
         private readonly EquipValidator _equipValidator;
@@ -507,265 +506,266 @@ namespace Netsphere.Server.Game.Handlers
             return true;
         }
 
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreKillReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
-        //             if (killer == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreKill(
-        //                 new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
-        //                 null,
-        //                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
-        //                 message.Score.Weapon);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreKillAssistReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
-        //             if (killer == null)
-        //                 return Task.FromResult(true);
-        //
-        //             var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
-        //             if (assist == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreKill(
-        //                 new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
-        //                 new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
-        //                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
-        //                 message.Score.Weapon);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreTeamKillReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
-        //             if (killer == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreTeamKill(
-        //                 new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
-        //                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
-        //                 message.Score.Weapon);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreHealAssistReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreHeal(plr);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreSuicideReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreSuicide(plr);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeMaster))]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreGoalReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             var td = room.Players.GetValueOrDefault(message.PeerId.AccountId);
-        //             if (td == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreTouchdown(td);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeMaster))]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreReboundReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             var newPlr = room.Players.GetValueOrDefault(message.NewId.AccountId);
-        //             var oldPlr = room.Players.GetValueOrDefault(message.OldId.AccountId);
-        //             room.GameRule.OnScoreFumbi(newPlr, oldPlr);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreOffenseReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
-        //             if (killer == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreOffense(
-        //                 new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
-        //                 null,
-        //                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
-        //                 message.Score.Weapon);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreOffenseAssistReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
-        //             if (killer == null)
-        //                 return Task.FromResult(true);
-        //
-        //             var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
-        //             if (assist == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreOffense(
-        //                 new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
-        //                 new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
-        //                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
-        //                 message.Score.Weapon);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreDefenseReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
-        //             if (killer == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreDefense(
-        //                 new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
-        //                 null,
-        //                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
-        //                 message.Score.Weapon);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CScoreDefenseAssistReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
-        //             if (killer == null)
-        //                 return Task.FromResult(true);
-        //
-        //             var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
-        //             if (assist == null)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreDefense(
-        //                 new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
-        //                 new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
-        //                 new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
-        //                 message.Score.Weapon);
-        //             return Task.FromResult(true);
-        //         }
-        //
-        //         [Firewall(typeof(MustBeInRoom))]
-        //         [Firewall(typeof(MustBeGameState), GameState.Playing)]
-        //         [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
-        //         public Task<bool> OnHandle(MessageContext context, CMissionScoreReqMessage message)
-        //         {
-        //             var session = context.GetSession<Session>();
-        //             var plr = session.Player;
-        //             var room = plr.Room;
-        //
-        //             if (plr.State != PlayerState.Alive)
-        //                 return Task.FromResult(true);
-        //
-        //             room.GameRule.OnScoreMission(plr);
-        //             return Task.FromResult(true);
-        //         }
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreKillReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
+            if (killer == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreKill(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                null,
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreKillAssistReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
+            if (killer == null)
+                return Task.FromResult(true);
+
+            var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
+            if (assist == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreKill(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreTeamKillReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
+            if (killer == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreTeamKill(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreHealAssistReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreHeal(plr);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreSuicideReqMessage message)
+        {
+            _logger.Debug("PeerId={PeerId}", message.Id.PeerId.ToString());
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreSuicide(plr);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreGoalReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            var td = room.Players.GetValueOrDefault(message.PeerId.AccountId);
+            if (td == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreTouchdown(td);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeMaster))]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreReboundReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            var newPlr = room.Players.GetValueOrDefault(message.NewId.AccountId);
+            var oldPlr = room.Players.GetValueOrDefault(message.OldId.AccountId);
+            room.GameRule.OnScoreFumbi(newPlr, oldPlr);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreOffenseReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
+            if (killer == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreOffense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                null,
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreOffenseAssistReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
+            if (killer == null)
+                return Task.FromResult(true);
+
+            var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
+            if (assist == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreOffense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreDefenseReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
+            if (killer == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreDefense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                null,
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreDefenseAssistReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            var killer = room.Players.GetValueOrDefault(message.Score.Killer.AccountId);
+            if (killer == null)
+                return Task.FromResult(true);
+
+            var assist = room.Players.GetValueOrDefault(message.Score.Assist.AccountId);
+            if (assist == null)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreDefense(
+                new ScoreContext(killer, message.Score.Killer.PeerId.ObjectType != 1 ? message.Score.Killer : null),
+                new ScoreContext(assist, message.Score.Assist.PeerId.ObjectType != 1 ? message.Score.Assist : null),
+                new ScoreContext(plr, message.Score.Target.PeerId.ObjectType != 1 ? message.Score.Target : null),
+                message.Score.Weapon);
+            return Task.FromResult(true);
+        }
+
+        [Firewall(typeof(MustBeInRoom))]
+        [Firewall(typeof(MustBeGameState), GameState.Playing)]
+        [Firewall(typeof(MustBeTimeState), GameTimeState.HalfTime, Invert = true)] // Must not be half time
+        public Task<bool> OnHandle(MessageContext context, ScoreMissionScoreReqMessage message)
+        {
+            var session = context.GetSession<Session>();
+            var plr = session.Player;
+            var room = plr.Room;
+
+            if (plr.State != PlayerState.Alive)
+                return Task.FromResult(true);
+
+            room.GameRule.OnScoreMission(plr);
+            return Task.FromResult(true);
+        }
     }
 }

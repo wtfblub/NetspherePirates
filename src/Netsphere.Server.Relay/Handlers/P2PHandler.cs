@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Foundatio.Messaging;
-using Netsphere.Common.Messaging;
 using Netsphere.Network.Message.P2P;
 using ProudNet;
 
@@ -21,7 +20,6 @@ namespace Netsphere.Server.Relay.Handlers
             var session = context.GetSession<Session>();
             var plr = session.Player;
 
-            await _messageBus.PublishAsync(new PlayerPeerIdMessage(plr.Account.Id, message.Character.Id.PeerId));
             return true;
         }
     }

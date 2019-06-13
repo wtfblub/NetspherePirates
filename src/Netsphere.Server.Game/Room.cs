@@ -185,7 +185,7 @@ namespace Netsphere.Server.Game
             _players.TryAdd(plr.Account.Id, plr);
             plr.Room = this;
             plr.IsConnectingToRoom = true;
-            plr.PeerId = null;
+            plr.PeerId = new LongPeerId(plr.Account.Id, plr.RoomJoinCounter++, plr.Slot, 1);
 
             if (Master == null)
             {
