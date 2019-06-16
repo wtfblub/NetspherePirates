@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Options;
 using Netsphere.Common.Configuration;
+using Netsphere.Network.Data.Game;
+using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 
 namespace Netsphere.Server.Game
@@ -91,6 +93,7 @@ namespace Netsphere.Server.Game
                 }
 
                 // Durability loss based on play time
+                var itemDurabilityUpdate = new List<(PlayerItem item, int loss)>();
                 foreach (var character in plr.CharacterManager)
                 {
                     if (plr.CharacterStartPlayTime[character.Slot] == default)
@@ -103,21 +106,30 @@ namespace Netsphere.Server.Game
                     foreach (var item in character.Weapons.GetItems()
                         .Where(item => item != null && item.Durability != -1))
                     {
-                        item.LoseDurability(loss);
+                        itemDurabilityUpdate.Add((item, item.LoseDurability(loss)));
                     }
 
                     foreach (var item in character.Costumes.GetItems()
                         .Where(item => item != null && item.Durability != -1))
                     {
-                        item.LoseDurability(loss);
+                        itemDurabilityUpdate.Add((item, item.LoseDurability(loss)));
                     }
 
                     foreach (var item in character.Skills.GetItems()
                         .Where(item => item != null && item.Durability != -1))
                     {
-                        item.LoseDurability(loss);
+                        itemDurabilityUpdate.Add((item, item.LoseDurability(loss)));
                     }
                 }
+
+                plr.Session.Send(new ItemDurabilityItemAckMessage(
+                    itemDurabilityUpdate
+                        .Where(x => x.loss > 0)
+                        .Select(x => new ItemDurabilityInfoDto
+                        {
+                            ItemId = x.item.Id, Durability = x.loss
+                        }).ToArray()
+                ));
             }
 
             Room.Broadcast(new GameBriefingInfoAckMessage(true, false, briefing.GetData()));

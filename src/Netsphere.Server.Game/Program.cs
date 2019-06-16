@@ -211,9 +211,6 @@ namespace Netsphere.Server.Game
                     }).OrderBy(x => x.Effect).ToArray()
                 );
 
-            Mapper.Register<PlayerItem, ItemDurabilityInfoDto>()
-                .Member(dest => dest.ItemId, src => src.Id);
-
             Mapper.Register<Room, Room2Dto>()
                 .Member(dest => dest.RoomId, src => src.Id)
                 .Member(dest => dest.GameRule, src => src.Options.GameRule)

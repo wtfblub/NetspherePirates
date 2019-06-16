@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using ExpressMapper.Extensions;
 using Logging;
 using Netsphere.Database.Game;
 using Netsphere.Database.Helpers;
-using Netsphere.Network.Data.Game;
-using Netsphere.Network.Message.Game;
 using Netsphere.Server.Game.Data;
 using Netsphere.Server.Game.Services;
 using Newtonsoft.Json;
@@ -134,7 +131,7 @@ namespace Netsphere.Server.Game
             return GetShopItemInfo().PriceGroup.GetPrice(PeriodType, Period);
         }
 
-        public void LoseDurability(int loss)
+        public int LoseDurability(int loss)
         {
             if (loss < 0)
                 throw new ArgumentOutOfRangeException(nameof(loss));
@@ -142,19 +139,12 @@ namespace Netsphere.Server.Game
             if (Inventory.Player.Room == null)
                 throw new InvalidOperationException("Player is not inside a room");
 
-            if (Durability == -1)
-                return;
+            if (Durability == -1 || loss == 0)
+                return 0;
 
+            loss = Math.Min(Durability, loss);
             Durability -= loss;
-            if (Durability < 0)
-                Durability = 0;
-
-            Inventory.Player.Session.Send(new ItemDurabilityItemAckMessage(
-                new[]
-                {
-                    this.Map<PlayerItem, ItemDurabilityInfoDto>()
-                })
-            );
+            return loss;
         }
 
         // TODO Calculate refund/repair cost
