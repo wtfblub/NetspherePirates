@@ -44,9 +44,6 @@ namespace Netsphere.Network.Data.Game
         [BlubSerializer(typeof(IPEndPointAddressStringSerializer))]
         public IPEndPoint RelayEndPoint { get; set; }
 
-        [BlubMember(12)]
-        public short Unk3 { get; set; }
-
         [BlubMember(13)]
         public bool CreatedRoom { get; set; }
 
