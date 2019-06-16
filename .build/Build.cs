@@ -109,7 +109,7 @@ internal class Build : NukeBuild
                 ("src/Netsphere.Server.Auth", "Auth", "netcoreapp2.1", true, null),
                 ("src/Netsphere.Server.Chat", "Chat", "netcoreapp2.1", true, null),
                 ("src/Netsphere.Server.Game", "Game", "netcoreapp2.1", true, null),
-                // ("src/Netsphere.Server.Relay", "Relay", "netcoreapp2.1", true, null),
+                ("src/Netsphere.Server.Relay", "Relay", "netcoreapp2.1", true, null),
                 ("src/tools/DataExtractor", "tools", "net472", false, null),
                 ("src/tools/NetsphereExplorer", "tools", "net472", false, null),
                 ("src/tools/Netsphere.Tools.ShopEditor", "tools/ShopEditor", "netcoreapp2.1", true, null),
