@@ -240,7 +240,8 @@ namespace Netsphere.Tools.ShopEditor.Services
                     .Where(x => x.Id == effectGroup.Id)
                     .UpdateAsync(x => new ShopEffectGroupEntity
                     {
-                        Name = effectGroup.Name.Value
+                        Name = effectGroup.Name.Value,
+                        PreviewEffect = effectGroup.PreviewEffect.Value
                     });
             }
         }

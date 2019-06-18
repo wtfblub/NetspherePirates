@@ -57,7 +57,7 @@ namespace Netsphere.Server.Game.Serializers
                     writer.WriteEnum(info.PriceGroup.PriceType);
                     writer.Write((ushort)info.Discount);
                     writer.WriteProudString(info.PriceGroup.Id.ToString());
-                    writer.WriteProudString(info.EffectGroup.Effects.Count > 0 ? info.EffectGroup.Id.ToString() : "");
+                    writer.Write(info.EffectGroup.PreviewEffect);
                 }
             }
         }

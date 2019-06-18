@@ -8,12 +8,14 @@ namespace Netsphere.Server.Game.Data
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public uint PreviewEffect { get; set; }
         public IList<ShopEffect> Effects { get; set; }
 
         public ShopEffectGroup(ShopEffectGroupEntity entity)
         {
             Id = entity.Id;
             Name = entity.Name;
+            PreviewEffect = entity.PreviewEffect;
             Effects = entity.ShopEffects.Select(x => new ShopEffect(x)).ToList();
         }
 

@@ -10,12 +10,14 @@ namespace Netsphere.Tools.ShopEditor.Models
     {
         public int Id { get; }
         public ReactiveProperty<string> Name { get; }
+        public ReactiveProperty<uint> PreviewEffect { get; }
         public IReactiveList<ShopEffect> Effects { get; }
 
         public ShopEffectGroup(ShopEffectGroupEntity entity)
         {
             Id = entity.Id;
             Name = new ReactiveProperty<string>(entity.Name);
+            PreviewEffect = new ReactiveProperty<uint>(entity.PreviewEffect);
             Effects = new ReactiveList<ShopEffect>(entity.ShopEffects.Select(x => new ShopEffect(this, x)));
         }
 

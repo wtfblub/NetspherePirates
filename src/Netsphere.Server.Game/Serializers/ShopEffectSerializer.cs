@@ -20,7 +20,7 @@ namespace Netsphere.Server.Game.Serializers
             writer.Write(value.Count);
             foreach (var group in value.Values)
             {
-                writer.WriteProudString(group.Id.ToString());
+                writer.Write(group.PreviewEffect);
 
                 writer.Write(group.Effects.Count);
                 foreach (var effect in group.Effects.OrderBy(x => x.Effect))

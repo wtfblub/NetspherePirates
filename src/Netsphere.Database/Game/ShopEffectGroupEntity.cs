@@ -16,6 +16,9 @@ namespace Netsphere.Database.Game
         [MaxLength(20)]
         public string Name { get; set; }
 
+        [Column]
+        public uint PreviewEffect { get; set; }
+
         public List<ShopEffectEntity> ShopEffects { get; set; } = new List<ShopEffectEntity>();
     }
 }
