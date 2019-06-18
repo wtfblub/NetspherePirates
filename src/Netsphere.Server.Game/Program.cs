@@ -17,6 +17,7 @@ using Netsphere.Common.Plugins;
 using Netsphere.Database;
 using Netsphere.Network.Data.Game;
 using Netsphere.Network.Data.GameRule;
+using Netsphere.Network.Message.Club;
 using Netsphere.Network.Message.Game;
 using Netsphere.Network.Message.GameRule;
 using Netsphere.Network.Serializers;
@@ -70,6 +71,7 @@ namespace Netsphere.Server.Game
                         .UseSessionFactory<SessionFactory>()
                         .AddMessageFactory<GameMessageFactory>()
                         .AddMessageFactory<GameRuleMessageFactory>()
+                        .AddMessageFactory<ClubMessageFactory>()
                         .UseMessageHandlerResolver(messageHandlerResolver)
                         .UseNetworkConfiguration((context, options) =>
                         {
