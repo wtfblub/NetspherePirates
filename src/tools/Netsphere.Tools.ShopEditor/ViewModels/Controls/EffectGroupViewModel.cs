@@ -23,7 +23,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
         public EffectGroupViewModel(ShopEffectGroup effectGroup)
         {
             EffectGroup = effectGroup;
-            var effect = ResourceService.Instance.Effects.FirstOrDefault(x => x.Id == EffectGroup.PreviewEffect.Value);
+            var effect = ResourceService.Instance.Previews.FirstOrDefault(x => x.Id == EffectGroup.PreviewEffect.Value);
             PreviewEffectName = new ReactiveProperty<string>(effect?.Name ?? "None");
             ChangePreviewEffect = ReactiveCommand.CreateFromTask(ChangePreviewEffectImpl);
             AddEffect = ReactiveCommand.CreateFromTask(AddEffectImpl);
@@ -37,8 +37,8 @@ namespace Netsphere.Tools.ShopEditor.ViewModels.Controls
 
         private async Task ChangePreviewEffectImpl()
         {
-            var selectEffect = new SelectEffectView();
-            var effect = await OverlayService.Show<Effect>(selectEffect);
+            var selectEffect = new SelectPreviewView();
+            var effect = await OverlayService.Show<EffectMatch>(selectEffect);
             if (effect == null)
                 return;
 
