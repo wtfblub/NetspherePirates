@@ -226,6 +226,7 @@ namespace Netsphere.Server.Game
                         ? new GameChangeSubStateAckMessage(GameTimeState.FirstHalf)
                         : new GameChangeSubStateAckMessage(GameTimeState.None)
                     );
+                    room.BroadcastBriefing();
 
                     var delay = _hasHalfTime
                         ? TimeSpan.FromSeconds(room.Options.TimeLimit.TotalSeconds / 2)
