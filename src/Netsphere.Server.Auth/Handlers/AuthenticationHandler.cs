@@ -129,7 +129,10 @@ namespace Netsphere.Server.Auth.Handlers
                         : new byte[remainingBytes];
                     Array.Copy(pair.Value, sent, chunk, 0, chunk.Length);
                     sent += chunk.Length;
-                    session.Send(new GameDataXBNAckMessage(pair.Key, chunk, pair.Value.Length));
+                    session.Send(
+                        new GameDataXBNAckMessage(pair.Key, chunk, pair.Value.Length),
+                        SendOptions.ReliableSecureCompress
+                    );
                 }
             }
 
