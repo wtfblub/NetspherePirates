@@ -28,7 +28,7 @@
     <AvaloniaResource Include="**\*.xaml">
       <SubType>Designer</SubType>
     </AvaloniaResource>
-    <AvaloniaResource Include="Assets\*"/>
+    <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <!--<ItemGroup>-->
   <!--<TrimFilesRootFiles Include="mscorlib.dll" />-->

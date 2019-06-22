@@ -17,7 +17,7 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
         public IReactiveList<Effect> Effects { get; }
         public ReactiveProperty<Effect> SelectedEffect { get; }
 
-        public SelectEffectViewModel()
+        public SelectEffectViewModel(bool showEffectMatch)
         {
             Search = new ReactiveProperty<string>();
             Effects = new ReactiveList<Effect>();
@@ -31,6 +31,9 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
                     if (string.IsNullOrWhiteSpace(search))
                     {
                         Effects.AddRange(ResourceService.Instance.Effects);
+                        if (showEffectMatch)
+                            Effects.AddRange(ResourceService.Instance.EffectMatches);
+
                         return;
                     }
 
@@ -39,6 +42,14 @@ namespace Netsphere.Tools.ShopEditor.ViewModels
                         .Where(effect => split.All(word => effect.Name.Contains(word, StringComparison.OrdinalIgnoreCase)))
                         .ToArray();
                     Effects.AddRange(effects);
+
+                    if (showEffectMatch)
+                    {
+                        var effectMatches = ResourceService.Instance.EffectMatches
+                            .Where(effect => split.All(word => effect.Name.Contains(word, StringComparison.OrdinalIgnoreCase)))
+                            .ToArray();
+                        Effects.AddRange(effectMatches);
+                    }
                 });
 
             var canSelect = SelectedEffect.WhenAnyValue(x => x.Value).Select(x => x != null);

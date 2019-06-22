@@ -4,9 +4,9 @@ namespace Netsphere.Tools.ShopEditor.Views
 {
     public sealed class SelectEffectView : View<SelectEffectViewModel>
     {
-        public SelectEffectView()
+        public SelectEffectView(bool showEffectMatch = false)
         {
-            DataContext = ViewModel = new SelectEffectViewModel();
+            DataContext = ViewModel = new SelectEffectViewModel(showEffectMatch);
             InitializeComponent();
         }
     }
