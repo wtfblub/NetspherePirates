@@ -23,7 +23,7 @@ namespace Netsphere.Tools.ShopEditor.Services
         private readonly S4Zip _zip;
 
         public Effect[] Effects { get; private set; }
-        public EffectMatch[] Previews { get; private set; }
+        public Effect[] EffectMatches { get; private set; }
         public Item[] Items { get; private set; }
 
         public ResourceService()
@@ -43,11 +43,11 @@ namespace Netsphere.Tools.ShopEditor.Services
                 return new Effect(id, name);
             }).ToArray();
 
-            Previews = effectMatchDto.match_key.Select(matchDto =>
+            EffectMatches = effectMatchDto.match_key.Select(matchDto =>
             {
                 var id = matchDto.id;
                 var name = stringTableDto.@string.FirstOrDefault(x => x.key == matchDto.name_key)?.eng ?? matchDto.name_key;
-                return new EffectMatch(id, name);
+                return new Effect(id, name);
             }).ToArray();
 
             var itemInfoDto = Deserialize<ItemListDto>("xml/item.x7");
@@ -87,18 +87,6 @@ namespace Netsphere.Tools.ShopEditor.Services
         public string Name { get; }
 
         public Effect(uint id, string name)
-        {
-            Id = id;
-            Name = name;
-        }
-    }
-
-    public class EffectMatch
-    {
-        public uint Id { get; }
-        public string Name { get; }
-
-        public EffectMatch(uint id, string name)
         {
             Id = id;
             Name = name;

@@ -7,11 +7,11 @@ namespace Netsphere.Resource.xml
     public class EffectMatchListDto
     {
         [XmlElement("match_key")]
-        public EffectMatchListItemEffectDto[] match_key { get; set; }
+        public EffectMatchListMatchKeyDto[] match_key { get; set; }
     }
 
     [XmlType(AnonymousType = true)]
-    public class EffectMatchListItemEffectDto
+    public class EffectMatchListMatchKeyDto
     {
         [XmlAttribute]
         public uint id { get; set; }
